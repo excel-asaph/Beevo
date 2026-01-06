@@ -1,0 +1,7 @@
+{
+  "name": "SV-CMO Orchestrator",
+  "description": "An autonomous marketing enterprise engine powered by Gemini 3 Pro, featuring Strategist, Architect, Forge, and Guardian modules for end-to-end campaign management.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

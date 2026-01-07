@@ -1,0 +1,157 @@
+Participating in a hackathon during the "Gemini 3 Era" is different from previous years. We are currently in early 2026, and the "insider" context you’re looking for involves Google's massive pivot from being a "Search company" to an "Agent company."
+
+Here is the strategic "why" behind this hackathon and what the judges are actually looking for behind the scenes.
+
+1. The "Big Why": Why Google is doing this NOW
+Google is currently in a "war of survival" against the 2026 IPO surge. Both OpenAI and Anthropic are preparing for massive public debuts (projected at $1 trillion and $300 billion respectively). To keep its stock (GOOGL) soaring, Google needs to prove that Gemini 3 isn't just a chatbot, but a platform.
+
+The "Antigravity" Push: Google just launched Antigravity, their new agentic development platform. They are desperate for "killer apps" that use it. They don't want more wrappers; they want autonomous agents that can use a terminal, a browser, and a code editor simultaneously.
+
+Monetizing Reasoning: Gemini 3 introduced "Deep Think" mode and a thinking_level API parameter. This is expensive to run. Google is holding this hackathon to find "high-value" use cases—problems so complex that users/companies will be willing to pay the premium for "thinking" time.
+
+The Apple Integration: Recent news confirmed that Apple’s 2026 Siri overhaul will be powered by Gemini. Google needs to show Apple (and the world) a library of sophisticated, multimodal "Gems" and "Agents" to prove their ecosystem is superior to OpenAI’s.
+
+2. The Insider Aim: What are they actually looking for?
+The prompt says "Open Ended," but the judging criteria (40% Technical, 30% Innovation) and the involvement of the AI Futures Fund tell a different story. They are looking for:
+
+A. "Vibe Coding" & Generative UI
+Google is obsessed with Generative UI right now. In late 2025, they introduced the ability for Gemini to not just send text, but to code a custom interface on the fly.
+
+The "Win": Don't just build a dashboard. Build an app where the entire UI changes based on what the user asks. If I ask for a flight, the app should "spawn" a map and a slider; if I ask for a budget, it should "spawn" a calculator.
+
+B. High-Fidelity Multimodality
+Gemini 3 Pro has "pixel-precise pointing." It can give you exact 2D coordinates [ymin,xmin,ymax,xmax] for anything in a video or image.
+
+The "Win": Applications that "see" and "interact" with the physical world. Think: An app that watches a live stream of a warehouse and highlights safety violations in real-time using those precise coordinates.
+
+C. Agentic Loops (The "Antigravity" factor)
+They want to see Gemini 3 doing multi-step planning.
+
+The "Win": An application that doesn't just answer a question but performs a job. For example, an agent that takes a "vague goal" (e.g., "Research this competitor and write a 10-page report"), opens 20 tabs, summarizes them, generates charts, and saves a PDF to Drive without you touching it.
+
+3. The "AI Futures Fund" Secret
+This is the most important "insider" tip: The AI Futures Fund is a venture arm. They aren't just looking for "cool projects"; they are scouting for startups to fund.
+
+If your project looks like a sustainable business—meaning it solves a boring, expensive problem (like legal document analysis, automated supply chain management, or personalized education)—you are 10x more likely to get that 30-minute interview than if you build a "funny meme generator."
+
+To win a Google hackathon in the "Gemini 3 Era," you need to look at the transition from 2024 to 2026. In 2024, Google was looking for "Chatbot+" (apps that used AI to summarize or generate text). By 2026, they are looking for "Autonomous Agents" and "Native Multimodality."
+
+Here is a breakdown of previous winners, what they built, and the "secret sauce" that caught the judges' eyes.
+
+1. Previous Winners & Their Projects
+Hackathon	Winner / Project	What They Built	The "Winning" Feature
+Gemini API Global '24	Jayu	A personal assistant that sits "on top" of your computer screen.	Multimodal Interactivity: It wasn't just a chat box; it could "see" what was on your screen and execute cross-app tasks.
+GKE AI Hackathon '25	SurgAgent	An agent that tracks surgical instruments in live medical video.	Reasoning under Pressure: It could identify blood, smoke, and occlusions, then decide which tracking algorithm to use in real-time.
+ADK Hackathon '25	SalesShortcut	A multi-agent SDR system for lead gen and outreach.	Complex Orchestration: It used different agents for research, writing, and scheduling, showing Gemini’s ability to "plan" a workflow.
+Gemini API '24 (Impact)	Vite Vere	Support for people with cognitive disabilities.	Real-world Empathy: They didn't just build an app; they did user testing with the target demographic to solve specific daily frictions.
+
+Export to Sheets
+
+2. Key Similarities: How They Won
+If you analyze the winning patterns from 2024 to early 2026, Google judges consistently reward three things:
+
+A. Moving Beyond the Chatbox (The "Agentic" Shift)
+Almost every winner in the last 12 months has been Agentic.
+
+The Loser: A chatbot where you say "Plan a trip" and it gives you a list.
+
+The Winner: An agent that you tell "Plan a trip," and it goes to five different websites, compares prices, checks your calendar, and presents a final booking link.
+
+Insider Tip: Google is currently pushing the Agent Development Kit (ADK) and Antigravity. If your project looks like an autonomous worker rather than a talking encyclopedia, you are ahead of 90% of participants.
+
+B. High-Fidelity Multimodality
+Google wants to prove Gemini is better at "seeing" and "hearing" than GPT-4o.
+
+Winners like ViddyScribe (accessibility) and SurgAgent won because they used Gemini's video-understanding capabilities.
+
+The Win: Use the thinking_level and Gemini 3’s native video processing. If your app can analyze a 2-minute video and pull out a specific "needle in a haystack" detail that a human would miss, you have a high "Wow Factor."
+
+C. The "Polished Skeleton" (UX/UI)
+Google is a design-centric company. Projects with "Vibe Coding" or Generative UI—where the interface feels modern and intuitive—often beat more complex backend projects that have a "ugly" interface.
+
+Many 2025 winners used Flutter or Firebase to make their apps look like real, shippable products.
+
+3. What Google is looking for in Gemini 3 Specifically
+For this specific 2026 hackathon, there is a massive internal focus on "Deep Think" (Reasoning).
+
+In the 2024 competition, the Grand Prize was a DeLorean. In 2026, the Grand Prize is Cash + AI Futures Fund interviews. This tells you they want utility.
+
+Google’s Hidden Checklist:
+
+Does it use Gemini 3's high-context window? (e.g., uploading 100 PDFs or 1 hour of video).
+
+Does it solve a "boring but expensive" problem? (e.g., automated legal audits, supply chain logistics, surgical tracking).
+
+Is it a "New Application"? They are strictly checking if people are just re-submitting old GPT wrappers. If your project uses Gemini 3’s specific thinking outputs, you prove it’s new.
+
+My Recommendation for your Team:
+Don't build a game or a simple productivity tool. Build a Domain-Specific Agent. For example, a "Legal Discovery Agent" that "watches" 10 hours of deposition video and finds every time a witness contradicted a written document. This uses:
+
+Multimodality (Video)
+
+High Context (Massive documents)
+
+Reasoning/Deep Think (Finding contradictions)
+
+In the 2026 landscape, the "Action Era" means Google is tired of seeing apps that just talk. They want apps that do. Here is the breakdown of what this means for your team, specifically looking at the "insider" technical shifts.
+
+1. The "Death of RAG" & The 1M Token Context
+The most shocking part of these rules is the explicit discouragement of Baseline RAG.
+
+The Insider Reason: In 2024-2025, everyone built apps that searched a database and summarized the result. Google is saying: "Our context window is so big (1M+ tokens) and our native reasoning is so strong that 'search and summarize' is now a built-in feature, not a product."
+
+What to do instead: Don't build a "Knowledge Base." Build a "Knowledge Worker." Instead of retrieving a document, the agent should read the whole codebase, find a bug, write a fix, and verify it in a browser (using the Vibe Engineering track).
+
+2. Decoding the New Tech: Antigravity & Thought Signatures
+Google is introducing two major 2026 features in this hackathon that you must use to win:
+
+Google Antigravity: This is their new orchestration layer. It’s designed for "long-running tasks." If your app closes the tab and keeps working for 3 hours to finish a task, you are using Antigravity correctly.
+
+Thought Signatures & Thinking Levels: Gemini 3 has a "hidden" reasoning process. These parameters allow you to see how the AI is thinking.
+
+Winning Move: Create a UI that actually shows the "Thought Signature." Judges love transparency. Show the AI "self-correcting" in the UI (e.g., "Wait, that API call failed, let me try a different library").
+
+3. The "Action Era" Architecture
+To win, your project needs to follow an Agentic Loop rather than a linear prompt-response flow.
+
+Linear (Loser): User Prompt → Gemini → Answer.
+
+Agentic (Winner): User Goal → Gemini Plans → Gemini uses Browser/Code Tool → Gemini Verifies Outcome → Gemini Self-Corrects → Final Execution.
+
+4. Analyzing the Strategic Tracks: Which one should you pick?
+Based on your interest in startups and high-converting pages, here is how you should view these tracks:
+
+Track	The Secret Goal	Best for...
+The Marathon Agent	To prove Gemini 3 can handle "Async" work without crashing.	Complex research or long-term data monitoring.
+Vibe Engineering	To replace Junior Developers. They want to see "Self-Healing" code.	Developers who want to build "DevOps" or "Web-Building" agents.
+The Real-Time Teacher	To show off Gemini Live's low latency (Face-to-Face AI).	Apps that require high emotional intelligence or "human" interaction.
+Creative Autopilot	To beat Midjourney/Canva by adding "Reasoning" to Art.	Marketing automation or professional brand asset generation.
+
+Export to Sheets
+
+5. Final Warning: The "Discouraged" List
+Google is being very blunt here. If you submit any of these, you will likely fail Stage One judging:
+
+Simple Vision: No "What is in this photo?" apps. It must be Spatial-Temporal (e.g., "Why did the person in this video drop the glass?").
+
+Generic Chatbots: No "AI Health Coach" or "AI Career Counselor."
+
+Prompt Wrappers: If your "code" is just a long system prompt in a pretty CSS box, you will be disqualified.
+
+Examples/ideas:
+
+How it implements the "Action Era" functionalities:
+Gemini 3 Feature	How it is used in ADFA
+1M Token Context Window	You upload the entire historical log of a project—thousands of emails, blueprints, and sensor data—allowing the AI to have "perfect memory" of the event context.
+Spatial-Temporal Video Understanding	The agent watches 5 hours of multi-angle security footage. It doesn't just "see" people; it reasons about cause and effect (e.g., "The crane failed because the worker at 02:45:10 bypassed the safety sensor").
+Thought Signatures & Deep Think	To be "legally defensible," every conclusion the AI makes includes its Thought Signature. This provides a verifiable audit trail of the AI's internal logic for insurance or legal teams.
+Google Antigravity	ADFA spawns multiple agents: Agent A scans the web for weather records at the time; Agent B writes a Python script to simulate the physical structural failure; Agent C uses the browser to find the manufacturer of a specific part.
+Pixel-Precise Pointing	In the final report, the AI "points" to exact coordinates in the video/images where the failure occurred, overlaying labels that follow the object through time.
+Nano Banana Pro	Based on the findings, it generates high-fidelity "Reconstructed Reality" infographics and 4K visualizations showing "What should have happened" vs "What did happen" for the jury/board.
+Generative UI	The "Crisis Dashboard" doesn't have a fixed layout. As the AI uncovers a new lead (e.g., a financial discrepancy), the UI morphs to add a new forensic accounting module on the fly.
+
+"Track	The Secret Goal	Best for...
+The Marathon Agent	To prove Gemini 3 can handle "Async" work without crashing.	Complex research or long-term data monitoring.
+Vibe Engineering	To replace Junior Developers. They want to see "Self-Healing" code.	Developers who want to build "DevOps" or "Web-Building" agents.
+The Real-Time Teacher	To show off Gemini Live's low latency (Face-to-Face AI).	Apps that require high emotional intelligence or "human" interaction.
+Creative Autopilot	To beat Midjourney/Canva by adding "Reasoning" to Art.	Marketing automation or professional brand asset generation."

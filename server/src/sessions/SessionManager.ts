@@ -16,6 +16,9 @@ interface Session {
     geminiConnection: GeminiLiveConnection | null;
     stateManager: BrandStateManager;
     isActive: boolean;
+    currentPalettes: Array<{ name: string; colors: string[]; vibe: string }>;
+    currentFonts: Array<{ name: string; category: string }>;
+    canvasMode: 'none' | 'fonts' | 'colors';
 }
 
 export class SessionManager {
@@ -29,7 +32,10 @@ export class SessionManager {
             ws,
             geminiConnection: null,
             stateManager: new BrandStateManager(sessionId),
-            isActive: false
+            isActive: false,
+            currentPalettes: [],
+            currentFonts: [],
+            canvasMode: 'none'
         };
 
         this.sessions.set(sessionId, session);
@@ -108,7 +114,21 @@ export class SessionManager {
                 // Callback for sending messages to client
                 (message: ServerMessage) => this.sendToClient(session.id, message),
                 // Callback for updating state
-                (field: string, value: any) => session.stateManager.update(field, value)
+                (field: string, value: any) => session.stateManager.update(field, value),
+                // Callback for storing color palettes (for click selection lookup)
+                (palettes: any[]) => { session.currentPalettes = palettes; },
+                // Callback for storing fonts
+                (fonts: any[]) => { session.currentFonts = fonts; },
+                // Callback for setting canvas mode
+                (mode: 'none' | 'fonts' | 'colors') => { session.canvasMode = mode; },
+                // Callback for getting current DNA state
+                () => session.stateManager.getDNA(),
+                // Callback for getting current fonts
+                () => session.currentFonts,
+                // Callback for getting current palettes
+                () => session.currentPalettes,
+                // Callback for getting current canvas mode
+                () => session.canvasMode
             );
 
             await session.geminiConnection.connect();
@@ -156,6 +176,25 @@ export class SessionManager {
         });
     }
 
+    // Build state context for AI awareness
+    private buildStateContext(session: Session): string {
+        const dna = session.stateManager.getDNA();
+
+        let canvasInfo = 'Canvas: empty';
+        if (session.canvasMode === 'fonts' && session.currentFonts.length > 0) {
+            const fontNames = session.currentFonts.map(f => f.name).join(', ');
+            canvasInfo = `Canvas: showing fonts (${fontNames})`;
+        } else if (session.canvasMode === 'colors' && session.currentPalettes.length > 0) {
+            const paletteNames = session.currentPalettes.map(p => p.name).join(', ');
+            canvasInfo = `Canvas: showing palettes (${paletteNames})`;
+        }
+
+        return `[CURRENT STATE]
+Brand DNA: name="${dna.name || ''}", mission="${dna.mission || ''}", typography=${JSON.stringify(dna.typography || [])}, colors=${JSON.stringify(dna.colors || [])}, voice="${dna.voice || ''}"
+${canvasInfo}
+[END STATE]`;
+    }
+
     private async handleAudioChunk(session: Session, audioData: string): Promise<void> {
         if (!session.geminiConnection || !session.isActive) {
             return;
@@ -169,7 +208,11 @@ export class SessionManager {
             return;
         }
 
-        await session.geminiConnection.sendText(text);
+        // Inject state context before user text
+        const context = this.buildStateContext(session);
+        const contextualMessage = `${context}\n\nUser: ${text}`;
+
+        await session.geminiConnection.sendText(contextualMessage);
     }
 
     private async handleUserSelection(
@@ -181,27 +224,42 @@ export class SessionManager {
             return;
         }
 
-        // Notify the AI about the user's selection
-        const message = selectionType === 'font'
-            ? `The user clicked and selected the "${value}" font.`
-            : `The user clicked and selected the "${value}" color palette.`;
+        console.log(`🎯 User clicked to select ${selectionType}: "${value}"`);
 
-        await session.geminiConnection.sendText(message);
-
-        // Also update the state
+        // Directly update the DNA based on selection type
         if (selectionType === 'font') {
             session.stateManager.update('typography', [value]);
+
+            // Send DNA_UPDATE to client immediately
+            this.sendToClient(session.id, {
+                type: 'DNA_UPDATE',
+                dna: session.stateManager.getDNA(),
+                updatedField: 'typography'
+            });
         } else if (selectionType === 'color') {
-            // The AI should handle extracting colors from the palette name
+            // Look up the palette by name to get actual colors
+            const palette = session.currentPalettes.find(p => p.name === value);
+            if (palette) {
+                session.stateManager.update('colors', palette.colors);
+
+                // Send DNA_UPDATE to client immediately
+                this.sendToClient(session.id, {
+                    type: 'DNA_UPDATE',
+                    dna: session.stateManager.getDNA(),
+                    updatedField: 'colors'
+                });
+            } else {
+                console.warn(`⚠️ Palette "${value}" not found in currentPalettes`);
+            }
         }
 
-        // Send progress update
-        this.sendToClient(session.id, {
-            type: 'PROGRESS_UPDATE',
-            field: selectionType === 'font' ? 'typography' : 'colors',
-            value: value,
-            finalized: false
-        });
+        // Also notify the AI about the selection so it can continue the conversation
+        const context = this.buildStateContext(session);
+        const message = selectionType === 'font'
+            ? `${context}\n\n[SYSTEM: User manually selected the "${value}" font. It is already saved. PLEASE ACKNOWLEDGE THIS SELECTION BRIEFLY (e.g. "Great choice").]`
+            : `${context}\n\n[SYSTEM: User manually selected the "${value}" palette. It is already saved. PLEASE ACKNOWLEDGE THIS SELECTION BRIEFLY (e.g. "That looks good").]`;
+
+        await session.geminiConnection.sendText(message);
     }
 
     private async handleUpdateDNA(session: Session, field: string, value: any): Promise<void> {

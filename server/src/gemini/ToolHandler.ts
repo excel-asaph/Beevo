@@ -20,14 +20,25 @@ interface FunctionResponse {
 export class ToolHandler {
     private sendToClient: (message: ServerMessage) => void;
     private updateState: (field: string, value: any) => void;
-    private currentDNA: Partial<BrandDNA> = {};
+    private storePalettes: (palettes: ColorPalette[]) => void;
+    private storeFonts: (fonts: FontSuggestion[]) => void;
+    private setCanvasMode: (mode: 'none' | 'fonts' | 'colors') => void;
+    private getDNA: () => BrandDNA;
 
     constructor(
         sendToClient: (message: ServerMessage) => void,
-        updateState: (field: string, value: any) => void
+        updateState: (field: string, value: any) => void,
+        storePalettes: (palettes: ColorPalette[]) => void = () => { },
+        storeFonts: (fonts: FontSuggestion[]) => void = () => { },
+        setCanvasMode: (mode: 'none' | 'fonts' | 'colors') => void = () => { },
+        getDNA: () => BrandDNA = () => ({ name: '', mission: '', typography: [], colors: [], voice: '' })
     ) {
         this.sendToClient = sendToClient;
         this.updateState = updateState;
+        this.storePalettes = storePalettes;
+        this.storeFonts = storeFonts;
+        this.setCanvasMode = setCanvasMode;
+        this.getDNA = getDNA;
     }
 
     async handleToolCalls(functionCalls: FunctionCall[]): Promise<FunctionResponse[]> {
@@ -93,6 +104,10 @@ export class ToolHandler {
 
         const previewText = args.context_text || 'Brand Name';
 
+        // Store fonts and set canvas mode for state injection
+        this.storeFonts(fonts);
+        this.setCanvasMode('fonts');
+
         console.log(`📝 Sending ${fonts.length} font suggestions`);
 
         this.sendToClient({
@@ -115,6 +130,10 @@ export class ToolHandler {
             vibe: p.vibe || 'modern'
         }));
 
+        // Store palettes for click selection lookup
+        this.storePalettes(palettes);
+        this.setCanvasMode('colors');
+
         console.log(`🎨 Sending ${palettes.length} color palettes`);
 
         this.sendToClient({
@@ -132,31 +151,30 @@ export class ToolHandler {
     private handleDNAUpdate(args: any): void {
         console.log('🧬 Updating Brand DNA:', args);
 
+        // Update state for each field
         if (args.brandName) {
-            this.currentDNA.name = args.brandName;
             this.updateState('name', args.brandName);
         }
         if (args.mission) {
-            this.currentDNA.mission = args.mission;
             this.updateState('mission', args.mission);
         }
         if (args.selectedColors && args.selectedColors.length > 0) {
-            this.currentDNA.colors = args.selectedColors;
             this.updateState('colors', args.selectedColors);
         }
         if (args.selectedFont) {
-            this.currentDNA.typography = [args.selectedFont];
             this.updateState('typography', [args.selectedFont]);
         }
         if (args.voice) {
-            this.currentDNA.voice = args.voice;
             this.updateState('voice', args.voice);
         }
 
-        // Send DNA update to client
+        // Get the complete updated DNA from the state manager
+        const fullDNA = this.getDNA();
+
+        // Send DNA update to client with complete state
         this.sendToClient({
             type: 'DNA_UPDATE',
-            dna: this.currentDNA as BrandDNA,
+            dna: fullDNA,
             updatedField: this.getUpdatedField(args)
         });
 

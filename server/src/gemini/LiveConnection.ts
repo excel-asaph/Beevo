@@ -8,6 +8,7 @@ import {
 } from '../../../shared/messages';
 import { BrandDNA, FontSuggestion, ColorPalette } from '../../../shared/types';
 import { ToolHandler } from './ToolHandler';
+import { ToolDecisionAgent } from './ToolDecisionAgent';
 
 // Tool declarations for Gemini Live
 const toolDeclarations: FunctionDeclaration[] = [
@@ -85,16 +86,37 @@ export class GeminiLiveConnection {
     private sendToClient: (message: ServerMessage) => void;
     private updateState: (field: string, value: any) => void;
     private toolHandler: ToolHandler;
+    private toolDecisionAgent: ToolDecisionAgent;
+
+    // State getters for the ToolDecisionAgent
+    private getDNA: () => BrandDNA;
+    private getFonts: () => Array<{ name: string; category: string }>;
+    private getPalettes: () => Array<{ name: string; colors: string[]; vibe: string }>;
+    private getCanvasMode: () => 'none' | 'fonts' | 'colors';
 
     constructor(
         sessionId: string,
         sendToClient: (message: ServerMessage) => void,
-        updateState: (field: string, value: any) => void
+        updateState: (field: string, value: any) => void,
+        storePalettes: (palettes: any[]) => void = () => { },
+        storeFonts: (fonts: any[]) => void = () => { },
+        setCanvasMode: (mode: 'none' | 'fonts' | 'colors') => void = () => { },
+        getDNA: () => any = () => ({}),
+        getFonts: () => Array<{ name: string; category: string }> = () => [],
+        getPalettes: () => Array<{ name: string; colors: string[]; vibe: string }> = () => [],
+        getCanvasMode: () => 'none' | 'fonts' | 'colors' = () => 'none'
     ) {
         this.sessionId = sessionId;
         this.sendToClient = sendToClient;
         this.updateState = updateState;
-        this.toolHandler = new ToolHandler(sendToClient, updateState);
+        this.toolHandler = new ToolHandler(sendToClient, updateState, storePalettes, storeFonts, setCanvasMode, getDNA);
+        this.toolDecisionAgent = new ToolDecisionAgent();
+
+        // Store state getters
+        this.getDNA = getDNA;
+        this.getFonts = getFonts;
+        this.getPalettes = getPalettes;
+        this.getCanvasMode = getCanvasMode;
     }
 
     async connect(): Promise<void> {
@@ -185,6 +207,7 @@ export class GeminiLiveConnection {
 
     private audioChunkCount = 0;
     private lastAudioLogTime = 0;
+    private accumulatedUserInput = ''; // Accumulate user input for tool decision
 
     async sendAudio(base64Audio: string): Promise<void> {
         if (!this.liveSession || !this.isConnected) {
@@ -291,6 +314,8 @@ export class GeminiLiveConnection {
                 text: outputTranscription,
                 isPartial: false
             });
+            // Track model responses for context
+            this.toolDecisionAgent.addModelResponse(outputTranscription);
         }
 
         if (inputTranscription) {
@@ -301,16 +326,99 @@ export class GeminiLiveConnection {
                 text: inputTranscription,
                 isPartial: false
             });
+            // Accumulate user input for tool decision
+            this.accumulatedUserInput += inputTranscription + ' ';
         }
 
-        // Log turn complete
+        // Log turn complete and process accumulated user input for tool decisions
         if (serverContent?.turnComplete) {
             console.log(`🔄 Turn complete for session: ${this.sessionId}`);
+
+            // Process accumulated user input through ToolDecisionAgent
+            if (this.accumulatedUserInput.trim()) {
+                this.processUserInputForTools(this.accumulatedUserInput.trim());
+                this.accumulatedUserInput = ''; // Reset accumulator
+            }
         }
 
         // Log interruption
         if (serverContent?.interrupted) {
             console.log(`⚠️ Turn interrupted for session: ${this.sessionId}`);
+            this.accumulatedUserInput = ''; // Reset on interruption
+        }
+    }
+
+    /**
+     * Process user input through ToolDecisionAgent for reliable tool calling
+     */
+    private async processUserInputForTools(userInput: string): Promise<void> {
+        try {
+            const dna = this.getDNA() as BrandDNA;
+            const fonts = this.getFonts();
+            const palettes = this.getPalettes();
+            const canvasMode = this.getCanvasMode();
+
+            console.log(`🧠 Processing user input for tools: "${userInput.substring(0, 50)}..."`);
+
+            const toolCalls = await this.toolDecisionAgent.analyzeAndDecideTools(
+                userInput,
+                dna,
+                canvasMode,
+                fonts,
+                palettes
+            );
+
+            // Execute any tool calls the agent decided on
+            if (toolCalls.length > 0) {
+                console.log(`🔧 ToolDecisionAgent executing ${toolCalls.length} tool(s)`);
+                await this.toolHandler.handleToolCalls(toolCalls as any);
+
+                // FEEDBACK LOOP: Tell the Live API what just happened
+                // This fixes the "correlation loss" by grounding the conversation model
+                // Create a clear summary of what happened for the Live API
+                const toolSummary = toolCalls.map(tc => {
+                    // Format args responsibly (avoid massive dumps, focus on names/values)
+                    const argsString = JSON.stringify(tc.args).substring(0, 500); // Audit limit
+                    return `${tc.name} with details: ${argsString}`;
+                }).join('; ');
+
+                const feedbackMsg = `[SYSTEM UPDATE: Tool(s) executed: ${toolSummary}. The results are now visible on the canvas. PLEASE ANNOUNCE THIS TO THE USER NOW by describing what was shown/updated.]`;
+
+                console.log(`🔄 Sending feedback to Live API: ${feedbackMsg}`);
+
+                // We send this as a user message to inject it into the context
+                // We DON'T force a turn complete so it doesn't interrupt, but it's there for the next turn
+                if (this.liveSession && this.isConnected) {
+                    this.liveSession.sendClientContent({
+                        turns: [{
+                            role: 'user',
+                            parts: [{ text: feedbackMsg }]
+                        }],
+                        turnComplete: true // Force the AI to speak the confirmation now
+                    });
+                }
+            } else {
+                // Pulse Check: No tools executed
+                // If the Live AI promised an action ("I'm checking..."), it needs a signal to unblock.
+                // If it was just chatting ("Hello"), it should ignore this.
+                const pulseMsg = `[SYSTEM UPDATE: Tool Decision Agent analyzed the request and determined NO TOOLS were needed (0 tools executed). 
+INSTRUCTION: If you had promised an action (e.g. "Updating...", "Checking..."), please apologize and explain why you can't do it (e.g. "I need more information").
+INSTRUCTION: If you were just chatting or asking a question, IGNORE this message and wait for user input.]`;
+
+                console.log(`💓 Sending Pulse Check: ${pulseMsg}`);
+
+                if (this.liveSession && this.isConnected) {
+                    this.liveSession.sendClientContent({
+                        turns: [{
+                            role: 'user',
+                            parts: [{ text: pulseMsg }]
+                        }],
+                        turnComplete: true // Force a turn to wake up the AI if it was hanging
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error in processUserInputForTools:', error);
         }
     }
 }

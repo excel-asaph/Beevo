@@ -13,7 +13,7 @@ export class BrandStateManager {
             mission: '',
             colors: [],
             typography: [],
-            voice: 'Professional'
+            voice: ''
         };
     }
 

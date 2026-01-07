@@ -11,6 +11,24 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
     brandDNA,
     onEditRequest
 }) => {
+    const [previewColor, setPreviewColor] = React.useState<string | null>(null);
+
+    // Load Fonts when selected
+    React.useEffect(() => {
+        if (!brandDNA.typography?.length) return;
+        const fontName = brandDNA.typography[0];
+        const link = document.createElement('link');
+        link.href = `https://fonts.googleapis.com/css2?family=${fontName.trim().replace(/\s+/g, '+')}&display=swap`;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+        return () => {
+            // Optional: Don't remove immediately if you want persistence, but cleanup is good practice
+            // To avoid flickering, maybe check if other components are using it? 
+            // For now, simple standard cleanup
+            if (document.head.contains(link)) document.head.removeChild(link);
+        };
+    }, [brandDNA.typography]);
+
     const hasName = brandDNA?.name && brandDNA.name.length > 0;
     const hasMission = brandDNA?.mission && brandDNA.mission.length > 0;
     const hasFont = brandDNA?.typography && brandDNA.typography.length > 0;
@@ -79,9 +97,14 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                         hasColors && (
                             <div className="flex gap-2 mt-2">
                                 {brandDNA.colors.map((color, i) => (
-                                    <div key={i} className="flex flex-col items-center">
+                                    <div
+                                        key={i}
+                                        className="flex flex-col items-center cursor-pointer group"
+                                        onClick={() => setPreviewColor(color)}
+                                        title="Click to preview"
+                                    >
                                         <div
-                                            className="w-8 h-8 rounded-lg shadow-md ring-1 ring-white/10"
+                                            className="w-8 h-8 rounded-lg shadow-md ring-1 ring-white/10 group-hover:ring-teal-400 group-hover:scale-110 transition-all"
                                             style={{ backgroundColor: color }}
                                         />
                                         <span className="text-[9px] text-slate-500 mt-1 font-mono">{color}</span>
@@ -109,9 +132,9 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                         Brand Preview
                     </h3>
                     <div
-                        className="p-4 rounded-xl"
+                        className="p-4 rounded-xl transition-colors duration-300"
                         style={{
-                            background: hasColors && brandDNA.colors[0] ? brandDNA.colors[0] : '#3b82f6'
+                            background: previewColor || (hasColors && brandDNA.colors[0] ? brandDNA.colors[0] : '#3b82f6')
                         }}
                     >
                         <h4
@@ -122,6 +145,15 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                         </h4>
                         {hasMission && (
                             <p className="text-white/80 text-sm mt-1">{brandDNA.mission}</p>
+                        )}
+                        {hasVoice && (
+                            <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-white/10">
+                                {brandDNA.voice.split(/,| and /).map((tag, i) => (
+                                    <span key={i} className="px-2 py-1 bg-black/20 text-white/90 text-[10px] uppercase font-bold tracking-wider rounded backdrop-blur-sm">
+                                        {tag.trim()}
+                                    </span>
+                                ))}
+                            </div>
                         )}
                     </div>
                 </div>

@@ -142,13 +142,13 @@ Examples/ideas:
 
 How it implements the "Action Era" functionalities:
 Gemini 3 Feature	How it is used in ADFA
-1M Token Context Window	You upload the entire historical log of a project—thousands of emails, blueprints, and sensor data—allowing the AI to have "perfect memory" of the event context.
-Spatial-Temporal Video Understanding	The agent watches 5 hours of multi-angle security footage. It doesn't just "see" people; it reasons about cause and effect (e.g., "The crane failed because the worker at 02:45:10 bypassed the safety sensor").
-Thought Signatures & Deep Think	To be "legally defensible," every conclusion the AI makes includes its Thought Signature. This provides a verifiable audit trail of the AI's internal logic for insurance or legal teams.
-Google Antigravity	ADFA spawns multiple agents: Agent A scans the web for weather records at the time; Agent B writes a Python script to simulate the physical structural failure; Agent C uses the browser to find the manufacturer of a specific part.
-Pixel-Precise Pointing	In the final report, the AI "points" to exact coordinates in the video/images where the failure occurred, overlaying labels that follow the object through time.
-Nano Banana Pro	Based on the findings, it generates high-fidelity "Reconstructed Reality" infographics and 4K visualizations showing "What should have happened" vs "What did happen" for the jury/board.
-Generative UI	The "Crisis Dashboard" doesn't have a fixed layout. As the AI uncovers a new lead (e.g., a financial discrepancy), the UI morphs to add a new forensic accounting module on the fly.
+- 1M Token Context Window	You upload the entire historical log of a project—thousands of emails, blueprints, and sensor data—allowing the AI to have "perfect memory" of the event context.
+- Spatial-Temporal Video Understanding	The agent watches 5 hours of multi-angle security footage. It doesn't just "see" people; it reasons about cause and effect (e.g., "The crane failed because the worker at 02:45:10 bypassed the safety sensor").
+- Thought Signatures & Deep Think	To be "legally defensible," every conclusion the AI makes includes its Thought Signature. This provides a verifiable audit trail of the AI's internal logic for insurance or legal teams.
+- Google Antigravity	ADFA spawns multiple agents: Agent A scans the web for weather records at the time; Agent B writes a Python script to simulate the physical structural failure; Agent C uses the browser to find the manufacturer of a specific part.
+- Pixel-Precise Pointing	In the final report, the AI "points" to exact coordinates in the video/images where the failure occurred, overlaying labels that follow the object through time.
+- Nano Banana Pro	Based on the findings, it generates high-fidelity "Reconstructed Reality" infographics and 4K visualizations showing "What should have happened" vs "What did happen" for the jury/board.
+- Generative UI	The "Crisis Dashboard" doesn't have a fixed layout. As the AI uncovers a new lead (e.g., a financial discrepancy), the UI morphs to add a new forensic accounting module on the fly.
 
 "Track	The Secret Goal	Best for...
 The Marathon Agent	To prove Gemini 3 can handle "Async" work without crashing.	Complex research or long-term data monitoring.

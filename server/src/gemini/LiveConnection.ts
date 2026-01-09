@@ -159,7 +159,16 @@ export class GeminiLiveConnection {
                     }
                 },
                 config: {
-                    responseModalities: [Modality.AUDIO],
+                    generationConfig: {
+                        responseModalities: [Modality.AUDIO],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: {
+                                    voiceName: "Aoede"
+                                }
+                            }
+                        }
+                    },
                     tools: tools,
                     systemInstruction: SYSTEM_INSTRUCTIONS.ARCHITECT,
                     inputAudioTranscription: {},

@@ -12,6 +12,7 @@ interface UseAudioStreamReturn {
     stopRecording: () => void;
     toggleMute: () => void;
     playAudio: (base64Audio: string) => void;
+    stopPlayback: () => void;
 }
 
 export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStreamReturn {
@@ -24,10 +25,17 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
     const streamRef = useRef<MediaStream | null>(null);
     const processorRef = useRef<ScriptProcessorNode | null>(null);
     const nextPlayTimeRef = useRef<number>(0);
+    const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
 
     // Store options in ref
     const optionsRef = useRef(options);
     optionsRef.current = options;
+
+    // Use ref for mute state to avoid stale closures in audio processor
+    const isMutedRef = useRef(isMuted);
+    useEffect(() => {
+        isMutedRef.current = isMuted;
+    }, [isMuted]);
 
     const startRecording = useCallback(async () => {
         try {
@@ -58,7 +66,8 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
             processorRef.current = processor;
 
             processor.onaudioprocess = (event) => {
-                if (isMuted) return;
+                // Check ref for current mute state
+                if (isMutedRef.current) return;
 
                 const inputData = event.inputBuffer.getChannelData(0);
 
@@ -92,7 +101,7 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
             console.error('Failed to start recording:', error);
             throw error;
         }
-    }, [isMuted]);
+    }, [isMuted]); // logic remains the same, ref handles the internal state check
 
     const stopRecording = useCallback(() => {
         // Stop media stream
@@ -159,6 +168,12 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
             source.buffer = buffer;
             source.connect(ctx.destination);
 
+            // Track active source for interruption
+            activeSourcesRef.current.add(source);
+            source.onended = () => {
+                activeSourcesRef.current.delete(source);
+            };
+
             // Schedule playback to avoid gaps
             const startTime = Math.max(ctx.currentTime, nextPlayTimeRef.current);
             source.start(startTime);
@@ -167,6 +182,22 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
         } catch (error) {
             console.error('Failed to play audio:', error);
         }
+    }, []);
+
+    // Stop all active audio playback immediately
+    const stopPlayback = useCallback(() => {
+        // Stop all active audio sources
+        activeSourcesRef.current.forEach(source => {
+            try {
+                source.stop();
+            } catch (e) {
+                // Ignore errors from already stopped sources
+            }
+        });
+        activeSourcesRef.current.clear();
+        // Reset the playback queue time
+        nextPlayTimeRef.current = 0;
+        console.log('🔇 Audio playback stopped');
     }, []);
 
     // Cleanup on unmount
@@ -182,6 +213,7 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
         startRecording,
         stopRecording,
         toggleMute,
-        playAudio
+        playAudio,
+        stopPlayback
     };
 }

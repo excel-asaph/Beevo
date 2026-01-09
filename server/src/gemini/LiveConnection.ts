@@ -350,10 +350,12 @@ export class GeminiLiveConnection {
             }
         }
 
-        // Log interruption
+        // Log interruption and notify client to stop playback
         if (serverContent?.interrupted) {
             console.log(`⚠️ Turn interrupted for session: ${this.sessionId}`);
             this.accumulatedUserInput = ''; // Reset on interruption
+            // Send interrupt signal to client to stop audio playback
+            this.sendToClient({ type: 'INTERRUPT' });
         }
     }
 

@@ -22,6 +22,7 @@ interface UseWebSocketOptions {
     onError?: (message: string) => void;
     onSessionStarted?: (sessionId: string) => void;
     onSessionEnded?: () => void;
+    onInterrupt?: () => void;
 }
 
 interface UseWebSocketReturn {
@@ -96,6 +97,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
                 case 'CONNECTION_STATUS':
                     setIsGeminiConnected(message.geminiConnected);
+                    break;
+
+                case 'INTERRUPT':
+                    opts.onInterrupt?.();
                     break;
 
                 case 'ERROR':

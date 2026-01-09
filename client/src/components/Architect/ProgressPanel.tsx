@@ -43,7 +43,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     Brand DNA Progress
                 </h2>
                 <div className="text-xs text-slate-500">
-                    {[hasName, hasMission, hasFont, hasColors].filter(Boolean).length} / 4 complete
+                    {[hasName, hasMission, hasFont, hasColors, hasVoice].filter(Boolean).length} / 5 complete
                 </div>
             </div>
 

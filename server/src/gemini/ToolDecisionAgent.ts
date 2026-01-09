@@ -116,28 +116,60 @@ CURRENT STATE:
 ${stateContext}
 
 TOOLS AVAILABLE:
-- display_font_suggestions: Show 3 fonts on canvas. Call when discussing/showing typography.
-- display_color_suggestions: Show 3 color palettes on canvas. Call when discussing/showing colors.
+- display_font_suggestions: Show fonts on canvas. Call when discussing/showing typography.
+- display_color_suggestions: Show color palettes on canvas. Call when discussing/showing colors.
 - update_live_brand_dna: Save user decisions (brandName, mission, selectedFont, selectedColors, voice).
 
-RULES:
+=== INTENT CLASSIFICATION (DO THIS FIRST) ===
+Before deciding on tools, classify the user's intent:
+
+1. ACTION: User explicitly requests something new.
+   Examples: "Show me fonts", "Give me 5 palettes", "Change the colors"
+   → Proceed to tool selection
+
+2. CONFIRMATION: User accepts/approves current state.
+   Examples: "Okay", "That's fine", "Yes", "I like it", "Perfect", "Great"
+   → Return NO TOOLS. The user is happy with what's shown.
+
+3. SELECTION: User picks from displayed options.
+   Examples: "I'll take Pacifico", "The second one", "Use the blue palette"
+   → Call update_live_brand_dna to save their choice. Do NOT refresh display tools.
+
+4. NEGATION: User rejects something.
+   Examples: "No", "Not that one", "I don't like these"
+   → Only call display tools if user wants NEW options. Ask for clarification if unclear.
+
+5. QUESTION: User asks about something.
+   Examples: "What is this?", "Why did you choose that?", "Can you explain?"
+   → Return NO TOOLS. Just answer the question.
+
+6. REFINEMENT: User wants to modify displayed options.
+   Examples: "Make it bolder", "More playful", "Add warmer colors"
+   → Call the appropriate display tool with MODIFIED options.
+
+=== CONSERVATIVE CALL PROTOCOL ===
+1. If canvas is ALREADY showing fonts and user says "okay/fine/yes" → NO TOOLS (they're confirming)
+2. If canvas is ALREADY showing palettes and user says "okay/fine/yes" → NO TOOLS (they're confirming)
+3. If you just called a display tool in the last turn, DO NOT call it again unless user explicitly says "new/different/more/refresh"
+4. DO NOT call tools for casual conversation, greetings, or small talk
+
+=== TOOL CALLING RULES ===
 1. When user asks to see fonts/typography → call display_font_suggestions. Default to 3 options unless user specifies otherwise.
 2. When user asks to see colors/palettes → call display_color_suggestions. Default to 3 options unless user specifies otherwise.
 3. When user picks a font → call update_live_brand_dna with selectedFont
 4. When user picks colors → call update_live_brand_dna with selectedColors
 5. When user gives brand name/mission → call update_live_brand_dna
 6. If user wants different options → call the appropriate display_* tool with NEW options
-7. DO NOT call tools if user is just asking questions or chatting
-8. STRICTLY FOLLOW user constraints. If user says "only one", "just that one", or "filter to X", respect the quantity and content restrictions.
-9. CONTENT ADHERENCE: If user specifies attributes (e.g. "bold", "pastel", "retro", "no serif"), the generated tool arguments MUST strictly match. Do not ignore adjectives.
+7. STRICTLY FOLLOW user constraints. If user says "only one", "just that one", or "filter to X", respect the quantity and content restrictions.
+8. CONTENT ADHERENCE: If user specifies attributes (e.g. "bold", "pastel", "retro", "no serif"), the generated tool arguments MUST strictly match.
 
-CRITICAL - VISIBILITY FIXES:
-9. If user says "I can't see", "it's blank", "nothing showing", or "display it again" → CALL THE DISPLAY TOOL AGAIN immediately.
+=== VISIBILITY FIXES ===
+If user says "I can't see", "it's blank", "nothing showing", or "display it again" → CALL THE DISPLAY TOOL AGAIN immediately.
    - If context was fonts: call display_font_suggestions
    - If context was colors: call display_color_suggestions
    - If unsure: call display_font_suggestions (default)
 
-Based on the conversation, decide which tools (if any) should be called.`;
+Based on the conversation and intent classification, decide which tools (if any) should be called.`;
 
         try {
             const response = await this.ai.models.generateContent({

@@ -78,6 +78,10 @@ export const ArchitectMain: React.FC = () => {
         onError: (message) => {
             console.error('WebSocket error:', message);
             addThought(`Error: ${message}`, Junction.ARCHITECT);
+        },
+        onInterrupt: () => {
+            // Stop audio playback immediately when interrupted
+            audioStream.stopPlayback();
         }
     });
 

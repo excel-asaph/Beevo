@@ -5,11 +5,13 @@ import type { BrandDNA } from '@shared/types';
 interface ProgressPanelProps {
     brandDNA: BrandDNA;
     onEditRequest: (field: string) => void;
+    processingField?: string;
 }
 
 export const ProgressPanel: React.FC<ProgressPanelProps> = ({
     brandDNA,
-    onEditRequest
+    onEditRequest,
+    processingField
 }) => {
     const [previewColor, setPreviewColor] = React.useState<string | null>(null);
 
@@ -22,9 +24,6 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
         link.rel = 'stylesheet';
         document.head.appendChild(link);
         return () => {
-            // Optional: Don't remove immediately if you want persistence, but cleanup is good practice
-            // To avoid flickering, maybe check if other components are using it? 
-            // For now, simple standard cleanup
             if (document.head.contains(link)) document.head.removeChild(link);
         };
     }, [brandDNA.typography]);
@@ -34,6 +33,9 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
     const hasFont = brandDNA?.typography && brandDNA.typography.length > 0;
     const hasColors = brandDNA?.colors && brandDNA.colors.length > 0;
     const hasVoice = brandDNA?.voice && brandDNA.voice.length > 0;
+
+    // Check if a specific field is processing
+    const isProcessing = (key: string) => processingField === key || (processingField === 'general' && !hasName); // Default to first item if general
 
     return (
         <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6 h-full flex flex-col">
@@ -53,6 +55,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     label="Brand Name"
                     value={brandDNA?.name}
                     isComplete={hasName}
+                    isProcessing={isProcessing('name')}
                     icon={<Sparkles size={16} />}
                     onEdit={() => onEditRequest('brand name')}
                 />
@@ -62,6 +65,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     label="Mission"
                     value={brandDNA?.mission}
                     isComplete={hasMission}
+                    isProcessing={isProcessing('mission')}
                     icon={<Target size={16} />}
                     onEdit={() => onEditRequest('mission')}
                     isLong
@@ -72,6 +76,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     label="Typography"
                     value={brandDNA?.typography?.[0]}
                     isComplete={hasFont}
+                    isProcessing={isProcessing('typography')}
                     icon={<TypeIcon size={16} />}
                     onEdit={() => onEditRequest('font')}
                     preview={
@@ -91,6 +96,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     label="Color Palette"
                     value={hasColors ? `${brandDNA.colors.length} colors` : undefined}
                     isComplete={hasColors}
+                    isProcessing={isProcessing('colors')}
                     icon={<Palette size={16} />}
                     onEdit={() => onEditRequest('colors')}
                     preview={
@@ -120,6 +126,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     label="Brand Voice"
                     value={brandDNA?.voice}
                     isComplete={hasVoice}
+                    isProcessing={isProcessing('voice')}
                     icon={<Sparkles size={16} />}
                     onEdit={() => onEditRequest('voice')}
                 />
@@ -166,6 +173,7 @@ interface ProgressItemProps {
     label: string;
     value?: string;
     isComplete: boolean;
+    isProcessing?: boolean;
     icon: React.ReactNode;
     onEdit: () => void;
     isLong?: boolean;
@@ -176,20 +184,34 @@ const ProgressItem: React.FC<ProgressItemProps> = ({
     label,
     value,
     isComplete,
+    isProcessing,
     icon,
     onEdit,
     isLong,
     preview
 }) => {
     return (
-        <div className={`p-4 rounded-xl border transition-all ${isComplete
+        <div className={`p-4 rounded-xl border transition-all relative overflow-hidden ${isComplete
             ? 'bg-slate-700/50 border-teal-800/50'
-            : 'bg-slate-800/30 border-slate-700/50 opacity-60'
+            : isProcessing
+                ? 'bg-purple-900/20 border-purple-500/50 ring-1 ring-purple-500/30'
+                : 'bg-slate-800/30 border-slate-700/50 opacity-60'
             }`}>
-            <div className="flex items-start justify-between">
+
+            {/* Thinking Animation */}
+            {isProcessing && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }}></div>
+            )}
+
+            <div className="flex items-start justify-between relative z-10">
                 <div className="flex items-center gap-2 text-slate-400">
                     {icon}
                     <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+                    {isProcessing && (
+                        <span className="text-xs text-purple-400 flex items-center gap-1 animate-pulse ml-2">
+                            <Sparkles size={10} /> Thinking...
+                        </span>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -211,15 +233,17 @@ const ProgressItem: React.FC<ProgressItemProps> = ({
             </div>
 
             {isComplete && value && (
-                <div className={`mt-2 ${isLong ? 'text-sm text-slate-300' : 'text-lg font-semibold text-white'}`}>
+                <div className={`mt-2 relative z-10 ${isLong ? 'text-sm text-slate-300' : 'text-lg font-semibold text-white'}`}>
                     {value}
                 </div>
             )}
 
-            {preview}
+            <div className="relative z-10">
+                {preview}
+            </div>
 
-            {!isComplete && (
-                <div className="mt-2 text-xs text-slate-500 italic">
+            {!isComplete && !isProcessing && (
+                <div className="mt-2 text-xs text-slate-500 italic relative z-10">
                     Waiting for input...
                 </div>
             )}

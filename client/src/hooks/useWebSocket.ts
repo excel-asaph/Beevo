@@ -1,11 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import type {
     ClientMessage,
-    ServerMessage,
-    FontSuggestionsMessage,
-    ColorSuggestionsMessage,
-    TranscriptionMessage,
-    DNAUpdateMessage
+    ServerMessage
 } from '@shared/messages';
 import type { BrandDNA, FontSuggestion, ColorPalette } from '@shared/types';
 
@@ -23,6 +19,8 @@ interface UseWebSocketOptions {
     onSessionStarted?: (sessionId: string) => void;
     onSessionEnded?: () => void;
     onInterrupt?: () => void;
+    onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna', targetField?: string) => void;
+    onToolProcessingEnd?: () => void;
 }
 
 interface UseWebSocketReturn {
@@ -101,6 +99,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
                 case 'INTERRUPT':
                     opts.onInterrupt?.();
+                    break;
+
+                case 'TOOL_PROCESSING_START':
+                    opts.onToolProcessingStart?.(message.toolType, message.targetField);
+                    break;
+
+                case 'TOOL_PROCESSING_END':
+                    opts.onToolProcessingEnd?.();
                     break;
 
                 case 'ERROR':

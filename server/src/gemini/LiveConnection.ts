@@ -87,6 +87,7 @@ export class GeminiLiveConnection {
     private updateState: (field: string, value: any) => void;
     private toolHandler: ToolHandler;
     private toolDecisionAgent: ToolDecisionAgent;
+    private isProcessingTools: boolean = false; // Flag to pause audio during processing
 
     // State getters for the ToolDecisionAgent
     private getDNA: () => BrandDNA;
@@ -224,6 +225,12 @@ export class GeminiLiveConnection {
                 console.log(`⚠️ Dropping audio - Gemini not connected (sent ${this.audioChunkCount} chunks before disconnect)`);
                 this.audioChunkCount = 0;
             }
+            return;
+        }
+
+        // PAUSE AUDIO: If we are currently processing tools, drop audio input
+        // This prevents the user's "umm" or background noise from triggering new requests while we're thinking
+        if (this.isProcessingTools) {
             return;
         }
 
@@ -371,12 +378,45 @@ export class GeminiLiveConnection {
 
             console.log(`🧠 Processing user input for tools: "${userInput.substring(0, 50)}..."`);
 
+            // START PROCESSING: Pause audio and notify client
+            this.isProcessingTools = true;
+
+            // INTERRUPT GEMINI: Send a burst of silence to stop "Okay..." response
+            // This ensures we don't get "I'll save that" (Future Tense) while we are actually saving
+            if (this.liveSession && this.isConnected) {
+                // created 100ms of silence (adjust size as needed)
+                const emptyBuffer = Buffer.alloc(3200);
+                this.liveSession.sendRealtimeInput({
+                    media: {
+                        mimeType: `audio/pcm;rate=${AUDIO_CONFIG.INPUT_SAMPLE_RATE}`,
+                        data: emptyBuffer.toString('base64')
+                    }
+                });
+            }
+
+            // Determine context for UI feedback
+            // Simple heuristic based on keywords to guess what MIGHT happen for the loading state
+            // Send initial generic "Processing" message (no tool type yet)
+            this.sendToClient({
+                type: 'TOOL_PROCESSING_START',
+                toolType: undefined,
+                targetField: undefined
+            });
+
             const toolCalls = await this.toolDecisionAgent.analyzeAndDecideTools(
                 userInput,
                 dna,
                 canvasMode,
                 fonts,
-                palettes
+                palettes,
+                // Streaming Thought Callback: Update UI based on AI's actual thought process
+                (thought, toolType, targetField) => {
+                    this.sendToClient({
+                        type: 'TOOL_PROCESSING_START',
+                        toolType: toolType,
+                        targetField: targetField
+                    });
+                }
             );
 
             // Execute any tool calls the agent decided on
@@ -430,6 +470,10 @@ INSTRUCTION: If you were just chatting or asking a question, IGNORE this message
             }
         } catch (error) {
             console.error('Error in processUserInputForTools:', error);
+        } finally {
+            // END PROCESSING: Resume audio and notify client
+            this.isProcessingTools = false;
+            this.sendToClient({ type: 'TOOL_PROCESSING_END' });
         }
     }
 }

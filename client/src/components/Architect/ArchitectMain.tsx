@@ -26,6 +26,13 @@ export const ArchitectMain: React.FC = () => {
     const [callDuration, setCallDuration] = useState(0);
     const [localDNA, setLocalDNA] = useState<Partial<BrandDNA>>({});
 
+    // Processing state for UX feedback
+    const [processingState, setProcessingState] = useState<{
+        isProcessing: boolean;
+        toolType?: 'display_fonts' | 'display_colors' | 'update_dna';
+        targetField?: string;
+    }>({ isProcessing: false });
+
     // WebSocket connection
     const ws = useWebSocket({
         onAudioReceived: (base64Audio) => {
@@ -82,6 +89,20 @@ export const ArchitectMain: React.FC = () => {
         onInterrupt: () => {
             // Stop audio playback immediately when interrupted
             audioStream.stopPlayback();
+        },
+        // Handle processing states for UX feedback
+        onToolProcessingStart: (toolType, targetField) => {
+            setProcessingState({
+                isProcessing: true,
+                toolType,
+                targetField
+            });
+            // If it's a display tool, switch mode immediately to show spinner in the right place
+            if (toolType === 'display_fonts') setSuggestionMode('fonts');
+            if (toolType === 'display_colors') setSuggestionMode('colors');
+        },
+        onToolProcessingEnd: () => {
+            setProcessingState({ isProcessing: false });
         }
     });
 
@@ -174,6 +195,8 @@ export const ArchitectMain: React.FC = () => {
                     previewText={previewText}
                     onFontSelect={handleFontSelect}
                     onColorSelect={handleColorSelect}
+                    isProcessing={processingState.isProcessing &&
+                        (processingState.toolType === 'display_fonts' || processingState.toolType === 'display_colors')}
                 />
             </div>
 
@@ -184,6 +207,9 @@ export const ArchitectMain: React.FC = () => {
                     onEditRequest={(field) => {
                         ws.sendText(`I want to change the ${field}`);
                     }}
+                    processingField={processingState.isProcessing && processingState.toolType === 'update_dna'
+                        ? processingState.targetField || 'general'
+                        : undefined}
                 />
             </div>
         </div>

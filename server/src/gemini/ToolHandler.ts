@@ -62,6 +62,8 @@ export class ToolHandler {
                         this.handleDNAUpdate(fc.args);
                         break;
 
+                    // end_session case REMOVED - was causing false terminations
+
                     default:
                         console.warn(`Unknown tool: ${fc.name}`);
                 }

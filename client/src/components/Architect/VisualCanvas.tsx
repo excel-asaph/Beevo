@@ -9,6 +9,7 @@ interface VisualCanvasProps {
     previewText: string;
     onFontSelect: (fontName: string) => void;
     onColorSelect: (paletteName: string) => void;
+    isProcessing?: boolean;
 }
 
 export const VisualCanvas: React.FC<VisualCanvasProps> = ({
@@ -17,7 +18,8 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     colorSuggestions,
     previewText,
     onFontSelect,
-    onColorSelect
+    onColorSelect,
+    isProcessing = false
 }) => {
     // Dynamically load Google Fonts
     React.useEffect(() => {
@@ -40,7 +42,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     }, [mode, fontSuggestions]);
 
     return (
-        <div className="bg-white text-slate-900 p-6 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden" >
+        <div className="bg-white text-slate-900 p-6 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden relative" >
             {/* Mode indicator */}
             < div className="flex items-center justify-between mb-4" >
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
@@ -60,7 +62,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 )}
             </div >
 
-            <div className="flex-1 overflow-y-auto">
+            <div className={`flex-1 overflow-y-auto transition-opacity duration-300 ${isProcessing ? 'opacity-50' : 'opacity-100'}`}>
                 {/* Font Suggestions */}
                 {mode === 'fonts' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -74,6 +76,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                                 key={idx}
                                 onClick={() => onFontSelect(font.name)}
                                 className="p-5 border-2 border-slate-200 rounded-xl hover:border-purple-500 hover:shadow-xl transition-all cursor-pointer group bg-slate-50 relative"
+                                style={{ animationDelay: `${idx * 100}ms` }}
                             >
                                 <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-purple-600 text-white p-1.5 rounded-full">
                                     <MousePointerClick size={14} />
@@ -122,6 +125,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                                 key={idx}
                                 onClick={() => onColorSelect(palette.name)}
                                 className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-orange-500 hover:shadow-xl transition-all cursor-pointer group relative"
+                                style={{ animationDelay: `${idx * 100}ms` }}
                             >
                                 <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur text-white p-1.5 rounded-full">
                                     <MousePointerClick size={14} />
@@ -155,7 +159,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 )}
 
                 {/* Empty State */}
-                {mode === 'none' && (
+                {mode === 'none' && !isProcessing && (
                     <div className="h-full flex flex-col items-center justify-center text-slate-400">
                         <div className="bg-slate-100 p-6 rounded-full mb-4">
                             <Code className="w-10 h-10 text-slate-400" />
@@ -167,6 +171,23 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                     </div>
                 )}
             </div>
+
+            {/* Processing Overlay */}
+            {isProcessing && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-50">
+                    <div className="flex flex-col items-center gap-4">
+                        <div className="relative">
+                            <div className="w-16 h-16 border-4 border-slate-200 border-t-purple-600 rounded-full animate-spin"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Sparkles className="w-6 h-6 text-purple-600 animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="text-slate-800 font-medium animate-pulse">
+                            Generating options...
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

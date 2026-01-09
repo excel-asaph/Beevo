@@ -115,6 +115,17 @@ export interface InterruptMessage {
     type: 'INTERRUPT';
 }
 
+// Tool processing state messages
+export interface ToolProcessingStartMessage {
+    type: 'TOOL_PROCESSING_START';
+    toolType?: 'display_fonts' | 'display_colors' | 'update_dna';
+    targetField?: string; // For DNA updates
+}
+
+export interface ToolProcessingEndMessage {
+    type: 'TOOL_PROCESSING_END';
+}
+
 export type ServerMessage =
     | SessionStartedMessage
     | SessionEndedMessage
@@ -124,6 +135,8 @@ export type ServerMessage =
     | ColorSuggestionsMessage
     | DNAUpdateMessage
     | InterruptMessage
+    | ToolProcessingStartMessage
+    | ToolProcessingEndMessage
     | ProgressUpdateMessage
     | ThoughtMessage
     | ErrorMessage
@@ -144,6 +157,7 @@ export function isServerMessage(msg: any): msg is ServerMessage {
     return msg && typeof msg.type === 'string' && [
         'SESSION_STARTED', 'SESSION_ENDED', 'AUDIO_CHUNK',
         'TRANSCRIPTION', 'FONT_SUGGESTIONS', 'COLOR_SUGGESTIONS',
-        'DNA_UPDATE', 'PROGRESS_UPDATE', 'THOUGHT', 'ERROR', 'CONNECTION_STATUS', 'INTERRUPT'
+        'DNA_UPDATE', 'PROGRESS_UPDATE', 'THOUGHT', 'ERROR', 'CONNECTION_STATUS',
+        'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END'
     ].includes(msg.type);
 }

@@ -58,6 +58,31 @@ export class BrandStateManager {
                 this.dna.logoUrl = value;
                 break;
 
+            // Phase 9: Logo & Competitive Intelligence
+            case 'logoStyle':
+                this.dna.logoStyle = value;
+                break;
+
+            case 'logoMood':
+                this.dna.logoMood = value;
+                break;
+
+            case 'logoInspiration':
+                this.dna.logoInspiration = value;
+                break;
+
+            case 'logoUsageContexts':
+                this.dna.logoUsageContexts = Array.isArray(value) ? value : [value];
+                break;
+
+            case 'competitorInsights':
+                this.dna.competitorInsights = value;
+                break;
+
+            case 'logoAssets':
+                this.dna.logoAssets = value;
+                break;
+
             default:
                 console.warn(`Unknown field: ${field}`);
         }

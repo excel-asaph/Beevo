@@ -19,8 +19,13 @@ interface UseWebSocketOptions {
     onSessionStarted?: (sessionId: string) => void;
     onSessionEnded?: () => void;
     onInterrupt?: () => void;
-    onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna', targetField?: string) => void;
+    onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration', targetField?: string) => void;
     onToolProcessingEnd?: () => void;
+    onLogoConcepts?: (concepts: Array<{ id: string; url: string; source: string; style: string; mood: string; reasoning: string; alt_text: string }>) => void;
+    // Thinking levels for hackathon
+    onThinkingStart?: (timestamp: number) => void;
+    onThinkingStream?: (thought: string, phase: 'classify' | 'analyze' | 'decide' | 'execute') => void;
+    onThinkingEnd?: (duration: number, toolDecided: string | null, thoughtSummary: string[]) => void;
 }
 
 interface UseWebSocketReturn {
@@ -107,6 +112,23 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
                 case 'TOOL_PROCESSING_END':
                     opts.onToolProcessingEnd?.();
+                    break;
+
+                case 'LOGO_CONCEPTS':
+                    opts.onLogoConcepts?.(message.concepts);
+                    break;
+
+                // Thinking levels for hackathon
+                case 'THINKING_START':
+                    opts.onThinkingStart?.(message.timestamp);
+                    break;
+
+                case 'THINKING_STREAM':
+                    opts.onThinkingStream?.(message.thought, message.phase);
+                    break;
+
+                case 'THINKING_END':
+                    opts.onThinkingEnd?.(message.duration, message.toolDecided, message.thoughtSummary);
                     break;
 
                 case 'ERROR':

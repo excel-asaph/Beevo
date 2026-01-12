@@ -99,6 +99,25 @@ export interface ThoughtMessage {
     confidence: number;
 }
 
+// Thinking levels for hackathon - shows AI reasoning in real-time
+export interface ThinkingStartMessage {
+    type: 'THINKING_START';
+    timestamp: number;  // Start time for timer
+}
+
+export interface ThinkingStreamMessage {
+    type: 'THINKING_STREAM';
+    thought: string;    // Current thought/reasoning step
+    phase: 'classify' | 'analyze' | 'decide' | 'execute';
+}
+
+export interface ThinkingEndMessage {
+    type: 'THINKING_END';
+    duration: number;       // Total thinking time in ms
+    toolDecided: string | null;  // Which tool was chosen (or null if none)
+    thoughtSummary: string[];    // All thoughts collected
+}
+
 export interface ErrorMessage {
     type: 'ERROR';
     message: string;
@@ -126,6 +145,40 @@ export interface ToolProcessingEndMessage {
     type: 'TOOL_PROCESSING_END';
 }
 
+// Phase 9: Competitive Intelligence & Logo Design
+export interface CompetitiveAnalysisMessage {
+    type: 'COMPETITIVE_ANALYSIS';
+    industry: string;
+    brands: string[];
+    patterns: string;
+    recommendation: string;
+}
+
+export interface LogoConceptsMessage {
+    type: 'LOGO_CONCEPTS';
+    concepts: Array<{
+        id: string;
+        url: string;
+        source: string;
+        style: string;
+        mood: string;
+        reasoning: string;
+        alt_text: string;
+    }>;
+}
+
+export interface AuditResultMessage {
+    type: 'AUDIT_RESULT';
+    assetUrl: string;
+    pass: boolean;
+    findings: {
+        colorMatch?: string;
+        styleMatch?: string;
+        accessibility?: string;
+    };
+    thoughtSignature: string;
+}
+
 export type ServerMessage =
     | SessionStartedMessage
     | SessionEndedMessage
@@ -139,8 +192,14 @@ export type ServerMessage =
     | ToolProcessingEndMessage
     | ProgressUpdateMessage
     | ThoughtMessage
+    | ThinkingStartMessage
+    | ThinkingStreamMessage
+    | ThinkingEndMessage
     | ErrorMessage
-    | ConnectionStatusMessage;
+    | ConnectionStatusMessage
+    | CompetitiveAnalysisMessage
+    | LogoConceptsMessage
+    | AuditResultMessage;
 
 // ============================================
 // MESSAGE HELPERS
@@ -158,6 +217,8 @@ export function isServerMessage(msg: any): msg is ServerMessage {
         'SESSION_STARTED', 'SESSION_ENDED', 'AUDIO_CHUNK',
         'TRANSCRIPTION', 'FONT_SUGGESTIONS', 'COLOR_SUGGESTIONS',
         'DNA_UPDATE', 'PROGRESS_UPDATE', 'THOUGHT', 'ERROR', 'CONNECTION_STATUS',
-        'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END'
+        'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END',
+        'THINKING_START', 'THINKING_STREAM', 'THINKING_END',
+        'COMPETITIVE_ANALYSIS', 'LOGO_CONCEPTS', 'AUDIT_RESULT'
     ].includes(msg.type);
 }

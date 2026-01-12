@@ -14,6 +14,24 @@ export interface BrandDNA {
     typography: string[];
     voice: string;
     logoUrl?: string;
+    // Phase 9: Logo & Competitive Intelligence
+    logoStyle?: 'wordmark' | 'emblem' | 'abstract' | 'combination' | 'lettermark';
+    logoMood?: string;
+    logoInspiration?: string;
+    logoUsageContexts?: string[];
+    competitorInsights?: {
+        industry: string;
+        analyzed: string[];
+        patterns: string;
+        recommendation: string;
+    };
+    logoAssets?: Array<{
+        id: string;
+        style: string;
+        mood: string;
+        url: string;
+        reasoning: string;
+    }>;
 }
 
 export interface SWOT {

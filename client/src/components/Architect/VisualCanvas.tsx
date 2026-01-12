@@ -2,13 +2,25 @@ import React from 'react';
 import { Type as TypeIcon, Palette, Code, MousePointerClick, Sparkles } from 'lucide-react';
 import type { FontSuggestion, ColorPalette } from '@shared/types';
 
+interface LogoConcept {
+    id: string;
+    url: string;
+    source: string;
+    style: string;
+    mood: string;
+    reasoning: string;
+    alt_text: string;
+}
+
 interface VisualCanvasProps {
-    mode: 'none' | 'fonts' | 'colors';
+    mode: 'none' | 'fonts' | 'colors' | 'logos';
     fontSuggestions: FontSuggestion[];
     colorSuggestions: ColorPalette[];
+    logoSuggestions?: LogoConcept[];
     previewText: string;
     onFontSelect: (fontName: string) => void;
     onColorSelect: (paletteName: string) => void;
+    onLogoSelect?: (logoId: string, style: string) => void;
     isProcessing?: boolean;
 }
 
@@ -16,9 +28,11 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     mode,
     fontSuggestions,
     colorSuggestions,
+    logoSuggestions = [],
     previewText,
     onFontSelect,
     onColorSelect,
+    onLogoSelect,
     isProcessing = false
 }) => {
     // Dynamically load Google Fonts
@@ -155,6 +169,71 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Logo Discovery Grid */}
+                {mode === 'logos' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="mb-4">
+                            <h3 className="text-xl font-bold text-slate-800 mb-1">Logo Discovery</h3>
+                            <p className="text-slate-500 text-sm">Real-world brand inspiration from verified sources</p>
+                        </div>
+
+                        {logoSuggestions.length === 0 ? (
+                            <div className="text-center py-12 text-slate-400">
+                                <p>Searching for logo inspiration...</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {logoSuggestions.map((logo) => (
+                                    <div
+                                        key={logo.id}
+                                        onClick={() => onLogoSelect?.(logo.id, logo.style)}
+                                        className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-500 cursor-pointer overflow-hidden transform hover:-translate-y-1"
+                                    >
+                                        {/* Logo Image Container */}
+                                        <div className="aspect-square flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-hidden">
+                                            {/* Subtle background pattern */}
+                                            <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_1px_1px,_#000_1px,_transparent_1px)] bg-[length:16px_16px]" />
+
+                                            <img
+                                                src={logo.url}
+                                                alt={logo.alt_text || logo.source}
+                                                className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 relative z-10"
+                                                loading="lazy"
+                                                onError={(e) => {
+                                                    // Better fallback SVG with brand initial
+                                                    const initial = (logo.source || 'L').charAt(0).toUpperCase();
+                                                    e.currentTarget.src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><rect fill="#f1f5f9" width="120" height="120" rx="12"/><text x="60" y="60" font-family="system-ui,-apple-system,sans-serif" font-size="48" font-weight="600" fill="#94a3b8" text-anchor="middle" dy=".35em">${initial}</text></svg>`)}`;
+                                                }}
+                                            />
+
+                                            {/* Hover overlay with reasoning */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                                                <p className="text-white text-xs leading-tight">{logo.reasoning}</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Logo Info */}
+                                        <div className="p-3 bg-white border-t border-slate-100">
+                                            <p className="font-semibold text-sm text-slate-800 truncate">{logo.source}</p>
+                                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                                <span className="text-xs bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                                                    {logo.mood}
+                                                </span>
+                                                <span className="text-xs text-slate-400 truncate">{logo.style?.split(' ').slice(0, 2).join(' ')}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Selection indicator */}
+                                        <div className="absolute top-2 right-2 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                                            <MousePointerClick className="w-3 h-3 text-white" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 

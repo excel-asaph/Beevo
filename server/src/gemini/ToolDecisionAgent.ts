@@ -165,7 +165,7 @@ const toolDefinitions: FunctionDeclaration[] = [
     },
     {
         name: "update_live_brand_dna",
-        description: "Save or update Brand DNA fields. Saves ALL data exactly as provided - if user selects 7 colors, save all 7. If user provides full mission statement, save the complete text.",
+        description: "Save or update Brand DNA fields after user confirms selection. WORKFLOW: 1) Display options (fonts/colors/logos), 2) User picks one, 3) CALL THIS TOOL to save their choice. When user says 'you should save something in the brand DNA and the likes you should call this tool', ALWAYS call this tool. Saves ALL data exactly as provided - if user selects 7 colors, save all 7.",
         parameters: {
             type: Type.OBJECT,
             properties: {
@@ -229,6 +229,214 @@ const toolDefinitions: FunctionDeclaration[] = [
                 }
             },
             required: []
+        }
+    },
+    {
+        name: "research_competitors",
+        description: "Deep competitive intelligence using headless browser automation. Extracts logos, colors, typography, and design patterns from competitor websites. Supports visual analysis and trend synthesis.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                industry: {
+                    type: Type.STRING,
+                    description: "Industry to analyze (e.g., 'fitness', 'tech startup', 'luxury fashion')"
+                },
+                competitor_count: {
+                    type: Type.INTEGER,
+                    description: "Number of competitors to analyze. Default 5, range 3-10."
+                },
+                focus_areas: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "What to extract: ['logos', 'colors', 'typography', 'messaging', 'layout']. Default: all."
+                },
+                depth: {
+                    type: Type.STRING,
+                    description: "'quick' (homepage only, 30s) or 'comprehensive' (multi-page, 90s)"
+                },
+                specific_brands: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Optional: Force specific brands ['Nike', 'Adidas']. If empty, auto-discover top brands."
+                },
+                extract_assets: {
+                    type: Type.BOOLEAN,
+                    description: "If true, download logo images. If false, just describe them."
+                },
+                color_analysis: {
+                    type: Type.BOOLEAN,
+                    description: "If true, extract hex codes from screenshots using computer vision."
+                },
+                font_detection: {
+                    type: Type.BOOLEAN,
+                    description: "If true, detect typography from CSS/rendered text."
+                },
+                screenshot_mode: {
+                    type: Type.STRING,
+                    description: "'full' (entire homepage), 'hero' (above fold), 'logo_only' (header)"
+                },
+                exclude_brands: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Brands to skip (e.g., ['Reebok'])"
+                },
+                synthesis_prompt: {
+                    type: Type.STRING,
+                    description: "Custom question for synthesis (e.g., 'What makes a luxury tech logo?')"
+                },
+                query: {
+                    type: Type.STRING,
+                    description: "Original user intent that triggered this research"
+                }
+            },
+            required: ["industry", "query"]
+        }
+    },
+    {
+        name: "search_logo_inspiration",
+        description: "Search the web for real logo examples using Google Search grounding. Find existing logos that match desired styles, industries, and moods. Returns actual image URLs for display and inspiration.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                style_keywords: {
+                    type: Type.STRING,
+                    description: "Primary style descriptors (e.g., 'minimalist tech wordmark', 'bold geometric emblem', 'playful handwritten script')"
+                },
+                industry: {
+                    type: Type.STRING,
+                    description: "Target industry or niche (e.g., 'fitness', 'saas', 'luxury fashion', 'eco-friendly')"
+                },
+                result_count: {
+                    type: Type.INTEGER,
+                    description: "Number of logo examples to return. Default 6, range 3-12."
+                },
+                mood_filters: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Mood/vibe keywords: ['professional', 'playful', 'sophisticated', 'bold', 'minimal', 'vintage']"
+                },
+                color_preference: {
+                    type: Type.STRING,
+                    description: "Preferred color scheme (e.g., 'monochrome', 'blue and white', 'vibrant multicolor', 'pastel')"
+                },
+                logo_types: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Specific types to include: ['wordmark', 'emblem', 'lettermark', 'abstract', 'mascot', 'combination']"
+                },
+                exclude_types: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Logo types to exclude from results"
+                },
+                reference_brands: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Example brands with similar style (e.g., ['Stripe', 'Linear', 'Notion']). Used for 'logos like X' queries."
+                },
+                exclude_brands: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Brands to avoid in results (e.g., direct competitors)"
+                },
+                complexity_level: {
+                    type: Type.STRING,
+                    description: "'simple' (1-2 elements), 'moderate' (3-5 elements), 'complex' (detailed illustrations)"
+                },
+                text_emphasis: {
+                    type: Type.STRING,
+                    description: "'text-only' (pure wordmark), 'text-primary' (icon secondary), 'balanced', 'icon-primary', 'icon-only'"
+                },
+                use_cases: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Where logo will be used: ['social_media', 'business_card', 'website_header', 'app_icon', 'merchandise']"
+                },
+                cultural_context: {
+                    type: Type.STRING,
+                    description: "Target audience region/culture (e.g., 'western', 'asian', 'global', 'urban youth')"
+                },
+                era_preference: {
+                    type: Type.STRING,
+                    description: "Design era aesthetic (e.g., 'modern 2020s', 'retro 80s', 'classic timeless', 'futuristic')"
+                },
+                query: {
+                    type: Type.STRING,
+                    description: "REQUIRED: Original user intent that triggered this search"
+                }
+            },
+            required: ["style_keywords", "industry", "query"]
+        }
+    },
+    {
+        name: "verify_asset_compliance",
+        description: "Pixel-precise brand compliance audit using vision AI. Checks colors, style, readability, accessibility. Can fail assets or generate detailed reports.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                asset_url: {
+                    type: Type.STRING,
+                    description: "URL or path to the asset to audit"
+                },
+                asset_type: {
+                    type: Type.STRING,
+                    description: "'logo', 'banner', 'social_post', 'video_frame'"
+                },
+                brand_colors: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Required hex codes. Asset MUST contain these."
+                },
+                color_tolerance: {
+                    type: Type.NUMBER,
+                    description: "Allowed hex deviation. 0 = exact match, 15 = close enough. Default 10."
+                },
+                expected_style: {
+                    type: Type.STRING,
+                    description: "Required visual style (e.g., 'minimalist', 'bold wordmark')"
+                },
+                expected_mood: {
+                    type: Type.STRING,
+                    description: "Required emotional tone (e.g., 'sophisticated', 'playful')"
+                },
+                check_dimensions: {
+                    type: Type.BOOLEAN,
+                    description: "Verify asset meets size requirements"
+                },
+                required_dimensions: {
+                    type: Type.STRING,
+                    description: "e.g., 'output_dimensions' or 'square aspect ratio'"
+                },
+                check_readability: {
+                    type: Type.BOOLEAN,
+                    description: "Test if text is legible at small sizes"
+                },
+                check_accessibility: {
+                    type: Type.BOOLEAN,
+                    description: "Verify WCAG contrast ratios"
+                },
+                min_contrast_ratio: {
+                    type: Type.NUMBER,
+                    description: "WCAG standard. 4.5 (normal), 3.0 (large text), 7.0 (AAA)"
+                },
+                fail_on_mismatch: {
+                    type: Type.BOOLEAN,
+                    description: "If true, reject asset. If false, just warn."
+                },
+                generate_report: {
+                    type: Type.BOOLEAN,
+                    description: "Return detailed audit trail with 'Thought Signature'"
+                },
+                spatial_analysis: {
+                    type: Type.BOOLEAN,
+                    description: "Run pixel-level coordinate analysis (for 'Pixel-Precise Pointing' demo)"
+                },
+                query: {
+                    type: Type.STRING,
+                    description: "Original user intent"
+                }
+            },
+            required: ["asset_url", "brand_colors", "query"]
         }
     }
     // end_session tool REMOVED - was causing false terminations

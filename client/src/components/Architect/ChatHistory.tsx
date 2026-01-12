@@ -1,24 +1,35 @@
 import React, { useRef, useEffect } from 'react';
 import { User, Bot, Radio } from 'lucide-react';
+import { ThinkingBubble } from './ThinkingBubble';
 
 interface ChatMessage {
     role: 'user' | 'model';
     text: string;
 }
 
-interface ChatHistoryProps {
-    messages: ChatMessage[];
+interface ThinkingState {
+    isThinking: boolean;
+    startTime: number | null;
+    duration: number | null;
+    thoughts: string[];
+    toolDecided: string | null;
+    phase: 'classify' | 'analyze' | 'decide' | 'execute' | null;
 }
 
-export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
+interface ChatHistoryProps {
+    messages: ChatMessage[];
+    thinkingState?: ThinkingState;
+}
+
+export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, thinkingState }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    // Auto-scroll to bottom when new messages arrive
+    // Auto-scroll to bottom when new messages arrive or thinking changes
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages]);
+    }, [messages, thinkingState?.isThinking, thinkingState?.thoughts]);
 
     return (
         <div className="bg-slate-800/50 rounded-2xl border border-slate-700 flex flex-col" style={{ height: '350px', maxHeight: '350px' }}>
@@ -38,29 +49,43 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages }) => {
                     scrollbarColor: '#475569 #1e293b'
                 }}
             >
-                {messages.length === 0 ? (
+                {messages.length === 0 && !thinkingState?.isThinking ? (
                     <div className="h-full flex flex-col items-center justify-center text-slate-600 py-8">
                         <Radio size={32} className="mb-2 opacity-50" />
                         <p className="text-sm">Conversation will appear here</p>
                     </div>
                 ) : (
-                    messages.map((msg, idx) => (
-                        <div
-                            key={idx}
-                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                            <div className={`max-w-[90%] px-3 py-2 rounded-xl text-sm leading-relaxed ${msg.role === 'user'
+                    <>
+                        {messages.map((msg, idx) => (
+                            <div
+                                key={idx}
+                                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                            >
+                                <div className={`max-w-[90%] px-3 py-2 rounded-xl text-sm leading-relaxed ${msg.role === 'user'
                                     ? 'bg-purple-600 text-white rounded-br-sm'
                                     : 'bg-slate-700 text-slate-200 rounded-bl-sm'
-                                }`}>
-                                <div className="flex items-center gap-1 mb-0.5 opacity-60 text-[9px] uppercase font-bold tracking-wider">
-                                    {msg.role === 'user' ? <User size={9} /> : <Bot size={9} />}
-                                    <span>{msg.role === 'user' ? 'You' : 'Architect'}</span>
+                                    }`}>
+                                    <div className="flex items-center gap-1 mb-0.5 opacity-60 text-[9px] uppercase font-bold tracking-wider">
+                                        {msg.role === 'user' ? <User size={9} /> : <Bot size={9} />}
+                                        <span>{msg.role === 'user' ? 'You' : 'Architect'}</span>
+                                    </div>
+                                    <div className="whitespace-pre-wrap break-words">{msg.text}</div>
                                 </div>
-                                <div className="whitespace-pre-wrap break-words">{msg.text}</div>
                             </div>
-                        </div>
-                    ))
+                        ))}
+
+                        {/* Thinking Bubble - shows when thinking or has recent thoughts */}
+                        {thinkingState && (thinkingState.isThinking || thinkingState.thoughts.length > 0) && (
+                            <ThinkingBubble
+                                isThinking={thinkingState.isThinking}
+                                startTime={thinkingState.startTime}
+                                duration={thinkingState.duration}
+                                thoughts={thinkingState.thoughts}
+                                toolDecided={thinkingState.toolDecided}
+                                phase={thinkingState.phase}
+                            />
+                        )}
+                    </>
                 )}
             </div>
         </div>

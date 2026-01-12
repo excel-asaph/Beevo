@@ -21,17 +21,35 @@ export const ArchitectMain: React.FC = () => {
     const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
     const [fontSuggestions, setFontSuggestions] = useState<FontSuggestion[]>([]);
     const [colorSuggestions, setColorSuggestions] = useState<ColorPalette[]>([]);
+    const [logoSuggestions, setLogoSuggestions] = useState<Array<{ id: string; url: string; source: string; style: string; mood: string; reasoning: string; alt_text: string }>>([]);
     const [previewText, setPreviewText] = useState('Brand Name');
-    const [suggestionMode, setSuggestionMode] = useState<'none' | 'fonts' | 'colors'>('none');
+    const [suggestionMode, setSuggestionMode] = useState<'none' | 'fonts' | 'colors' | 'logos'>('none');
     const [callDuration, setCallDuration] = useState(0);
     const [localDNA, setLocalDNA] = useState<Partial<BrandDNA>>({});
 
     // Processing state for UX feedback
     const [processingState, setProcessingState] = useState<{
         isProcessing: boolean;
-        toolType?: 'display_fonts' | 'display_colors' | 'update_dna';
+        toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration';
         targetField?: string;
     }>({ isProcessing: false });
+
+    // Thinking state for hackathon feature
+    const [thinkingState, setThinkingState] = useState<{
+        isThinking: boolean;
+        startTime: number | null;
+        duration: number | null;
+        thoughts: string[];
+        toolDecided: string | null;
+        phase: 'classify' | 'analyze' | 'decide' | 'execute' | null;
+    }>({
+        isThinking: false,
+        startTime: null,
+        duration: null,
+        thoughts: [],
+        toolDecided: null,
+        phase: null
+    });
 
     // WebSocket connection
     const ws = useWebSocket({
@@ -73,6 +91,10 @@ export const ArchitectMain: React.FC = () => {
         onThought: (logic) => {
             addThought(logic, Junction.ARCHITECT);
         },
+        onLogoConcepts: (concepts) => {
+            setLogoSuggestions(concepts);
+            setSuggestionMode('logos');
+        },
         onSessionStarted: (sessionId) => {
             console.log('Session started:', sessionId);
             addThought('Interactive Design Session initialized', Junction.ARCHITECT);
@@ -100,9 +122,37 @@ export const ArchitectMain: React.FC = () => {
             // If it's a display tool, switch mode immediately to show spinner in the right place
             if (toolType === 'display_fonts') setSuggestionMode('fonts');
             if (toolType === 'display_colors') setSuggestionMode('colors');
+            if (toolType === 'search_logo_inspiration') setSuggestionMode('logos');
         },
         onToolProcessingEnd: () => {
             setProcessingState({ isProcessing: false });
+        },
+        // Thinking events for hackathon feature
+        onThinkingStart: (timestamp) => {
+            setThinkingState({
+                isThinking: true,
+                startTime: timestamp,
+                duration: null,
+                thoughts: [],
+                toolDecided: null,
+                phase: 'classify'
+            });
+        },
+        onThinkingStream: (thought, phase) => {
+            setThinkingState(prev => ({
+                ...prev,
+                thoughts: [...prev.thoughts, thought],
+                phase: phase
+            }));
+        },
+        onThinkingEnd: (duration, toolDecided, thoughtSummary) => {
+            setThinkingState(prev => ({
+                ...prev,
+                isThinking: false,
+                duration: duration,
+                toolDecided: toolDecided,
+                thoughts: thoughtSummary.length > 0 ? thoughtSummary : prev.thoughts
+            }));
         }
     });
 
@@ -182,7 +232,10 @@ export const ArchitectMain: React.FC = () => {
                 />
 
                 <div className="flex-1 min-h-0 overflow-hidden">
-                    <ChatHistory messages={chatHistory} />
+                    <ChatHistory
+                        messages={chatHistory}
+                        thinkingState={thinkingState}
+                    />
                 </div>
             </div>
 
@@ -192,11 +245,16 @@ export const ArchitectMain: React.FC = () => {
                     mode={suggestionMode}
                     fontSuggestions={fontSuggestions}
                     colorSuggestions={colorSuggestions}
+                    logoSuggestions={logoSuggestions}
                     previewText={previewText}
                     onFontSelect={handleFontSelect}
                     onColorSelect={handleColorSelect}
-                    isProcessing={processingState.isProcessing &&
-                        (processingState.toolType === 'display_fonts' || processingState.toolType === 'display_colors')}
+                    onLogoSelect={(logoId, style) => {
+                        // Update logo style in DNA
+                        ws.sendSelection('font', style); // Reusing font selection mechanism
+                        addThought(`Selected ${style} logo style`, Junction.ARCHITECT);
+                    }}
+                    isProcessing={processingState.isProcessing}
                 />
             </div>
 

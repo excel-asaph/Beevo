@@ -130,6 +130,25 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     icon={<Sparkles size={16} />}
                     onEdit={() => onEditRequest('voice')}
                 />
+
+                {/* Phase 9: Logo Fields - Always visible */}
+                <ProgressItem
+                    label="Logo Style"
+                    value={brandDNA?.logoStyle}
+                    isComplete={!!brandDNA?.logoStyle}
+                    isProcessing={false}
+                    icon={<Sparkles size={16} />}
+                    onEdit={() => onEditRequest('logo style')}
+                />
+
+                <ProgressItem
+                    label="Logo Mood"
+                    value={brandDNA?.logoMood}
+                    isComplete={!!brandDNA?.logoMood}
+                    isProcessing={false}
+                    icon={<Palette size={16} />}
+                    onEdit={() => onEditRequest('logo mood')}
+                />
             </div>
 
             {/* Summary */}

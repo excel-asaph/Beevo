@@ -167,6 +167,33 @@ export interface LogoConceptsMessage {
     }>;
 }
 
+// Logo research progress - shows browser automation status
+export interface LogoResearchProgressMessage {
+    type: 'LOGO_RESEARCH_PROGRESS';
+    phase: 'starting' | 'browsing' | 'analyzing' | 'complete';
+    source: string;  // e.g., "Dribbble", "Behance", "Nike.com"
+    progress: number; // 0-100
+    message: string;  // e.g., "Searching for shoe brand logos..."
+}
+
+export interface LogoResearchResultMessage {
+    type: 'LOGO_RESEARCH_RESULT';
+    logos: Array<{
+        id: string;
+        imageUrl: string;
+        brandName: string;
+        source: string;
+        style: string;
+        designPrinciples: string[];
+    }>;
+    insights: {
+        dominantStyles: string[];
+        commonPatterns: string[];
+        recommendation: string;
+    };
+    screenshots: string[]; // Base64 screenshots from research
+}
+
 export interface AuditResultMessage {
     type: 'AUDIT_RESULT';
     assetUrl: string;
@@ -199,7 +226,9 @@ export type ServerMessage =
     | ConnectionStatusMessage
     | CompetitiveAnalysisMessage
     | LogoConceptsMessage
-    | AuditResultMessage;
+    | AuditResultMessage
+    | LogoResearchProgressMessage
+    | LogoResearchResultMessage;
 
 // ============================================
 // MESSAGE HELPERS
@@ -219,6 +248,7 @@ export function isServerMessage(msg: any): msg is ServerMessage {
         'DNA_UPDATE', 'PROGRESS_UPDATE', 'THOUGHT', 'ERROR', 'CONNECTION_STATUS',
         'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END',
         'THINKING_START', 'THINKING_STREAM', 'THINKING_END',
-        'COMPETITIVE_ANALYSIS', 'LOGO_CONCEPTS', 'AUDIT_RESULT'
+        'COMPETITIVE_ANALYSIS', 'LOGO_CONCEPTS', 'AUDIT_RESULT',
+        'LOGO_RESEARCH_PROGRESS', 'LOGO_RESEARCH_RESULT'
     ].includes(msg.type);
 }

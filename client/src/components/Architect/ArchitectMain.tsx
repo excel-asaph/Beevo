@@ -34,6 +34,21 @@ export const ArchitectMain: React.FC = () => {
         targetField?: string;
     }>({ isProcessing: false });
 
+    // Logo research progress state
+    const [researchProgress, setResearchProgress] = useState<{
+        isResearching: boolean;
+        phase: 'starting' | 'browsing' | 'analyzing' | 'complete';
+        source: string;
+        progress: number;
+        message: string;
+    }>({ isResearching: false, phase: 'starting', source: '', progress: 0, message: '' });
+
+    const [logoResearchInsights, setLogoResearchInsights] = useState<{
+        dominantStyles: string[];
+        commonPatterns: string[];
+        recommendation: string;
+    } | undefined>(undefined);
+
     // Thinking state for hackathon feature
     const [thinkingState, setThinkingState] = useState<{
         isThinking: boolean;
@@ -153,6 +168,39 @@ export const ArchitectMain: React.FC = () => {
                 toolDecided: toolDecided,
                 thoughts: thoughtSummary.length > 0 ? thoughtSummary : prev.thoughts
             }));
+        },
+        // Logo research progress
+        onLogoResearchProgress: (phase, source, progress, message) => {
+            console.log(`🔍 Research Progress: ${phase} | ${source} | ${progress}% | ${message}`);
+            setResearchProgress({
+                isResearching: phase !== 'complete',
+                phase,
+                source,
+                progress,
+                message
+            });
+            // Show logos mode while researching
+            if (phase !== 'complete') {
+                setSuggestionMode('logos');
+            }
+        },
+        onLogoResearchResult: (logos, insights, screenshots) => {
+            console.log(`✅ Research Complete: ${logos.length} logos`, insights);
+
+            // Store insights
+            setLogoResearchInsights(insights);
+
+            // Convert to logo concepts format
+            setLogoSuggestions(logos.map((logo: any) => ({
+                id: logo.id,
+                url: logo.imageUrl,
+                source: logo.source,
+                style: logo.style,
+                mood: 'discovered',
+                reasoning: logo.designPrinciples?.join(', ') || '',
+                alt_text: `${logo.brandName} logo`
+            })));
+            setResearchProgress({ isResearching: false, phase: 'complete', source: '', progress: 100, message: '' });
         }
     });
 
@@ -255,6 +303,8 @@ export const ArchitectMain: React.FC = () => {
                         addThought(`Selected ${style} logo style`, Junction.ARCHITECT);
                     }}
                     isProcessing={processingState.isProcessing}
+                    researchProgress={researchProgress}
+                    logoResearchInsights={logoResearchInsights}
                 />
             </div>
 

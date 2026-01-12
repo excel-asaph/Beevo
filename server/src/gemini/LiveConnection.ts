@@ -8,6 +8,7 @@ import {
 } from '../../../shared/messages';
 import { BrandDNA, FontSuggestion, ColorPalette } from '../../../shared/types';
 import { ToolHandler } from './ToolHandler';
+import { ToolDecisionAgent } from './ToolDecisionAgent';
 
 // Tool declarations for Gemini Live
 const toolDeclarations: FunctionDeclaration[] = [
@@ -115,6 +116,17 @@ export class GeminiLiveConnection {
     private toolCalledThisTurn: boolean = false;
     private accumulatedAIOutput: string = '';
     private accumulatedUserInput: string = '';
+    
+    // History tracking for context-aware safeguards
+    private previousUserTurn: string = '';
+    private previousAITurn: string = '';
+
+    // Hybrid approach: ToolDecisionAgent for reliable tool execution
+    private toolDecisionAgent: ToolDecisionAgent;
+    private getDNA: () => any;
+    private getFonts: () => Array<{ name: string; category: string }>;
+    private getPalettes: () => Array<{ name: string; colors: string[]; vibe: string }>;
+    private getCanvasMode: () => 'none' | 'fonts' | 'colors';
 
     constructor(
         sessionId: string,
@@ -132,6 +144,15 @@ export class GeminiLiveConnection {
         this.sendToClient = sendToClient;
         this.updateState = updateState;
         this.toolHandler = new ToolHandler(sendToClient, updateState, storePalettes, storeFonts, setCanvasMode, getDNA);
+
+        // Store references for ToolDecisionAgent
+        this.getDNA = getDNA;
+        this.getFonts = getFonts;
+        this.getPalettes = getPalettes;
+        this.getCanvasMode = getCanvasMode;
+
+        // Initialize ToolDecisionAgent for reliable fallback
+        this.toolDecisionAgent = new ToolDecisionAgent();
     }
 
     async connect(): Promise<void> {
@@ -304,6 +325,16 @@ export class GeminiLiveConnection {
                 console.log('📤 Sending tool response:', JSON.stringify(responsePayload, null, 2));
                 await this.liveSession.sendToolResponse(responsePayload);
                 console.log('✅ Tool response sent');
+
+                // FORCE CONTINUATION: Send a system note to ensure the model speaks
+                // Sometimes the model treats a tool response as "task done" and stays silent
+                this.liveSession.sendClientContent({
+                    turns: [{
+                        role: 'user',
+                        parts: [{ text: "[System: Tool execution complete. Please confirm to the user and continue.]" }]
+                    }],
+                    turnComplete: true
+                });
             } catch (error) {
                 console.error('Error sending tool response:', error);
             }
@@ -363,20 +394,25 @@ export class GeminiLiveConnection {
             this.accumulatedUserInput += inputTranscription + ' ';
         }
 
-        // SAFEGUARD: On turn complete, check if AI claimed to save but didn't call tool
+        // TURN COMPLETE: Check if tool should have been called
         if (serverContent?.turnComplete) {
             console.log(`🔄 Turn complete for session: ${this.sessionId}`);
 
-            // Check if AI said "saved/done" but no tool was called
-            const aiClaimedAction = this.detectClaimedAction(this.accumulatedAIOutput);
+            // HYBRID SAFEGUARD: If AI claimed action but no tool was called, execute directly
+            if (!this.toolCalledThisTurn && !this.isGreetingPhase && this.accumulatedAIOutput.length > 0) {
+                const claimedAction = this.detectClaimedAction(this.accumulatedAIOutput);
 
-            if (aiClaimedAction && !this.toolCalledThisTurn && !this.isGreetingPhase) {
-                console.log(`⚠️ SAFEGUARD TRIGGERED: AI claimed "${aiClaimedAction}" but no tool was called!`);
-                console.log(`📝 User context: "${this.accumulatedUserInput.trim().substring(0, 100)}..."`);
+                if (claimedAction) {
+                    console.log(`⚠️ AI claimed "${claimedAction}" but no tool called. Executing safeguard...`);
 
-                // Send correction message to Gemini
-                this.sendCorrectionToGemini(aiClaimedAction, this.accumulatedUserInput.trim());
+                    // Pass both user context AND AI output so we can find palette names
+                    this.executeSafeguard(claimedAction, this.accumulatedUserInput.trim(), this.accumulatedAIOutput);
+                }
             }
+
+            // Save history for context in next turn (useful for safeguards)
+            if (this.accumulatedUserInput.trim()) this.previousUserTurn = this.accumulatedUserInput;
+            if (this.accumulatedAIOutput.trim()) this.previousAITurn = this.accumulatedAIOutput;
 
             // Reset tracking for next turn
             this.toolCalledThisTurn = false;
@@ -397,40 +433,39 @@ export class GeminiLiveConnection {
 
     /**
      * Detect if AI claimed to perform an action (saved, displayed, etc.)
+     * Analyzes the SENTENCE containing the claim, not the whole output
      */
     private detectClaimedAction(aiOutput: string): string | null {
-        const actionPatterns = [
-            // Brand DNA saving patterns
-            { pattern: /i('ve| have) saved/i, action: 'saved' },
-            { pattern: /it('s| is) saved/i, action: 'saved' },
-            { pattern: /saved (it|that|the)/i, action: 'saved' },
-            { pattern: /i('ve| have) updated/i, action: 'updated' },
-            { pattern: /mission.*saved/i, action: 'saved mission' },
-            { pattern: /brand.*saved/i, action: 'saved brand' },
-            { pattern: /name.*saved/i, action: 'saved name' },
-            { pattern: /voice.*saved/i, action: 'saved voice' },
+        const lowerOutput = aiOutput.toLowerCase();
 
-            // Color display patterns
-            { pattern: /here are (some |the )?color/i, action: 'displayed colors' },
-            { pattern: /i('ve| have) (displayed|shown|generated|pulled up|created) (some |the )?color/i, action: 'displayed colors' },
-            { pattern: /showing (you )?(some |the )?color/i, action: 'displayed colors' },
-            { pattern: /palette(s)? (are |is )?on (the |your )?canvas/i, action: 'displayed colors' },
+        // Find the sentence containing "saved", "done", etc.
+        const sentences = lowerOutput.split(/[.!?]+/);
 
-            // Font display patterns
-            { pattern: /here are (some |the )?font/i, action: 'displayed fonts' },
-            { pattern: /i('ve| have) (displayed|shown|generated|pulled up|created) (some |the )?font/i, action: 'displayed fonts' },
-            { pattern: /showing (you )?(some |the )?font/i, action: 'displayed fonts' },
-            { pattern: /font(s)? (are |is )?on (the |your )?canvas/i, action: 'displayed fonts' },
+        for (const sentence of sentences) {
+            const isSaveClaim = sentence.includes('saved') || sentence.includes('done') ||
+                sentence.includes('updated') || sentence.includes('recorded');
 
-            // Logo search patterns
-            { pattern: /here are (some |the )?logo/i, action: 'searched logos' },
-            { pattern: /i('ve| have) (found|searched|pulled up|displayed) (some |the )?logo/i, action: 'searched logos' },
-            { pattern: /logo inspiration/i, action: 'searched logos' },
-        ];
+            if (isSaveClaim) {
+                // Check what was saved IN THIS SENTENCE
+                // Order matters - more specific first (voice before colors)
+                if (sentence.includes('voice')) return 'save_voice';
+                if (sentence.includes('mission')) return 'save_mission';
+                if (sentence.includes('color') || sentence.includes('palette')) return 'save_colors';
+                if (sentence.includes('font') || sentence.includes('typography')) return 'save_font';
+                if (sentence.includes('name') || sentence.includes('brand name')) return 'save_name';
 
-        for (const { pattern, action } of actionPatterns) {
-            if (pattern.test(aiOutput)) {
-                return action;
+                // If we see "done" or "saved" but can't determine what, skip
+                // Don't return save_unknown anymore - too many false positives
+            }
+
+            // Check for display claims in this sentence
+            const isDisplayClaim = sentence.includes('here are') || sentence.includes('displayed') ||
+                sentence.includes('showing');
+
+            if (isDisplayClaim) {
+                if (sentence.includes('color') || sentence.includes('palette')) return 'display_colors';
+                if (sentence.includes('font')) return 'display_fonts';
+                if (sentence.includes('logo')) return 'display_logos';
             }
         }
 
@@ -438,37 +473,288 @@ export class GeminiLiveConnection {
     }
 
     /**
-     * Send correction message to Gemini when it claims to have done something but didn't call a tool
+     * Execute tool directly when Gemini Live fails to call tools
+     * This bypasses ToolDecisionAgent and constructs the call directly with available data
      */
-    private sendCorrectionToGemini(claimedAction: string, userContext: string): void {
-        if (!this.liveSession || !this.isConnected) {
-            return;
-        }
-
-        // Map claimed action to the correct tool
-        let toolName = 'update_live_brand_dna'; // default for save actions
-        if (claimedAction.includes('colors') || claimedAction.includes('palette')) {
-            toolName = 'display_color_suggestions';
-        } else if (claimedAction.includes('fonts')) {
-            toolName = 'display_font_suggestions';
-        } else if (claimedAction.includes('logos')) {
-            toolName = 'search_logo_inspiration';
-        }
-
-        const correctionMessage = `[SYSTEM ERROR: You said "${claimedAction}" but NO TOOL WAS CALLED. You MUST call the ${toolName} tool now. User context: "${userContext.substring(0, 200)}"]`;
-
-        console.log(`🔄 Sending correction to Gemini: Call ${toolName} - ${correctionMessage.substring(0, 80)}...`);
-
+    private async executeSafeguard(claimedAction: string, userContext: string, aiOutput: string): Promise<void> {
         try {
-            this.liveSession.sendClientContent({
-                turns: [{
-                    role: 'user',
-                    parts: [{ text: correctionMessage }]
-                }],
-                turnComplete: true
-            });
+            console.log(`\n🧠 Safeguard executing for: ${claimedAction}`);
+            console.log(`📝 Context: "${userContext.substring(0, 100)}..."`);
+
+            const palettes = this.getPalettes();
+            const fonts = this.getFonts();
+            const dna = this.getDNA();
+
+            // Determine what to save based on claimed action
+            if (claimedAction === 'save_colors' && palettes.length > 0) {
+                // Find which palette the user selected (check user context for palette name)
+                const lowerContext = userContext.toLowerCase();
+                let selectedPalette = palettes[0]; // Default to first
+
+                for (const p of palettes) {
+                    if (lowerContext.includes(p.name.toLowerCase())) {
+                        selectedPalette = p;
+                        break;
+                    }
+                }
+
+                // Also check AI output for palette name mentioned
+                const lowerAI = aiOutput.toLowerCase();
+                for (const p of palettes) {
+                    if (lowerAI.includes(p.name.toLowerCase())) {
+                        selectedPalette = p;
+                        break;
+                    }
+                }
+
+                console.log(`🎨 Saving palette "${selectedPalette.name}"`);
+
+                // If explicit colors aren't found in current palette, we might need to look deeper
+                // But for now, using the matched palette is safe
+                await this.toolHandler.handleToolCalls([{
+                    name: 'update_live_brand_dna',
+                    id: `fallback-${Date.now()}`,
+                    args: {
+                        selectedColors: selectedPalette.colors
+                    }
+                }]);
+
+            } else if (claimedAction === 'save_font' && fonts.length > 0) {
+                // Find which font the user selected
+                const lowerContext = userContext.toLowerCase();
+                let selectedFont = fonts[0]; // Default to first
+
+                for (const f of fonts) {
+                    if (lowerContext.includes(f.name.toLowerCase())) {
+                        selectedFont = f;
+                        break;
+                    }
+                }
+
+                console.log(`🔤 Saving font "${selectedFont.name}"`);
+
+                await this.toolHandler.handleToolCalls([{
+                    name: 'update_live_brand_dna',
+                    id: `fallback-${Date.now()}`,
+                    args: {
+                        selectedFont: selectedFont.name
+                    }
+                }]);
+
+            } else if (claimedAction === 'save_name') {
+                // Extract brand name from context
+                const nameMatch = userContext.match(/called?\s+['"]?(\w+)['"]?/i) ||
+                    userContext.match(/name\s+(?:is\s+)?['"]?(\w+)['"]?/i);
+
+                // Fallback: Check DNA or previous turns if current context failed (e.g. user just said "Yes")
+                let brandName = nameMatch ? nameMatch[1] : null;
+                if (!brandName && dna.brandName) brandName = dna.brandName;
+                if (!brandName && this.previousUserTurn) {
+                    const prevNameMatch = this.previousUserTurn.match(/called?\s+['"]?(\w+)['"]?/i) ||
+                        this.previousUserTurn.match(/name\s+(?:is\s+)?['"]?(\w+)['"]?/i);
+                    if (prevNameMatch) brandName = prevNameMatch[1];
+                }
+
+                if (brandName) {
+                    console.log(`📛 Saving brand name "${brandName}"`);
+                    await this.toolHandler.handleToolCalls([{
+                        name: 'update_live_brand_dna',
+                        id: `fallback-${Date.now()}`,
+                        args: { brandName: brandName }
+                    }]);
+                }
+
+            } else if (claimedAction === 'save_mission') {
+                // MISSION EXTRACTION STRATEGY
+                // 1. Check if we already have a tentative mission in DNA (optimistic update) - skipped to be safe
+                // 2. Check current AI output for "saving 'X' as mission"
+                // 3. Check PREVIOUS AI output for "Would you like to save 'X'?"
+                // 4. Check PREVIOUS User input for declaration
+
+                let missionText = null;
+                const badPhrases = ['is now saved', 'is saved', 'saved', 'done'];
+
+                // Helper to clean mission reference
+                const extract = (text: string, patterns: RegExp[]) => {
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match && match[1] && match[1].length > 10) {
+                            const trimmed = match[1].trim();
+                            if (!badPhrases.includes(trimmed.toLowerCase())) return trimmed;
+                        }
+                    }
+                    return null;
+                };
+
+                const missionPatterns = [
+                    /mission\s+is\s+(?:to\s+)?(.+?)(?:\.|Would you|$)/i,
+                    /mission\s+statement[:\s]+(.+?)(?:\.|Would you|$)/i,
+                    /saving[:\s]+['""]?(.+?)['""]?\s+as\s+(?:the\s+)?mission/i
+                ];
+
+                // 2. Check current AI output
+                missionText = extract(aiOutput, missionPatterns);
+
+                // 3. Fallback: Check PREVIOUS AI output (history check)
+                if (!missionText && this.previousAITurn) {
+                    // Check if AI asked confirmation previously
+                    missionText = extract(this.previousAITurn, missionPatterns);
+                    // Also check specifically for quoted mission in questions
+                    if (!missionText) {
+                        const quoteMatch = this.previousAITurn.match(/['"](.+?)['"]\s+as\s+(?:your|the)\s+mission/i);
+                        if (quoteMatch && quoteMatch[1].length > 10) missionText = quoteMatch[1];
+                    }
+                }
+
+                // 4. Fallback: Check PREVIOUS User input
+                if (!missionText && this.previousUserTurn) {
+                    // Start simple: If previous user turn was long, it's likely the mission itself
+                    if (this.previousUserTurn.length > 20) {
+                        missionText = this.previousUserTurn;
+                    }
+                }
+
+                if (missionText) {
+                    console.log(`📜 Saving mission: "${missionText}"`);
+                    await this.toolHandler.handleToolCalls([{
+                        name: 'update_live_brand_dna',
+                        id: `fallback-${Date.now()}`,
+                        args: { mission: missionText }
+                    }]);
+                } else {
+                    console.log(`⚠️ Could not extract mission from AI output`);
+                }
+
+            } else if (claimedAction === 'save_voice') {
+                let voiceText = null;
+                const voicePatterns = [
+                    /saved\s+(?:as\s+)?['""]?(\w+)['""]?\s*(?:\.|Now|$)/i,
+                    /voice\s+(?:is\s+)?['""]?(\w+)['""]?\s*(?:\.|Now|Would|$)/i,
+                    /['""](\w+)['""].*?as\s+(?:the\s+)?(?:brand\s+)?voice/i
+                ];
+
+                const extractVoice = (text: string) => {
+                    for (const pattern of voicePatterns) {
+                        const match = text.match(pattern);
+                        if (match && match[1] && match[1].length >= 3) {
+                            const skip = ['done', 'your', 'the', 'now', 'brand', 'saved'];
+                            if (!skip.includes(match[1].toLowerCase())) return match[1].trim();
+                        }
+                    }
+                    return null;
+                };
+
+                // Try current AI output
+                voiceText = extractVoice(aiOutput);
+
+                // Try previous AI output (e.g. "Save 'Energetic' as voice?")
+                if (!voiceText && this.previousAITurn) {
+                    voiceText = extractVoice(this.previousAITurn);
+                }
+
+                // Try previous User input (e.g. "Energetic.")
+                if (!voiceText && this.previousUserTurn) {
+                    // If user input is short (word or two), it's likely the voice
+                    if (this.previousUserTurn.length < 20 && this.previousUserTurn.length > 3) {
+                        voiceText = this.previousUserTurn.replace(/[^\w\s]/g, '').trim();
+                    }
+                }
+
+                if (voiceText) {
+                    console.log(`🎤 Saving voice: "${voiceText}"`);
+                    await this.toolHandler.handleToolCalls([{
+                        name: 'update_live_brand_dna',
+                        id: `fallback-${Date.now()}`,
+                        args: { voice: voiceText }
+                    }]);
+                } else {
+                    console.log(`⚠️ Could not extract voice from AI output`);
+                }
+
+            } else if (claimedAction === 'display_colors') {
+                // AI claimed to display colors but didn't call the tool
+                // Generate and display default palettes based on brand voice/vibe
+                console.log(`🎨 Generating palettes since AI failed to call display_color_suggestions`);
+
+                const dna = this.getDNA();
+                const voice = dna.voice || 'energetic';
+
+                // Generate palettes based on brand voice (simple predefined sets)
+                const defaultPalettes = this.generatePalettesForVoice(voice);
+
+                await this.toolHandler.handleToolCalls([{
+                    name: 'display_color_suggestions',
+                    id: `fallback-${Date.now()}`,
+                    args: { palettes: defaultPalettes }
+                }]);
+
+                console.log(`✅ Displayed ${defaultPalettes.length} fallback palettes`);
+
+            } else if (claimedAction === 'display_fonts') {
+                // AI claimed to display fonts but didn't call the tool
+                console.log(`🔤 Generating fonts since AI failed to call display_font_suggestions`);
+
+                const defaultFonts = [
+                    { name: 'Poppins', category: 'sans-serif', reasoning: 'Modern and friendly' },
+                    { name: 'Playfair Display', category: 'serif', reasoning: 'Elegant and sophisticated' },
+                    { name: 'Roboto', category: 'sans-serif', reasoning: 'Clean and professional' }
+                ];
+
+                await this.toolHandler.handleToolCalls([{
+                    name: 'display_font_suggestions',
+                    id: `fallback-${Date.now()}`,
+                    args: { fonts: defaultFonts, context_text: dna.name || 'Brand Name' }
+                }]);
+
+                console.log(`✅ Displayed ${defaultFonts.length} fallback fonts`);
+
+            } else {
+                console.log(`⚠️ Safeguard: No matching action for "${claimedAction}" or no data available`);
+                console.log(`   Palettes: ${palettes.length}, Fonts: ${fonts.length}`);
+            }
         } catch (error) {
-            console.error('Error sending correction to Gemini:', error);
+            console.error('❌ Safeguard execution failed:', error);
         }
+    }
+
+    /**
+     * Generate color palettes based on brand voice
+     */
+    private generatePalettesForVoice(voice: string): ColorPalette[] {
+        const lowerVoice = voice.toLowerCase();
+
+        // Energetic/Bold palettes
+        if (lowerVoice.includes('energetic') || lowerVoice.includes('bold') || lowerVoice.includes('dynamic')) {
+            return [
+                { name: 'Action Rush', colors: ['#FF4136', '#FF851B', '#FFDC00'], vibe: 'Vibrant and bold' },
+                { name: 'Electric Pulse', colors: ['#7FDBFF', '#0074D9', '#001f3f'], vibe: 'High energy' },
+                { name: 'Neon Burst', colors: ['#39CCCC', '#01FF70', '#2ECC40'], vibe: 'Fresh and dynamic' }
+            ];
+        }
+
+        // Calm/Professional palettes
+        if (lowerVoice.includes('calm') || lowerVoice.includes('professional') || lowerVoice.includes('serious')) {
+            return [
+                { name: 'Corporate Blue', colors: ['#0074D9', '#7FDBFF', '#001f3f'], vibe: 'Professional and trustworthy' },
+                { name: 'Slate Gray', colors: ['#AAAAAA', '#DDDDDD', '#111111'], vibe: 'Clean and minimal' },
+                { name: 'Ocean Depth', colors: ['#001f3f', '#0074D9', '#B10DC9'], vibe: 'Calm and sophisticated' }
+            ];
+        }
+
+        // Playful/Friendly palettes
+        if (lowerVoice.includes('playful') || lowerVoice.includes('friendly') || lowerVoice.includes('fun')) {
+            return [
+                { name: 'Candy Pop', colors: ['#F012BE', '#FF4136', '#FFDC00'], vibe: 'Fun and playful' },
+                { name: 'Sunset Fun', colors: ['#FF851B', '#FF4136', '#85144b'], vibe: 'Warm and inviting' },
+                { name: 'Rainbow Joy', colors: ['#2ECC40', '#FFDC00', '#FF4136'], vibe: 'Cheerful and vibrant' }
+            ];
+        }
+
+        // Default/Neutral palettes
+        return [
+            { name: 'Modern Classic', colors: ['#0074D9', '#2ECC40', '#FF851B'], vibe: 'Versatile and modern' },
+            { name: 'Earth Tones', colors: ['#85144b', '#3D9970', '#AAAAAA'], vibe: 'Natural and grounded' },
+            { name: 'Twilight', colors: ['#B10DC9', '#0074D9', '#001f3f'], vibe: 'Creative and unique' }
+        ];
     }
 }

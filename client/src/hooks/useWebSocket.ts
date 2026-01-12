@@ -22,6 +22,9 @@ interface UseWebSocketOptions {
     onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration', targetField?: string) => void;
     onToolProcessingEnd?: () => void;
     onLogoConcepts?: (concepts: Array<{ id: string; url: string; source: string; style: string; mood: string; reasoning: string; alt_text: string }>) => void;
+    // Logo research progress for browser automation
+    onLogoResearchProgress?: (phase: 'starting' | 'browsing' | 'analyzing' | 'complete', source: string, progress: number, message: string) => void;
+    onLogoResearchResult?: (logos: any[], insights: any, screenshots: string[]) => void;
     // Thinking levels for hackathon
     onThinkingStart?: (timestamp: number) => void;
     onThinkingStream?: (thought: string, phase: 'classify' | 'analyze' | 'decide' | 'execute') => void;
@@ -129,6 +132,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
                 case 'THINKING_END':
                     opts.onThinkingEnd?.(message.duration, message.toolDecided, message.thoughtSummary);
+                    break;
+
+                case 'LOGO_RESEARCH_PROGRESS':
+                    opts.onLogoResearchProgress?.(message.phase, message.source, message.progress, message.message);
+                    break;
+
+                case 'LOGO_RESEARCH_RESULT':
+                    opts.onLogoResearchResult?.(message.logos, message.insights, message.screenshots);
                     break;
 
                 case 'ERROR':

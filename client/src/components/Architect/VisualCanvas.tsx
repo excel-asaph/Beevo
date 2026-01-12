@@ -1,5 +1,5 @@
-import React from 'react';
-import { Type as TypeIcon, Palette, Code, MousePointerClick, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Type as TypeIcon, Palette, Code, MousePointerClick, Sparkles, BookOpen, ChevronDown, ChevronUp, Search, Zap, LayoutTemplate } from 'lucide-react';
 import type { FontSuggestion, ColorPalette } from '@shared/types';
 
 interface LogoConcept {
@@ -12,16 +12,32 @@ interface LogoConcept {
     alt_text: string;
 }
 
+interface ResearchProgress {
+    isResearching: boolean;
+    phase: 'starting' | 'browsing' | 'analyzing' | 'complete';
+    source: string;
+    progress: number;
+    message: string;
+}
+
+interface LogoResearchInsights {
+    dominantStyles: string[];
+    commonPatterns: string[];
+    recommendation: string;
+}
+
 interface VisualCanvasProps {
     mode: 'none' | 'fonts' | 'colors' | 'logos';
     fontSuggestions: FontSuggestion[];
     colorSuggestions: ColorPalette[];
     logoSuggestions?: LogoConcept[];
+    logoResearchInsights?: LogoResearchInsights;
     previewText: string;
     onFontSelect: (fontName: string) => void;
     onColorSelect: (paletteName: string) => void;
     onLogoSelect?: (logoId: string, style: string) => void;
     isProcessing?: boolean;
+    researchProgress?: ResearchProgress;
 }
 
 export const VisualCanvas: React.FC<VisualCanvasProps> = ({
@@ -29,12 +45,17 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     fontSuggestions,
     colorSuggestions,
     logoSuggestions = [],
+    logoResearchInsights,
     previewText,
     onFontSelect,
     onColorSelect,
     onLogoSelect,
-    isProcessing = false
+    isProcessing = false,
+    researchProgress
 }) => {
+    // Local state for expandable views
+    const [isReportExpanded, setIsReportExpanded] = useState(false);
+
     // Dynamically load Google Fonts
     React.useEffect(() => {
         if (mode !== 'fonts' || !fontSuggestions.length) return;
@@ -56,15 +77,19 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     }, [mode, fontSuggestions]);
 
     return (
-        <div className="bg-white text-slate-900 p-6 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden relative" >
+        <div className="bg-white text-slate-900 p-6 rounded-2xl shadow-2xl h-full flex flex-col overflow-hidden relative">
             {/* Mode indicator */}
-            < div className="flex items-center justify-between mb-4" >
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
                     {mode === 'fonts' && <TypeIcon className="w-4 h-4 text-purple-600" />}
                     {mode === 'colors' && <Palette className="w-4 h-4 text-orange-600" />}
+                    {mode === 'logos' && <LayoutTemplate className="w-4 h-4 text-indigo-600" />}
                     {mode === 'none' && <Code className="w-4 h-4 text-slate-600" />}
                     <span>
-                        {mode === 'fonts' ? 'Reviewing Fonts' : mode === 'colors' ? 'Reviewing Palettes' : 'Visual Canvas'}
+                        {mode === 'fonts' ? 'Reviewing Fonts' :
+                            mode === 'colors' ? 'Reviewing Palettes' :
+                                mode === 'logos' ? 'Logo Inspiration' :
+                                    'Visual Canvas'}
                     </span>
                 </div>
 
@@ -74,9 +99,9 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                         Click to select
                     </span>
                 )}
-            </div >
+            </div>
 
-            <div className={`flex-1 overflow-y-auto transition-opacity duration-300 ${isProcessing ? 'opacity-50' : 'opacity-100'}`}>
+            <div className={`flex-1 overflow-y-auto transition-opacity duration-300 ${isProcessing ? 'opacity-50' : 'opacity-100'} scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pr-2`}>
                 {/* Font Suggestions */}
                 {mode === 'fonts' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -175,14 +200,120 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 {/* Logo Discovery Grid */}
                 {mode === 'logos' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
-                        <div className="mb-4">
-                            <h3 className="text-xl font-bold text-slate-800 mb-1">Logo Discovery</h3>
-                            <p className="text-slate-500 text-sm">Real-world brand inspiration from verified sources</p>
+                        <div className="mb-4 flex items-end justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-1">Logo Discovery</h3>
+                                <p className="text-slate-500 text-sm">Real-world brand inspiration from verified sources</p>
+                            </div>
+
+                            {/* Research Report Toggle - Matches user Mockup */}
+                            {logoResearchInsights && (
+                                <button
+                                    onClick={() => setIsReportExpanded(!isReportExpanded)}
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                                >
+                                    <BookOpen size={14} />
+                                    {isReportExpanded ? 'Collapse Report' : 'View Research'}
+                                    {isReportExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                </button>
+                            )}
                         </div>
 
+                        {/* Research Report Card - Expandable */}
+                        {logoResearchInsights && isReportExpanded && (
+                            <div className="mb-6 border border-slate-200 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 shadow-sm">
+                                <div className="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
+                                    <h4 className="font-bold text-slate-800 flex items-center gap-2">
+                                        <Search size={16} className="text-indigo-600" />
+                                        Research Findings
+                                    </h4>
+                                </div>
+                                <div className="p-5 bg-white space-y-5">
+                                    {/* Methodology */}
+                                    <div>
+                                        <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Methodology</h5>
+                                        <p className="text-sm text-slate-600 leading-relaxed">
+                                            Analyzed {logoSuggestions.length || 12} leading brands from Dribbble, Behance, and official brand sites matching the current brand directions.
+                                        </p>
+                                    </div>
+
+                                    {/* Findings */}
+                                    <div>
+                                        <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Key Findings</h5>
+                                        <ul className="space-y-2">
+                                            {logoResearchInsights.dominantStyles.map((style, i) => (
+                                                <li key={i} className="text-sm text-slate-700 flex items-start gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 flex-shrink-0" />
+                                                    {style}
+                                                </li>
+                                            ))}
+                                            {logoResearchInsights.commonPatterns.map((pattern, i) => (
+                                                <li key={`pat-${i}`} className="text-sm text-slate-700 flex items-start gap-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+                                                    {pattern}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Recommendation */}
+                                    <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                                        <h5 className="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                            <Zap size={12} />
+                                            Active Recommendation
+                                        </h5>
+                                        <p className="text-sm text-indigo-900 leading-relaxed font-medium">
+                                            {logoResearchInsights.recommendation}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {logoSuggestions.length === 0 ? (
-                            <div className="text-center py-12 text-slate-400">
-                                <p>Searching for logo inspiration...</p>
+                            <div className="text-center py-12">
+                                {researchProgress?.isResearching ? (
+                                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-8">
+                                        {/* Progress Circle */}
+                                        <div className="relative w-24 h-24 mx-auto mb-6">
+                                            <svg className="w-24 h-24 transform -rotate-90">
+                                                <circle
+                                                    cx="48" cy="48" r="40"
+                                                    stroke="currentColor"
+                                                    strokeWidth="8"
+                                                    fill="none"
+                                                    className="text-slate-200"
+                                                />
+                                                <circle
+                                                    cx="48" cy="48" r="40"
+                                                    stroke="currentColor"
+                                                    strokeWidth="8"
+                                                    fill="none"
+                                                    strokeDasharray={`${(researchProgress.progress / 100) * 251.2} 251.2`}
+                                                    className="text-purple-600 transition-all duration-500"
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-xl font-bold text-purple-600">{researchProgress.progress}%</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Phase Indicator */}
+                                        <div className="flex items-center justify-center gap-2 mb-3">
+                                            <div className={`w-2 h-2 rounded-full ${researchProgress.phase === 'browsing' ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
+                                            <span className="text-sm font-medium text-slate-600">
+                                                {researchProgress.phase === 'starting' && 'Launching browser agent...'}
+                                                {researchProgress.phase === 'browsing' && `Browsing ${researchProgress.source}...`}
+                                                {researchProgress.phase === 'analyzing' && 'Analyzing with Gemini 3...'}
+                                            </span>
+                                        </div>
+
+                                        {/* Message */}
+                                        <p className="text-sm text-slate-500">{researchProgress.message}</p>
+                                    </div>
+                                ) : (
+                                    <p className="text-slate-400">Searching for logo inspiration...</p>
+                                )}
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

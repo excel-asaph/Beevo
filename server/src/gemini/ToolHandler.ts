@@ -1,11 +1,14 @@
 import {
     ServerMessage,
     FontSuggestionsMessage,
-    ColorSuggestionsMessage
+    ColorSuggestionsMessage,
+    LogoResearchProgressMessage,
+    LogoResearchResultMessage
 } from '../../../shared/messages';
 import { FontSuggestion, ColorPalette, BrandDNA } from '../../../shared/types';
 import puppeteer from 'puppeteer';
 import { SearchGroundingService } from './SearchGroundingService';
+import { getLogoStrategist, LogoStrategist, BrandContext } from '../agents/LogoStrategist';
 
 interface FunctionCall {
     id: string;
@@ -64,7 +67,6 @@ export class ToolHandler {
                         break;
 
                     case 'update_live_brand_dna':
-                    case 'update_live_brand_dna':
                         this.handleDNAUpdate(fc.args);
                         break;
 
@@ -89,10 +91,25 @@ export class ToolHandler {
                 // Log raw call to check for ID
                 console.log(`🔍 Raw tool call:`, JSON.stringify(fc));
 
+                // Add instructions to prompt the model to speak
+                let flowInstruction = "Action completed. Continue conversation.";
+
+                if (fc.name === 'display_color_suggestions') {
+                    flowInstruction = "Palettes are now visible on the canvas. You must now DESCRIBE them by name and vibe to the user, then ask for their preference.";
+                } else if (fc.name === 'display_font_suggestions') {
+                    flowInstruction = "Fonts are now visible on the canvas. You must now DESCRIBE them by name to the user, then ask for their preference.";
+                } else if (fc.name === 'update_live_brand_dna') {
+                    flowInstruction = "Data saved successfully. Confirm this briefly to the user and immediately ask the next question to drive the flow forward.";
+                }
+
                 // Gemini Live API expects this exact format
                 const response: any = {
                     name: fc.name,
-                    response: { result: 'success', ...fc.args }
+                    response: {
+                        result: 'success',
+                        ...fc.args,
+                        system_note: flowInstruction
+                    }
                 };
 
                 // Only include ID if it was sent by Gemini
@@ -282,63 +299,101 @@ export class ToolHandler {
     }
 
     private async handleSearchLogoInspiration(args: any): Promise<void> {
-        console.log('🔍 Searching for logo inspiration:', args);
+        console.log('🔍 Starting BROWSER-BASED logo research:', args);
 
-        const styleKeywords = args.style_keywords || 'modern logo';
-        const industry = args.industry || 'business';
-        const count = args.result_count || 6;
+        // Get brand context from current DNA
+        const dna = this.getDNA();
+        const brandContext: BrandContext = {
+            name: dna.name || 'Brand',
+            industry: args.industry || 'business',
+            mission: dna.mission,
+            voice: dna.voice,
+            style: args.style || args.query
+        };
 
+        // Send initial progress
         this.sendToClient({
-            type: 'THOUGHT',
-            logic: `Searching the web for ${styleKeywords} logos in ${industry} industry...`,
-            confidence: 0.95
-        });
+            type: 'LOGO_RESEARCH_PROGRESS',
+            phase: 'starting',
+            source: 'Browser Agent',
+            progress: 0,
+            message: `Starting logo research for ${brandContext.industry} industry...`
+        } as LogoResearchProgressMessage);
 
         try {
-            // Build search query
-            const searchTerms = [styleKeywords, industry, 'logo design'];
-            if (args.mood_filters?.length) {
-                searchTerms.push(...args.mood_filters);
-            }
-            if (args.color_preference) {
-                searchTerms.push(args.color_preference);
-            }
+            // Get the strategist (singleton with browser)
+            const strategist = await getLogoStrategist();
 
-            const searchQuery = searchTerms.join(' ');
-            console.log(`🔎 Search query: "${searchQuery}"`);
+            // Run research with progress callbacks
+            const results = await strategist.researchLogos(
+                brandContext,
+                (phase, source, progress, message) => {
+                    console.log(`📊 Research progress: ${phase} | ${source} | ${progress}% | ${message}`);
+                    this.sendToClient({
+                        type: 'LOGO_RESEARCH_PROGRESS',
+                        phase: phase as 'starting' | 'browsing' | 'analyzing' | 'complete',
+                        source,
+                        progress,
+                        message
+                    } as LogoResearchProgressMessage);
+                }
+            );
 
-            // Use SearchGroundingService for real web results
-            const results = await this.searchService.searchLogoInspirationFromWeb({
-                styleKeywords,
-                industry,
-                mood: args.mood_filters?.[0],
-                count,
-                referenceBrands: args.brand_references,
-                logoTypes: args.logo_types
-            });
+            console.log(`✅ Research complete: ${results.logos.length} logos found`);
 
-            console.log(`✅ Found ${results.length} logo examples via Search Grounding`);
-            console.log(`📸 Logo URLs being sent:`, results.map(r => `${r.source}: ${r.url}`));
+            // Send final results
+            this.sendToClient({
+                type: 'LOGO_RESEARCH_RESULT',
+                logos: results.logos,
+                insights: results.insights,
+                screenshots: results.screenshots
+            } as LogoResearchResultMessage);
 
-            // Send LOGO_CONCEPTS message to client
+            // Also send LOGO_CONCEPTS for backward compatibility
             this.sendToClient({
                 type: 'LOGO_CONCEPTS',
-                concepts: results
+                concepts: results.logos.map(logo => ({
+                    id: logo.id,
+                    url: logo.imageUrl,
+                    source: logo.source,
+                    style: logo.style,
+                    mood: 'discovered',
+                    reasoning: logo.designPrinciples.join(', '),
+                    alt_text: `${logo.brandName} logo`
+                }))
             });
 
             this.sendToClient({
                 type: 'THOUGHT',
-                logic: `Displaying ${results.length} ${styleKeywords} logo examples from ${industry} brands found on the web.`,
-                confidence: 0.9
+                logic: `Research complete! Found ${results.logos.length} logos. ${results.insights.recommendation}`,
+                confidence: 0.95
             });
 
         } catch (error) {
-            console.error('❌ Logo search failed:', error);
+            console.error('❌ Logo research failed:', error);
             this.sendToClient({
-                type: 'THOUGHT',
-                logic: `Search encountered an error. Please try refining your criteria.`,
-                confidence: 0.5
-            });
+                type: 'LOGO_RESEARCH_PROGRESS',
+                phase: 'complete',
+                source: 'Error',
+                progress: 100,
+                message: 'Research encountered an error. Showing fallback results.'
+            } as LogoResearchProgressMessage);
+
+            // Fall back to SearchGroundingService
+            try {
+                const fallbackResults = await this.searchService.searchLogoInspirationFromWeb({
+                    styleKeywords: args.style || 'modern logo',
+                    industry: args.industry || 'business',
+                    count: 6
+                });
+
+                this.sendToClient({
+                    type: 'LOGO_CONCEPTS',
+                    concepts: fallbackResults
+                });
+            } catch (fallbackError) {
+                console.error('❌ Fallback also failed:', fallbackError);
+            }
         }
     }
 

@@ -8,7 +8,6 @@ import {
 } from '../../../shared/messages';
 import { BrandDNA, FontSuggestion, ColorPalette } from '../../../shared/types';
 import { ToolHandler } from './ToolHandler';
-import { ToolDecisionAgent } from './ToolDecisionAgent';
 
 // Tool declarations for Gemini Live
 const toolDeclarations: FunctionDeclaration[] = [
@@ -40,7 +39,7 @@ const toolDeclarations: FunctionDeclaration[] = [
     },
     {
         name: "display_color_suggestions",
-        description: "Display color palette options on the canvas. Use this whenever discussing colors.",
+        description: "Display color palette options on the canvas. Use this whenever discussing colors. IMPORTANT: All colors MUST be hex codes (e.g., #FF5733, #00A8E8).",
         parameters: {
             type: Type.OBJECT,
             properties: {
@@ -49,9 +48,9 @@ const toolDeclarations: FunctionDeclaration[] = [
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            name: { type: Type.STRING },
-                            colors: { type: Type.ARRAY, items: { type: Type.STRING } },
-                            vibe: { type: Type.STRING }
+                            name: { type: Type.STRING, description: "Palette name" },
+                            colors: { type: Type.ARRAY, items: { type: Type.STRING, description: "Hex color code (e.g., #FF5733)" } },
+                            vibe: { type: Type.STRING, description: "Mood or feeling of the palette" }
                         },
                         required: ["name", "colors", "vibe"]
                     }
@@ -74,6 +73,30 @@ const toolDeclarations: FunctionDeclaration[] = [
             },
             required: [] // Explicitly state no fields are required
         }
+    },
+    {
+        name: "search_logo_inspiration",
+        description: "Search for logo inspiration images based on brand context. Use when the user asks for logo ideas, inspiration, or wants to see logo examples.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                query: {
+                    type: Type.STRING,
+                    description: "Search query for logo inspiration (e.g., 'modern minimalist shoe brand logo', 'athletic footwear logo design')"
+                },
+                style: {
+                    type: Type.STRING,
+                    description: "Logo style preference: minimalist, modern, vintage, playful, elegant, bold",
+                    nullable: true
+                },
+                industry: {
+                    type: Type.STRING,
+                    description: "Industry context: footwear, athletic, fashion, streetwear",
+                    nullable: true
+                }
+            },
+            required: ["query"]
+        }
     }
 ];
 
@@ -86,26 +109,12 @@ export class GeminiLiveConnection {
     private sendToClient: (message: ServerMessage) => void;
     private updateState: (field: string, value: any) => void;
     private toolHandler: ToolHandler;
-    private toolDecisionAgent: ToolDecisionAgent;
-    private isProcessingTools: boolean = false; // Flag to pause audio during processing
-    private isProcessingToolDecision: boolean = false; // Mutex to prevent overlapping tool decisions
-    private isGreetingPhase: boolean = true; // Prevent tool decisions during AI greeting
-    private readonly MIN_INPUT_LENGTH = 5; // Minimum chars to consider as real input
+    private isGreetingPhase: boolean = true;
 
-    // Confirmation-based Brain trigger (Option C)
-    private awaitingConfirmation: boolean = false; // True when AI asked a confirmation question
-    private lastAIMessage: string = ''; // Track AI's last message for context
-    private accumulatedAIOutput: string = ''; // Accumulate AI output to check confirmation on full message
-
-    // Queue for sequential tool processing (prevents race conditions)
-    private inputQueue: string[] = [];
-    private isProcessingQueue: boolean = false;
-
-    // State getters for the ToolDecisionAgent
-    private getDNA: () => BrandDNA;
-    private getFonts: () => Array<{ name: string; category: string }>;
-    private getPalettes: () => Array<{ name: string; colors: string[]; vibe: string }>;
-    private getCanvasMode: () => 'none' | 'fonts' | 'colors';
+    // Safeguard: Track if tool was actually called this turn
+    private toolCalledThisTurn: boolean = false;
+    private accumulatedAIOutput: string = '';
+    private accumulatedUserInput: string = '';
 
     constructor(
         sessionId: string,
@@ -123,13 +132,6 @@ export class GeminiLiveConnection {
         this.sendToClient = sendToClient;
         this.updateState = updateState;
         this.toolHandler = new ToolHandler(sendToClient, updateState, storePalettes, storeFonts, setCanvasMode, getDNA);
-        this.toolDecisionAgent = new ToolDecisionAgent();
-
-        // Store state getters
-        this.getDNA = getDNA;
-        this.getFonts = getFonts;
-        this.getPalettes = getPalettes;
-        this.getCanvasMode = getCanvasMode;
     }
 
     async connect(): Promise<void> {
@@ -227,7 +229,6 @@ export class GeminiLiveConnection {
 
     private audioChunkCount = 0;
     private lastAudioLogTime = 0;
-    private accumulatedUserInput = ''; // Accumulate user input for tool decision
 
     async sendAudio(base64Audio: string): Promise<void> {
         if (!this.liveSession || !this.isConnected) {
@@ -238,11 +239,6 @@ export class GeminiLiveConnection {
             return;
         }
 
-        // PAUSE AUDIO: If we are currently processing tools, drop audio input
-        // This prevents the user's "umm" or background noise from triggering new requests while we're thinking
-        if (this.isProcessingTools) {
-            return;
-        }
 
         try {
             this.liveSession.sendRealtimeInput({
@@ -293,17 +289,12 @@ export class GeminiLiveConnection {
             return;
         }
 
-        // Handle tool calls
+        // Handle tool calls - mark that a tool was actually called
         if (toolCall) {
             console.log(`🛠️ Tool call received: ${JSON.stringify(toolCall.functionCalls.map((f: any) => ({ name: f.name, args: f.args })))}`);
 
-            // Reset confirmation state - Gemini is handling this directly
-            // This prevents the Brain from triggering redundantly
-            if (this.awaitingConfirmation) {
-                console.log(`🔄 Gemini handling confirmation directly - resetting awaitingConfirmation`);
-                this.awaitingConfirmation = false;
-                this.accumulatedUserInput = ''; // Clear any pending user input
-            }
+            // Mark that a tool was called this turn
+            this.toolCalledThisTurn = true;
 
             const functionResponses = await this.toolHandler.handleToolCalls(toolCall.functionCalls);
 
@@ -328,14 +319,12 @@ export class GeminiLiveConnection {
                 type: 'AUDIO_CHUNK',
                 data: audioData
             });
-            // Note: We no longer trigger tools here - using debounced trigger on turnComplete instead
         }
 
         // Handle text parts from model
         const textPart = serverContent?.modelTurn?.parts?.find((p: any) => p.text);
         if (textPart) {
             console.log(`💬 Model text: ${textPart.text.substring(0, 100)}...`);
-            // Note: We no longer trigger tools here - using debounced trigger on turnComplete instead
         }
 
         // Handle transcription
@@ -350,16 +339,14 @@ export class GeminiLiveConnection {
                 text: outputTranscription,
                 isPartial: false
             });
-            // Track model responses for context
-            this.toolDecisionAgent.addModelResponse(outputTranscription);
 
-            // Accumulate AI output to check confirmation on full message (not per-chunk)
+            // Accumulate AI output for safeguard checking
             this.accumulatedAIOutput += outputTranscription;
 
             // After AI's first response, greeting phase is over
             if (this.isGreetingPhase) {
                 this.isGreetingPhase = false;
-                console.log(`✅ Greeting phase complete - tool decisions now enabled`);
+                console.log(`✅ Greeting phase complete`);
             }
         }
 
@@ -371,313 +358,117 @@ export class GeminiLiveConnection {
                 text: inputTranscription,
                 isPartial: false
             });
-            // Accumulate user input for tool decision
+
+            // Accumulate user input for context
             this.accumulatedUserInput += inputTranscription + ' ';
         }
 
-        // Log turn complete - Handle both AI turns and User turns
+        // SAFEGUARD: On turn complete, check if AI claimed to save but didn't call tool
         if (serverContent?.turnComplete) {
             console.log(`🔄 Turn complete for session: ${this.sessionId}`);
 
-            const hasUserInput = this.accumulatedUserInput.trim().length >= this.MIN_INPUT_LENGTH;
-            const hasAIOutput = this.accumulatedAIOutput.trim().length > 0;
+            // Check if AI said "saved/done" but no tool was called
+            const aiClaimedAction = this.detectClaimedAction(this.accumulatedAIOutput);
 
-            if (this.isGreetingPhase) {
-                console.log(`⏸️ Skipping - greeting phase`);
-                this.accumulatedUserInput = '';
-                this.accumulatedAIOutput = '';
-            } else {
-                // STEP 1: ALWAYS check AI output for confirmation patterns FIRST
-                let aiAskedConfirmation = false;
-                if (hasAIOutput) {
-                    const fullAIMessage = this.accumulatedAIOutput;
-                    this.lastAIMessage = fullAIMessage;
+            if (aiClaimedAction && !this.toolCalledThisTurn && !this.isGreetingPhase) {
+                console.log(`⚠️ SAFEGUARD TRIGGERED: AI claimed "${aiClaimedAction}" but no tool was called!`);
+                console.log(`📝 User context: "${this.accumulatedUserInput.trim().substring(0, 100)}..."`);
 
-                    const confirmationPatterns = [
-                        /would you like/i,
-                        /want me to/i,
-                        /shall i/i,
-                        /should i/i,
-                        /do you want/i,
-                        /can i show/i,
-                        /ready to see/i,
-                        /let me show/i,
-                        /display.*\?/i,
-                        /show.*\?/i,
-                        /save.*\?/i,
-                        /proceed.*\?/i,
-                        /is that (right|correct)/i,
-                        /confirm\??$/i,
-                        /should i save/i,
-                        /is that what you/i,
-                        /does that sound/i
-                    ];
-
-                    if (confirmationPatterns.some(pattern => pattern.test(fullAIMessage))) {
-                        aiAskedConfirmation = true;
-                        this.awaitingConfirmation = true;
-                        console.log(`❓ AI asked confirmation: "${fullAIMessage.substring(0, 50)}..." - awaiting user response`);
-                    }
-                }
-                this.accumulatedAIOutput = ''; // Reset AI output
-
-                // STEP 2: Handle user input based on confirmation state
-                if (aiAskedConfirmation) {
-                    // AI just asked a confirmation question
-                    // Any user input in this turn was BEFORE the question - discard it
-                    if (hasUserInput) {
-                        console.log(`📝 Discarding pre-confirmation input: "${this.accumulatedUserInput.trim().substring(0, 30)}..."`);
-                    }
-                    this.accumulatedUserInput = '';
-                    console.log(`⏸️ AI asked confirmation - waiting for user's response`);
-                } else if (!hasUserInput) {
-                    // No user input and no confirmation - just AI speaking
-                    console.log(`⏸️ AI turn ending - waiting for user response`);
-                } else {
-                    // User spoke and AI did NOT ask confirmation
-                    const userInput = this.accumulatedUserInput.trim();
-                    this.accumulatedUserInput = '';
-
-                    // Trigger Brain if:
-                    // 1. AI was awaiting confirmation (from PREVIOUS turn)
-                    // 2. User's input appears to be a direct action request
-                    const shouldTriggerBrain = this.shouldAnalyzeInput(userInput);
-
-                    if (shouldTriggerBrain) {
-                        console.log(`🧠 Brain triggered - ${this.awaitingConfirmation ? 'confirmation response' : 'action request'}`);
-                        this.awaitingConfirmation = false; // Reset after processing
-                        this.queueToolDecision(userInput);
-                    } else {
-                        console.log(`💬 Conversational input - letting AI respond naturally`);
-                        this.awaitingConfirmation = false;
-                        // No Brain, AI will continue naturally
-                    }
-                }
+                // Send correction message to Gemini
+                this.sendCorrectionToGemini(aiClaimedAction, this.accumulatedUserInput.trim());
             }
+
+            // Reset tracking for next turn
+            this.toolCalledThisTurn = false;
+            this.accumulatedAIOutput = '';
+            this.accumulatedUserInput = '';
         }
 
         // Log interruption and notify client to stop playback
         if (serverContent?.interrupted) {
             console.log(`⚠️ Turn interrupted for session: ${this.sessionId}`);
+            // Reset tracking on interrupt
+            this.toolCalledThisTurn = false;
+            this.accumulatedAIOutput = '';
             this.accumulatedUserInput = '';
-            this.accumulatedAIOutput = ''; // Reset AI output too
-            this.inputQueue = []; // Clear queue on interruption
-            this.awaitingConfirmation = false; // Reset confirmation state on interrupt
             this.sendToClient({ type: 'INTERRUPT' });
         }
     }
 
     /**
-     * Determine if user input should trigger Brain analysis.
-     * Uses semantic intent detection, not simple keyword matching.
-     * 
-     * Returns true if:
-     * 1. AI is awaiting confirmation (asked a confirmation question)
-     * 2. User input appears to be a direct action request
+     * Detect if AI claimed to perform an action (saved, displayed, etc.)
      */
-    private shouldAnalyzeInput(userInput: string): boolean {
-        const input = userInput.toLowerCase();
-
-        // Case 1: AI asked a confirmation question - any response should be analyzed
-        if (this.awaitingConfirmation) {
-            console.log(`✅ Awaiting confirmation - analyzing response`);
-            return true;
-        }
-
-        // Case 2: Check if input appears to be a direct action request
-        // These patterns capture intent semantically, not exact keywords
+    private detectClaimedAction(aiOutput: string): string | null {
         const actionPatterns = [
-            // Explicit action requests
-            /\b(show|display|give|generate|create|make)\b.*\b(font|color|palette|logo|option|design)/i,
-            /\b(font|color|palette|logo|option)\b.*\b(please|now|for me)/i,
+            // Brand DNA saving patterns
+            { pattern: /i('ve| have) saved/i, action: 'saved' },
+            { pattern: /it('s| is) saved/i, action: 'saved' },
+            { pattern: /saved (it|that|the)/i, action: 'saved' },
+            { pattern: /i('ve| have) updated/i, action: 'updated' },
+            { pattern: /mission.*saved/i, action: 'saved mission' },
+            { pattern: /brand.*saved/i, action: 'saved brand' },
+            { pattern: /name.*saved/i, action: 'saved name' },
+            { pattern: /voice.*saved/i, action: 'saved voice' },
 
-            // Logo-specific patterns (must be combined with action words)
-            /\b(logo|logos|brandmark|icon)\s*(design|style|inspiration|option)/i,
-            /\b(minimalist|modern|classic|bold|playful)\b.*\b(logo|design|style)/i,
-            /\b(shoe|tech|fashion|startup|business)\b.*\blog\b/i,
-            /\b(search|find|look\s*for)\b.*\b(logo|inspiration)/i,
+            // Color display patterns
+            { pattern: /here are (some |the )?color/i, action: 'displayed colors' },
+            { pattern: /i('ve| have) (displayed|shown|generated|pulled up|created) (some |the )?color/i, action: 'displayed colors' },
+            { pattern: /showing (you )?(some |the )?color/i, action: 'displayed colors' },
+            { pattern: /palette(s)? (are |is )?on (the |your )?canvas/i, action: 'displayed colors' },
 
-            // Save/update actions  
-            /\b(save|store|update|set|use|apply|keep)\b.*\b(brand|dna|this|that|these|it)/i,
-            /\b(that|this|these)\b.*\b(one|look|works|perfect|great)/i,
+            // Font display patterns
+            { pattern: /here are (some |the )?font/i, action: 'displayed fonts' },
+            { pattern: /i('ve| have) (displayed|shown|generated|pulled up|created) (some |the )?font/i, action: 'displayed fonts' },
+            { pattern: /showing (you )?(some |the )?font/i, action: 'displayed fonts' },
+            { pattern: /font(s)? (are |is )?on (the |your )?canvas/i, action: 'displayed fonts' },
 
-            // Quantity requests
-            /\b(more|another|different|new|other)\b.*\b(font|color|option|palette|logo)/i,
-            /\b\d+\b.*\b(font|color|option|palette|logo)/i,
-
-            // Direct commands
-            /^(show|display|give|generate|save|update|create)\b/i,
-
-            // Simple affirmations (respond to AI's questions)
-            /^(yes|yeah|yep|sure|ok|okay|please|go\s*ahead|do\s*it)\b/i,
-            /\b(sounds?\s*good|let'?s?\s*(do|go)|perfect|exactly|that'?s?\s*(fine|good|great))\b/i
+            // Logo search patterns
+            { pattern: /here are (some |the )?logo/i, action: 'searched logos' },
+            { pattern: /i('ve| have) (found|searched|pulled up|displayed) (some |the )?logo/i, action: 'searched logos' },
+            { pattern: /logo inspiration/i, action: 'searched logos' },
         ];
 
-        const isActionRequest = actionPatterns.some(pattern => pattern.test(input));
-
-        if (isActionRequest) {
-            console.log(`🎯 Direct action request detected in input`);
-            return true;
+        for (const { pattern, action } of actionPatterns) {
+            if (pattern.test(aiOutput)) {
+                return action;
+            }
         }
 
-        // Default: conversational input, no Brain needed
-        console.log(`💭 Conversational input - no Brain trigger`);
-        return false;
+        return null;
     }
 
     /**
-     * Queue an input for tool decision processing.
-     * Inputs are processed sequentially to prevent race conditions.
+     * Send correction message to Gemini when it claims to have done something but didn't call a tool
      */
-    private queueToolDecision(input: string): void {
-        console.log(`📥 Queuing input: "${input.substring(0, 40)}..."`);
-        this.inputQueue.push(input);
-
-        // Start processing if not already running
-        if (!this.isProcessingQueue) {
-            this.processQueue();
-        }
-    }
-
-    /**
-     * Process queued inputs sequentially.
-     * Only one tool decision runs at a time.
-     */
-    private async processQueue(): Promise<void> {
-        if (this.isProcessingQueue) return; // Already processing
-        this.isProcessingQueue = true;
-
-        while (this.inputQueue.length > 0) {
-            const input = this.inputQueue.shift()!;
-            console.log(`🚀 Processing from queue: "${input.substring(0, 40)}..."`);
-            await this.processUserInputForTools(input);
+    private sendCorrectionToGemini(claimedAction: string, userContext: string): void {
+        if (!this.liveSession || !this.isConnected) {
+            return;
         }
 
-        this.isProcessingQueue = false;
-        console.log(`✅ Queue empty - ready for next input`);
-    }
+        // Map claimed action to the correct tool
+        let toolName = 'update_live_brand_dna'; // default for save actions
+        if (claimedAction.includes('colors') || claimedAction.includes('palette')) {
+            toolName = 'display_color_suggestions';
+        } else if (claimedAction.includes('fonts')) {
+            toolName = 'display_font_suggestions';
+        } else if (claimedAction.includes('logos')) {
+            toolName = 'search_logo_inspiration';
+        }
 
-    /**
-     * Process user input through ToolDecisionAgent for reliable tool calling
-     */
-    private async processUserInputForTools(userInput: string): Promise<void> {
-        const startTime = Date.now();
-        const collectedThoughts: string[] = [];
-        let toolDecided: string | null = null;
+        const correctionMessage = `[SYSTEM ERROR: You said "${claimedAction}" but NO TOOL WAS CALLED. You MUST call the ${toolName} tool now. User context: "${userContext.substring(0, 200)}"]`;
+
+        console.log(`🔄 Sending correction to Gemini: Call ${toolName} - ${correctionMessage.substring(0, 80)}...`);
 
         try {
-            const dna = this.getDNA() as BrandDNA;
-            const fonts = this.getFonts();
-            const palettes = this.getPalettes();
-            const canvasMode = this.getCanvasMode();
-
-            console.log(`🧠 Processing user input for tools: "${userInput.substring(0, 50)}..."`);
-
-            // START PROCESSING: Prevent overlapping calls
-            this.isProcessingToolDecision = true;
-            this.isProcessingTools = true;
-
-            // 🛑 HOLD - Tell the Live API to wait while Brain thinks
-            // This prevents the AI from speaking before we know what action to take
-            if (this.liveSession && this.isConnected) {
-                this.liveSession.sendClientContent({
-                    turns: [{
-                        role: 'user',
-                        parts: [{ text: '[SYSTEM: THINKING IN PROGRESS - Do NOT speak yet. Wait for the Brain to finish analyzing and provide results. Stay silent until you receive the next SYSTEM UPDATE.]' }]
-                    }],
-                    turnComplete: false // Don't trigger response yet
-                });
-            }
-
-            // 🧠 THINKING_START - Tell client we're thinking
-            this.sendToClient({
-                type: 'THINKING_START',
-                timestamp: startTime
+            this.liveSession.sendClientContent({
+                turns: [{
+                    role: 'user',
+                    parts: [{ text: correctionMessage }]
+                }],
+                turnComplete: true
             });
-
-            const toolCalls = await this.toolDecisionAgent.analyzeAndDecideTools(
-                userInput,
-                dna,
-                canvasMode,
-                fonts,
-                palettes,
-                // Streaming thought callback - now sends to client!
-                (thought) => {
-                    console.log(`💭 Brain thinking: ${thought}`);
-                    collectedThoughts.push(thought);
-
-                    // Determine phase based on thought content
-                    let phase: 'classify' | 'analyze' | 'decide' | 'execute' = 'analyze';
-                    if (thought.toLowerCase().includes('classif') || thought.toLowerCase().includes('intent')) {
-                        phase = 'classify';
-                    } else if (thought.toLowerCase().includes('tool') || thought.toLowerCase().includes('call')) {
-                        phase = 'decide';
-                    } else if (thought.toLowerCase().includes('execut')) {
-                        phase = 'execute';
-                    }
-
-                    // 🧠 THINKING_STREAM - Real-time thought to client
-                    this.sendToClient({
-                        type: 'THINKING_STREAM',
-                        thought: thought,
-                        phase: phase
-                    });
-                }
-            );
-
-            // Execute any tool calls the agent decided on
-            if (toolCalls.length > 0) {
-                toolDecided = toolCalls[0]?.name || null;
-                console.log(`🔧 ToolDecisionAgent executing ${toolCalls.length} tool(s)`);
-                await this.toolHandler.handleToolCalls(toolCalls as any);
-
-                // FEEDBACK LOOP: Tell the Live API what just happened
-                const toolSummary = toolCalls.map(tc => {
-                    const argsString = JSON.stringify(tc.args).substring(0, 500);
-                    return `${tc.name} with details: ${argsString}`;
-                }).join('; ');
-
-                const feedbackMsg = `[SYSTEM UPDATE: Tool(s) executed: ${toolSummary}. The results are now visible on the canvas. PLEASE ANNOUNCE THIS TO THE USER NOW by describing what was shown/updated.]`;
-
-                console.log(`🔄 Sending feedback to Live API: ${feedbackMsg}`);
-
-                if (this.liveSession && this.isConnected) {
-                    this.liveSession.sendClientContent({
-                        turns: [{
-                            role: 'user',
-                            parts: [{ text: feedbackMsg }]
-                        }],
-                        turnComplete: true // NOW trigger AI to speak about results
-                    });
-                }
-            } else {
-                // No tools needed - release the AI to continue conversation naturally
-                console.log(`💬 No tools needed - releasing AI to continue conversation`);
-                if (this.liveSession && this.isConnected) {
-                    this.liveSession.sendClientContent({
-                        turns: [{
-                            role: 'user',
-                            parts: [{ text: '[SYSTEM RELEASE: Brain analysis complete. No visual actions needed. You may now respond naturally to the user.]' }]
-                        }],
-                        turnComplete: true // Trigger AI to speak
-                    });
-                }
-            }
         } catch (error) {
-            console.error('Error in processUserInputForTools:', error);
-        } finally {
-            // 🧠 THINKING_END - Tell client we're done thinking
-            const duration = Date.now() - startTime;
-            this.sendToClient({
-                type: 'THINKING_END',
-                duration: duration,
-                toolDecided: toolDecided,
-                thoughtSummary: collectedThoughts
-            });
-
-            // END PROCESSING: Release mutex
-            this.isProcessingToolDecision = false;
-            this.isProcessingTools = false;
+            console.error('Error sending correction to Gemini:', error);
         }
     }
 }

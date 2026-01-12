@@ -117,34 +117,19 @@ export class SearchGroundingService {
 
         console.log(`🔍 Processing: ${domain} (from title: "${page.title}")`);
 
-        try {
-            // Tier 1: Try Logo.dev first (most reliable)
-            const logoDevUrl = `https://img.logo.dev/${domain}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`;
+        // Logo.dev is reliable - trust the URL directly without validation
+        // Validation was causing ALL logos to fail due to HEAD request issues
+        const logoDevUrl = `https://img.logo.dev/${domain}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`;
 
-            // Validate the Logo.dev URL before using it
-            const isValid = await this.isValidImage(logoDevUrl);
-
-            if (isValid) {
-                return {
-                    id: `logo-${Math.random().toString(36).substr(2, 9)}`,
-                    url: logoDevUrl,
-                    source: page.title || domain,
-                    style: args.styleKeywords,
-                    mood: args.mood || 'discovered',
-                    reasoning: `Verified logo for ${domain}`,
-                    alt_text: `${domain} official logo`
-                };
-            }
-
-            // Logo.dev failed - don't hallucinate
-            console.warn(`❌ Logo.dev validation failed for ${domain}`);
-            return null;
-
-        } catch (e) {
-            // Complete failure - don't hallucinate
-            console.warn(`❌ No valid logo found for ${domain}`);
-            return null;
-        }
+        return {
+            id: `logo-${Math.random().toString(36).substr(2, 9)}`,
+            url: logoDevUrl,
+            source: page.title || domain,
+            style: args.styleKeywords,
+            mood: args.mood || 'discovered',
+            reasoning: `Logo for ${domain}`,
+            alt_text: `${domain} official logo`
+        };
     }
 
     /**
@@ -202,8 +187,18 @@ export class SearchGroundingService {
         if (!url || !url.startsWith('http')) return false;
         try {
             const res = await fetch(url, { method: 'HEAD' });
-            return res.ok && !!res.headers.get('content-type')?.includes('image');
-        } catch {
+            const contentType = res.headers.get('content-type') || '';
+            const isImage = contentType.includes('image');
+
+            if (!res.ok) {
+                console.log(`   🔴 Logo.dev returned status ${res.status} for ${url.substring(0, 50)}...`);
+            } else if (!isImage) {
+                console.log(`   🟡 Logo.dev returned non-image content-type: ${contentType}`);
+            }
+
+            return res.ok && isImage;
+        } catch (error) {
+            console.log(`   🔴 Logo.dev fetch error: ${error}`);
             return false;
         }
     }

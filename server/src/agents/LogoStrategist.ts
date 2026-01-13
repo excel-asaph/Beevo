@@ -1,8 +1,13 @@
 // LogoStrategist: Browser-based logo research agent
-// Uses Puppeteer to browse Dribbble, Behance, and brand sites
+// Uses Puppeteer with Stealth to browse Dribbble, Behance, and brand sites
 
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { Browser, Page } from 'puppeteer';
 import { GoogleGenAI } from '@google/genai';
+
+// Enable stealth mode to bypass bot detection
+puppeteer.use(StealthPlugin());
 
 export interface BrandContext {
     name: string;
@@ -49,16 +54,19 @@ export class LogoStrategist {
 
     async initialize(): Promise<void> {
         if (!this.browser) {
-            console.log('🌐 Launching browser for logo research...');
+            console.log('🌐 Launching STEALTH browser for logo research...');
             this.browser = await puppeteer.launch({
                 headless: true,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
-                    '--disable-gpu'
+                    '--disable-gpu',
+                    '--disable-blink-features=AutomationControlled',
+                    '--window-size=1920,1080'
                 ]
-            });
+            }) as Browser;
+            console.log('✅ Stealth browser launched successfully');
         }
     }
 
@@ -79,19 +87,14 @@ export class LogoStrategist {
         const screenshots: string[] = [];
 
         try {
-            // Phase 1: Dribbble research
-            onProgress('browsing', 'Dribbble', 10, `Searching for ${context.industry} logos on Dribbble...`);
-            const dribbbleResults = await this.searchDribbble(context);
-            allLogos.push(...dribbbleResults.logos);
-            if (dribbbleResults.screenshot) screenshots.push(dribbbleResults.screenshot);
+            // Phase 1: Google Images - Most reliable source for logo inspiration
+            onProgress('browsing', 'Google Images', 10, `Searching for ${context.industry} logo inspiration...`);
+            const googleResults = await this.searchGoogleImages(context);
+            allLogos.push(...googleResults.logos);
+            if (googleResults.screenshot) screenshots.push(googleResults.screenshot);
+            console.log(`📊 Google Images: Found ${googleResults.logos.length} logos`);
 
-            // Phase 2: Behance research
-            onProgress('browsing', 'Behance', 30, `Exploring ${context.industry} branding on Behance...`);
-            const behanceResults = await this.searchBehance(context);
-            allLogos.push(...behanceResults.logos);
-            if (behanceResults.screenshot) screenshots.push(behanceResults.screenshot);
-
-            // Phase 3: Industry leader brands
+            // Phase 2: Industry leader brands (reliable Logo.dev)
             onProgress('browsing', 'Industry Leaders', 50, `Analyzing logos from leading ${context.industry} brands...`);
             const brandResults = await this.researchIndustryBrands(context, onProgress);
             allLogos.push(...brandResults.logos);
@@ -115,7 +118,11 @@ export class LogoStrategist {
         }
     }
 
-    private async searchDribbble(context: BrandContext): Promise<{ logos: LogoFinding[], screenshot?: string }> {
+    /**
+     * Search Google Images for logo inspiration
+     * More reliable than Dribbble/Behance which rate-limit aggressively
+     */
+    private async searchGoogleImages(context: BrandContext): Promise<{ logos: LogoFinding[], screenshot?: string }> {
         if (!this.browser) throw new Error('Browser not initialized');
 
         const page = await this.browser.newPage();
@@ -123,105 +130,62 @@ export class LogoStrategist {
         let screenshot: string | undefined;
 
         try {
-            await page.setViewport({ width: 1280, height: 800 });
+            // Set realistic viewport and user agent
+            await page.setViewport({ width: 1920, height: 1080 });
+            await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-            // Search Dribbble for industry + logo
-            const searchQuery = encodeURIComponent(`${context.industry} logo minimalist`);
-            const url = `https://dribbble.com/search?q=${searchQuery}`;
+            // Build search query for logo inspiration
+            const searchQuery = encodeURIComponent(`${context.industry} logo design inspiration`);
+            const url = `https://www.google.com/search?q=${searchQuery}&tbm=isch`;
 
-            console.log(`🔍 Dribbble: ${url}`);
+            console.log(`🔍 Google Images: ${url}`);
             await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-            // Wait for shots to load
-            await page.waitForSelector('.shot-thumbnail-base', { timeout: 10000 }).catch(() => { });
+            // Wait for images to load
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Take screenshot
+            // Take screenshot for debugging
             screenshot = await page.screenshot({ encoding: 'base64' }) as string;
 
-            // Extract logo shots
-            const shots = await page.$$eval('.shot-thumbnail-base', (elements) => {
-                return elements.slice(0, 6).map((el, index) => {
-                    const img = el.querySelector('img');
-                    const link = el.querySelector('a');
-                    return {
-                        imageUrl: img?.src || '',
-                        title: img?.alt || `Dribbble Design ${index + 1}`,
-                        href: link?.href || ''
-                    };
-                });
+            // Extract image results from Google Images
+            const images = await page.$$eval('img', (imgs) => {
+                return imgs
+                    .filter(img => {
+                        // Filter for actual image results (not icons/UI elements)
+                        const src = img.src || '';
+                        const isDataUrl = src.startsWith('data:image');
+                        const isGoogleCdn = src.includes('encrypted-tbn');
+                        const hasGoodSize = img.width > 50 && img.height > 50;
+                        return (isDataUrl || isGoogleCdn) && hasGoodSize;
+                    })
+                    .slice(0, 8)
+                    .map((img, index) => ({
+                        imageUrl: img.src || '',
+                        title: img.alt || `Logo Design ${index + 1}`,
+                        width: img.width,
+                        height: img.height
+                    }));
             });
 
-            shots.forEach((shot, index) => {
-                if (shot.imageUrl) {
+            console.log(`📊 Found ${images.length} Google Images results`);
+
+            images.forEach((img, index) => {
+                if (img.imageUrl) {
                     logos.push({
-                        id: `dribbble-${index}`,
-                        imageUrl: shot.imageUrl,
-                        brandName: shot.title,
-                        source: 'Dribbble',
-                        style: 'Design Community',
-                        designPrinciples: ['Creative', 'Modern']
+                        id: `google-${index}`,
+                        imageUrl: img.imageUrl,
+                        brandName: img.title.slice(0, 50), // Truncate long titles
+                        source: 'Google Images',
+                        style: 'Design Inspiration',
+                        designPrinciples: ['Discovered', 'Trending']
                     });
                 }
             });
 
-            console.log(`✅ Dribbble: Found ${logos.length} logos`);
+            console.log(`✅ Google Images: Found ${logos.length} logo inspirations`);
 
         } catch (error) {
-            console.error('Dribbble search error:', error);
-        } finally {
-            await page.close();
-        }
-
-        return { logos, screenshot };
-    }
-
-    private async searchBehance(context: BrandContext): Promise<{ logos: LogoFinding[], screenshot?: string }> {
-        if (!this.browser) throw new Error('Browser not initialized');
-
-        const page = await this.browser.newPage();
-        const logos: LogoFinding[] = [];
-        let screenshot: string | undefined;
-
-        try {
-            await page.setViewport({ width: 1280, height: 800 });
-
-            const searchQuery = encodeURIComponent(`${context.industry} branding logo`);
-            const url = `https://www.behance.net/search/projects?search=${searchQuery}`;
-
-            console.log(`🔍 Behance: ${url}`);
-            await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-
-            // Wait for projects to load
-            await page.waitForSelector('[class*="ProjectCover"]', { timeout: 10000 }).catch(() => { });
-
-            // Take screenshot
-            screenshot = await page.screenshot({ encoding: 'base64' }) as string;
-
-            // Extract project covers
-            const projects = await page.$$eval('img[class*="ProjectCover"]', (imgs) => {
-                return imgs.slice(0, 6).map((img, index) => ({
-                    imageUrl: img.src || '',
-                    title: img.alt || `Behance Project ${index + 1}`
-                }));
-            });
-
-            projects.forEach((project, index) => {
-                if (project.imageUrl) {
-                    logos.push({
-                        id: `behance-${index}`,
-                        imageUrl: project.imageUrl,
-                        brandName: project.title,
-                        source: 'Behance',
-                        style: 'Professional Branding',
-                        designPrinciples: ['Professional', 'Brand-focused']
-                    });
-                }
-            });
-
-            console.log(`✅ Behance: Found ${logos.length} logos`);
-
-        } catch (error) {
-            console.error('Behance search error:', error);
+            console.error('❌ Google Images search error:', error);
         } finally {
             await page.close();
         }
@@ -233,19 +197,80 @@ export class LogoStrategist {
         context: BrandContext,
         onProgress: ProgressCallback
     ): Promise<{ logos: LogoFinding[], screenshots: string[] }> {
-        // Industry-specific brand lists
+        // Comprehensive industry-specific brand lists
         const industryBrands: Record<string, string[]> = {
+            // Beverages & Drinks
+            drink: ['cocacola.com', 'pepsi.com', 'redbull.com', 'monster.com', 'drpepper.com', 'sprite.com'],
+            drinks: ['cocacola.com', 'pepsi.com', 'redbull.com', 'monster.com', 'drpepper.com', 'sprite.com'],
+            beverage: ['cocacola.com', 'pepsi.com', 'redbull.com', 'monster.com', 'drpepper.com', 'sprite.com'],
+            beverages: ['cocacola.com', 'pepsi.com', 'redbull.com', 'monster.com', 'drpepper.com', 'sprite.com'],
+            soda: ['cocacola.com', 'pepsi.com', 'sprite.com', 'fanta.com', 'drpepper.com', '7up.com'],
+            juice: ['tropicana.com', 'minutemaid.com', 'simplyorangejuice.com', 'oceanspray.com', 'naked.com'],
+            energy: ['redbull.com', 'monster.com', 'rockstarenergy.com', 'celsius.com', 'gatorade.com'],
+            'energy drink': ['redbull.com', 'monster.com', 'rockstarenergy.com', 'celsius.com', 'gatorade.com'],
+            water: ['evian.com', 'perrier.com', 'fiji.com', 'voss.com', 'smartwater.com'],
+            // Coffee & Tea
+            coffee: ['starbucks.com', 'dunkindonuts.com', 'peets.com', 'bluebottlecoffee.com', 'nespresso.com'],
+            tea: ['twinings.com', 'tazo.com', 'bigelowtea.com', 'celestialseasonings.com'],
+            // Alcohol
+            beer: ['heineken.com', 'budweiser.com', 'corona.com', 'guinness.com', 'stellaartois.com'],
+            wine: ['barefoot.com', 'yellowtail.com', 'opus-one.com', 'kendall-jackson.com'],
+            spirits: ['jackdaniels.com', 'absolut.com', 'bacardi.com', 'patron.com', 'hendricks.com'],
+            // Footwear
             footwear: ['nike.com', 'adidas.com', 'puma.com', 'newbalance.com', 'converse.com', 'vans.com'],
             shoes: ['nike.com', 'adidas.com', 'puma.com', 'newbalance.com', 'converse.com', 'vans.com'],
-            tech: ['apple.com', 'google.com', 'spotify.com', 'stripe.com', 'notion.so', 'discord.com'],
-            technology: ['apple.com', 'google.com', 'spotify.com', 'stripe.com', 'notion.so', 'discord.com'],
-            food: ['mcdonalds.com', 'starbucks.com', 'chipotle.com', 'sweetgreen.com'],
-            fashion: ['gucci.com', 'zara.com', 'hm.com', 'uniqlo.com'],
-            default: ['apple.com', 'nike.com', 'spotify.com', 'airbnb.com']
+            sneakers: ['nike.com', 'adidas.com', 'puma.com', 'newbalance.com', 'converse.com', 'vans.com'],
+            // Technology
+            tech: ['apple.com', 'google.com', 'microsoft.com', 'stripe.com', 'notion.so', 'discord.com'],
+            technology: ['apple.com', 'google.com', 'microsoft.com', 'stripe.com', 'notion.so', 'discord.com'],
+            software: ['slack.com', 'figma.com', 'notion.so', 'linear.app', 'vercel.com', 'github.com'],
+            saas: ['slack.com', 'figma.com', 'notion.so', 'linear.app', 'vercel.com', 'intercom.com'],
+            // Food & Restaurant
+            food: ['mcdonalds.com', 'starbucks.com', 'chipotle.com', 'sweetgreen.com', 'shake-shack.com'],
+            restaurant: ['mcdonalds.com', 'chipotle.com', 'sweetgreen.com', 'shake-shack.com', 'dominos.com'],
+            fastfood: ['mcdonalds.com', 'burgerking.com', 'wendys.com', 'tacobell.com', 'chickfila.com'],
+            snacks: ['lays.com', 'doritos.com', 'pringles.com', 'oreo.com', 'cheetos.com'],
+            // Fashion & Apparel
+            fashion: ['gucci.com', 'zara.com', 'hm.com', 'uniqlo.com', 'nike.com', 'gap.com'],
+            clothing: ['gucci.com', 'zara.com', 'hm.com', 'uniqlo.com', 'gap.com', 'levis.com'],
+            apparel: ['gucci.com', 'zara.com', 'hm.com', 'uniqlo.com', 'gap.com', 'levis.com'],
+            luxury: ['gucci.com', 'louisvuitton.com', 'chanel.com', 'hermes.com', 'prada.com'],
+            // Health & Fitness
+            fitness: ['nike.com', 'underarmour.com', 'lululemon.com', 'gymshark.com', 'peloton.com'],
+            health: ['headspace.com', 'calm.com', 'noom.com', 'myfitnesspal.com', 'whoop.com'],
+            wellness: ['headspace.com', 'calm.com', 'ritual.com', 'careofvitamins.com'],
+            // Beauty & Personal Care
+            beauty: ['sephora.com', 'ulta.com', 'glossier.com', 'fenty.com', 'charlotte-tilbury.com'],
+            skincare: ['cerave.com', 'theordinary.com', 'drunk-elephant.com', 'laroche-posay.com'],
+            cosmetics: ['mac.com', 'maybelline.com', 'nars.com', 'urbandecay.com'],
+            // Automotive
+            automotive: ['tesla.com', 'bmw.com', 'mercedes-benz.com', 'porsche.com', 'ferrari.com'],
+            car: ['tesla.com', 'bmw.com', 'mercedes-benz.com', 'porsche.com', 'ferrari.com'],
+            // Travel & Hospitality
+            travel: ['airbnb.com', 'booking.com', 'expedia.com', 'marriott.com', 'hilton.com'],
+            hotel: ['marriott.com', 'hilton.com', 'hyatt.com', 'fourseasons.com', 'airbnb.com'],
+            airline: ['emirates.com', 'united.com', 'delta.com', 'southwest.com', 'britishairways.com'],
+            // Finance
+            finance: ['stripe.com', 'square.com', 'robinhood.com', 'coinbase.com', 'chime.com'],
+            fintech: ['stripe.com', 'square.com', 'robinhood.com', 'coinbase.com', 'plaid.com'],
+            banking: ['chase.com', 'bankofamerica.com', 'wellsfargo.com', 'capitalone.com'],
+            // Entertainment
+            entertainment: ['netflix.com', 'spotify.com', 'disney.com', 'hbo.com', 'youtube.com'],
+            gaming: ['playstation.com', 'xbox.com', 'nintendo.com', 'epicgames.com', 'riotgames.com'],
+            music: ['spotify.com', 'soundcloud.com', 'tidal.com', 'deezer.com', 'bandcamp.com'],
+            // Sports
+            sports: ['nike.com', 'adidas.com', 'underarmour.com', 'nba.com', 'nfl.com'],
+            athletic: ['nike.com', 'adidas.com', 'underarmour.com', 'puma.com', 'asics.com'],
+            // E-commerce & Retail
+            ecommerce: ['amazon.com', 'shopify.com', 'etsy.com', 'ebay.com', 'alibaba.com'],
+            retail: ['target.com', 'walmart.com', 'costco.com', 'bestbuy.com', 'ikea.com'],
         };
 
-        const industry = context.industry.toLowerCase();
-        const brands = industryBrands[industry] || industryBrands.default;
+        // Smart industry normalization - find the best matching category
+        const normalizedIndustry = this.normalizeIndustry(context.industry.toLowerCase(), industryBrands);
+        const brands = industryBrands[normalizedIndustry] || this.getSmartDefault(context);
+
+        console.log(`🏷️ Industry "${context.industry}" normalized to "${normalizedIndustry}", using brands: ${brands.slice(0, 3).join(', ')}...`);
 
         const logos: LogoFinding[] = [];
         const screenshots: string[] = [];
@@ -253,7 +278,7 @@ export class LogoStrategist {
         // Get logos via Logo.dev (fast, reliable)
         for (let i = 0; i < Math.min(brands.length, 4); i++) {
             const domain = brands[i];
-            const brandName = domain.replace('.com', '').replace('.', '');
+            const brandName = domain.replace('.com', '').replace('.so', '').replace('.app', '');
 
             onProgress('browsing', brandName, 50 + (i * 10), `Analyzing ${brandName} logo...`);
 
@@ -272,15 +297,107 @@ export class LogoStrategist {
         return { logos, screenshots };
     }
 
+    /**
+     * Normalize user-provided industry to a known category
+     */
+    private normalizeIndustry(industry: string, knownIndustries: Record<string, string[]>): string {
+        // Direct match
+        if (knownIndustries[industry]) {
+            return industry;
+        }
+
+        // Check if it contains a known keyword
+        const keywords = industry.split(/\s+/);
+        for (const keyword of keywords) {
+            if (knownIndustries[keyword]) {
+                return keyword;
+            }
+        }
+
+        // Fuzzy matching - check if industry contains or is contained by known category
+        for (const category of Object.keys(knownIndustries)) {
+            if (industry.includes(category) || category.includes(industry)) {
+                return category;
+            }
+        }
+
+        return 'default';
+    }
+
+    /**
+     * Generate a smart default based on context clues
+     */
+    private getSmartDefault(context: BrandContext): string[] {
+        // Analyze mission and style for clues
+        const contextText = `${context.mission || ''} ${context.voice || ''} ${context.style || ''}`.toLowerCase();
+
+        if (contextText.includes('drink') || contextText.includes('beverage') || contextText.includes('thirst')) {
+            return ['cocacola.com', 'pepsi.com', 'redbull.com', 'monster.com'];
+        }
+        if (contextText.includes('coffee') || contextText.includes('cafe')) {
+            return ['starbucks.com', 'dunkindonuts.com', 'peets.com', 'bluebottlecoffee.com'];
+        }
+        if (contextText.includes('sport') || contextText.includes('athletic') || contextText.includes('fitness')) {
+            return ['nike.com', 'adidas.com', 'underarmour.com', 'puma.com'];
+        }
+        if (contextText.includes('tech') || contextText.includes('software') || contextText.includes('app')) {
+            return ['slack.com', 'figma.com', 'notion.so', 'linear.app'];
+        }
+
+        // True default - show diverse modern brands
+        return ['stripe.com', 'airbnb.com', 'slack.com', 'notion.so'];
+    }
+
     private async inferDesignPrinciples(brandName: string): Promise<string[]> {
         // Quick inference based on known brands
         const principles: Record<string, string[]> = {
+            // Beverages & Drinks
+            cocacola: ['Iconic', 'Script Typography', 'Timeless Red'],
+            pepsi: ['Circular', 'Dynamic', 'Modern'],
+            redbull: ['Bold', 'Aggressive', 'Energetic'],
+            monster: ['Edgy', 'Bold Typography', 'Dark Theme'],
+            drpepper: ['Heritage', 'Distinctive', 'Playful'],
+            sprite: ['Fresh', 'Green Accent', 'Clean'],
+            fanta: ['Playful', 'Vibrant Colors', 'Fun'],
+            gatorade: ['Athletic', 'Lightning Bolt', 'Performance'],
+            // Coffee
+            starbucks: ['Iconic', 'Circular Emblem', 'Green Accent'],
+            dunkindonuts: ['Friendly', 'Warm Colors', 'Approachable'],
+            peets: ['Premium', 'Heritage', 'Artisanal'],
+            bluebottlecoffee: ['Minimal', 'Clean', 'Craft'],
+            nespresso: ['Luxurious', 'Sleek', 'Premium'],
+            // Footwear & Sports
             nike: ['Minimal', 'Motion-inspired', 'Bold'],
             adidas: ['Geometric', 'Structured', 'Athletic'],
             puma: ['Dynamic', 'Energetic', 'Fierce'],
+            newbalance: ['Heritage', 'Stable', 'Trustworthy'],
+            converse: ['Retro', 'Star Icon', 'Youth Culture'],
+            vans: ['Skateboard Culture', 'Off the Wall', 'Authentic'],
+            underarmour: ['Technical', 'Performance', 'Athletic'],
+            // Technology
             apple: ['Minimal', 'Clean', 'Premium'],
+            google: ['Colorful', 'Friendly', 'Simple'],
             spotify: ['Modern', 'Vibrant', 'Playful'],
-            google: ['Colorful', 'Friendly', 'Simple']
+            stripe: ['Clean', 'Professional', 'Tech-forward'],
+            notion: ['Minimal', 'Black & White', 'Productivity'],
+            slack: ['Colorful', 'Friendly', 'Collaborative'],
+            figma: ['Modern', 'Colorful', 'Creative'],
+            discord: ['Playful', 'Modern', 'Community'],
+            microsoft: ['Grid-based', 'Colorful', 'Enterprise'],
+            // Finance
+            robinhood: ['Modern', 'Minimal', 'Accessible'],
+            coinbase: ['Clean', 'Circular', 'Trustworthy'],
+            // Fashion & Luxury
+            gucci: ['Luxurious', 'Interlocking G', 'Heritage'],
+            zara: ['Minimal', 'Bold Typography', 'Fashion-forward'],
+            // Travel
+            airbnb: ['Friendly', 'Bélo Symbol', 'Community'],
+            // Alcohol
+            heineken: ['Star Icon', 'Green', 'Premium'],
+            corona: ['Crown', 'Golden', 'Beach Vibes'],
+            guinness: ['Harp', 'Heritage', 'Bold'],
+            jackdaniels: ['Heritage', 'Black & White', 'Authentic'],
+            absolut: ['Bottle Shape', 'Minimal', 'Premium'],
         };
 
         return principles[brandName.toLowerCase()] || ['Professional', 'Modern'];

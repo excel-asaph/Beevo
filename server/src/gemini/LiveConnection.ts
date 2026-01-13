@@ -1,4 +1,5 @@
-import { GoogleGenAI, LiveServerMessage, Modality, Type, FunctionDeclaration, Tool } from '@google/genai';
+import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
+import { BrainConnection } from './BrainConnection';
 import { MODELS, SYSTEM_INSTRUCTIONS, AUDIO_CONFIG } from '../../../shared/constants';
 import {
     ServerMessage,
@@ -10,98 +11,9 @@ import { BrandDNA, FontSuggestion, ColorPalette } from '../../../shared/types';
 import { ToolHandler } from './ToolHandler';
 import { ToolDecisionAgent } from './ToolDecisionAgent';
 
-// Tool declarations for Gemini Live
-const toolDeclarations: FunctionDeclaration[] = [
-    {
-        name: "display_font_suggestions",
-        description: "Display visual font options on the canvas. Use this whenever discussing typography choices.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                fonts: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING, description: "Font family name" },
-                            category: { type: Type.STRING, description: "serif, sans-serif, display, handwriting, monospace" },
-                            reasoning: { type: Type.STRING, description: "Brief reason" }
-                        },
-                        required: ["name", "category", "reasoning"]
-                    }
-                },
-                context_text: {
-                    type: Type.STRING,
-                    description: "The text to preview"
-                }
-            },
-            required: ["fonts", "context_text"]
-        }
-    },
-    {
-        name: "display_color_suggestions",
-        description: "Display color palette options on the canvas. Use this whenever discussing colors. IMPORTANT: All colors MUST be hex codes (e.g., #FF5733, #00A8E8).",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                palettes: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING, description: "Palette name" },
-                            colors: { type: Type.ARRAY, items: { type: Type.STRING, description: "Hex color code (e.g., #FF5733)" } },
-                            vibe: { type: Type.STRING, description: "Mood or feeling of the palette" }
-                        },
-                        required: ["name", "colors", "vibe"]
-                    }
-                }
-            },
-            required: ["palettes"]
-        }
-    },
-    {
-        name: "update_live_brand_dna",
-        description: "Save the Brand DNA to memory. Call this when the user makes a decision or provides new info.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                brandName: { type: Type.STRING, nullable: true },
-                mission: { type: Type.STRING, nullable: true },
-                selectedColors: { type: Type.ARRAY, items: { type: Type.STRING }, nullable: true },
-                selectedFont: { type: Type.STRING, nullable: true },
-                voice: { type: Type.STRING, nullable: true }
-            },
-            required: [] // Explicitly state no fields are required
-        }
-    },
-    {
-        name: "search_logo_inspiration",
-        description: "Search for logo inspiration images based on brand context. Use when the user asks for logo ideas, inspiration, or wants to see logo examples.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                query: {
-                    type: Type.STRING,
-                    description: "Search query for logo inspiration (e.g., 'modern minimalist shoe brand logo', 'athletic footwear logo design')"
-                },
-                style: {
-                    type: Type.STRING,
-                    description: "Logo style preference: minimalist, modern, vintage, playful, elegant, bold",
-                    nullable: true
-                },
-                industry: {
-                    type: Type.STRING,
-                    description: "Industry context: footwear, athletic, fashion, streetwear",
-                    nullable: true
-                }
-            },
-            required: ["query"]
-        }
-    }
-];
-
-const tools: Tool[] = [{ functionDeclarations: toolDeclarations }];
+// Bridge Architecture: Tool declarations have been MOVED to BrainConnection.ts
+// Gemini Live is now VOICE-ONLY - no tools, no hallucinations
+// The Brain (Gemini 3 Pro) handles all tool calls reliably
 
 export class GeminiLiveConnection {
     private sessionId: string;
@@ -116,10 +28,17 @@ export class GeminiLiveConnection {
     private toolCalledThisTurn: boolean = false;
     private accumulatedAIOutput: string = '';
     private accumulatedUserInput: string = '';
-    
+
     // History tracking for context-aware safeguards
     private previousUserTurn: string = '';
     private previousAITurn: string = '';
+
+    // Bridge Architecture: Brain connection for reliable tool calls
+    private brain: BrainConnection | null = null;
+    private audioBuffer: string[] = [];
+    private transcriptBuffer: { user: string; ai: string } = { user: '', ai: '' };
+    private lastBufferFlush: number = 0;
+    private readonly BUFFER_WINDOW_MS = 3000; // Send to Brain every 3 seconds
 
     // Hybrid approach: ToolDecisionAgent for reliable tool execution
     private toolDecisionAgent: ToolDecisionAgent;
@@ -153,6 +72,16 @@ export class GeminiLiveConnection {
 
         // Initialize ToolDecisionAgent for reliable fallback
         this.toolDecisionAgent = new ToolDecisionAgent();
+
+        // Bridge Architecture: Initialize Brain (Gemini 3 Pro) for reliable tool calls
+        this.brain = new BrainConnection(
+            sessionId,
+            sendToClient,
+            this.toolHandler,
+            () => this.interruptLive(),
+            getDNA
+        );
+        console.log(`🧠 Bridge Architecture: Brain initialized for session ${sessionId}`);
     }
 
     async connect(): Promise<void> {
@@ -205,7 +134,8 @@ export class GeminiLiveConnection {
                             }
                         }
                     },
-                    tools: tools,
+                    // NO TOOLS - Bridge Architecture: Voice only for Gemini Live
+                    // Tools are handled by BrainConnection (Gemini 3 Pro)
                     systemInstruction: SYSTEM_INSTRUCTIONS.ARCHITECT,
                     inputAudioTranscription: {},
                     outputAudioTranscription: {},
@@ -276,9 +206,55 @@ export class GeminiLiveConnection {
                 console.log(`🎙️ Audio flowing: ${this.audioChunkCount} chunks sent to Gemini`);
                 this.lastAudioLogTime = now;
             }
+
+            // Bridge: Flush buffer to Brain every BUFFER_WINDOW_MS
+            if (now - this.lastBufferFlush > this.BUFFER_WINDOW_MS) {
+                await this.flushBufferToBrain();
+            }
         } catch (error) {
             console.error('❌ Error sending audio to Gemini:', error);
             this.isConnected = false;
+        }
+    }
+
+    /**
+     * Bridge: Send accumulated conversation to Brain for tool decisions
+     */
+    private async flushBufferToBrain(): Promise<void> {
+        if (!this.brain) return;
+
+        // Only analyze if we have accumulated content
+        if (!this.transcriptBuffer.user && !this.transcriptBuffer.ai) {
+            this.lastBufferFlush = Date.now();
+            return;
+        }
+
+        const userTranscript = this.transcriptBuffer.user;
+        const aiTranscript = this.transcriptBuffer.ai;
+
+        // Reset buffers
+        this.transcriptBuffer = { user: '', ai: '' };
+        this.lastBufferFlush = Date.now();
+
+        // Send to Brain for analysis
+        await this.brain.analyzeConversation(userTranscript, aiTranscript);
+    }
+
+    /**
+     * Bridge: Interrupt Live session when Brain issues a tool call
+     */
+    private interruptLive(): void {
+        if (!this.liveSession || !this.isConnected) return;
+
+        try {
+            // Send interrupt signal to stop Live audio output
+            this.liveSession.sendClientContent({
+                turns: [{ role: 'user', parts: [{ text: '[SYSTEM: Canvas updating...]' }] }],
+                turnComplete: true
+            });
+            console.log('🛑 Live session interrupted by Brain tool call');
+        } catch (error) {
+            console.error('Error interrupting Live session:', error);
         }
     }
 
@@ -374,6 +350,9 @@ export class GeminiLiveConnection {
             // Accumulate AI output for safeguard checking
             this.accumulatedAIOutput += outputTranscription;
 
+            // Bridge: Also accumulate for Brain analysis
+            this.transcriptBuffer.ai += outputTranscription + ' ';
+
             // After AI's first response, greeting phase is over
             if (this.isGreetingPhase) {
                 this.isGreetingPhase = false;
@@ -392,6 +371,9 @@ export class GeminiLiveConnection {
 
             // Accumulate user input for context
             this.accumulatedUserInput += inputTranscription + ' ';
+
+            // Bridge: Also accumulate for Brain analysis
+            this.transcriptBuffer.user += inputTranscription + ' ';
         }
 
         // TURN COMPLETE: Check if tool should have been called

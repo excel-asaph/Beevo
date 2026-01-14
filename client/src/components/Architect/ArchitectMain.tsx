@@ -7,7 +7,7 @@ import { VisualCanvas } from './VisualCanvas';
 import { ProgressPanel } from './ProgressPanel';
 import { ChatHistory } from './ChatHistory';
 import { Junction } from '@shared/types';
-import type { FontSuggestion, ColorPalette, BrandDNA } from '@shared/types';
+import type { FontSuggestion, ColorPalette, BrandDNA, LogoStructureOption, ImagerySuggestion } from '@shared/types';
 
 interface ChatMessage {
     role: 'user' | 'model';
@@ -22,15 +22,18 @@ export const ArchitectMain: React.FC = () => {
     const [fontSuggestions, setFontSuggestions] = useState<FontSuggestion[]>([]);
     const [colorSuggestions, setColorSuggestions] = useState<ColorPalette[]>([]);
     const [logoSuggestions, setLogoSuggestions] = useState<Array<{ id: string; url: string; source: string; style: string; mood: string; reasoning: string; alt_text: string }>>([]);
+    const [logoStructureOptions, setLogoStructureOptions] = useState<LogoStructureOption[]>([]);
+    const [imagerySuggestions, setImagerySuggestions] = useState<ImagerySuggestion[]>([]);
+
     const [previewText, setPreviewText] = useState('Brand Name');
-    const [suggestionMode, setSuggestionMode] = useState<'none' | 'fonts' | 'colors' | 'logos'>('none');
+    const [suggestionMode, setSuggestionMode] = useState<'none' | 'fonts' | 'colors' | 'logos' | 'logo_structure' | 'imagery'>('none');
     const [callDuration, setCallDuration] = useState(0);
     const [localDNA, setLocalDNA] = useState<Partial<BrandDNA>>({});
 
     // Processing state for UX feedback
     const [processingState, setProcessingState] = useState<{
         isProcessing: boolean;
-        toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration';
+        toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration' | 'display_logo_structure_options' | 'display_imagery_suggestions';
         targetField?: string;
     }>({ isProcessing: false });
 
@@ -68,6 +71,14 @@ export const ArchitectMain: React.FC = () => {
 
     // WebSocket connection
     const ws = useWebSocket({
+        onLogoStructureOptions: (options) => {
+            setLogoStructureOptions(options);
+            setSuggestionMode('logo_structure');
+        },
+        onImagerySuggestions: (suggestions) => {
+            setImagerySuggestions(suggestions);
+            setSuggestionMode('imagery');
+        },
         onAudioReceived: (base64Audio) => {
             audioStream.playAudio(base64Audio);
         },
@@ -138,6 +149,8 @@ export const ArchitectMain: React.FC = () => {
             if (toolType === 'display_fonts') setSuggestionMode('fonts');
             if (toolType === 'display_colors') setSuggestionMode('colors');
             if (toolType === 'search_logo_inspiration') setSuggestionMode('logos');
+            if (toolType === 'display_logo_structure_options') setSuggestionMode('logo_structure');
+            if (toolType === 'display_imagery_suggestions') setSuggestionMode('imagery');
         },
         onToolProcessingEnd: () => {
             setProcessingState({ isProcessing: false });
@@ -294,12 +307,14 @@ export const ArchitectMain: React.FC = () => {
                     fontSuggestions={fontSuggestions}
                     colorSuggestions={colorSuggestions}
                     logoSuggestions={logoSuggestions}
+                    logoStructureOptions={logoStructureOptions}
+                    imagerySuggestions={imagerySuggestions}
                     previewText={previewText}
                     onFontSelect={handleFontSelect}
                     onColorSelect={handleColorSelect}
                     onLogoSelect={(logoId, style) => {
                         // Update logo style in DNA
-                        ws.sendSelection('font', style); // Reusing font selection mechanism
+                        ws.sendSelection('logo', style);
                         addThought(`Selected ${style} logo style`, Junction.ARCHITECT);
                     }}
                     isProcessing={processingState.isProcessing}

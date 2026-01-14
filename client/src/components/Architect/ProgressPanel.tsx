@@ -1,5 +1,5 @@
 import React from 'react';
-import { Type as TypeIcon, Palette, Target, Edit2, Check, Sparkles } from 'lucide-react';
+import { Type as TypeIcon, Palette, Target, Edit2, Check, Sparkles, LayoutTemplate, Image as ImageIcon, Bookmark } from 'lucide-react';
 import type { BrandDNA } from '@shared/types';
 
 interface ProgressPanelProps {
@@ -28,11 +28,11 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
         };
     }, [brandDNA.typography]);
 
-    const hasName = brandDNA?.name && brandDNA.name.length > 0;
-    const hasMission = brandDNA?.mission && brandDNA.mission.length > 0;
-    const hasFont = brandDNA?.typography && brandDNA.typography.length > 0;
-    const hasColors = brandDNA?.colors && brandDNA.colors.length > 0;
-    const hasVoice = brandDNA?.voice && brandDNA.voice.length > 0;
+    const hasName = !!(brandDNA?.name && brandDNA.name.length > 0);
+    const hasMission = !!(brandDNA?.mission && brandDNA.mission.length > 0);
+    const hasFont = !!(brandDNA?.typography && brandDNA.typography.length > 0);
+    const hasColors = !!(brandDNA?.colors && brandDNA.colors.length > 0);
+    const hasVoice = !!(brandDNA?.voice && brandDNA.voice.length > 0);
 
     // Check if a specific field is processing
     const isProcessing = (key: string) => processingField === key || (processingField === 'general' && !hasName); // Default to first item if general
@@ -45,7 +45,11 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     Brand DNA Progress
                 </h2>
                 <div className="text-xs text-slate-500">
-                    {[hasName, hasMission, hasFont, hasColors, hasVoice].filter(Boolean).length} / 5 complete
+                    {[
+                        hasName, hasMission, hasFont, hasColors, hasVoice,
+                        !!brandDNA?.logoType, !!brandDNA?.imagery, !!brandDNA?.designGoals,
+                        !!brandDNA?.logoAssets?.length
+                    ].filter(Boolean).length} / 9 complete
                 </div>
             </div>
 
@@ -131,23 +135,54 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     onEdit={() => onEditRequest('voice')}
                 />
 
-                {/* Phase 9: Logo Fields - Always visible */}
+                {/* Design Goals */}
                 <ProgressItem
-                    label="Logo Style"
-                    value={brandDNA?.logoStyle}
-                    isComplete={!!brandDNA?.logoStyle}
-                    isProcessing={false}
-                    icon={<Sparkles size={16} />}
-                    onEdit={() => onEditRequest('logo style')}
+                    label="Design Goals"
+                    value={brandDNA?.designGoals}
+                    isComplete={!!(brandDNA?.designGoals && brandDNA.designGoals.length > 0)}
+                    isProcessing={isProcessing('designGoals')}
+                    icon={<Target size={16} />}
+                    onEdit={() => onEditRequest('design goals')}
+                    isLong
+                />
+
+                {/* Phase 9: Logo Fields */}
+                <ProgressItem
+                    label="Logo Structure"
+                    value={brandDNA?.logoType}
+                    isComplete={!!brandDNA?.logoType}
+                    isProcessing={isProcessing('logoType')}
+                    icon={<LayoutTemplate size={16} />}
+                    onEdit={() => onEditRequest('logo structure')}
                 />
 
                 <ProgressItem
-                    label="Logo Mood"
-                    value={brandDNA?.logoMood}
-                    isComplete={!!brandDNA?.logoMood}
+                    label="Imagery"
+                    value={brandDNA?.imagery}
+                    isComplete={!!brandDNA?.imagery}
+                    isProcessing={isProcessing('imagery')}
+                    icon={<ImageIcon size={16} />}
+                    onEdit={() => onEditRequest('imagery')}
+                />
+
+                <ProgressItem
+                    label="Saved Logos"
+                    value={brandDNA?.logoAssets && brandDNA.logoAssets.length > 0 ? `${brandDNA.logoAssets.length} saved` : undefined}
+                    isComplete={!!brandDNA?.logoAssets?.length}
                     isProcessing={false}
-                    icon={<Palette size={16} />}
-                    onEdit={() => onEditRequest('logo mood')}
+                    icon={<Bookmark size={16} />}
+                    onEdit={() => onEditRequest('logo inspiration')}
+                    preview={
+                        brandDNA?.logoAssets && (
+                            <div className="flex -space-x-2 mt-2 overflow-hidden py-1 pl-1">
+                                {brandDNA.logoAssets.map((logo, i) => (
+                                    <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-800 bg-white flex items-center justify-center overflow-hidden hover:z-10 hover:scale-110 transition-transform">
+                                        <img src={logo.url} alt={logo.name || 'Logo'} className="w-full h-full object-contain" />
+                                    </div>
+                                ))}
+                            </div>
+                        )
+                    }
                 />
             </div>
 

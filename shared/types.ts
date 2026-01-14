@@ -15,8 +15,9 @@ export interface BrandDNA {
     voice: string;
     logoUrl?: string;
     // Phase 9: Logo & Competitive Intelligence
-    logoStyle?: 'wordmark' | 'emblem' | 'abstract' | 'combination' | 'lettermark';
-    logoMood?: string;
+    logoType?: string; // wordmark, lettermark, emblem, combination mark
+    imagery?: string; // symbols, icons, abstract shapes
+    designGoals?: string;
     logoInspiration?: string;
     logoUsageContexts?: string[];
     competitorInsights?: {
@@ -27,10 +28,10 @@ export interface BrandDNA {
     };
     logoAssets?: Array<{
         id: string;
-        style: string;
-        mood: string;
         url: string;
-        reasoning: string;
+        name?: string; // Brand name or alt text
+        style?: string;
+        reasoning?: string;
     }>;
 }
 
@@ -73,9 +74,23 @@ export interface ColorPalette {
     vibe: string;
 }
 
+// Logo structure suggestion
+export interface LogoStructureOption {
+    type: 'wordmark' | 'lettermark' | 'emblem' | 'combination';
+    reasoning: string;
+    suitability: string; // High, Medium, Low
+}
+
+// Imagery/Iconography suggestion
+export interface ImagerySuggestion {
+    concept: string;
+    description: string;
+    visualStyle: string;
+}
+
 // Progress item for tracking finalized decisions
 export interface ProgressItem {
-    field: 'name' | 'mission' | 'font' | 'colors' | 'voice';
+    field: 'name' | 'mission' | 'font' | 'colors' | 'voice' | 'logoType' | 'imagery';
     value: any;
     finalized: boolean;
     timestamp: number;
@@ -90,6 +105,8 @@ export interface ArchitectSession {
     currentSuggestions: {
         fonts?: FontSuggestion[];
         colors?: ColorPalette[];
+        logoStructures?: LogoStructureOption[];
+        imagery?: ImagerySuggestion[];
         previewText?: string;
     };
 }

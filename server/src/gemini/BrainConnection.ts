@@ -231,12 +231,129 @@ const brainToolDeclarations: FunctionDeclaration[] = [
                     },
                     description: "How colors should be used (primary, secondary, accent, etc.)"
                 },
+                logoType: {
+                    type: Type.STRING,
+                    description: "Logo structure: 'wordmark', 'lettermark', 'emblem', or 'combination mark'. ONLY these values."
+                },
+                imagery: {
+                    type: Type.STRING,
+                    description: "Visual elements: symbols, icons, or abstract shapes used in the logo."
+                },
+                savedLogos: {
+                    type: Type.ARRAY,
+                    description: "Array of logo objects to SAVE to Brand DNA. Use this when user says 'save this logo' or 'I like these'.",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            url: { type: Type.STRING },
+                            name: { type: Type.STRING, description: "Brand name or alt text" },
+                            style: { type: Type.STRING, description: "Style tag (e.g. 'Minimal')" },
+                            reasoning: { type: Type.STRING, description: "Why user liked it" }
+                        },
+                        required: ["url"]
+                    }
+                },
                 query: {
                     type: Type.STRING,
                     description: "The original user intent/query that triggered this tool"
                 }
             },
             required: []
+        }
+    },
+    {
+        name: "display_logo_structure_options",
+        description: "Generate and display logo structure options (Wordmark, Lettermark, Emblem, Combination Mark). Call this when user wants to decide on the FORM of the logo. Provide DEEP expert analysis.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                options: {
+                    type: Type.ARRAY,
+                    description: "List of structure options tailored to the brand",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            type: { type: Type.STRING, description: "One of: 'wordmark', 'lettermark', 'emblem', 'combination'" },
+                            reasoning: { type: Type.STRING, description: "Why this structure fits the brand" },
+                            suitability: { type: Type.STRING, description: "High, Medium, or Low" }
+                        },
+                        required: ["type", "reasoning", "suitability"]
+                    }
+                },
+                structure_count: {
+                    type: Type.INTEGER,
+                    description: "Number of options to generate. Default 3, range 1-5."
+                },
+                complexity_preference: {
+                    type: Type.STRING,
+                    description: "User preference for complexity: 'minimalist', 'moderate', 'detailed', 'adaptive'"
+                },
+                style_filter: {
+                    type: Type.STRING,
+                    description: "Filter by style: 'modern', 'vintage', 'tech', 'luxury', 'playful'"
+                },
+                industry_context: {
+                    type: Type.STRING,
+                    description: "Specific industry nuances to consider (e.g. 'SaaS logos usually prefer wordmarks')"
+                },
+                exclude_types: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Structure types to exclude (e.g. 'No mascots')"
+                },
+                query: {
+                    type: Type.STRING,
+                    description: "Original user intent"
+                }
+            },
+            required: ["options"]
+        }
+    },
+    {
+        name: "display_imagery_suggestions",
+        description: "Generate and display imagery/iconography concepts. Call this when user asks about 'symbols', 'icons', or 'imagery'. Provide DEEP creative direction.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                suggestions: {
+                    type: Type.ARRAY,
+                    description: "List of imagery concepts",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            concept: { type: Type.STRING, description: "Short name (e.g., 'Soaring Wing', 'Geometric Cube')" },
+                            description: { type: Type.STRING, description: "Detailed visual description" },
+                            visualStyle: { type: Type.STRING, description: "Style tag (e.g., 'Minimalist', 'Abstract')" }
+                        },
+                        required: ["concept", "description", "visualStyle"]
+                    }
+                },
+                suggestion_count: {
+                    type: Type.INTEGER,
+                    description: "Number of suggestions to generate. Default 3, range 1-6."
+                },
+                abstraction_level: {
+                    type: Type.STRING,
+                    description: "Level of abstraction: 'literal' (apple), 'abstract' (shape), 'symbolic' (metaphor), 'mixed'"
+                },
+                art_style: {
+                    type: Type.STRING,
+                    description: "Artistic style: 'geometric', 'organic', 'line_art', 'flat', '3d', 'sketch'"
+                },
+                mood_filter: {
+                    type: Type.STRING,
+                    description: "Mood to evoke: 'trust', 'speed', 'creativity', 'luxury', 'friendliness'"
+                },
+                focus_element: {
+                    type: Type.STRING,
+                    description: "Specific element to focus on: 'nature', 'technology', 'human', 'typography'"
+                },
+                query: {
+                    type: Type.STRING,
+                    description: "Original user intent"
+                }
+            },
+            required: ["suggestions"]
         }
     },
     {
@@ -452,7 +569,7 @@ const brainToolDeclarations: FunctionDeclaration[] = [
 const brainTools: Tool[] = [{ functionDeclarations: brainToolDeclarations }];
 
 interface ConversationTurn {
-    role: 'user' | 'assistant';
+    role: 'user' | 'assistant' | 'system';
     timestamp: number;
     transcript: string;
     audioBase64?: string;
@@ -463,7 +580,19 @@ export class BrainConnection {
     private conversationHistory: ConversationTurn[] = [];
     private lastToolCall: number = 0;
     private readonly TOOL_COOLDOWN_MS = 8000;
+    private toolExecutionHistory: {
+        id: string;
+        name: string;
+        timestamp: number;
+        args: any;
+        result: string;
+    }[] = [];
+
     private recentToolCalls: { name: string; timestamp: number; args: string }[] = [];
+
+    // Debounce properties
+    private cachedTranscript: string = '';
+    private lastAnalysisTime: number = 0;
 
     constructor(
         private sessionId: string,
@@ -486,161 +615,208 @@ export class BrainConnection {
         userTranscript: string,
         aiTranscript: string
     ): Promise<void> {
-        const now = Date.now();
-
-        // Prevent rapid-fire tool calls
-        if (now - this.lastToolCall < this.TOOL_COOLDOWN_MS) {
-            return;
-        }
-
-        // Skip if no meaningful content
-        if (!userTranscript.trim() && !aiTranscript.trim()) {
-            return;
-        }
-
-        // Add to history
-        if (userTranscript.trim()) {
-            this.conversationHistory.push({
-                role: 'user',
-                timestamp: now,
-                transcript: userTranscript
-            });
-        }
-        if (aiTranscript.trim()) {
-            this.conversationHistory.push({
-                role: 'assistant',
-                timestamp: now,
-                transcript: aiTranscript
-            });
-        }
-
-        // Keep last 30 turns for deeper context (Negotiation Awareness)
-        if (this.conversationHistory.length > 30) {
-            this.conversationHistory = this.conversationHistory.slice(-30);
-        }
-
-        // Format history with TIMESTAMPS (Temporal Context)
-        // usage: [5s ago] USER: hello
-        const historyText = this.conversationHistory
-            .map(t => {
-                const secondsAgo = Math.round((now - t.timestamp) / 1000);
-                const timeTag = secondsAgo === 0 ? '[JUST NOW]' : `[${secondsAgo}s ago]`;
-                return `${timeTag} ${t.role.toUpperCase()}: ${t.transcript}`;
-            })
-            .join('\n');
-
-        // Build context of recently executed tools
-        const recentToolsText = this.recentToolCalls
-            .filter(t => now - t.timestamp < 60000) // Look back 60 seconds
-            .map(t => `- ${t.name} (${Math.round((now - t.timestamp) / 1000)}s ago)`)
-            .join('\n') || 'None';
-
-        // Detect if AI previously asked a question (deep history check)
-        // We look at the last assistant message
-        const lastAiTurn = [...this.conversationHistory].reverse().find(t => t.role === 'assistant');
-        const aiIsWaitingForAnswer = lastAiTurn ? (
-            lastAiTurn.transcript.toLowerCase().includes('?') ||
-            lastAiTurn.transcript.toLowerCase().includes('brand name') ||
-            lastAiTurn.transcript.toLowerCase().includes('mission') ||
-            lastAiTurn.transcript.toLowerCase().includes('color')
-        ) : false;
-
-        const systemPrompt = `You are a tool orchestrator for a brand design assistant.
-Your job is to decide when to call tools based on the conversation history.
-
-Current Brand DNA:
-${JSON.stringify(this.getBrandDNA(), null, 2)}
-
-TOOLS ALREADY EXECUTED (Last 60s):
-${recentToolsText}
-
-CONVERSATION HISTORY (With timing context):
-${historyText}
-
-CRITICAL DECISION RATIONALE:
-1. **TIMING MATTERS**: If the USER responded "[JUST NOW]" or "[1s ago]" after a question, they are likely confirming efficiently. If there's a delay, or multiple short bursts, wait for the full thought.
-2. **NEGOTIATION MODE**: The user is "Bargaining". Do not execute tools during brainstorming. Only execute when the deal is "Sealed".
-   - "I want blue" = Brainstorming. (NO TOOL)
-   - "Show me blue" = Command. (TOOL: display_color_suggestions)
-   - "Make it pop" = Brainstorming. (NO TOOL)
-   - "Save that" = Sealed. (TOOL: update_live_brand_dna)
-3. **AMBIGUITY**: If the user says "Different variations" but doesn't specify params, DO NOT GUESS. The Voice Agent will ask for clarification. You stay silent.
-4. **FINAL SAY**: You are the "Contract Signer". You only sign (call tool) when the User says "Yes" to a specific terms proposed by the Voice Agent.
-
-INSTRUCTIONS:
-- If a tool is needed based on specific user confirmation rules: Output the Function Call.
-- If the user is still thinking, discussing, or the request is vague: Output "NO_TOOL_NEEDED".
-- If the Voice Agent (Assistant) just asked a clarifying question, Output "NO_TOOL_NEEDED" (Let user answer).
-
-Respond with JUST the function call or say "NO_TOOL_NEEDED"`;
-
         try {
-            console.log(`🧠 Brain: Analyzing ${this.conversationHistory.length} turns of history...`);
+            const now = Date.now();
 
-            const response = await this.client.models.generateContent({
-                model: MODELS.ARCHITECT_TEXT,
-                contents: [{
-                    role: 'user',
-                    parts: [{ text: systemPrompt }]
-                }],
-                config: {
-                    tools: brainTools
-                }
-            });
-
-            // Check for tool calls
-            const candidate = response.candidates?.[0];
-            if (candidate?.content?.parts) {
-                for (const part of candidate.content.parts) {
-                    if (part.functionCall) {
-                        const toolName = part.functionCall.name;
-                        const toolArgs = JSON.stringify(part.functionCall.args || {});
-
-                        // Check if USER explicitly requested something (not just AI talking)
-                        const userHasRequest = userTranscript.trim().length > 3;
-
-                        // SMART DUPLICATE CHECK
-                        const recentSameTool = this.recentToolCalls.find(
-                            t => t.name === toolName && (now - t.timestamp) < 15000
-                        );
-
-                        if (recentSameTool && !userHasRequest) {
-                            console.log(`🧠 Skipping duplicate: ${toolName} (AI repeat, no user request)`);
-                            return;
-                        }
-
-                        console.log(`🧠 Brain decided to call: ${toolName}`);
-                        this.interruptLive();
-
-                        // Execute the tool
-                        if (toolName) {
-                            await this.toolHandler.handleToolCalls([{
-                                id: `brain-${Date.now()}`,
-                                name: toolName,
-                                args: part.functionCall.args || {}
-                            }]);
-
-                            // Track this tool call
-                            this.recentToolCalls.push({
-                                name: toolName,
-                                timestamp: now,
-                                args: toolArgs
-                            });
-
-                            // Keep last 60 seconds of tools
-                            this.recentToolCalls = this.recentToolCalls.filter(
-                                t => now - t.timestamp < 60000
-                            );
-                        }
-
-                        this.lastToolCall = Date.now();
-                        break;
-                    }
-                }
+            // Prevent rapid-fire tool calls
+            if (now - this.lastToolCall < this.TOOL_COOLDOWN_MS) {
+                return;
             }
 
-        } catch (error) {
-            console.error('🧠 Brain error:', error);
+            // Skip if no meaningful content
+            if (!userTranscript.trim() && !aiTranscript.trim()) {
+                return;
+            }
+
+            // ---------------------------------------------------------
+            // PREPARE CONTEXT
+            // ---------------------------------------------------------
+            this.conversationHistory.push({
+                role: 'user',
+                transcript: userTranscript,
+                timestamp: now
+            });
+
+            // Keep history manageable
+            if (this.conversationHistory.length > 20) {
+                this.conversationHistory = this.conversationHistory.slice(-20);
+            }
+
+            // Check cache for identical requests
+            if (userTranscript === this.cachedTranscript && (now - this.lastAnalysisTime) < 2000) {
+                console.log('🧠 Skipping duplicate analysis (debounce)');
+                return;
+            }
+            this.cachedTranscript = userTranscript;
+            this.lastAnalysisTime = now;
+
+            // Build prompt from history
+            const historyText = this.conversationHistory
+                .map(t => {
+                    const secondsAgo = Math.round((now - t.timestamp) / 1000);
+                    const timeTag = secondsAgo === 0 ? '[JUST NOW]' : `[${secondsAgo}s ago]`;
+                    return `${timeTag} ${t.role.toUpperCase()}: ${t.transcript}`;
+                })
+                .join('\n');
+
+            // Build context of recently executed tools
+            const recentToolsText = this.recentToolCalls
+                .filter(t => now - t.timestamp < 60000) // Look back 60 seconds
+                .map(t => `- ${t.name} (${Math.round((now - t.timestamp) / 1000)}s ago)`)
+                .join('\n') || 'None';
+
+            // Detect if AI previously asked a question
+            const lastAiTurn = [...this.conversationHistory].reverse().find(t => t.role === 'assistant');
+            const aiIsWaitingForAnswer = lastAiTurn ? (
+                lastAiTurn.transcript.toLowerCase().includes('?') ||
+                lastAiTurn.transcript.toLowerCase().includes('brand name') ||
+                lastAiTurn.transcript.toLowerCase().includes('mission') ||
+                lastAiTurn.transcript.toLowerCase().includes('color')
+            ) : false;
+
+            // ---------------------------------------------------------
+            // STRUCTURED TOOL HISTORY (XML)
+            // ---------------------------------------------------------
+            const toolHistoryXML = this.toolExecutionHistory.length > 0
+                ? `<ToolHistory>\n${this.toolExecutionHistory.map(t => {
+                    const timeAgo = Math.round((now - t.timestamp) / 1000);
+                    return `  <Execution id="${t.id}" timestamp="${t.timestamp}" timeAgo="${timeAgo}s" tool="${t.name}">
+    <Arguments>${JSON.stringify(t.args)}</Arguments>
+    <Result>${t.result}</Result>
+  </Execution>`;
+                }).join('\n')}\n</ToolHistory>`
+                : '<ToolHistory>No tools executed yet.</ToolHistory>';
+
+            const dnaContext = JSON.stringify(this.getBrandDNA(), null, 2);
+
+            // Refactored to avoid template literal complexities
+            const systemPrompt = [
+                'You are a tool orchestrator for a brand design assistant.',
+                'Your job is to decide when to call tools based on the conversation history.',
+                '',
+                'Current Brand DNA:',
+                dnaContext,
+                '',
+                toolHistoryXML,
+                '',
+                'CONVERSATION HISTORY (With timing context):',
+                historyText,
+                '',
+                'CRITICAL DECISION RATIONALE:',
+                '1. **CTX MATTERS**: You have a "Photographic Memory" of tool results in <ToolHistory>. USE IT.',
+                '   - If User says "Save them", look at the <Result> of the last tool (e.g. search_logo_inspiration) to get the URLs/Data.',
+                '2. **TIMING MATTERS**: If the USER responded "[JUST NOW]" or "[1s ago]" after a question, they are likely confirming efficiently.',
+                '3. **NEGOTIATION MODE**: The user is "Bargaining". Do not execute tools during brainstorming. Only execute when the deal is "Sealed".',
+                '4. **DATA INTEGRITY**:',
+                '   - When calling \'update_live_brand_dna\' with \'savedLogos\', EXTRACT the exact URLs from the <ToolHistory> XML.',
+                '   - Do NOT halllucinate URLs.',
+                '5. **VOICE AGENT SKEPTICISM (CRITICAL)**:',
+                '   - The Voice Agent (Assistant) CANNOT call tools. It often hallucinates, saying "I\'ve updated the system" or "It\'s saved."',
+                '   - DO NOT believe the Assistant.',
+                '   - If the User confirmed an action (e.g. "Yes", "Save it"), and you do not see a corresponding `<Execution>` in `<ToolHistory>` *after* that request, YOU MUST CALL THE TOOL.',
+                '   - IGNORE the Assistant\'s claims of completion. YOU are the only one who can actually do it.',
+                '',
+                'INSTRUCTIONS:',
+                '- If a tool is needed based on specific user confirmation rules: Output the Function Call.',
+                '- If the user is still thinking, discussing, or the request is vague: Output "NO_TOOL_NEEDED".',
+                '- If the Voice Agent asked a question but the user issued a direct command (e.g. "Just save it"): Output the Function Call.',
+                '',
+                'Respond with JUST the function call or say "NO_TOOL_NEEDED"'
+            ].join('\n');
+
+            try {
+                console.log(`🧠 Brain: Analyzing ${this.conversationHistory.length} turns of history...`);
+
+                // DEBUG: Log prompt size
+                if (this.toolExecutionHistory.length > 0) {
+                    console.log(`🧠 [DEBUG] Inclusion of ToolHistory XML (${this.toolExecutionHistory.length} items) confirmed.`);
+                }
+
+                const response = await this.client.models.generateContent({
+                    model: MODELS.ARCHITECT_TEXT,
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: systemPrompt }]
+                    }],
+                    config: {
+                        tools: brainTools
+                    }
+                });
+
+                // Check for tool calls
+                const candidate = response.candidates?.[0];
+                if (candidate?.content?.parts) {
+                    for (const part of candidate.content.parts) {
+                        if (part.functionCall) {
+                            const toolName = part.functionCall.name;
+                            const toolArgs = JSON.stringify(part.functionCall.args || {});
+
+                            // Check if USER explicitly requested something (not just AI talking)
+                            const userHasRequest = userTranscript.trim().length > 3;
+
+                            // SMART DUPLICATE CHECK
+                            const recentSameTool = this.recentToolCalls.find(
+                                t => t.name === toolName && (now - t.timestamp) < 15000
+                            );
+
+                            if (recentSameTool && !userHasRequest) {
+                                console.log(`🧠 Skipping duplicate: ${toolName} (AI repeat, no user request)`);
+                                return;
+                            }
+
+                            console.log(`🧠 Brain decided to call: ${toolName}`);
+                            this.interruptLive();
+
+                            // Execute the tool
+                            if (toolName) {
+                                const results = await this.toolHandler.handleToolCalls([{
+                                    id: `brain-${Date.now()}`,
+                                    name: toolName,
+                                    args: part.functionCall.args || {}
+                                }]);
+
+                                // STORE STRUCTURED HISTORY
+                                for (const res of results) {
+                                    const systemNote = (res.response as any).system_note || "Success";
+                                    console.log(`📥 [DEBUG] Injecting into Memory: ${toolName} -> ${systemNote.substring(0, 100)}...`);
+                                    this.toolExecutionHistory.push({
+                                        id: res.id,
+                                        name: toolName,
+                                        timestamp: now,
+                                        args: part.functionCall.args || {},
+                                        result: systemNote
+                                    });
+                                }
+
+                                // Keep last 20 tool calls (generous history)
+                                if (this.toolExecutionHistory.length > 20) {
+                                    this.toolExecutionHistory = this.toolExecutionHistory.slice(-20);
+                                }
+
+                                // Track this tool call (for short-term dedup logic)
+                                this.recentToolCalls.push({
+                                    name: toolName,
+                                    timestamp: now,
+                                    args: toolArgs
+                                });
+
+                                // Keep last 60 seconds of tools
+                                this.recentToolCalls = this.recentToolCalls.filter(
+                                    t => now - t.timestamp < 60000
+                                );
+                            }
+
+                            this.lastToolCall = Date.now();
+                            break;
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('🧠 Brain error:', error);
+            }
+        } catch (outerError) {
+            console.error('🧠 CRITICAL UNCAUGHT BRAIN ERROR:', outerError);
         }
     }
 
@@ -651,5 +827,6 @@ Respond with JUST the function call or say "NO_TOOL_NEEDED"`;
         this.conversationHistory = [];
         this.lastToolCall = 0;
         this.recentToolCalls = [];
+        this.toolExecutionHistory = [];
     }
 }

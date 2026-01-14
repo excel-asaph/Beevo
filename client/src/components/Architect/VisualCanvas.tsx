@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Type as TypeIcon, Palette, Code, MousePointerClick, Sparkles, BookOpen, ChevronDown, ChevronUp, Search, Zap, LayoutTemplate } from 'lucide-react';
-import type { FontSuggestion, ColorPalette } from '@shared/types';
+import { Type as TypeIcon, Palette, Code, MousePointerClick, Sparkles, BookOpen, ChevronDown, ChevronUp, Search, Zap, LayoutTemplate, Shapes, Image as ImageIcon } from 'lucide-react';
+import type { FontSuggestion, ColorPalette, LogoStructureOption, ImagerySuggestion } from '@shared/types';
 
 interface LogoConcept {
     id: string;
@@ -27,10 +27,12 @@ interface LogoResearchInsights {
 }
 
 interface VisualCanvasProps {
-    mode: 'none' | 'fonts' | 'colors' | 'logos';
+    mode: 'none' | 'fonts' | 'colors' | 'logos' | 'logo_structure' | 'imagery';
     fontSuggestions: FontSuggestion[];
     colorSuggestions: ColorPalette[];
     logoSuggestions?: LogoConcept[];
+    logoStructureOptions?: LogoStructureOption[];
+    imagerySuggestions?: ImagerySuggestion[];
     logoResearchInsights?: LogoResearchInsights;
     previewText: string;
     onFontSelect: (fontName: string) => void;
@@ -45,6 +47,8 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     fontSuggestions,
     colorSuggestions,
     logoSuggestions = [],
+    logoStructureOptions = [],
+    imagerySuggestions = [],
     logoResearchInsights,
     previewText,
     onFontSelect,
@@ -56,7 +60,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     // Local state for expandable views
     const [isReportExpanded, setIsReportExpanded] = useState(false);
 
-    // Dynamically load Google Fonts
+    // ... (keep useEffect for fonts)
     React.useEffect(() => {
         if (mode !== 'fonts' || !fontSuggestions.length) return;
 
@@ -84,12 +88,16 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                     {mode === 'fonts' && <TypeIcon className="w-4 h-4 text-purple-600" />}
                     {mode === 'colors' && <Palette className="w-4 h-4 text-orange-600" />}
                     {mode === 'logos' && <LayoutTemplate className="w-4 h-4 text-indigo-600" />}
+                    {mode === 'logo_structure' && <Shapes className="w-4 h-4 text-blue-600" />}
+                    {mode === 'imagery' && <ImageIcon className="w-4 h-4 text-pink-600" />}
                     {mode === 'none' && <Code className="w-4 h-4 text-slate-600" />}
                     <span>
                         {mode === 'fonts' ? 'Reviewing Fonts' :
                             mode === 'colors' ? 'Reviewing Palettes' :
                                 mode === 'logos' ? 'Logo Inspiration' :
-                                    'Visual Canvas'}
+                                    mode === 'logo_structure' ? 'Logo Structure' :
+                                        mode === 'imagery' ? 'Visual Imagery' :
+                                            'Visual Canvas'}
                     </span>
                 </div>
 
@@ -105,6 +113,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 {/* Font Suggestions */}
                 {mode === 'fonts' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        {/* ... (existing font rendering) ... */}
                         <div className="mb-4">
                             <h3 className="text-xl font-bold text-slate-800 mb-1">Typography Options</h3>
                             <p className="text-slate-500 text-sm">Preview: "{previewText}"</p>
@@ -154,6 +163,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                 {/* Color Suggestions */}
                 {mode === 'colors' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        {/* ... (existing color rendering) ... */}
                         <div className="mb-4">
                             <h3 className="text-xl font-bold text-slate-800 mb-1">Palette Options</h3>
                             <p className="text-slate-500 text-sm">Click to apply to your Brand DNA</p>
@@ -166,6 +176,7 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                                 className="border-2 border-slate-200 rounded-xl overflow-hidden hover:border-orange-500 hover:shadow-xl transition-all cursor-pointer group relative"
                                 style={{ animationDelay: `${idx * 100}ms` }}
                             >
+                                {/* ... (existing palette items) ... */}
                                 <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur text-white p-1.5 rounded-full">
                                     <MousePointerClick size={14} />
                                 </div>
@@ -197,9 +208,68 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
                     </div>
                 )}
 
+                {/* Logo Structure Mode */}
+                {mode === 'logo_structure' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="mb-4">
+                            <h3 className="text-xl font-bold text-slate-800 mb-1">Structure Options</h3>
+                            <p className="text-slate-500 text-sm">Select the structural form of your logo</p>
+                        </div>
+                        {logoStructureOptions.map((opt, idx) => (
+                            <div
+                                key={idx}
+                                onClick={() => onLogoSelect?.(opt.type, opt.type)} // Reusing onLogoSelect
+                                className="p-5 border-2 border-slate-200 rounded-xl hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group bg-white relative"
+                                style={{ animationDelay: `${idx * 100}ms` }}
+                            >
+                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 text-white p-1.5 rounded-full">
+                                    <MousePointerClick size={14} />
+                                </div>
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="text-lg font-bold text-slate-800 capitalize">{opt.type}</h4>
+                                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${opt.suitability === 'High' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                                        {opt.suitability} Suitability
+                                    </span>
+                                </div>
+                                <p className="text-slate-600 text-sm italic border-l-2 border-blue-200 pl-3">
+                                    "{opt.reasoning}"
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Imagery Mode */}
+                {mode === 'imagery' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="mb-4">
+                            <h3 className="text-xl font-bold text-slate-800 mb-1">Imagery Concepts</h3>
+                            <p className="text-slate-500 text-sm">Visual concepts to inspire the symbol</p>
+                        </div>
+                        {imagerySuggestions.map((sugg, idx) => (
+                            <div
+                                key={idx}
+                                className="p-5 border-2 border-slate-200 rounded-xl hover:border-pink-500 hover:shadow-xl transition-all group bg-white relative"
+                                style={{ animationDelay: `${idx * 100}ms` }}
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <h4 className="text-lg font-bold text-slate-800">{sugg.concept}</h4>
+                                    <span className="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full font-medium">
+                                        {sugg.visualStyle}
+                                    </span>
+                                </div>
+                                <p className="text-slate-600 text-sm leading-relaxed">
+                                    {sugg.description}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 {/* Logo Discovery Grid */}
                 {mode === 'logos' && (
                     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+                        {/* ... (existing logo grid code) ... */}
                         <div className="mb-4 flex items-end justify-between">
                             <div>
                                 <h3 className="text-xl font-bold text-slate-800 mb-1">Logo Discovery</h3>
@@ -348,12 +418,16 @@ export const VisualCanvas: React.FC<VisualCanvasProps> = ({
 
                                         {/* Logo Info */}
                                         <div className="p-3 bg-white border-t border-slate-100">
-                                            <p className="font-semibold text-sm text-slate-800 truncate">{logo.source}</p>
-                                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                            <h4 className="font-bold text-sm text-slate-900 truncate" title={logo.alt_text || logo.source}>
+                                                {logo.alt_text || logo.source}
+                                            </h4>
+                                            <p className="text-xs text-slate-500 truncate mb-2">{logo.source}</p>
+
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <span className="text-xs bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
                                                     {logo.mood}
                                                 </span>
-                                                <span className="text-xs text-slate-400 truncate">{logo.style?.split(' ').slice(0, 2).join(' ')}</span>
+                                                <span className="text-xs text-slate-400 truncate max-w-[100px]">{logo.style?.split(' ').slice(0, 2).join(' ')}</span>
                                             </div>
                                         </div>
 

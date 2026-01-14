@@ -30,6 +30,7 @@ export class ToolHandler {
     private setCanvasMode: (mode: 'none' | 'fonts' | 'colors') => void;
     private getDNA: () => BrandDNA;
     private searchService: SearchGroundingService;
+    private logoCache: Map<string, string> = new Map();
 
     constructor(
         sendToClient: (message: ServerMessage) => void,
@@ -77,13 +78,20 @@ export class ToolHandler {
                         break;
 
                     case 'search_logo_inspiration':
-                        await this.handleSearchLogoInspiration(fc.args);
-                        contextSummary = "Logo inspiration search complete.";
+                        contextSummary = await this.handleSearchLogoInspiration(fc.args);
                         break;
 
                     case 'verify_asset_compliance':
                         await this.handleVerifyAssetCompliance(fc.args);
                         contextSummary = "Asset compliance check complete.";
+                        break;
+
+                    case 'display_logo_structure_options':
+                        contextSummary = this.handleLogoStructureOptions(fc.args);
+                        break;
+
+                    case 'display_imagery_suggestions':
+                        contextSummary = this.handleImagerySuggestions(fc.args);
                         break;
 
                     default:
@@ -127,7 +135,7 @@ export class ToolHandler {
         return responses;
     }
 
-    private handleFontSuggestions(args: any): void {
+    private handleFontSuggestions(args: any): string {
         const fonts: FontSuggestion[] = (args.fonts || []).map((f: any) => ({
             name: f.name,
             category: f.category || 'sans-serif',
@@ -158,7 +166,7 @@ export class ToolHandler {
         return `Displayed ${fonts.length} font options: ${fontNames}.`;
     }
 
-    private handleColorSuggestions(args: any): void {
+    private handleColorSuggestions(args: any): string {
         const palettes: ColorPalette[] = (args.palettes || []).map((p: any) => ({
             name: p.name || 'Unnamed Palette',
             // Sanitize colors: remove commas, trim whitespace, filter invalid
@@ -191,7 +199,45 @@ export class ToolHandler {
         return `Displayed ${palettes.length} color palettes: ${paletteNames}.`;
     }
 
-    private handleDNAUpdate(args: any): void {
+    private handleLogoStructureOptions(args: any): string {
+        const options = args.options || [];
+        console.log(`🏗️ Sending ${options.length} logo structure options`);
+        console.log(`   Filters: Style=${args.style_filter}, Complexity=${args.complexity_preference}, Industry=${args.industry_context}`);
+
+        this.sendToClient({
+            type: 'LOGO_STRUCTURE_OPTIONS',
+            options
+        });
+
+        this.sendToClient({
+            type: 'THOUGHT',
+            logic: `Generating logo structure options (${args.complexity_preference || 'balanced'}) for ${args.industry_context || 'brand'}`,
+            confidence: 0.9
+        });
+
+        return `Displayed ${options.length} logo structure options.`;
+    }
+
+    private handleImagerySuggestions(args: any): string {
+        const suggestions = args.suggestions || [];
+        console.log(`🖼️ Sending ${suggestions.length} imagery suggestions`);
+        console.log(`   Params: Abstraction=${args.abstraction_level}, Mood=${args.mood_filter}, Style=${args.art_style}`);
+
+        this.sendToClient({
+            type: 'IMAGERY_SUGGESTIONS',
+            suggestions
+        });
+
+        this.sendToClient({
+            type: 'THOUGHT',
+            logic: `Generating imagery: ${args.abstraction_level || 'varied'} ${args.art_style || 'style'} for ${args.focus_element || 'core'}`,
+            confidence: 0.9
+        });
+
+        return `Displayed ${suggestions.length} imagery suggestions.`;
+    }
+
+    private handleDNAUpdate(args: any): string {
         console.log('🧬 Updating Brand DNA:', args);
 
         // Update state for each field
@@ -209,6 +255,26 @@ export class ToolHandler {
         }
         if (args.voice) {
             this.updateState('voice', args.voice);
+        }
+        if (args.logoType) {
+            this.updateState('logoType', args.logoType);
+        }
+        if (args.imagery) {
+            this.updateState('imagery', args.imagery);
+        }
+        if (args.savedLogos && args.savedLogos.length > 0) {
+            // Resolve any cached logo references
+            const resolvedLogos = args.savedLogos.map(logo => {
+                const cachedUrl = this.logoCache.get(logo.url) || this.logoCache.get(logo.url.trim());
+                if (cachedUrl) {
+                    console.log(`🔄 Resolved logo reference ${logo.url} to full URL`);
+                    return { ...logo, url: cachedUrl };
+                }
+                return logo;
+            });
+
+            console.log(`💾 Saving ${resolvedLogos.length} logos to Brand DNA`);
+            this.updateState('logoAssets', resolvedLogos);
         }
 
         // Get the complete updated DNA from the state manager
@@ -231,12 +297,15 @@ export class ToolHandler {
         return `Updated Brand DNA: ${updatedFields.join(', ')}.`;
     }
 
-    private getUpdatedField(args: any): 'name' | 'mission' | 'colors' | 'typography' | 'voice' {
+    private getUpdatedField(args: any): 'name' | 'mission' | 'colors' | 'typography' | 'voice' | 'logoAssets' | 'logoType' | 'imagery' {
         if (args.brandName) return 'name';
         if (args.mission) return 'mission';
         if (args.selectedColors) return 'colors';
         if (args.selectedFont) return 'typography';
         if (args.voice) return 'voice';
+        if (args.savedLogos) return 'logoAssets';
+        if (args.logoType) return 'logoType';
+        if (args.imagery) return 'imagery';
         return 'name';
     }
 
@@ -301,7 +370,7 @@ export class ToolHandler {
         }
     }
 
-    private async handleSearchLogoInspiration(args: any): Promise<void> {
+    private async handleSearchLogoInspiration(args: any): Promise<string> {
         console.log('🔍 Starting BROWSER-BASED logo research:', args);
 
         // Get brand context from current DNA
@@ -352,25 +421,20 @@ export class ToolHandler {
                 screenshots: results.screenshots
             } as LogoResearchResultMessage);
 
-            // Also send LOGO_CONCEPTS for backward compatibility
-            this.sendToClient({
-                type: 'LOGO_CONCEPTS',
-                concepts: results.logos.map(logo => ({
-                    id: logo.id,
-                    url: logo.imageUrl,
-                    source: logo.source,
-                    style: logo.style,
-                    mood: 'discovered',
-                    reasoning: logo.designPrinciples.join(', '),
-                    alt_text: `${logo.brandName} logo`
-                }))
-            });
-
             this.sendToClient({
                 type: 'THOUGHT',
                 logic: `Research complete! Found ${results.logos.length} logos. ${results.insights.recommendation}`,
                 confidence: 0.95
             });
+
+            // Construct rich summary for Brain context (using References to avoid huge Base64 payloads)
+            const logoSummary = results.logos.map((l, i) => {
+                const refId = `LOGO_REF_${Date.now()}_${i}`;
+                this.logoCache.set(refId, l.imageUrl);
+                return `${i + 1}. ${l.brandName || 'Brand'}: ${refId} (Source: ${l.source})`;
+            }).join('\n');
+
+            return `Research complete. Found these logos (IDs referenced for safety):\n${logoSummary}\n\nInsights: ${results.insights.recommendation}`;
 
         } catch (error) {
             console.error('❌ Logo research failed:', error);
@@ -394,8 +458,11 @@ export class ToolHandler {
                     type: 'LOGO_CONCEPTS',
                     concepts: fallbackResults
                 });
+
+                return `Research failed, but displayed ${fallbackResults.length} fallback images using search grounding.`;
             } catch (fallbackError) {
                 console.error('❌ Fallback also failed:', fallbackError);
+                return "Logo research failed completely.";
             }
         }
     }

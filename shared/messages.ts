@@ -26,8 +26,8 @@ export interface TextInputMessage {
 
 export interface UserSelectionMessage {
     type: 'USER_SELECTION';
-    selectionType: 'font' | 'color';
-    value: string; // Font name or palette name
+    selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery';
+    value: string; // Font name, palette name, logo ID, structure type, or imagery concept
 }
 
 export interface UpdateDNAMessage {
@@ -83,7 +83,7 @@ export interface ColorSuggestionsMessage {
 export interface DNAUpdateMessage {
     type: 'DNA_UPDATE';
     dna: BrandDNA;
-    updatedField?: keyof BrandDNA;
+    updatedField?: keyof BrandDNA | string;
 }
 
 export interface ProgressUpdateMessage {
@@ -194,6 +194,16 @@ export interface LogoResearchResultMessage {
     screenshots: string[]; // Base64 screenshots from research
 }
 
+export interface LogoStructureOptionsMessage {
+    type: 'LOGO_STRUCTURE_OPTIONS';
+    options: any[]; // Used strict types in client
+}
+
+export interface ImagerySuggestionsMessage {
+    type: 'IMAGERY_SUGGESTIONS';
+    suggestions: any[]; // Used strict types in client
+}
+
 export interface AuditResultMessage {
     type: 'AUDIT_RESULT';
     assetUrl: string;
@@ -228,7 +238,9 @@ export type ServerMessage =
     | LogoConceptsMessage
     | AuditResultMessage
     | LogoResearchProgressMessage
-    | LogoResearchResultMessage;
+    | LogoResearchResultMessage
+    | LogoStructureOptionsMessage
+    | ImagerySuggestionsMessage;
 
 // ============================================
 // MESSAGE HELPERS
@@ -249,6 +261,7 @@ export function isServerMessage(msg: any): msg is ServerMessage {
         'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END',
         'THINKING_START', 'THINKING_STREAM', 'THINKING_END',
         'COMPETITIVE_ANALYSIS', 'LOGO_CONCEPTS', 'AUDIT_RESULT',
-        'LOGO_RESEARCH_PROGRESS', 'LOGO_RESEARCH_RESULT'
+        'LOGO_RESEARCH_PROGRESS', 'LOGO_RESEARCH_RESULT',
+        'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS'
     ].includes(msg.type);
 }

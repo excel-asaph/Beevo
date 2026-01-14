@@ -3,7 +3,7 @@ import type {
     ClientMessage,
     ServerMessage
 } from '@shared/messages';
-import type { BrandDNA, FontSuggestion, ColorPalette } from '@shared/types';
+import type { BrandDNA, FontSuggestion, ColorPalette, LogoStructureOption, ImagerySuggestion } from '@shared/types';
 
 // WebSocket connection states
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -19,9 +19,11 @@ interface UseWebSocketOptions {
     onSessionStarted?: (sessionId: string) => void;
     onSessionEnded?: () => void;
     onInterrupt?: () => void;
-    onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration', targetField?: string) => void;
+    onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration' | 'display_logo_structure_options' | 'display_imagery_suggestions', targetField?: string) => void;
     onToolProcessingEnd?: () => void;
     onLogoConcepts?: (concepts: Array<{ id: string; url: string; source: string; style: string; mood: string; reasoning: string; alt_text: string }>) => void;
+    onLogoStructureOptions?: (options: LogoStructureOption[]) => void;
+    onImagerySuggestions?: (suggestions: ImagerySuggestion[]) => void;
     // Logo research progress for browser automation
     onLogoResearchProgress?: (phase: 'starting' | 'browsing' | 'analyzing' | 'complete', source: string, progress: number, message: string) => void;
     onLogoResearchResult?: (logos: any[], insights: any, screenshots: string[]) => void;
@@ -41,7 +43,7 @@ interface UseWebSocketReturn {
     endSession: () => void;
     sendAudio: (base64Audio: string) => void;
     sendText: (text: string) => void;
-    sendSelection: (type: 'font' | 'color', value: string) => void;
+    sendSelection: (type: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string) => void;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
@@ -142,6 +144,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
                     opts.onLogoResearchResult?.(message.logos, message.insights, message.screenshots);
                     break;
 
+                case 'LOGO_STRUCTURE_OPTIONS':
+                    opts.onLogoStructureOptions?.(message.options);
+                    break;
+
+                case 'IMAGERY_SUGGESTIONS':
+                    opts.onImagerySuggestions?.(message.suggestions);
+                    break;
+
                 case 'ERROR':
                     console.error('WebSocket error:', message.message);
                     opts.onError?.(message.message);
@@ -211,7 +221,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         sendMessage({ type: 'TEXT_INPUT', text });
     }, [sendMessage]);
 
-    const sendSelection = useCallback((selectionType: 'font' | 'color', value: string) => {
+    const sendSelection = useCallback((selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string) => {
         sendMessage({ type: 'USER_SELECTION', selectionType, value });
     }, [sendMessage]);
 

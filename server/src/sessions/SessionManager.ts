@@ -217,7 +217,7 @@ ${canvasInfo}
 
     private async handleUserSelection(
         session: Session,
-        selectionType: 'font' | 'color',
+        selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery',
         value: string
     ): Promise<void> {
         if (!session.geminiConnection || !session.isActive) {
@@ -251,15 +251,45 @@ ${canvasInfo}
             } else {
                 console.warn(`⚠️ Palette "${value}" not found in currentPalettes`);
             }
+        } else if (selectionType === 'structure') {
+            session.stateManager.update('logoType', value);
+            this.sendToClient(session.id, {
+                type: 'DNA_UPDATE',
+                dna: session.stateManager.getDNA(),
+                updatedField: 'logoType'
+            });
+        } else if (selectionType === 'imagery') {
+            session.stateManager.update('imagery', value);
+            this.sendToClient(session.id, {
+                type: 'DNA_UPDATE',
+                dna: session.stateManager.getDNA(),
+                updatedField: 'imagery'
+            });
         }
 
         // Also notify the AI about the selection so it can continue the conversation
         const context = this.buildStateContext(session);
-        const message = selectionType === 'font'
-            ? `${context}\n\n[SYSTEM: User manually selected the "${value}" font. It is already saved. PLEASE ACKNOWLEDGE THIS SELECTION BRIEFLY (e.g. "Great choice").]`
-            : `${context}\n\n[SYSTEM: User manually selected the "${value}" palette. It is already saved. PLEASE ACKNOWLEDGE THIS SELECTION BRIEFLY (e.g. "That looks good").]`;
+        let systemMsg = "";
 
-        await session.geminiConnection.sendText(message);
+        switch (selectionType) {
+            case 'font':
+                systemMsg = `[SYSTEM: User manually selected the "${value}" font. It is already saved. PLEASE ACKNOWLEDGE THIS SELECTION BRIEFLY (e.g. "Great choice").]`;
+                break;
+            case 'color':
+                systemMsg = `[SYSTEM: User manually selected the "${value}" palette. It is already saved. PLEASE ACKNOWLEDGE THIS SELECTION BRIEFLY (e.g. "That looks good").]`;
+                break;
+            case 'logo':
+                systemMsg = `[SYSTEM: User clicked a logo with style/name "${value}". They might like this style. Ask if they want to save it or use it as inspiration.]`;
+                break;
+            case 'structure':
+                systemMsg = `[SYSTEM: User selected the "${value}" logo structure (e.g. Wordmark/Emblem). It is saved to DNA. Confirm this choice.]`;
+                break;
+            case 'imagery':
+                systemMsg = `[SYSTEM: User selected the "${value}" imagery concept. It is saved to DNA. Confirm this choice.]`;
+                break;
+        }
+
+        await session.geminiConnection.sendText(`${context}\n\n${systemMsg}`);
     }
 
     private async handleUpdateDNA(session: Session, field: string, value: any): Promise<void> {

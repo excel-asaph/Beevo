@@ -55,34 +55,36 @@ export class ToolHandler {
 
         for (const fc of functionCalls) {
             console.log(`🔧 Processing tool: ${fc.name}`, JSON.stringify(fc.args || {}));
+            let contextSummary = "Action completed.";
 
             try {
                 switch (fc.name) {
                     case 'display_font_suggestions':
-                        this.handleFontSuggestions(fc.args);
+                        contextSummary = this.handleFontSuggestions(fc.args);
                         break;
 
                     case 'display_color_suggestions':
-                        this.handleColorSuggestions(fc.args);
+                        contextSummary = this.handleColorSuggestions(fc.args);
                         break;
 
                     case 'update_live_brand_dna':
-                        this.handleDNAUpdate(fc.args);
+                        contextSummary = this.handleDNAUpdate(fc.args);
                         break;
 
                     case 'research_competitors':
                         await this.handleResearchCompetitors(fc.args);
+                        contextSummary = "Competitor research complete.";
                         break;
 
                     case 'search_logo_inspiration':
                         await this.handleSearchLogoInspiration(fc.args);
+                        contextSummary = "Logo inspiration search complete.";
                         break;
 
                     case 'verify_asset_compliance':
                         await this.handleVerifyAssetCompliance(fc.args);
+                        contextSummary = "Asset compliance check complete.";
                         break;
-
-                    // end_session case REMOVED - was causing false terminations
 
                     default:
                         console.warn(`Unknown tool: ${fc.name}`);
@@ -92,15 +94,8 @@ export class ToolHandler {
                 console.log(`🔍 Raw tool call:`, JSON.stringify(fc));
 
                 // Add instructions to prompt the model to speak
-                let flowInstruction = "Action completed. Continue conversation.";
-
-                if (fc.name === 'display_color_suggestions') {
-                    flowInstruction = "Palettes are now visible on the canvas. You must now DESCRIBE them by name and vibe to the user, then ask for their preference.";
-                } else if (fc.name === 'display_font_suggestions') {
-                    flowInstruction = "Fonts are now visible on the canvas. You must now DESCRIBE them by name to the user, then ask for their preference.";
-                } else if (fc.name === 'update_live_brand_dna') {
-                    flowInstruction = "Data saved successfully. Confirm this briefly to the user and immediately ask the next question to drive the flow forward.";
-                }
+                // NOW DYNAMIC: Injects the specific context summary!
+                const flowInstruction = `System Update: ${contextSummary} Briefly confirm this to the user.`;
 
                 // Gemini Live API expects this exact format
                 const response: any = {
@@ -158,6 +153,9 @@ export class ToolHandler {
             logic: `Typography thread: Rendering ${fonts.length} font options for "${previewText}"`,
             confidence: 0.9
         });
+
+        const fontNames = fonts.map(f => f.name).join(', ');
+        return `Displayed ${fonts.length} font options: ${fontNames}.`;
     }
 
     private handleColorSuggestions(args: any): void {
@@ -188,6 +186,9 @@ export class ToolHandler {
             logic: `Color thread: Rendering ${palettes.length} palette options`,
             confidence: 0.9
         });
+
+        const paletteNames = palettes.map(p => p.name).join(', ');
+        return `Displayed ${palettes.length} color palettes: ${paletteNames}.`;
     }
 
     private handleDNAUpdate(args: any): void {
@@ -226,6 +227,8 @@ export class ToolHandler {
             logic: `Brand DNA updated: ${updatedFields.join(', ')}`,
             confidence: 0.95
         });
+
+        return `Updated Brand DNA: ${updatedFields.join(', ')}.`;
     }
 
     private getUpdatedField(args: any): 'name' | 'mission' | 'colors' | 'typography' | 'voice' {

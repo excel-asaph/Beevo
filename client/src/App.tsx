@@ -1,29 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrandProvider, useBrand } from './context/BrandContext';
 import { Strategist } from './components/Strategist';
 import { ArchitectMain } from './components/Architect';
 import { Forge } from './components/Forge';
 import { Guardian } from './components/Guardian';
+import { AgentCanvas } from './components/Agent';
 import { Junction } from '@shared/types';
-import { Brain, Search, Code, Layers, ShieldCheck, Activity } from 'lucide-react';
+import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles } from 'lucide-react';
+
+type ViewMode = 'dashboard' | 'agent';
 
 const SidebarItem: React.FC<{
     active: boolean;
     icon: React.ReactNode;
     label: string;
-    onClick: () => void
-}> = ({ active, icon, label, onClick }) => (
+    onClick: () => void;
+    accent?: boolean;
+}> = ({ active, icon, label, onClick, accent }) => (
     <button
         onClick={onClick}
-        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${active ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+        className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${active
+                ? accent
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/40'
+                    : 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            }`}
     >
         {icon}
         <span className="font-medium">{label}</span>
+        {accent && !active && (
+            <span className="ml-auto text-[10px] px-1.5 py-0.5 bg-indigo-500/30 text-indigo-300 rounded-full">NEW</span>
+        )}
     </button>
 );
 
 const MainLayout: React.FC = () => {
     const { currentJunction, setJunction, thoughtStream } = useBrand();
+    const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
+
+    // If in Agent mode, render the full-screen Agent Canvas
+    if (viewMode === 'agent') {
+        return <AgentCanvas onBack={() => setViewMode('dashboard')} />;
+    }
 
     return (
         <div className="flex h-screen bg-slate-950 overflow-hidden text-slate-200">
@@ -42,6 +60,18 @@ const MainLayout: React.FC = () => {
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2">
+                    {/* Agent Canvas - Featured at top */}
+                    <div className="pb-3 mb-3 border-b border-slate-800">
+                        <SidebarItem
+                            active={false}
+                            onClick={() => setViewMode('agent')}
+                            icon={<Sparkles size={20} />}
+                            label="Agent Canvas"
+                            accent
+                        />
+                    </div>
+
+                    {/* Original navigation items */}
                     <SidebarItem
                         active={currentJunction === Junction.STRATEGIST}
                         onClick={() => setJunction(Junction.STRATEGIST)}
@@ -77,9 +107,9 @@ const MainLayout: React.FC = () => {
                         {thoughtStream.map(thought => (
                             <div key={thought.id} className="text-xs p-2 rounded bg-slate-800 border border-slate-700/50">
                                 <span className={`inline-block px-1 rounded text-[10px] font-bold mb-1 ${thought.junction === Junction.STRATEGIST ? 'bg-blue-900 text-blue-300' :
-                                        thought.junction === Junction.ARCHITECT ? 'bg-purple-900 text-purple-300' :
-                                            thought.junction === Junction.FORGE ? 'bg-orange-900 text-orange-300' :
-                                                'bg-teal-900 text-teal-300'
+                                    thought.junction === Junction.ARCHITECT ? 'bg-purple-900 text-purple-300' :
+                                        thought.junction === Junction.FORGE ? 'bg-orange-900 text-orange-300' :
+                                            'bg-teal-900 text-teal-300'
                                     }`}>
                                     {thought.junction}
                                 </span>

@@ -24,10 +24,11 @@ export interface TextInputMessage {
     text: string;
 }
 
-export interface UserSelectionMessage {
-    type: 'USER_SELECTION';
+export interface SelectionEventMessage {
+    type: 'SELECTION_EVENT';
     selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery';
-    value: string; // Font name, palette name, logo ID, structure type, or imagery concept
+    value: string; // The ID or Name of what was clicked
+    context?: any; // Full object details (e.g., the full palette object)
 }
 
 export interface UpdateDNAMessage {
@@ -36,13 +37,33 @@ export interface UpdateDNAMessage {
     value: any;
 }
 
+export interface InterruptRequestMessage {
+    type: 'INTERRUPT';
+}
+
+export interface UIStateChangeMessage {
+    type: 'UI_STATE_CHANGE';
+    mode: 'chat' | 'thinking' | 'canvas';
+    overlayVisible: boolean; // Control Gemini Live overlay
+}
+
 export type ClientMessage =
     | StartSessionMessage
     | EndSessionMessage
     | AudioChunkMessage
     | TextInputMessage
-    | UserSelectionMessage
-    | UpdateDNAMessage;
+    | SelectionEventMessage
+    | UpdateDNAMessage
+    | InterruptRequestMessage
+    | FileUploadMessage;
+
+export interface FileUploadMessage {
+    type: 'FILE_UPLOAD';
+    base64: string;
+    mimeType: string;
+    fileName: string;
+    target?: 'extraction' | 'vault';
+}
 
 // ============================================
 // SERVER → CLIENT MESSAGES
@@ -216,6 +237,16 @@ export interface AuditResultMessage {
     thoughtSignature: string;
 }
 
+export interface ResearchCompleteMessage {
+    type: 'RESEARCH_COMPLETE';
+    summary: {
+        brandName: string;
+        colorsGenerated: number;
+        fontsGenerated: number;
+        competitorsFound: number;
+    };
+}
+
 export type ServerMessage =
     | SessionStartedMessage
     | SessionEndedMessage
@@ -240,7 +271,51 @@ export type ServerMessage =
     | LogoResearchProgressMessage
     | LogoResearchResultMessage
     | LogoStructureOptionsMessage
-    | ImagerySuggestionsMessage;
+    | ImagerySuggestionsMessage
+    | VaultUpdateMessage
+    | ResearchUpdateMessage
+    | ThoughtSignatureMessage
+    | ResearchCompleteMessage
+    | UIStateChangeMessage;
+
+export interface VaultUpdateMessage {
+    type: 'VAULT_UPDATE';
+    stats: {
+        fileCount: number;
+        totalTokens: number;
+        isIngesting: boolean;
+    };
+}
+
+// ============================================
+// AGENTIC BRAND DISCOVERY MESSAGES
+// ============================================
+
+// Research phase progress updates
+export interface ResearchUpdateMessage {
+    type: 'RESEARCH_UPDATE';
+    status: 'started' | 'searching' | 'analyzing' | 'generating' | 'complete';
+    message: string;  // Human-readable status
+    step: number;     // Current step (0-4)
+    totalSteps: number;  // Total steps (5)
+    competitors?: string[];  // List of competitors found
+    industryInsights?: string;  // Summary of industry analysis
+    // Streaming thoughts for "thinking" UX
+    thoughts?: Array<{
+        id: string;
+        text: string;
+        status: 'pending' | 'active' | 'complete';
+    }>;
+}
+
+// Thought Signature - AI reasoning attached to a specific node
+export interface ThoughtSignatureMessage {
+    type: 'THOUGHT_SIGNATURE';
+    nodeId: string;       // Which node this reasoning belongs to (e.g., 'colors', 'typography')
+    title: string;        // Display title (e.g., "Color Strategy")
+    reasoning: string;    // The AI's reasoning/justification
+    confidence?: number;  // Optional confidence score (0-1)
+}
 
 // ============================================
 // MESSAGE HELPERS
@@ -249,7 +324,7 @@ export type ServerMessage =
 export function isClientMessage(msg: any): msg is ClientMessage {
     return msg && typeof msg.type === 'string' && [
         'START_SESSION', 'END_SESSION', 'AUDIO_CHUNK',
-        'TEXT_INPUT', 'USER_SELECTION', 'UPDATE_DNA'
+        'TEXT_INPUT', 'SELECTION_EVENT', 'UPDATE_DNA', 'INTERRUPT', 'FILE_UPLOAD'
     ].includes(msg.type);
 }
 
@@ -259,9 +334,11 @@ export function isServerMessage(msg: any): msg is ServerMessage {
         'TRANSCRIPTION', 'FONT_SUGGESTIONS', 'COLOR_SUGGESTIONS',
         'DNA_UPDATE', 'PROGRESS_UPDATE', 'THOUGHT', 'ERROR', 'CONNECTION_STATUS',
         'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END',
-        'THINKING_START', 'THINKING_STREAM', 'THINKING_END',
+        'INTERRUPT', 'TOOL_PROCESSING_START', 'TOOL_PROCESSING_END',
+        'THINKING_START', 'THINKING_STREAM', 'THINKING_END', 'UI_STATE_CHANGE',
         'COMPETITIVE_ANALYSIS', 'LOGO_CONCEPTS', 'AUDIT_RESULT',
         'LOGO_RESEARCH_PROGRESS', 'LOGO_RESEARCH_RESULT',
-        'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS'
+        'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS', 'VAULT_UPDATE',
+        'RESEARCH_UPDATE', 'THOUGHT_SIGNATURE'
     ].includes(msg.type);
 }

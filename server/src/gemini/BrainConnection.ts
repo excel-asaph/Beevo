@@ -412,6 +412,32 @@ const brainToolDeclarations: FunctionDeclaration[] = [
                 query: {
                     type: Type.STRING,
                     description: "Original user intent that triggered this research"
+                },
+                // Brand DNA fields - Brain extracts these from conversation context during research
+                brandName: {
+                    type: Type.STRING,
+                    description: "Brand name mentioned in conversation"
+                },
+                mission: {
+                    type: Type.STRING,
+                    description: "Brand mission statement if discussed"
+                },
+                tagline: {
+                    type: Type.STRING,
+                    description: "Brand slogan/tagline if discussed"
+                },
+                values: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Core brand values (e.g., 'Quality', 'Innovation') if discussed"
+                },
+                voice: {
+                    type: Type.STRING,
+                    description: "Brand voice/personality (e.g., 'sophisticated and bold') if discussed"
+                },
+                targetAudience: {
+                    type: Type.STRING,
+                    description: "Target audience description if discussed"
                 }
             },
             required: ["industry", "query"]
@@ -563,6 +589,62 @@ const brainToolDeclarations: FunctionDeclaration[] = [
             },
             required: ["asset_url", "brand_colors", "query"]
         }
+    },
+    {
+        name: "extract_brand_identity",
+        description: "EXTRACT EVERYTHING from a brand document. Call this IMMEDIATELY after file upload analysis. Extracts Name, Mission, Colors, Fonts, Voice, and Logo style in a SINGLE action. Use this instead of calling separate tools.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                brandName: { type: Type.STRING },
+                mission: { type: Type.STRING },
+                voice: { type: Type.STRING },
+                colors: {
+                    type: Type.OBJECT,
+                    properties: {
+                        palettes: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    name: { type: Type.STRING },
+                                    colors: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    vibe: { type: Type.STRING }
+                                },
+                                required: ["name", "colors", "vibe"]
+                            }
+                        }
+                    },
+                    required: ["palettes"]
+                },
+                typography: {
+                    type: Type.OBJECT,
+                    properties: {
+                        fonts: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    name: { type: Type.STRING },
+                                    category: { type: Type.STRING },
+                                    reasoning: { type: Type.STRING }
+                                },
+                                required: ["name", "category", "reasoning"]
+                            }
+                        },
+                        context_text: { type: Type.STRING }
+                    },
+                    required: ["fonts"]
+                },
+                tagline: { type: Type.STRING, description: "A catchy phrase or slogan for the brand" },
+                values: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "List of 3-5 core brand values (e.g. 'Quality', 'Innovation')"
+                }
+            },
+            required: ["brandName", "mission", "colors", "typography", "tagline", "values"]
+        }
     }
 ];
 
@@ -593,6 +675,14 @@ export class BrainConnection {
     // Debounce properties
     private cachedTranscript: string = '';
     private lastAnalysisTime: number = 0;
+
+    // TWO-BRAIN ARCHITECTURE STATE
+    private phase: 'discovery' | 'execution' = 'discovery';
+
+    public setPhase(phase: 'discovery' | 'execution') {
+        this.phase = phase;
+        console.log(`🧠 [BrainConnection] Phase Switched to: ${phase.toUpperCase()}`);
+    }
 
     constructor(
         private sessionId: string,
@@ -689,48 +779,12 @@ export class BrainConnection {
 
             const dnaContext = JSON.stringify(this.getBrandDNA(), null, 2);
 
-            // Refactored to avoid template literal complexities
-            const systemPrompt = [
-                'You are a tool orchestrator for a brand design assistant.',
-                'Your job is to decide when to call tools based on the conversation history.',
-                '',
-                'Current Brand DNA:',
-                dnaContext,
-                '',
-                toolHistoryXML,
-                '',
-                'CONVERSATION HISTORY (With timing context):',
-                historyText,
-                '',
-                'CRITICAL DECISION RATIONALE:',
-                '1. **CTX MATTERS**: You have a "Photographic Memory" of tool results in <ToolHistory>. USE IT.',
-                '   - If User says "Save them", look at the <Result> of the last tool (e.g. search_logo_inspiration) to get the URLs/Data.',
-                '2. **TIMING MATTERS**: If the USER responded "[JUST NOW]" or "[1s ago]" after a question, they are likely confirming efficiently.',
-                '3. **NEGOTIATION MODE**: The user is "Bargaining". Do not execute tools during brainstorming. Only execute when the deal is "Sealed".',
-                '4. **DATA INTEGRITY**:',
-                '   - When calling \'update_live_brand_dna\' with \'savedLogos\', EXTRACT the exact URLs from the <ToolHistory> XML.',
-                '   - Do NOT halllucinate URLs.',
-                '5. **VOICE AGENT SKEPTICISM (CRITICAL)**:',
-                '   - The Voice Agent (Assistant) CANNOT call tools. It often hallucinates, saying "I\'ve updated the system" or "It\'s saved."',
-                '   - DO NOT believe the Assistant.',
-                '   - If the User confirmed an action (e.g. "Yes", "Save it"), and you do not see a corresponding `<Execution>` in `<ToolHistory>` *after* that request, YOU MUST CALL THE TOOL.',
-                '   - IGNORE the Assistant\'s claims of completion. YOU are the only one who can actually do it.',
-                '',
-                'INSTRUCTIONS:',
-                '- If a tool is needed based on specific user confirmation rules: Output the Function Call.',
-                '- If the user is still thinking, discussing, or the request is vague: Output "NO_TOOL_NEEDED".',
-                '- If the Voice Agent asked a question but the user issued a direct command (e.g. "Just save it"): Output the Function Call.',
-                '',
-                'Respond with JUST the function call or say "NO_TOOL_NEEDED"'
-            ].join('\n');
+            // DYNAMIC PROMPT & TOOLS BASED ON PHASE
+            const systemPrompt = this.getPhaseSystemInstruction(this.phase, dnaContext, toolHistoryXML, historyText);
+            const phaseTools = [{ functionDeclarations: this.getPhaseTools(this.phase) }];
 
             try {
-                console.log(`🧠 Brain: Analyzing ${this.conversationHistory.length} turns of history...`);
-
-                // DEBUG: Log prompt size
-                if (this.toolExecutionHistory.length > 0) {
-                    console.log(`🧠 [DEBUG] Inclusion of ToolHistory XML (${this.toolExecutionHistory.length} items) confirmed.`);
-                }
+                console.log(`🧠 Brain: Analyzing ${this.conversationHistory.length} turns in phase: ${this.phase.toUpperCase()}`);
 
                 const response = await this.client.models.generateContent({
                     model: MODELS.ARCHITECT_TEXT,
@@ -739,7 +793,7 @@ export class BrainConnection {
                         parts: [{ text: systemPrompt }]
                     }],
                     config: {
-                        tools: brainTools
+                        tools: phaseTools
                     }
                 });
 
@@ -820,6 +874,69 @@ export class BrainConnection {
         }
     }
 
+    private getPhaseTools(phase: 'discovery' | 'execution'): FunctionDeclaration[] {
+        // Assuming brainToolDeclarations is defined at top of file
+        const allTools = brainToolDeclarations;
+
+        if (phase === 'discovery') {
+            // PHASE 1: LISTENER BRAIN
+            // Only allow the "Handshake" tool (research_competitors usually, or explicit transition tool)
+            return allTools.filter(t => t.name === 'research_competitors');
+        } else {
+            // PHASE 2: EXECUTOR BRAIN
+            // Allow EVERYTHING (Design tools, Updates, Research)
+            return allTools;
+        }
+    }
+
+    private getPhaseSystemInstruction(phase: 'discovery' | 'execution', dnaContext: string, toolHistoryXML: string, historyText: string): string {
+        if (phase === 'discovery') {
+            return [
+                'YOU ARE "THE LISTENER".',
+                'ROLE: Passive observer of a conversation between a User and Gemini Live.',
+                'GOAL: Detect when the User and AI have agreed to "Start Building".',
+                'TOOLS: You have ONE primary tool: \'research_competitors\'. This is the trigger.',
+                '',
+                'PROTOCOL:',
+                '1. LISTEN to the chat.',
+                '2. IGNORE affirmations ("Yes", "Cool", "Locked in") happening during the context gathering phase.',
+                '3. WAIT for the "HANDSHAKE":',
+                '   - AI asks: "Are you ready to build?" (or similar explicit question)',
+                '   - User responds: EXPRESSES CLEAR AGREEMENT (e.g., "Yes", "Let\'s go", "Do it", "Sure", "I am").',
+                '4. TRIGGER: Call \'research_competitors\' with all gathered context.',
+                '',
+                'STRICT RULE: DO NOT CALL ANY OTHER TOOLS. DO NOT UPDATE DNA.',
+                '',
+                'Current Context:',
+                `DNA: ${dnaContext}`,
+                `History: ${historyText}`
+            ].join('\n');
+        } else {
+            return [
+                'YOU ARE "THE EXECUTOR".',
+                'ROLE: Active Builder. You have been triggered to execute the design.',
+                'GOAL: Build the Brand automatically based on research.',
+                'TOOLS: You have ALL tools (fonts, colors, DNA updates, etc.).',
+                '',
+                'CHAIN REACTION PROTOCOL (MUST FOLLOW):',
+                '1. IF `research_competitors` was just called (see history):',
+                '   -> YOU MUST CALL `extract_brand_identity` to save the strategy.',
+                '2. IF `extract_brand_identity` was just called:',
+                '   -> YOU MUST CALL `display_font_suggestions`.',
+                '3. IF `display_font_suggestions` was just called:',
+                '   -> YOU MUST CALL `display_color_suggestions`.',
+                '',
+                'RULE:',
+                '- DO NOT STOP until you have displayed fonts AND colors.',
+                '- DO NOT WAIT for user input between these steps. CHAIN THEM.',
+                '',
+                'Context:',
+                `DNA: ${dnaContext}`,
+                toolHistoryXML,
+                `History: ${historyText}`
+            ].join('\n');
+        }
+    }
     /**
      * Clear conversation history (on session end)
      */

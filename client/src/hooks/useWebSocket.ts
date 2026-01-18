@@ -27,10 +27,16 @@ interface UseWebSocketOptions {
     // Logo research progress for browser automation
     onLogoResearchProgress?: (phase: 'starting' | 'browsing' | 'analyzing' | 'complete', source: string, progress: number, message: string) => void;
     onLogoResearchResult?: (logos: any[], insights: any, screenshots: string[]) => void;
+    onVaultUpdate?: (stats: { fileCount: number; totalTokens: number; isIngesting: boolean }) => void;
     // Thinking levels for hackathon
     onThinkingStart?: (timestamp: number) => void;
     onThinkingStream?: (thought: string, phase: 'classify' | 'analyze' | 'decide' | 'execute') => void;
     onThinkingEnd?: (duration: number, toolDecided: string | null, thoughtSummary: string[]) => void;
+    // Agentic Brand Discovery
+    onResearchUpdate?: (status: 'started' | 'searching' | 'analyzing' | 'generating' | 'complete', message: string, step: number, totalSteps: number, competitors?: string[], thoughts?: Array<{ id: string; text: string; status: 'pending' | 'active' | 'complete' }>) => void;
+    onThoughtSignature?: (nodeId: string, title: string, reasoning: string, confidence?: number) => void;
+    // Research complete signal - all data is ready
+    onResearchComplete?: (summary: { brandName: string; colorsGenerated: number; fontsGenerated: number; competitorsFound: number }) => void;
 }
 
 interface UseWebSocketReturn {
@@ -41,9 +47,11 @@ interface UseWebSocketReturn {
     disconnect: () => void;
     startSession: () => void;
     endSession: () => void;
-    sendAudio: (base64Audio: string) => void;
-    sendText: (text: string) => void;
-    sendSelection: (type: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string) => void;
+    sendAudio: (base64Audio: string) => boolean;
+    sendText: (text: string) => boolean;
+    sendSelection: (selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string, context?: any) => boolean;
+    sendInterrupt: () => boolean;
+    sendFile: (file: File, base64Data: string, target?: 'extraction' | 'vault') => boolean;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
@@ -59,13 +67,17 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     const sendMessage = useCallback((message: ClientMessage) => {
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify(message));
+            return true;
         }
+        console.warn('⚠️ WebSocket not connected, failed to send message:', message.type);
+        return false;
     }, []);
 
     const handleMessage = useCallback((event: MessageEvent) => {
         try {
             const message: ServerMessage = JSON.parse(event.data);
             const opts = optionsRef.current;
+
 
             switch (message.type) {
                 case 'SESSION_STARTED':
@@ -152,6 +164,23 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
                     opts.onImagerySuggestions?.(message.suggestions);
                     break;
 
+                case 'VAULT_UPDATE':
+                    opts.onVaultUpdate?.(message.stats);
+                    break;
+
+                case 'RESEARCH_UPDATE':
+                    opts.onResearchUpdate?.(message.status, message.message, message.step, message.totalSteps, message.competitors, message.thoughts);
+                    break;
+
+                case 'THOUGHT_SIGNATURE':
+                    opts.onThoughtSignature?.(message.nodeId, message.title, message.reasoning, message.confidence);
+                    break;
+
+                case 'RESEARCH_COMPLETE':
+                    console.log('🎉 Research complete signal received:', message.summary);
+                    opts.onResearchComplete?.(message.summary);
+                    break;
+
                 case 'ERROR':
                     console.error('WebSocket error:', message.message);
                     opts.onError?.(message.message);
@@ -214,15 +243,30 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }, [sendMessage]);
 
     const sendAudio = useCallback((base64Audio: string) => {
-        sendMessage({ type: 'AUDIO_CHUNK', data: base64Audio });
+        return sendMessage({ type: 'AUDIO_CHUNK', data: base64Audio });
     }, [sendMessage]);
 
     const sendText = useCallback((text: string) => {
-        sendMessage({ type: 'TEXT_INPUT', text });
+        return sendMessage({ type: 'TEXT_INPUT', text });
     }, [sendMessage]);
 
-    const sendSelection = useCallback((selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string) => {
-        sendMessage({ type: 'USER_SELECTION', selectionType, value });
+    const sendSelection = useCallback((selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string, context?: any) => {
+        return sendMessage({ type: 'SELECTION_EVENT', selectionType, value, context });
+    }, [sendMessage]);
+
+    const sendInterrupt = useCallback(() => {
+        return sendMessage({ type: 'INTERRUPT' });
+    }, [sendMessage]);
+
+    // NEW: Send file content to server
+    const sendFile = useCallback((file: File, base64Data: string, target?: 'extraction' | 'vault') => {
+        return sendMessage({
+            type: 'FILE_UPLOAD',
+            base64: base64Data,
+            mimeType: file.type,
+            fileName: file.name,
+            target
+        });
     }, [sendMessage]);
 
     // Cleanup on unmount
@@ -244,6 +288,12 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         endSession,
         sendAudio,
         sendText,
-        sendSelection
+        sendSelection,
+        sendInterrupt,
+        sendFile
     };
 }
+
+
+
+export default useWebSocket;

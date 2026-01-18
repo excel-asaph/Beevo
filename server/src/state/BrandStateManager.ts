@@ -83,9 +83,24 @@ export class BrandStateManager {
                 this.dna.logoAssets = value;
                 break;
 
+            case 'tagline':
+                this.dna.tagline = value;
+                break;
+
+            case 'values':
+                this.dna.values = value;
+                break;
+
             default:
                 console.warn(`Unknown field: ${field}`);
         }
+    }
+
+    updateBatch(updates: Record<string, any>): void {
+        console.log('📝 Batch state update:', Object.keys(updates));
+        Object.entries(updates).forEach(([field, value]) => {
+            this.update(field, value);
+        });
     }
 
     private updateProgress(field: ProgressItem['field'], value: any): void {

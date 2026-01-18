@@ -20,6 +20,7 @@ export class GeminiLiveConnection {
     private sendToClient: (message: ServerMessage) => void;
     private updateState: (field: string, value: any) => void;
     private toolHandler: ToolHandler;
+    public getToolHandler(): ToolHandler { return this.toolHandler; }
     private isGreetingPhase: boolean = true;
 
 
@@ -30,6 +31,26 @@ export class GeminiLiveConnection {
     private transcriptBuffer: { user: string; ai: string } = { user: '', ai: '' };
     private lastBufferFlush: number = 0;
     private readonly BUFFER_WINDOW_MS = 3000; // Send to Brain every 3 seconds
+
+    // Pause state: stops audio processing during research
+    private isPaused: boolean = false;
+
+    /** Pause audio processing (during research/tool execution) */
+    public pause(): void {
+        this.isPaused = true;
+        console.log('⏸️ Gemini Live PAUSED (research in progress)');
+    }
+
+    /** Resume audio processing (after research completes) */
+    public resume(): void {
+        this.isPaused = false;
+        console.log('▶️ Gemini Live RESUMED');
+    }
+
+    /** Check if currently paused */
+    public isPausedState(): boolean {
+        return this.isPaused;
+    }
 
     // Hybrid approach: ToolDecisionAgent for reliable tool execution
     private getDNA: () => any;
@@ -45,15 +66,33 @@ export class GeminiLiveConnection {
         storeFonts: (fonts: any[]) => void = () => { },
         setCanvasMode: (mode: 'none' | 'fonts' | 'colors') => void = () => { },
         getDNA: () => any = () => ({}),
-        getFonts: () => Array<{ name: string; category: string }> = () => [],
-        getPalettes: () => Array<{ name: string; colors: string[]; vibe: string }> = () => [],
-        getCanvasMode: () => 'none' | 'fonts' | 'colors' = () => 'none'
+        getFonts: () => FontSuggestion[],
+        getPalettes: () => ColorPalette[],
+        getCanvasMode: () => 'none' | 'fonts' | 'colors',
+        updateStateBatch: (updates: Record<string, any>) => void = () => { }
     ) {
         this.sessionId = sessionId;
         this.sendToClient = sendToClient;
         this.updateState = updateState;
-        this.toolHandler = new ToolHandler(sendToClient, updateState, storePalettes, storeFonts, setCanvasMode, getDNA);
 
+        // Initialize ToolHandler with batch update support and voice control
+        this.toolHandler = new ToolHandler(
+            sendToClient,
+            updateState,
+            storePalettes,
+            storeFonts,
+            setCanvasMode,
+            getDNA,
+            updateStateBatch,
+            () => this.pause(),  // onPauseVoice - pause audio during research
+            () => this.resume(), // onResumeVoice - resume after research
+            // ON PHASE CHANGE: Trigger Brain Switch
+            (phase) => {
+                if (this.brain) {
+                    this.brain.setPhase(phase);
+                }
+            }
+        );
         // Store references for ToolDecisionAgent
         this.getDNA = getDNA;
         this.getFonts = getFonts;
@@ -171,6 +210,11 @@ export class GeminiLiveConnection {
     private lastAudioLogTime = 0;
 
     async sendAudio(base64Audio: string): Promise<void> {
+        // Drop audio if paused (during research)
+        if (this.isPaused) {
+            return;
+        }
+
         if (!this.liveSession || !this.isConnected) {
             if (this.audioChunkCount > 0) {
                 console.log(`⚠️ Dropping audio - Gemini not connected (sent ${this.audioChunkCount} chunks before disconnect)`);
@@ -232,7 +276,7 @@ export class GeminiLiveConnection {
     /**
      * Bridge: Interrupt Live session when Brain issues a tool call
      */
-    private interruptLive(): void {
+    public interruptLive(): void {
         if (!this.liveSession || !this.isConnected) return;
 
         try {
@@ -263,6 +307,39 @@ export class GeminiLiveConnection {
             });
         } catch (error) {
             console.error('Error sending text to Gemini:', error);
+        }
+    }
+
+    async sendFile(base64Data: string, mimeType: string): Promise<void> {
+        if (!this.liveSession || !this.isConnected) {
+            console.warn('⚠️ Cannot send file - Gemini not connected');
+            return;
+        }
+
+        console.log(`📤 Sending file to Gemini (${mimeType}, ${base64Data.length} bytes)...`);
+
+        try {
+            // Send media via RealtimeInput
+            await this.liveSession.sendRealtimeInput({
+                media: {
+                    mimeType,
+                    data: base64Data
+                }
+            });
+
+            // Send a follow-up text prompt to ensure the model attends to it
+            // This is crucial for "wake up" effect on static content
+            await this.liveSession.sendClientContent({
+                turns: [{
+                    role: 'user',
+                    parts: [{ text: "I've just uploaded a file. Please analyze it and validly extract the FULL brand identity (Name, Mission, Colors, Fonts, Voice) immediately using the 'extract_brand_identity' tool. Do not ask me for permission, just do it." }]
+                }],
+                turnComplete: true
+            });
+
+            console.log('✅ File sent successfully');
+        } catch (error) {
+            console.error('❌ Error sending file to Gemini:', error);
         }
     }
 

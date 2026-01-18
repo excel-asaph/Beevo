@@ -13,6 +13,10 @@ export interface BrandDNA {
     colors: string[];
     typography: string[];
     voice: string;
+    tagline?: string;
+    values?: string[];
+    targetAudience?: string;
+    keywords?: string[];
     logoUrl?: string;
     // Phase 9: Logo & Competitive Intelligence
     logoType?: string; // wordmark, lettermark, emblem, combination mark
@@ -86,6 +90,15 @@ export interface ImagerySuggestion {
     concept: string;
     description: string;
     visualStyle: string;
+}
+
+// Logo search result/inspiration
+export interface LogoInspiration {
+    id: string;
+    url: string;
+    brandName?: string;
+    source?: string;
+    description?: string;
 }
 
 // Progress item for tracking finalized decisions

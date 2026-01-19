@@ -77,99 +77,55 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
-        name: "display_color_suggestions",
-        description: "Generate and display color palettes. Supports ANY color count (3-20), palette variations, expanding palettes, modifying colors, mood filtering, and color operations. Call this for ANY color-related request.",
+        name: "generate_brand_colors",
+        description: "STEP 1 of Build: Generate color palettes. Call this immediately after research is complete.",
         parameters: {
             type: Type.OBJECT,
             properties: {
                 palettes: {
                     type: Type.ARRAY,
-                    description: "Array of palettes to display. Each can have ANY number of colors.",
+                    description: "Optional: Suggest specific palettes if user provided them. Usually empty to let AI generate.",
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            name: { type: Type.STRING, description: "Descriptive palette name" },
-                            colors: {
-                                type: Type.ARRAY,
-                                items: { type: Type.STRING },
-                                description: "Array of hex colors. Can be ANY length: 3, 5, 7, 10, 15, 20 colors."
-                            },
-                            vibe: { type: Type.STRING, description: "Mood/feeling of the palette" }
-                        },
-                        required: ["name", "colors", "vibe"]
-                    }
-                },
-                palette_count: {
-                    type: Type.INTEGER,
-                    description: "Number of palettes to generate. Default 3, can be 1-10."
-                },
-                colors_per_palette: {
-                    type: Type.INTEGER,
-                    description: "Colors in each palette. Default 5, can be 3-20. HONOR USER'S EXACT REQUEST."
-                },
-                base_palette: {
-                    type: Type.STRING,
-                    description: "Name of existing palette to base new ones on (for variations/expansions)"
-                },
-                operation: {
-                    type: Type.STRING,
-                    description: "Operation to perform: 'generate' (new), 'expand' (add colors), 'vary' (create variations), 'modify' (change colors), 'combine' (merge palettes)"
-                },
-                expand_to_count: {
-                    type: Type.INTEGER,
-                    description: "When expanding a palette, the target total color count"
-                },
-                variation_count: {
-                    type: Type.INTEGER,
-                    description: "Number of variations to generate from base palette"
-                },
-                mood_filter: {
-                    type: Type.STRING,
-                    description: "Filter by mood: sophisticated, playful, warm, cool, energetic, calm, professional, creative, natural, bold"
-                },
-                color_temperature: {
-                    type: Type.STRING,
-                    description: "Temperature: warm, cool, neutral, mixed"
-                },
-                brightness: {
-                    type: Type.STRING,
-                    description: "Brightness: light, medium, dark, vibrant, pastel, muted"
-                },
-                include_neutrals: {
-                    type: Type.BOOLEAN,
-                    description: "Whether to include neutral colors (white, black, gray)"
-                },
-                primary_color: {
-                    type: Type.STRING,
-                    description: "Base color to build palette around (hex code)"
-                },
-                exclude_colors: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Colors to exclude (hex codes or color names)"
-                },
-                replace_colors: {
-                    type: Type.ARRAY,
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            old_color: { type: Type.STRING },
-                            new_color: { type: Type.STRING }
+                            name: { type: Type.STRING },
+                            colors: { type: Type.ARRAY, items: { type: Type.STRING } },
+                            vibe: { type: Type.STRING }
                         }
-                    },
-                    description: "Replace specific colors in a palette"
-                },
-                remove_colors: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Remove specific colors from palette (by hex or position like 'last 3')"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "The original user intent/query that triggered this tool"
+                    }
                 }
-            },
-            required: ["palettes"]
+            }
+        }
+    },
+    {
+        name: "generate_brand_fonts",
+        description: "STEP 2 of Build: Generate typography options. Call this AFTER color generation.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                fonts: {
+                    type: Type.ARRAY,
+                    description: "Optional: specific fonts if user requested them.",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            name: { type: Type.STRING },
+                            category: { type: Type.STRING },
+                            reasoning: { type: Type.STRING }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        name: "finalize_brand_dna",
+        description: "STEP 3 (FINAL): Commit the Brand DNA and reveal the canvas. Call this ONLY after Colors and Fonts are generated.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                summary: { type: Type.STRING, description: "Brief summary of what was built." }
+            }
         }
     },
     {
@@ -591,59 +547,39 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
-        name: "extract_brand_identity",
-        description: "EXTRACT EVERYTHING from a brand document. Call this IMMEDIATELY after file upload analysis. Extracts Name, Mission, Colors, Fonts, Voice, and Logo style in a SINGLE action. Use this instead of calling separate tools.",
+        name: "get_canvas_state",
+        description: "Get the current state of the canvas including displayed options and saved DNA. Call this BEFORE making changes to understand what's currently shown to the user.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                brandName: { type: Type.STRING },
-                mission: { type: Type.STRING },
-                voice: { type: Type.STRING },
-                colors: {
-                    type: Type.OBJECT,
-                    properties: {
-                        palettes: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    name: { type: Type.STRING },
-                                    colors: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                    vibe: { type: Type.STRING }
-                                },
-                                required: ["name", "colors", "vibe"]
-                            }
-                        }
-                    },
-                    required: ["palettes"]
-                },
-                typography: {
-                    type: Type.OBJECT,
-                    properties: {
-                        fonts: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    name: { type: Type.STRING },
-                                    category: { type: Type.STRING },
-                                    reasoning: { type: Type.STRING }
-                                },
-                                required: ["name", "category", "reasoning"]
-                            }
-                        },
-                        context_text: { type: Type.STRING }
-                    },
-                    required: ["fonts"]
-                },
-                tagline: { type: Type.STRING, description: "A catchy phrase or slogan for the brand" },
-                values: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "List of 3-5 core brand values (e.g. 'Quality', 'Innovation')"
+                query: {
+                    type: Type.STRING,
+                    description: "What aspect of canvas state you need (e.g., 'current colors', 'displayed fonts', 'full state')"
                 }
             },
-            required: ["brandName", "mission", "colors", "typography", "tagline", "values"]
+            required: []
+        }
+    },
+    {
+        name: "general_research",
+        description: "Research any topic to inform design decisions. Use this for questions about trends, color psychology, typography history, industry best practices, etc. Results will be displayed in the Research Insights panel on the canvas.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                query: {
+                    type: Type.STRING,
+                    description: "The research topic or question (e.g., 'color psychology in tech branding', 'serif vs sans-serif for luxury brands')"
+                },
+                depth: {
+                    type: Type.STRING,
+                    description: "Research depth: 'quick' (summary) or 'detailed' (comprehensive)"
+                },
+                focus: {
+                    type: Type.STRING,
+                    description: "Focus area: 'visual_trends', 'historical_context', 'scientific_facts', 'market_data'"
+                }
+            },
+            required: ["query"]
         }
     }
 ];
@@ -676,12 +612,31 @@ export class BrainConnection {
     private cachedTranscript: string = '';
     private lastAnalysisTime: number = 0;
 
-    // TWO-BRAIN ARCHITECTURE STATE
-    private phase: 'discovery' | 'execution' = 'discovery';
+    // THREE-BRAIN ARCHITECTURE STATE
+    // - 'discovery': Listener Brain - waits for handshake to start research
+    // - 'execution': Builder Brain - one-time chain to populate canvas
+    // - 'modification': Modifier Brain - handles user's post-canvas changes
+    private phase: 'discovery' | 'execution' | 'modification' = 'discovery';
 
-    public setPhase(phase: 'discovery' | 'execution') {
-        this.phase = phase;
-        console.log(`🧠 [BrainConnection] Phase Switched to: ${phase.toUpperCase()}`);
+    // Flag to track if extract_brand_identity was ever DECIDED (not just executed)
+    // This prevents parallel Brain analyses from making duplicate decisions
+    private extractBrandIdentityDecided: boolean = false;
+
+    // Track when the current phase started to isolate history for Modification phase
+    private phaseStartTime: number = Date.now();
+
+    public setPhase(phase: 'discovery' | 'execution' | 'modification') {
+        if (this.phase !== phase) {
+            this.phase = phase;
+            this.phaseStartTime = Date.now();
+            console.log(`🧠 [BrainConnection] Phase Switched to: ${phase.toUpperCase()} at ${this.phaseStartTime}`);
+        }
+    }
+
+    // Called by ToolHandler when extract_brand_identity is about to execute
+    public markExtractBrandIdentityDecided() {
+        this.extractBrandIdentityDecided = true;
+        console.log('🧠 [BrainConnection] extract_brand_identity marked as DECIDED - removing from future tool lists');
     }
 
     constructor(
@@ -695,6 +650,7 @@ export class BrainConnection {
         if (!apiKey) throw new Error('GEMINI_API_KEY not set');
         this.client = new GoogleGenAI({ apiKey });
         console.log(`🧠 Brain initialized for session: ${sessionId}`);
+        this.phaseStartTime = Date.now();
     }
 
     /**
@@ -740,8 +696,27 @@ export class BrainConnection {
             this.cachedTranscript = userTranscript;
             this.lastAnalysisTime = now;
 
+            // STALE ANALYSIS PREVENTION: If extract_brand_identity was already decided,
+            // ensure we're in MODIFICATION phase (not stuck in EXECUTION from a parallel analysis)
+            if (this.extractBrandIdentityDecided && this.phase === 'execution') {
+                console.log('🧠 STALE ANALYSIS DETECTED: extract_brand_identity already decided but phase is still EXECUTION → forcing MODIFICATION');
+                this.setPhase('modification'); // Use setter to update timestamp
+            }
+
+            // FILTER HISTORY FOR ISOLATION
+            // If in Modification phase, only show history that belongs to THIS phase (or is very recent)
+            // This prevents the "Interviewer" context from Discovery from confusing the "Modifier" brain.
+            let relevantHistory = this.conversationHistory;
+            if (this.phase === 'modification') {
+                relevantHistory = this.conversationHistory.filter(t => t.timestamp >= this.phaseStartTime);
+                // Ensure at least the current user message is included if timestamp mismatch occurs
+                if (relevantHistory.length === 0) {
+                    relevantHistory.push(this.conversationHistory[this.conversationHistory.length - 1]);
+                }
+            }
+
             // Build prompt from history
-            const historyText = this.conversationHistory
+            const historyText = relevantHistory
                 .map(t => {
                     const secondsAgo = Math.round((now - t.timestamp) / 1000);
                     const timeTag = secondsAgo === 0 ? '[JUST NOW]' : `[${secondsAgo}s ago]`;
@@ -818,11 +793,37 @@ export class BrainConnection {
                                 return;
                             }
 
+                            // ========== EXECUTION-TIME VALIDATION ==========
+                            // Check if this tool is STILL valid in the CURRENT phase.
+                            // This catches stale decisions from parallel analyses that started before phase transitions.
+                            // IMPORTANT: Check BEFORE setting flags so first call isn't blocked.
+                            const currentValidTools = this.getPhaseTools(this.phase);
+                            const toolIsValid = currentValidTools.some(t => t.name === toolName);
+                            if (!toolIsValid) {
+                                console.log(`🚫 [IGNORED] Stale decision for "${toolName}" from previous phase. Current phase: "${this.phase}".`);
+                                return;
+                            }
+
                             console.log(`🧠 Brain decided to call: ${toolName}`);
+
+                            // IMMEDIATE FLAG SET: Prevent parallel Brain analyses from executing again
+                            if (toolName === 'finalize_brand_dna') {
+                                this.extractBrandIdentityDecided = true;
+                                console.log('🧠 [BrainConnection] finalize_brand_dna EXECUTING - blocking future calls');
+                            }
+
                             this.interruptLive();
 
                             // Execute the tool
                             if (toolName) {
+                                // Pass conversation history for brand extraction
+                                if (toolName === 'research_competitors') {
+                                    const historyString = this.conversationHistory
+                                        .map(t => `${t.role.toUpperCase()}: ${t.transcript}`)
+                                        .join('\n');
+                                    this.toolHandler.setConversationHistory(historyString);
+                                }
+
                                 const results = await this.toolHandler.handleToolCalls([{
                                     id: `brain-${Date.now()}`,
                                     name: toolName,
@@ -874,67 +875,164 @@ export class BrainConnection {
         }
     }
 
-    private getPhaseTools(phase: 'discovery' | 'execution'): FunctionDeclaration[] {
-        // Assuming brainToolDeclarations is defined at top of file
-        const allTools = brainToolDeclarations;
+    private getPhaseTools(phase: 'discovery' | 'execution' | 'modification'): FunctionDeclaration[] {
+        // ========== ONE-TIME TOOLS FILTER ==========
+        // These tools should only be called ONCE per session. If already executed/decided, never include again.
+        const oneTimeToolsExecuted: string[] = [];
+        if (this.extractBrandIdentityDecided) {
+            oneTimeToolsExecuted.push('extract_brand_identity');
+        }
 
-        if (phase === 'discovery') {
-            // PHASE 1: LISTENER BRAIN
-            // Only allow the "Handshake" tool (research_competitors usually, or explicit transition tool)
-            return allTools.filter(t => t.name === 'research_competitors');
-        } else {
-            // PHASE 2: EXECUTOR BRAIN
-            // Allow EVERYTHING (Design tools, Updates, Research)
-            return allTools;
+        // Filter out one-time tools that have been executed FIRST, before phase logic
+        const availableTools = brainToolDeclarations.filter(t => !oneTimeToolsExecuted.includes(t.name || ''));
+
+        switch (phase) {
+            case 'discovery':
+                // PHASE 1: LISTENER BRAIN - Only the handshake trigger
+                return availableTools.filter(t => t.name === 'research_competitors');
+
+            case 'execution':
+                // PHASE 2: BUILDER BRAIN - Build tools (and Update tools for safety)
+                return availableTools.filter(t => [
+                    'generate_brand_colors',
+                    'generate_brand_fonts',
+                    'finalize_brand_dna'
+                ].includes(t.name || ''));
+
+            case 'modification':
+                // PHASE 3: MODIFIER BRAIN - Change tools only
+                return availableTools.filter(t => [
+                    'display_color_suggestions',
+                    'display_font_suggestions',
+                    'update_live_brand_dna',
+                    'general_research',
+                    'get_canvas_state',
+                    'search_logo_inspiration',
+                    'display_logo_structure_options',
+                    'display_imagery_suggestions'
+                ].includes(t.name || ''));
         }
     }
 
-    private getPhaseSystemInstruction(phase: 'discovery' | 'execution', dnaContext: string, toolHistoryXML: string, historyText: string): string {
-        if (phase === 'discovery') {
-            return [
-                'YOU ARE "THE LISTENER".',
-                'ROLE: Passive observer of a conversation between a User and Gemini Live.',
-                'GOAL: Detect when the User and AI have agreed to "Start Building".',
-                'TOOLS: You have ONE primary tool: \'research_competitors\'. This is the trigger.',
-                '',
-                'PROTOCOL:',
-                '1. LISTEN to the chat.',
-                '2. IGNORE affirmations ("Yes", "Cool", "Locked in") happening during the context gathering phase.',
-                '3. WAIT for the "HANDSHAKE":',
-                '   - AI asks: "Are you ready to build?" (or similar explicit question)',
-                '   - User responds: EXPRESSES CLEAR AGREEMENT (e.g., "Yes", "Let\'s go", "Do it", "Sure", "I am").',
-                '4. TRIGGER: Call \'research_competitors\' with all gathered context.',
-                '',
-                'STRICT RULE: DO NOT CALL ANY OTHER TOOLS. DO NOT UPDATE DNA.',
-                '',
-                'Current Context:',
-                `DNA: ${dnaContext}`,
-                `History: ${historyText}`
-            ].join('\n');
-        } else {
-            return [
-                'YOU ARE "THE EXECUTOR".',
-                'ROLE: Active Builder. You have been triggered to execute the design.',
-                'GOAL: Build the Brand automatically based on research.',
-                'TOOLS: You have ALL tools (fonts, colors, DNA updates, etc.).',
-                '',
-                'CHAIN REACTION PROTOCOL (MUST FOLLOW):',
-                '1. IF `research_competitors` was just called (see history):',
-                '   -> YOU MUST CALL `extract_brand_identity` to save the strategy.',
-                '2. IF `extract_brand_identity` was just called:',
-                '   -> YOU MUST CALL `display_font_suggestions`.',
-                '3. IF `display_font_suggestions` was just called:',
-                '   -> YOU MUST CALL `display_color_suggestions`.',
-                '',
-                'RULE:',
-                '- DO NOT STOP until you have displayed fonts AND colors.',
-                '- DO NOT WAIT for user input between these steps. CHAIN THEM.',
-                '',
-                'Context:',
-                `DNA: ${dnaContext}`,
-                toolHistoryXML,
-                `History: ${historyText}`
-            ].join('\n');
+    private getPhaseSystemInstruction(phase: 'discovery' | 'execution' | 'modification', dnaContext: string, toolHistoryXML: string, historyText: string): string {
+        // Parse DNA for context
+        let dnaObj: any = {};
+        try { dnaObj = JSON.parse(dnaContext); } catch (e) { }
+
+        // Check if Identity is already "Done" (populated in DNA)
+        // STRICTER CHECK: Must have colors and fonts to be considered "Done"
+        // This prevents research_competitors (which sets name/mission) from tricking the Brain into thinking the build is complete.
+        const hasIdentity = dnaObj && dnaObj.name && (dnaObj.mission || dnaObj.industry) &&
+            (dnaObj.colors && dnaObj.colors.length > 0) &&
+            (dnaObj.typography && dnaObj.typography.length > 0);
+
+        switch (phase) {
+            case 'discovery':
+                // PHASE 1: LISTENER BRAIN
+                console.log(`🧠 Brain Mode: DISCOVERY (Listener)`);
+                return [
+                    'YOU ARE "THE LISTENER".',
+                    'ROLE: Passive observer of a conversation between a User and Gemini Live.',
+                    'GOAL: Detect when the User and AI have agreed to "Start Building".',
+                    'TOOLS: You have ONE tool: `research_competitors` - the trigger to start building.',
+                    '',
+                    'PROTOCOL:',
+                    '1. LISTEN to the chat.',
+                    '2. IGNORE casual mentions of brand names. Just hearing "Nike" is NOT enough.',
+                    '3. WAIT for the "HANDSHAKE":',
+                    '   - AI asks: "Ready to build?" or "Shall we start?" (Must be an EXPLICIT proposal to move forward)',
+                    '   - User responds with CLEAR AGREEMENT ("Yes", "Let\'s go", "Sure", "Do it", "That\'s beautiful", "Perfect")',
+                    '   - WARNING: If AI asks "Did I capture that correctly?" and User says "Yes", NO HANDSHAKE YET. Wait for the "Ready to build?" question.',
+                    '4. CRITICAL CHECK - Do we have context?',
+                    '   - Brand Name? (REQUIRED)',
+                    '   - Industry OR Mission/Vibe? (REQUIRED)',
+                    '   - If missing, DO NOT CALL TOOL. Wait for more chat.',
+                    '5. TRIGGER: When you get the handshake:',
+                    '   - YOU MUST CALL `research_competitors` IMMEDIATELY.',
+                    '   - DO NOT just say "Starting now". YOU MUST EXECUTE THE TOOL.',
+                    '   - If you send a text response like "Starting...", ensure the tool call is ATTACHED.',
+                    '',
+                    'STRICT RULE: DO NOT CALL ANY OTHER TOOLS. DO NOT CALL PREMATURELY.',
+                    '',
+                    `DNA: ${dnaContext}`,
+                    `History: ${historyText}`
+                ].join('\n');
+
+            case 'execution': {
+                // PHASE 2: BUILDER BRAIN - Sequential Atomic Tools
+                const hasColors = dnaObj.colors && dnaObj.colors.length > 0;
+                const hasFonts = dnaObj.typography && dnaObj.typography.length > 0;
+
+                console.log(`🧠 Brain Mode: EXECUTION (Sequential Builder). Colors: ${hasColors}, Fonts: ${hasFonts}`);
+
+                return [
+                    'YOU ARE "THE BUILDER".',
+                    'PHASE: EXECUTION',
+                    'GOAL: Build the brand identity SEQUENTIALLY.',
+                    '',
+                    'PROTOCOL: EXECUTE THESE TOOLS IN ORDER. DO NOT SKIP STEPS.',
+                    '',
+                    '1. CHECK: Do we have colors?',
+                    hasColors ? '   - ✅ Colors: DONE.' : '   - ❌ Colors: MISSING. 👉 CALL `generate_brand_colors` IMMEDIATELY.',
+                    '',
+                    '2. CHECK: Do we have fonts?',
+                    hasColors
+                        ? (hasFonts ? '   - ✅ Fonts: DONE.' : '   - ❌ Fonts: MISSING. 👉 CALL `generate_brand_fonts` IMMEDIATELY.')
+                        : '   - ⏳ Wait for colors first.',
+                    '',
+                    '3. CHECK: Finalize?',
+                    (hasColors && hasFonts)
+                        ? '   - ✅ ALL PARTS READY. 👉 CALL `finalize_brand_dna` NOW.'
+                        : '   - ⏳ Complete previous steps first.',
+                    '',
+                    `DNA: ${dnaContext}`,
+                    toolHistoryXML
+                ].join('\n');
+            }
+
+            case 'modification':
+                // PHASE 3: MODIFIER BRAIN - Post-canvas changes
+                // ISOLATED BRAIN: History is filtered to only include turns since this phase started.
+                const hasColors = dnaObj.colors && dnaObj.colors.length > 0;
+                const hasFonts = dnaObj.typography && dnaObj.typography.length > 0;
+                console.log(`🧠 Brain Mode: MODIFICATION (Modifier) - colors:${hasColors}, fonts:${hasFonts} - History filtered to isolate phase.`);
+                return [
+                    'YOU ARE "THE MODIFIER".',
+                    'ROLE: The canvas is COMPLETE. The User is looking at it.',
+                    'GOAL: Handle user requests to CHANGE/UPDATE specific fields or styles.',
+                    'CONTEXT: You are a FRESH AGENT. Do not care about the previous interview.',
+                    '',
+                    '⛔ FORBIDDEN (NEVER CALL):',
+                    '- `extract_brand_identity` - Identity is EXTRACTED. Calling this will RESET and ANNOY the user.',
+                    '- `research_competitors` - Research is DONE',
+                    '',
+                    '✅ YOUR TOOLS:',
+                    '- `update_live_brand_dna` - USE THIS for ANY text change (Name, Mission, Values, Tagline, etc.)',
+                    '- `display_color_suggestions` - User wants different colors',
+                    '- `display_font_suggestions` - User wants different fonts',
+                    '- `general_research` - User asks about design topics',
+                    '- `search_logo_inspiration` - User wants logo ideas',
+                    '',
+                    'SCENARIOS:',
+                    '1. "Change name to Nike" → Call `update_live_brand_dna` with { name: "Nike" }. DO NOT ask for mission/values again. You already have them.',
+                    '2. "I want warmer colors" → Call `display_color_suggestions`.',
+                    '3. "Change mission to..." → Call `update_live_brand_dna`.',
+                    '',
+                    'CRITICAL CONTEXT:',
+                    'You HAVE the full brand identity below. If the user changes ONE thing, the rest remains VALID.',
+                    'DO NOT act like you know nothing. DO NOT start the interview over.',
+                    '',
+                    'CURRENT CANVAS STATE (Visible to User):',
+                    `  Name: ${dnaObj.name || 'Unknown'}`,
+                    `  Mission: ${dnaObj.mission || 'Unknown'}`,
+                    `  Values: ${dnaObj.values ? dnaObj.values.join(', ') : 'Unknown'}`,
+                    `  Tagline: ${dnaObj.tagline || 'Unknown'}`,
+                    `  Colors: ${hasColors ? dnaObj.colors.slice(0, 4).join(', ') : 'None'}`,
+                    `  Fonts: ${hasFonts ? dnaObj.typography.join(', ') : 'None'}`,
+                    '',
+                    `History (This Phase Only):`,
+                    `${historyText}`
+                ].join('\n');
         }
     }
     /**

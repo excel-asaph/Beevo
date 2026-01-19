@@ -196,9 +196,10 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
         ? colorOptions[0].colors
         : dna.colors || [];
 
+    // Pass full font objects to preserve pairing data for display
     const displayFonts = fontOptions.length > 0
-        ? fontOptions.map(f => f.name)
-        : dna.typography || [];
+        ? fontOptions
+        : dna.typography?.map((name: string) => ({ name, category: 'sans-serif' })) || [];
 
     const logoImages = logoInspirations.map(l => ({
         url: l.url,

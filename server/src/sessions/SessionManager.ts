@@ -464,11 +464,19 @@ ${canvasInfo}
                     const coreData = JSON.parse(jsonMatch[0]);
                     console.log('✅ STAGE 1 COMPLETE: Core DNA Extracted', coreData);
 
-                    // Inject into ToolHandler - this triggers the Canvas to OPEN
-                    if (session.geminiConnection?.toolHandler) {
-                        session.geminiConnection.toolHandler.handleExtractBrandIdentity(coreData);
+                    // Update state directly with extracted core data
+                    if (coreData.brandName) session.stateManager.update('name', coreData.brandName);
+                    if (coreData.mission) session.stateManager.update('mission', coreData.mission);
+                    if (coreData.voice) session.stateManager.update('voice', coreData.voice);
 
-                        // Notify Voice AI to narrate progress
+                    // Broadcast DNA update
+                    this.sendToClient(session.id, {
+                        type: 'DNA_UPDATE',
+                        dna: session.stateManager.getDNA()
+                    });
+
+                    // Notify Voice AI to narrate progress
+                    if (session.geminiConnection) {
                         session.geminiConnection.sendText(`[SYSTEM EVENT: Core Brand Identity (Name: ${coreData.brandName}) has been extracted and the Canvas is now visible to the user. Briefly confirm this and mention you are now analyzing the visual style.]`);
                     }
                 } else {
@@ -529,11 +537,26 @@ ${canvasInfo}
                     const visualData = JSON.parse(jsonMatch[0]);
                     console.log('✅ STAGE 2 COMPLETE: Visuals Extracted', visualData);
 
-                    // Inject into ToolHandler - this Populates the Cards
-                    if (session.geminiConnection?.toolHandler) {
-                        session.geminiConnection.toolHandler.handleExtractBrandIdentity(visualData);
+                    // Update state with extracted visual data
+                    if (visualData.colors?.palettes?.[0]?.colors) {
+                        session.stateManager.update('colors', visualData.colors.palettes[0].colors);
+                        session.currentPalettes = visualData.colors.palettes;
+                    }
+                    if (visualData.typography?.fonts) {
+                        session.stateManager.update('typography', visualData.typography.fonts.map((f: any) => f.name));
+                        session.currentFonts = visualData.typography.fonts;
+                    }
+                    if (visualData.logoType) session.stateManager.update('logoType', visualData.logoType);
+                    if (visualData.imagery) session.stateManager.update('imagery', visualData.imagery);
 
-                        // Notify Voice AI to narrate completion
+                    // Broadcast DNA update
+                    this.sendToClient(session.id, {
+                        type: 'DNA_UPDATE',
+                        dna: session.stateManager.getDNA()
+                    });
+
+                    // Notify Voice AI to narrate completion
+                    if (session.geminiConnection) {
                         session.geminiConnection.sendText(`[SYSTEM EVENT: Visual assets (Colors, Fonts, Logo Style) have now been extracted and added to the canvas. The brand analysis is complete. Ask the user what they think of the extracted style.]`);
                     }
                 }

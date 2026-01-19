@@ -13,6 +13,7 @@ export interface FontOption {
     id: string;
     name: string;
     category: 'serif' | 'sans-serif' | 'display' | 'monospace';
+    pairing?: string;
     reasoning?: string;
 }
 

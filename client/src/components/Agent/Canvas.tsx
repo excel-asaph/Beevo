@@ -265,7 +265,27 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 competitors: competitors || [],
                 thoughts: thoughts || []
             });
-            addThinkingStep(message, status === 'complete' ? 'complete' : 'active');
+
+            // Sync thinkingPhase with research status
+            const phaseMap: Record<string, ThinkingPhase> = {
+                'started': 'analyzing',
+                'searching': 'researching',
+                'analyzing': 'analyzing',
+                'generating': 'generating',
+                'complete': 'complete'
+            };
+            setThinkingPhase(phaseMap[status] || 'analyzing');
+
+            // Use server thoughts directly for ThinkingPanel during research
+            // This prevents duplicates by replacing local state with server state
+            if (thoughts && thoughts.length > 0) {
+                setThinkingSteps(thoughts);
+            }
+
+            // When complete, ensure ALL thoughts are marked complete
+            if (status === 'complete') {
+                setThinkingSteps(prev => prev.map(t => ({ ...t, status: 'complete' as const })));
+            }
         },
 
         onThoughtSignature: (nodeId, title, reasoning, confidence) => {

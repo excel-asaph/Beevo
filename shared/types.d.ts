@@ -1,12 +1,9 @@
-// Shared types between client and server
-
-export enum Junction {
-    STRATEGIST = 'STRATEGIST',
-    ARCHITECT = 'ARCHITECT',
-    FORGE = 'FORGE',
-    GUARDIAN = 'GUARDIAN'
+export declare enum Junction {
+    STRATEGIST = "STRATEGIST",
+    ARCHITECT = "ARCHITECT",
+    FORGE = "FORGE",
+    GUARDIAN = "GUARDIAN"
 }
-
 export interface BrandDNA {
     name: string;
     mission: string;
@@ -18,9 +15,8 @@ export interface BrandDNA {
     targetAudience?: string;
     keywords?: string[];
     logoUrl?: string;
-    // Phase 9: Logo & Competitive Intelligence
-    logoType?: string; // wordmark, lettermark, emblem, combination mark
-    imagery?: string; // symbols, icons, abstract shapes
+    logoType?: string;
+    imagery?: string;
     designGoals?: string;
     logoInspiration?: string;
     logoUsageContexts?: string[];
@@ -30,22 +26,14 @@ export interface BrandDNA {
         patterns: string;
         recommendation: string;
     };
-    // General research results - Brain can reference these for context
-    researchInsights?: Array<{
-        query: string;
-        result: string;
-        focus?: string;
-        timestamp: number;
-    }>;
     logoAssets?: Array<{
         id: string;
         url: string;
-        name?: string; // Brand name or alt text
+        name?: string;
         style?: string;
         reasoning?: string;
     }>;
 }
-
 export interface SWOT {
     strengths: string[];
     weaknesses: string[];
@@ -53,7 +41,6 @@ export interface SWOT {
     threats: string[];
     strategicGap: string;
 }
-
 export interface CampaignAsset {
     id: string;
     type: 'image' | 'video';
@@ -62,7 +49,6 @@ export interface CampaignAsset {
     status: 'pending' | 'completed' | 'failed';
     feedback?: string;
 }
-
 export interface ThoughtSignature {
     id: string;
     junction: Junction;
@@ -70,36 +56,26 @@ export interface ThoughtSignature {
     logic: string;
     confidence: number;
 }
-
-// Font suggestion from AI
 export interface FontSuggestion {
     name: string;
     category: 'serif' | 'sans-serif' | 'display' | 'handwriting' | 'monospace';
     reasoning: string;
 }
-
-// Color palette suggestion from AI
 export interface ColorPalette {
     name: string;
     colors: string[];
     vibe: string;
 }
-
-// Logo structure suggestion
 export interface LogoStructureOption {
     type: 'wordmark' | 'lettermark' | 'emblem' | 'combination';
     reasoning: string;
-    suitability: string; // High, Medium, Low
+    suitability: string;
 }
-
-// Imagery/Iconography suggestion
 export interface ImagerySuggestion {
     concept: string;
     description: string;
     visualStyle: string;
 }
-
-// Logo search result/inspiration
 export interface LogoInspiration {
     id: string;
     url: string;
@@ -107,16 +83,12 @@ export interface LogoInspiration {
     source?: string;
     description?: string;
 }
-
-// Progress item for tracking finalized decisions
 export interface ProgressItem {
     field: 'name' | 'mission' | 'font' | 'colors' | 'voice' | 'logoType' | 'imagery';
     value: any;
     finalized: boolean;
     timestamp: number;
 }
-
-// Session state
 export interface ArchitectSession {
     id: string;
     isActive: boolean;
@@ -130,3 +102,4 @@ export interface ArchitectSession {
         previewText?: string;
     };
 }
+//# sourceMappingURL=types.d.ts.map

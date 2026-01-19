@@ -7,6 +7,7 @@ export interface FontOption {
     id: string;
     name: string;
     category: 'serif' | 'sans-serif' | 'display' | 'monospace';
+    pairing?: string;
     preview?: string;
     reasoning?: string;
 }
@@ -68,16 +69,33 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
                         >
                             {font.name}
                         </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors[font.category]}`}>
-                            {font.category}
-                        </span>
+                        <div className="flex gap-2 items-center">
+                            {font.pairing && (
+                                <span className="text-xs text-slate-400 font-normal">
+                                    + {font.pairing}
+                                </span>
+                            )}
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors[font.category]}`}>
+                                {font.category}
+                            </span>
+                        </div>
                     </div>
-                    <p
-                        className="text-sm text-slate-600"
-                        style={{ fontFamily: font.name }}
-                    >
-                        {font.preview || 'The quick brown fox jumps over the lazy dog'}
-                    </p>
+                    <div className="space-y-1">
+                        <p
+                            className="text-sm text-slate-600 truncate"
+                            style={{ fontFamily: font.name }}
+                        >
+                            The quick brown fox jumps over the lazy dog
+                        </p>
+                        {font.pairing && (
+                            <p
+                                className="text-xs text-slate-500 truncate opacity-80"
+                                style={{ fontFamily: font.pairing }}
+                            >
+                                The quick brown fox jumps over the lazy dog
+                            </p>
+                        )}
+                    </div>
                     {font.reasoning && hoveredFont === font.id && (
                         <motion.p
                             initial={{ opacity: 0, height: 0 }}
@@ -126,16 +144,33 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
                         >
                             {font.name}
                         </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors[font.category]}`}>
-                            {font.category}
-                        </span>
+                        <div className="flex gap-2 items-center">
+                            {font.pairing && (
+                                <span className="text-xs text-slate-400 font-normal">
+                                    + {font.pairing}
+                                </span>
+                            )}
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors[font.category]}`}>
+                                {font.category}
+                            </span>
+                        </div>
                     </div>
-                    <p
-                        className="text-sm text-slate-600"
-                        style={{ fontFamily: font.name }}
-                    >
-                        Aa Bb Cc 123
-                    </p>
+                    <div className="space-y-1">
+                        <p
+                            className="text-sm text-slate-600 truncate"
+                            style={{ fontFamily: font.name }}
+                        >
+                            Aa Bb Cc 123
+                        </p>
+                        {font.pairing && (
+                            <p
+                                className="text-xs text-slate-500 truncate opacity-80"
+                                style={{ fontFamily: font.pairing }}
+                            >
+                                Aa Bb Cc 123
+                            </p>
+                        )}
+                    </div>
                 </motion.div>
             ))}
         </div>

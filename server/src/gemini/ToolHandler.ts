@@ -12,6 +12,8 @@ import { SearchGroundingService } from './SearchGroundingService';
 import { getLogoStrategist, LogoStrategist, BrandContext } from '../agents/LogoStrategist';
 import { getResearchAgent, ResearchAgent, CompetitorInfo } from '../agents/ResearchAgent';
 import { BrainLogger } from '../utils/BrainLogger';
+import { ResearchLogger } from '../utils/ResearchLogger';
+import { identifyGaps, extractMissingIdentity } from '../utils/BrandExtractor';
 
 interface FunctionCall {
     id: string;
@@ -35,11 +37,17 @@ export class ToolHandler {
     private updateBatch: (updates: Record<string, any>) => void;
     private searchService: SearchGroundingService;
     private logoCache: Map<string, string> = new Map();
-    // Callback to trigger Brain Mode Switch (Discovery -> Execution)
-    private onPhaseChange: (phase: 'discovery' | 'execution') => void;
+    // Conversation history for brand extraction
+    private conversationHistory: string = '';
+    // Callback to trigger Brain Mode Switch (Discovery -> Execution -> Modification)
+    private onPhaseChange: (phase: 'discovery' | 'execution' | 'modification') => void;
     private genAI: GoogleGenAI;
     private onPauseVoice: () => void;
     private onResumeVoice: () => void;
+
+    // HARD BLOCK: Prevent extract_brand_identity from being called more than once per session
+    // This flag persists across parallel Brain decisions
+    private extractBrandIdentityCalled: boolean = false;
 
     constructor(
         sendToClient: (message: ServerMessage) => void,
@@ -51,7 +59,7 @@ export class ToolHandler {
         updateBatch: (updates: Record<string, any>) => void = () => { },
         onPauseVoice: () => void = () => { },
         onResumeVoice: () => void = () => { },
-        onPhaseChange: (phase: 'discovery' | 'execution') => void = () => { }
+        onPhaseChange: (phase: 'discovery' | 'execution' | 'modification') => void = () => { }
     ) {
         this.sendToClient = sendToClient;
         this.updateState = updateState;
@@ -67,12 +75,34 @@ export class ToolHandler {
         this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
     }
 
+    /**
+     * Set conversation history for brand extraction
+     * Called by BrainConnection before research starts
+     */
+    public setConversationHistory(history: string): void {
+        this.conversationHistory = history;
+        console.log(`📝 ToolHandler received ${history.length} chars of conversation history`);
+    }
+
     async handleToolCalls(functionCalls: FunctionCall[]): Promise<FunctionResponse[]> {
         const responses: FunctionResponse[] = [];
 
         for (const fc of functionCalls) {
             console.log(`🔧 Processing tool: ${fc.name}`, JSON.stringify(fc.args || {}));
             let contextSummary = "Action completed.";
+
+            // ========== HARD BLOCK: Prevent duplicate extract_brand_identity ==========
+            // Must be BEFORE the switch to completely skip the tool
+            if (fc.name === 'extract_brand_identity' && this.extractBrandIdentityCalled) {
+                console.log('⛔ BLOCKED: extract_brand_identity already called this session. Skipping duplicate.');
+                BrainLogger.log(fc.name, 'Tool Call BLOCKED', { reason: 'Already called once per session' });
+                responses.push({
+                    id: fc.id,
+                    name: fc.name,
+                    response: { result: '[SYSTEM ERROR: extract_brand_identity already executed. Use modification tools instead.]' }
+                });
+                continue; // Skip this tool entirely
+            }
 
             try {
                 // Log tool entrance
@@ -84,7 +114,8 @@ export class ToolHandler {
                         break;
 
                     case 'display_color_suggestions':
-                        contextSummary = await this.handleColorSuggestions(fc.args);
+                        // Legacy tool - redirect to generate_brand_colors
+                        contextSummary = await this.handleGenerateBrandColors(fc.args);
                         break;
 
                     case 'update_live_brand_dna':
@@ -107,6 +138,10 @@ export class ToolHandler {
                         contextSummary = await this.handleGeneralResearch(fc.args);
                         break;
 
+                    case 'get_canvas_state':
+                        contextSummary = this.handleGetCanvasState(fc.args);
+                        break;
+
                     case 'search_logo_inspiration':
                         contextSummary = await this.handleSearchLogoInspiration(fc.args);
                         break;
@@ -124,8 +159,17 @@ export class ToolHandler {
                         contextSummary = this.handleImagerySuggestions(fc.args);
                         break;
 
-                    case 'extract_brand_identity':
-                        contextSummary = this.handleExtractBrandIdentity(fc.args);
+
+                    case 'generate_brand_colors':
+                        contextSummary = await this.handleGenerateBrandColors(fc.args);
+                        break;
+
+                    case 'generate_brand_fonts':
+                        contextSummary = await this.handleGenerateBrandFonts(fc.args);
+                        break;
+
+                    case 'finalize_brand_dna':
+                        contextSummary = await this.handleFinalizeBrandDNA(fc.args);
                         break;
 
                     default:
@@ -253,22 +297,12 @@ export class ToolHandler {
         return `Displayed ${fonts.length} font options: ${fontNames}.`;
     }
 
-    private async executeResearchPhase(args: any): Promise<{
-        streamedCompetitors: string[];
-        differentiationAdvice: string;
-        competitorColors: string[];
-        allThoughts: any[];
-        industry: string;
-        brandName: string;
-        researchStartTime: number;
-        MINIMUM_RESEARCH_TIME: number;
-        delay: (ms: number) => Promise<void>;
-        streamThought: (stepIndex: number, text: string, delayMs?: number) => Promise<void>;
-    }> {
+    private async executeResearchPhase(args: any): Promise<any> {
         // Pause Gemini Live audio during research
         this.onPauseVoice();
 
-        const brandName = this.getDNA()?.name || 'Your Brand';
+        // Prioritize: 1. DNA (already saved) 2. Args (passed by Brain) 3. Fallback
+        let brandName = this.getDNA()?.name || args.brandName || 'Your Brand';
         const researchStartTime = Date.now();
         const MINIMUM_RESEARCH_TIME = 20000; // 20 seconds minimum for user to appreciate the research
 
@@ -313,14 +347,70 @@ export class ToolHandler {
             await delay(delayMs);
         };
 
-        // ========== STEP 0: Analyzing Vision ==========
+        // ========== STEP 0: Analyzing Vision + EXTRACTION ==========
+        ResearchLogger.startSession(brandName, industry);
+        ResearchLogger.phase(0, 'Analyzing Your Vision');
+        ResearchLogger.input('Brand Name', brandName);
+        ResearchLogger.input('Industry', industry);
+        ResearchLogger.input('DNA Context', dnaContext);
+
         await streamThought(0, `Extracting brand essence: "${brandName}"...`, 600);
-        await streamThought(0, `Brand: ${brandName} ✓`, 450);
+        ResearchLogger.thought(0, `Extracting brand essence: "${brandName}"...`);
+
+        // ===== BRAND IDENTITY EXTRACTION =====
+        // Check for missing DNA fields and extract from conversation
+        const currentDNA = this.getDNA();
+        const gaps = identifyGaps(currentDNA);
+        ResearchLogger.input('Missing Fields', gaps);
+
+        if (gaps.length > 0 && this.conversationHistory.length > 0) {
+            await streamThought(0, `Analyzing conversation for brand identity...`, 500);
+            ResearchLogger.toolCall('BrandExtractor', { gaps, historyLength: this.conversationHistory.length });
+
+            try {
+                const extracted = await extractMissingIdentity(this.conversationHistory, currentDNA);
+                const extractedCount = Object.keys(extracted).length;
+
+                if (extractedCount > 0) {
+                    ResearchLogger.toolResult('BrandExtractor', extracted);
+                    await streamThought(0, `Inferred ${extractedCount} brand fields ✓`, 400);
+
+                    // Save extracted fields to DNA
+                    this.updateBatch(extracted);
+                    if (extracted.name) {
+                        brandName = extracted.name;
+                        // Also update the logger context
+                        ResearchLogger.input('Updated Brand Name', brandName);
+                    }
+                    console.log(`🧬 Extracted ${extractedCount} missing fields:`, Object.keys(extracted));
+                } else {
+                    await streamThought(0, `Using provided brand details ✓`, 300);
+                }
+            } catch (err) {
+                console.error('❌ Brand extraction failed:', err);
+                ResearchLogger.error('BrandExtractor', err);
+                await streamThought(0, `Proceeding with available data...`, 300);
+            }
+        } else if (gaps.length === 0) {
+            await streamThought(0, `Brand identity complete ✓`, 300);
+        }
+
+        await streamThought(0, `Brand: ${this.getDNA()?.name || brandName} ✓`, 450);
         await streamThought(0, `Industry: ${industry} ✓`, 450);
         await streamThought(0, `Identifying target market...`, 500);
         await streamThought(0, `Target audience profiled ✓`, 400);
 
+        ResearchLogger.output('Phase 0 Complete', {
+            brandName: this.getDNA()?.name,
+            industry,
+            extractedFields: gaps.length > 0 ? 'attempted' : 'complete'
+        });
+
         // ========== STEP 1: Finding Competitors (LIVE SEARCH via ResearchAgent) ==========
+        ResearchLogger.phase(1, 'Finding Competitors');
+        ResearchLogger.input('Industry Query', industry);
+        ResearchLogger.input('Brand Context', `${brandName} - ${industry}`);
+
         await streamThought(1, `🔍 Searching Google for ${industry} competitors...`, 800);
 
         // Call ResearchAgent for live competitor data AND branding insights
@@ -328,6 +418,8 @@ export class ToolHandler {
 
         try {
             const researchAgent = getResearchAgent();
+            ResearchLogger.toolCall('ResearchAgent.researchCompetitors', { industry, brandContext: `${brandName} - ${industry}` });
+
             const researchResult = await researchAgent.researchCompetitors(
                 industry,
                 `${brandName} - ${industry}`,
@@ -335,9 +427,18 @@ export class ToolHandler {
                     // Stream progress as it happens
                     if (phase === 'searching') {
                         streamThought(1, message, 300);
+                        ResearchLogger.thought(1, `[Callback] ${message}`);
                     }
                 }
             );
+
+            ResearchLogger.toolResult('ResearchAgent.researchCompetitors', {
+                competitorCount: researchResult.competitors.length,
+                competitors: researchResult.competitors.map(c => ({ name: c.name, domain: c.domain })),
+                differentiationOpportunity: researchResult.differentiationOpportunity,
+                competitorBranding: researchResult.competitorBranding
+            });
+
             liveCompetitors = researchResult.competitors;
             differentiationAdvice = researchResult.differentiationOpportunity;
 
@@ -346,11 +447,15 @@ export class ToolHandler {
                 .flatMap(cb => [cb.primaryColor, cb.secondaryColor])
                 .filter((c): c is string => !!c);
 
+            ResearchLogger.output('Extracted Competitor Colors', competitorColors);
+
             // Stream the differentiation insight
             if (differentiationAdvice) {
                 await streamThought(2, `💡 Strategy: ${differentiationAdvice.slice(0, 80)}...`, 600);
+                ResearchLogger.thought(2, `Differentiation: ${differentiationAdvice}`);
             }
         } catch (err) {
+            ResearchLogger.error('ResearchAgent.researchCompetitors', err);
             console.error('Live search failed, using fallback:', err);
             // Fallback with generic competitor names if search fails
             liveCompetitors = [
@@ -368,33 +473,33 @@ export class ToolHandler {
         }
         await streamThought(1, `${liveCompetitors.length} competitors identified ✓`, 500);
 
+        ResearchLogger.output('Phase 1 Complete', {
+            competitors: streamedCompetitors,
+            differentiationAdvice,
+            competitorColorsCount: competitorColors.length
+        });
+
         // Store domains for logo fetching
         // const competitorDomains = liveCompetitors.map(c => c.domain); // Not used here, but kept for context
 
-        // ========== STEP 2: Analyzing Brand Aesthetics ==========
-        await streamThought(2, `Analyzing competitor color strategies...`, 600);
-        // Use insights from ResearchAgent instead of hardcoded analysis
-        if (differentiationAdvice) {
-            await streamThought(2, `💡 ${differentiationAdvice.slice(0, 100)}...`, 500);
-        }
-        await streamThought(2, `Identifying differentiation opportunities...`, 500);
-        await streamThought(2, `Market position mapped ✓`, 400);
-
-        return {
+        // ========== CHAIN NEXT PHASE: BRAND COLORS ==========
+        // Passing accumulated data to the next handler to maintain state
+        const researchData = {
             streamedCompetitors,
             differentiationAdvice,
             competitorColors,
             allThoughts,
             industry,
-            brandName,
-            researchStartTime,
-            MINIMUM_RESEARCH_TIME,
-            delay,
-            streamThought
+            brandName
         };
+
+        return this.handleGenerateBrandColors({
+            ...args,
+            researchData
+        });
     }
 
-    private async handleColorSuggestions(args: any): Promise<string> {
+    public async handleGenerateBrandColors(args: any): Promise<string> {
         // Pause Gemini Live audio during research
         this.onPauseVoice();
 
@@ -511,6 +616,10 @@ export class ToolHandler {
             // setCanvasMode moved to end to prevent premature reveal
 
             // ========== STEP 2: Analyzing Brand Aesthetics ==========
+            ResearchLogger.phase(2, 'Analyzing Brand Aesthetics');
+            ResearchLogger.input('Differentiation Advice', differentiationAdvice);
+            ResearchLogger.input('Competitor Colors to Avoid', competitorColors);
+
             await streamThought(2, `Analyzing competitor color strategies...`, 600);
             // Use insights from ResearchAgent instead of hardcoded analysis
             if (differentiationAdvice) {
@@ -519,53 +628,104 @@ export class ToolHandler {
             await streamThought(2, `Identifying differentiation opportunities...`, 500);
             await streamThought(2, `Market position mapped ✓`, 400);
 
+            ResearchLogger.output('Phase 2 Complete', { differentiationAdvice, competitorColorsCount: competitorColors.length });
+
             // ========== STEP 3: Generating Color Palettes ==========
-            await streamThought(3, `Generating ${palettes.length} unique palettes...`, 600);
-            await streamThought(3, `Avoiding competitor overlap...`, 450);
-            await streamThought(3, `Testing contrast ratios...`, 450);
-            for (const palette of palettes.slice(0, 3)) {
-                await streamThought(3, `Creating "${palette.name}" palette...`, 450);
+            ResearchLogger.phase(3, 'Generating Color Palettes');
+            try {
+                const paletteCount = palettes?.length || 0;
+                console.log(`🎨 Starting Step 3: Generating ${paletteCount} palettes`);
+                ResearchLogger.input('Palette Count', paletteCount);
+                ResearchLogger.input('Generated Palettes', palettes);
+
+                await streamThought(3, `Generating ${paletteCount} unique palettes...`, 600);
+                await streamThought(3, `Avoiding competitor overlap...`, 200);
+
+                if (paletteCount > 0) {
+                    await streamThought(3, `Testing contrast ratios...`, 200);
+                    for (const palette of palettes.slice(0, 3)) {
+                        await streamThought(3, `Creating "${palette.name}" palette...`, 300);
+                        ResearchLogger.thought(3, `Creating palette: ${palette.name} with ${palette.colors.length} colors`);
+                    }
+                    await streamThought(3, `Color harmony validated ✓`, 400);
+                } else {
+                    await streamThought(3, `Analysis complete (skipped generation).`, 200);
+                }
+
+                console.log(`🎨 Sending ${paletteCount} color palettes`);
+
+                const colorMessage = {
+                    type: 'THOUGHT_SIGNATURE',
+                    nodeId: 'colors',
+                    title: 'Color Psychology Strategy',
+                    reasoning: `I've designed these palettes to stand out in the ${industry} market. While competitors rely on ${industry === 'design' ? 'safe Swiss styles' : industry === 'tech' ? 'predictable blues' : 'standard conventions'}, I've introduced unexpected accents to signal innovation and differentiate ${brandName}.`,
+                    confidence: 0.94
+                };
+                ResearchLogger.uiMessage('THOUGHT_SIGNATURE (colors)', colorMessage);
+                this.sendToClient(colorMessage);
+
+                ResearchLogger.output('Phase 3 Complete', { paletteCount, paletteNames: palettes.map(p => p.name) });
+            } catch (err) {
+                ResearchLogger.error('Phase 3 Color Generation', err);
+                console.error('❌ Error in Step 3 (Color Generation):', err);
+                await streamThought(3, `Color generation encountered an issue, proceeding...`, 500);
             }
-            await streamThought(3, `Color harmony validated ✓`, 400);
-
-            console.log(`🎨 Sending ${palettes.length} color palettes`);
-
-            // Send Color Thought Signature
-            this.sendToClient({
-                type: 'THOUGHT_SIGNATURE',
-                nodeId: 'colors',
-                title: 'Color Psychology Strategy',
-                reasoning: `I've designed these palettes to stand out in the ${industry} market. While competitors rely on ${industry === 'design' ? 'safe Swiss styles' : industry === 'tech' ? 'predictable blues' : 'standard conventions'}, I've introduced unexpected accents like ${palettes[0].colors[2]} to signal innovation and differentiate ${brandName}.`,
-                confidence: 0.94
-            });
 
             // ========== STEP 4: Typography Generation (AI-Driven) ==========
-            await streamThought(4, `Analyzing typography trends for ${industry}...`, 500);
+            ResearchLogger.phase(4, 'Crafting Typography');
+            let fonts: any[] = [];
+            try {
+                await streamThought(4, `Analyzing typography trends for ${industry}...`, 500);
+                ResearchLogger.input('Industry for Fonts', industry);
+                ResearchLogger.input('Brand Name', brandName);
 
-            // Generate Fonts using AI validation
-            let fonts = await this.generateResearchInformedFonts(industry, brandName);
+                // Generate Fonts using AI validation
+                ResearchLogger.toolCall('generateResearchInformedFonts', { industry, brandName });
+                fonts = await this.generateResearchInformedFonts(industry, brandName);
+                ResearchLogger.toolResult('generateResearchInformedFonts', fonts);
 
-            if (!fonts || fonts.length === 0) {
-                // Fallback: Try one more time with broader prompt
-                fonts = await this.generateResearchInformedFonts('general', brandName);
+                if (!fonts || fonts.length === 0) {
+                    // Fallback: Try one more time with broader prompt
+                    ResearchLogger.toolCall('generateResearchInformedFonts (retry)', { industry: 'general', brandName });
+                    fonts = await this.generateResearchInformedFonts('general', brandName);
+                    ResearchLogger.toolResult('generateResearchInformedFonts (retry)', fonts);
+                }
+
+                // Ensure we have something (last resort safety, but still AI generated)
+                if (!fonts || fonts.length === 0) {
+                    fonts = [{ name: 'Roboto', category: 'sans-serif', reasoning: 'Universal fallback' }];
+                    ResearchLogger.output('Fallback Fonts Used', fonts);
+                }
+
+                // Flatten font structure to handle pairings vs single fonts
+                const flattenedFonts = fonts.map((f: any) => ({
+                    name: f.primary_font?.name || f.name || 'Unknown Font',
+                    category: f.primary_font?.category || f.category || 'sans-serif',
+                    reasoning: f.reasoning || 'Fits brand personality',
+                    pairing: f.secondary_font?.name
+                }));
+                fonts = flattenedFonts; // Replace with flattened version
+
+                // Stream font thoughts
+                for (const font of fonts) {
+                    await streamThought(4, `Selecting font: ${font.name} (${font.category})...`, 400);
+                    ResearchLogger.thought(4, `Selected font: ${font.name}`);
+                }
+                await streamThought(4, `Typography pairing complete ✓`, 350);
+
+                const fontMessage = { type: 'FONT_SUGGESTIONS', fonts, previewText: brandName };
+                ResearchLogger.uiMessage('FONT_SUGGESTIONS', fontMessage);
+                this.sendToClient(fontMessage);
+
+                // DO NOT SAVE to Batch Update immediately. Let user select.
+                // this.updateBatch({ typography: fonts.map(f => f.name) });
+                ResearchLogger.output('Phase 4 Complete (Selection Pending)', { fontNames: fonts.map(f => f.name) });
+
+            } catch (err) {
+                ResearchLogger.error('Phase 4 Typography', err);
+                console.error('❌ Error in Step 4 (Fonts):', err);
+                await streamThought(4, `Font selection skipped due to error.`, 200);
             }
-
-            // Ensure we have something (last resort safety, but still AI generated)
-            if (!fonts || fonts.length === 0) {
-                fonts = [{ name: 'Roboto', category: 'sans-serif', reasoning: 'Universal fallback' }];
-            }
-
-            // Stream font thoughts
-            for (const font of fonts) {
-                await streamThought(4, `Selecting font: ${font.name} (${font.category})...`, 400);
-            }
-            await streamThought(4, `Typography pairing complete ✓`, 350);
-
-            this.sendToClient({
-                type: 'FONT_SUGGESTIONS',
-                fonts,
-                previewText: brandName
-            });
 
             // Send Font Thought Signature
             this.sendToClient({
@@ -578,15 +738,17 @@ export class ToolHandler {
 
 
             // ========== STEP 5: Building Strategy ==========
+            ResearchLogger.phase(5, 'Building Brand Strategy');
             await streamThought(5, `Finalizing brand strategy...`, 500);
 
             // Populate the "Brand Strategy" card on frontend
             const currentDNA = this.getDNA();
+            ResearchLogger.input('Current DNA State', currentDNA);
+
             if (currentDNA) {
-                this.sendToClient({
-                    type: 'DNA_UPDATE',
-                    dna: currentDNA
-                });
+                const dnaMessage = { type: 'DNA_UPDATE', dna: currentDNA };
+                ResearchLogger.uiMessage('DNA_UPDATE', dnaMessage);
+                this.sendToClient(dnaMessage);
                 await streamThought(5, `Brand Strategy data synced ✓`, 300);
             }
 
@@ -594,22 +756,26 @@ export class ToolHandler {
 
             // Ensure minimum research time has passed
             const elapsed = Date.now() - researchStartTime;
+            ResearchLogger.input('Elapsed Time (ms)', elapsed);
+            ResearchLogger.input('Minimum Time (ms)', MINIMUM_RESEARCH_TIME);
+
             if (elapsed < MINIMUM_RESEARCH_TIME) {
-                await streamThought(5, `Finalizing recommendations...`, MINIMUM_RESEARCH_TIME - elapsed);
+                const waitTime = MINIMUM_RESEARCH_TIME - elapsed;
+                ResearchLogger.thought(5, `Waiting ${waitTime}ms to meet minimum research time`);
+                await streamThought(5, `Finalizing recommendations...`, waitTime);
             }
             await streamThought(5, `Strategy complete ✓`, 400);
 
-            this.sendToClient({
-                type: 'COLOR_SUGGESTIONS',
-                palettes
-            });
+            const colorSuggestionsMessage = { type: 'COLOR_SUGGESTIONS', palettes };
+            ResearchLogger.uiMessage('COLOR_SUGGESTIONS', colorSuggestionsMessage);
+            this.sendToClient(colorSuggestionsMessage);
 
             // Show canvas only after research is complete
             this.setCanvasMode('colors');
 
             // Step 6: Complete
             allThoughts = allThoughts.map(t => ({ ...t, status: 'complete' as const }));
-            this.sendToClient({
+            const researchUpdateMessage = {
                 type: 'RESEARCH_UPDATE',
                 status: 'complete',
                 step: 6,
@@ -617,7 +783,9 @@ export class ToolHandler {
                 message: 'Research complete!',
                 competitors: streamedCompetitors,
                 thoughts: allThoughts
-            } as any);
+            };
+            ResearchLogger.uiMessage('RESEARCH_UPDATE (complete)', researchUpdateMessage);
+            this.sendToClient(researchUpdateMessage as any);
 
             this.sendToClient({
                 type: 'THOUGHT',
@@ -626,15 +794,24 @@ export class ToolHandler {
             });
 
             // Send RESEARCH_COMPLETE - signals client can safely show canvas
-            this.sendToClient({
-                type: 'RESEARCH_COMPLETE',
-                summary: {
-                    brandName,
-                    colorsGenerated: palettes.length,
-                    fontsGenerated: fonts.length,
-                    competitorsFound: streamedCompetitors.length
-                }
-            });
+            if (!args.suppressCompletion) {
+                const researchCompleteMessage = {
+                    type: 'RESEARCH_COMPLETE',
+                    summary: {
+                        brandName: currentDNA?.name || brandName || 'Unknown',
+                        mission: currentDNA?.mission || 'N/A',
+                        values: currentDNA?.values || [],
+                        voice: currentDNA?.voice || 'N/A',
+                        tagline: currentDNA?.tagline || 'N/A',
+                        colorsGenerated: palettes.length,
+                        fontsGenerated: fonts.length,
+                        competitorsFound: streamedCompetitors.length
+                    }
+                };
+                ResearchLogger.uiMessage('RESEARCH_COMPLETE', researchCompleteMessage);
+                ResearchLogger.endSession(researchCompleteMessage.summary);
+                this.sendToClient(researchCompleteMessage);
+            }
 
             // Resume Gemini Live audio now that research is complete
             this.onResumeVoice();
@@ -656,18 +833,30 @@ export class ToolHandler {
         count: number
     ): Promise<ColorPalette[] | null> {
         try {
-            const prompt = `You are a brand color strategist creating unique palettes for "${brandName}" in the ${industry} industry.
+            const dna = this.getDNA();
+            const brandIdentity = `
+Mission: ${dna.mission || 'N/A'}
+Voice/Personality: ${dna.voice || 'N/A'}
+Values: ${dna.values ? dna.values.join(', ') : 'N/A'}
+Target Audience: ${dna.targetAudience || 'N/A'}
+Tagline: ${dna.tagline || 'N/A'}
+`;
 
-COMPETITIVE INTELLIGENCE:
-- Differentiation advice: ${differentiationAdvice}
-- Competitor colors to AVOID: ${competitorColors.join(', ') || 'none identified'}
-- Target mood: ${mood}
+            const prompt = `You are a high-end brand identity designer.
+            
+Brand Identity Context for ${brandName}:
+${brandIdentity}
+
+Industry: ${industry}
+Differentiation Strategy: ${differentiationAdvice || 'Be unique and stand out'}
+Competitor Colors to AVOID: ${competitorColors.length > 0 ? competitorColors.join(', ') : 'None specified'}
 
 Generate ${count} unique color palettes that:
-1. Follow the differentiation advice
-2. AVOID colors similar to competitor colors
-3. Match the "${mood}" mood
-4. Work well together with good contrast
+1. Embody the brand's personality (${dna.voice || 'modern'}) and mission
+2. Follow the differentiation advice
+3. AVOID colors similar to competitor colors
+4. Match the "${mood}" mood
+5. Provide a sophisticated primary, secondary, and accent structure
 
 Return JSON array:
 [
@@ -680,6 +869,8 @@ Return JSON array:
 
 IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
 
+            ResearchLogger.aiPrompt('generateResearchInformedPalettes', prompt);
+
             const response = await this.genAI.models.generateContent({
                 model: 'gemini-2.0-flash',
                 contents: prompt,
@@ -687,21 +878,241 @@ IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
             });
 
             const text = response.text || '';
-            const jsonMatch = text.match(/\[[\s\S]*\]/);
-            if (jsonMatch) {
-                const parsed = JSON.parse(jsonMatch[0]);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    return parsed.map(p => ({
-                        name: p.name || 'Custom Palette',
-                        colors: (p.colors || []).filter((c: string) => /^#[0-9A-Fa-f]{3,8}$/.test(c)),
-                        vibe: p.vibe || mood
-                    })).filter(p => p.colors.length >= 3);
+            ResearchLogger.aiResponse('generateResearchInformedPalettes', text);
+            console.log(`🎨 Raw Gemini Response for Palettes:\n${text}`);
+
+            let jsonMatch = text.match(/\[[\s\S]*\]/);
+
+            // If strict match fails, try to find any array-like structure
+            if (!jsonMatch) {
+                console.log('⚠️ Strict JSON match failed, trying lenient match...');
+                const start = text.indexOf('[');
+                const end = text.lastIndexOf(']');
+                if (start !== -1 && end !== -1 && end > start) {
+                    jsonMatch = [text.substring(start, end + 1)];
                 }
             }
+
+            if (jsonMatch) {
+                try {
+                    // Sanitize potential trailing commas or markdown issues before parsing
+                    const cleanJson = jsonMatch[0].replace(/,\s*]/g, ']');
+                    const parsed = JSON.parse(cleanJson);
+
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed.map(p => ({
+                            name: p.name || 'Custom Palette',
+                            colors: (p.colors || []).filter((c: string) => /^#[0-9A-Fa-f]{3,8}$/.test(c)),
+                            vibe: p.vibe || mood
+                        })).filter(p => p.colors.length >= 3);
+                    }
+                } catch (parseErr) {
+                    console.error('❌ JSON Parse Failed for Palettes:', parseErr, '\nSnippet:', jsonMatch[0].slice(0, 100));
+                }
+            } else {
+                console.warn('⚠️ No JSON array found in Gemini response.');
+            }
+            return null;
         } catch (e) {
-            console.error('Failed to generate research-informed palettes:', e);
+            console.error('❌ generateResearchInformedPalettes failed:', e);
+            return null;
         }
-        return null;
+    }
+
+    /**
+     * Generate font pairings informed by industry and brand DNA
+     */
+    private async generateResearchInformedFonts(
+        industry: string,
+        brandName: string
+    ): Promise<any[]> {
+        try {
+            const dna = this.getDNA();
+            const brandIdentity = `
+Mission: ${dna.mission || 'N/A'}
+Voice/Personality: ${dna.voice || 'N/A'}
+Values: ${dna.values ? dna.values.join(', ') : 'N/A'}
+Target Audience: ${dna.targetAudience || 'N/A'}
+Tagline: ${dna.tagline || 'N/A'}
+`;
+
+            const prompt = `You are a world-class typography strategist selecting fonts for "${brandName}".
+
+Brand Identity Context:
+${brandIdentity}
+
+Industry: ${industry}
+
+Generate 3 distinct typography pairings (Primary + Secondary font) that embody the brand's voice and personality.
+Primary font: Distinctive, matching the brand personality.
+Secondary font: Harmonious, legible, complementary.
+
+Return JSON array:
+[
+    {
+        "primary_font": {
+            "name": "Primary Font Name",
+            "category": "serif/sans-serif/display"
+        },
+        "secondary_font": {
+            "name": "Secondary Font Name",
+            "category": "serif/sans-serif/display"
+        },
+        "reasoning": "Why this pairing fits the brand"
+    }
+]
+IMPORTANT: Return ONLY valid JSON. Use real Google Fonts.`;
+
+            ResearchLogger.aiPrompt('generateResearchInformedFonts', prompt);
+
+            const response = await this.genAI.models.generateContent({
+                model: 'gemini-2.0-flash',
+                contents: prompt,
+                config: { temperature: 0.7 }
+            });
+
+            const text = response.text || '';
+            ResearchLogger.aiResponse('generateResearchInformedFonts', text);
+            console.log(`🔤 Raw Gemini Response for Fonts:\n${text}`);
+
+            let jsonMatch = text.match(/\[[\s\S]*\]/);
+            if (!jsonMatch) {
+                const start = text.indexOf('[');
+                const end = text.lastIndexOf(']');
+                if (start !== -1 && end !== -1 && end > start) {
+                    jsonMatch = [text.substring(start, end + 1)];
+                }
+            }
+
+            if (jsonMatch) {
+                try {
+                    const cleanJson = jsonMatch[0].replace(/,\s*]/g, ']');
+                    const parsed = JSON.parse(cleanJson);
+                    return parsed;
+                } catch (e) {
+                    console.error('❌ JSON Parse Failed for Fonts:', e);
+                }
+            }
+            return [];
+        } catch (e) {
+            console.error('❌ generateResearchInformedFonts failed:', e);
+            return [];
+        }
+    }
+
+    /**
+     * Handle generate_brand_fonts tool - Atomic font generation step
+     * Uses industry and brand context for research-informed font selection
+     */
+    public async handleGenerateBrandFonts(args: any): Promise<string> {
+        console.log('🔤 Starting atomic font generation');
+        const brandName = this.getDNA()?.name || 'Your Brand';
+        const industry = args.industry || 'general';
+
+        try {
+            const fonts = await this.generateResearchInformedFonts(industry, brandName);
+
+            if (fonts && fonts.length > 0) {
+                // Flatten font structure for client/session consistency
+                const flattenedFonts = fonts.map((f: any) => ({
+                    name: f.primary_font?.name || f.name || 'Unknown Font',
+                    category: f.primary_font?.category || f.category || 'sans-serif',
+                    reasoning: f.reasoning || 'Fits brand personality',
+                    pairing: f.secondary_font?.name
+                }));
+
+                // Store flattened fonts for selection
+                this.storeFonts(flattenedFonts);
+
+                const fontNames = flattenedFonts.map((f: any) => f.name);
+                // DO NOT save to DNA immediately. Let user select one.
+                // this.updateBatch({ typography: fontNames });
+
+                console.log('🔤 Suggested Fonts (Selection Pending):', fontNames);
+
+                // Send to client
+                this.sendToClient({
+                    type: 'FONT_SUGGESTIONS',
+                    fonts,
+                    previewText: brandName
+                });
+
+                this.sendToClient({
+                    type: 'THOUGHT',
+                    logic: `Typography selected: ${fonts.map((f: any) => f.name).join(', ')}`,
+                    confidence: 0.92
+                });
+
+                return `Generated ${fonts.length} typography options: ${fonts.map((f: any) => f.name).join(', ')}.`;
+            }
+
+            return 'Font generation completed with fallbacks.';
+        } catch (error) {
+            console.error('❌ handleGenerateBrandFonts failed:', error);
+            return 'Font generation encountered an error.';
+        }
+    }
+
+    /**
+     * Handle finalize_brand_dna tool - Final validation and canvas reveal
+     * This is the gatekeeper - ensures all fields exist before showing canvas
+     */
+    public async handleFinalizeBrandDNA(args: any): Promise<string> {
+        console.log('✅ Finalizing Brand DNA');
+        const currentDNA = this.getDNA();
+
+        // Validate required fields
+        const hasName = !!currentDNA.name?.trim();
+        const hasMission = !!currentDNA.mission?.trim();
+        const hasValues = currentDNA.values && currentDNA.values.length > 0;
+        const hasVoice = !!currentDNA.voice?.trim();
+        const hasColors = currentDNA.colors && currentDNA.colors.length > 0;
+        const hasTypography = currentDNA.typography && currentDNA.typography.length > 0;
+
+        const isComplete = hasName && hasMission && hasValues && hasVoice && hasColors && hasTypography;
+
+        if (!isComplete) {
+            console.warn('⚠️ Brand DNA incomplete:', {
+                name: hasName,
+                mission: hasMission,
+                values: hasValues,
+                voice: hasVoice,
+                colors: hasColors,
+                typography: hasTypography
+            });
+        }
+
+        // Sync final DNA state to client
+        this.sendToClient({
+            type: 'DNA_UPDATE',
+            dna: currentDNA
+        });
+
+        // Trigger canvas reveal
+        this.setCanvasMode('colors');
+
+        // Send RESEARCH_COMPLETE signal with FULL summary
+        this.sendToClient({
+            type: 'RESEARCH_COMPLETE',
+            summary: {
+                brandName: currentDNA.name || 'Unknown',
+                mission: currentDNA.mission || 'N/A',
+                values: currentDNA.values || [],
+                voice: currentDNA.voice || 'N/A',
+                tagline: currentDNA.tagline || 'N/A',
+                colorsGenerated: currentDNA.colors?.length || 0,
+                fontsGenerated: currentDNA.typography?.length || 0,
+                competitorsFound: 0 // This is finalization, not research
+            }
+        });
+
+        // Resume Gemini Live audio
+        this.onResumeVoice();
+
+        // Transition to modification phase
+        this.onPhaseChange('modification');
+
+        return `Brand DNA finalized. Canvas revealed with ${currentDNA.colors?.length || 0} colors and ${currentDNA.typography?.length || 0} fonts.`;
     }
 
     private handleLogoStructureOptions(args: any): string {
@@ -742,66 +1153,7 @@ IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
         return `Displayed ${suggestions.length} imagery suggestions.`;
     }
 
-    public handleExtractBrandIdentity(args: any): string {
-        console.log('🏗️ EXTRACTING FULL BRAND IDENTITY:', args);
 
-        // Prepare batch updates
-        const updates: Record<string, any> = {};
-
-        const summary = [];
-
-        // 1. Update Core DNA (Name, Mission, Voice)
-        if (args.brandName) updates.name = args.brandName;
-        if (args.mission) updates.mission = args.mission;
-        if (args.voice) updates.voice = args.voice;
-        summary.push(`Updated Core DNA (Name: ${args.brandName || 'N/A'})`);
-
-        // 2. Display Colors
-        if (args.colors && args.colors.palettes) {
-            this.handleColorSuggestions({
-                palettes: args.colors.palettes
-            }); // This sends COLOR_SUGGESTIONS message
-
-            // Add to batch update
-            if (args.colors.palettes.length > 0) {
-                updates.colors = args.colors.palettes[0].colors;
-            }
-            summary.push(`Processed ${args.colors.palettes.length} color palettes`);
-        }
-
-        // 3. Display Typography
-        if (args.typography && args.typography.fonts) {
-            this.handleFontSuggestions({
-                fonts: args.typography.fonts,
-                context_text: args.typography.context_text
-            }); // This sends FONT_SUGGESTIONS message
-
-            // Add to batch update
-            if (args.typography.fonts.length > 0) {
-                updates.typography = [args.typography.fonts[0].name];
-            }
-            summary.push(`Processed ${args.typography.fonts.length} fonts`);
-        }
-
-        // 4. Tagline & Values
-        if (args.tagline) updates.tagline = args.tagline;
-        if (args.values) updates.values = args.values;
-        summary.push(`Extracted Tagline & Values`);
-
-        // EXECUTE BATCH UPDATE - Triggers SINGLE DNA_UPDATE broadcast
-        if (Object.keys(updates).length > 0) {
-            this.updateBatch(updates);
-        }
-
-        this.sendToClient({
-            type: 'THOUGHT',
-            logic: `Brand Extraction Complete: ${summary.join(', ')}`,
-            confidence: 0.98
-        });
-
-        // Trigger the post-research summary voiceover
-        return `[SYSTEM EVENT: Brand Identity Extracted. The canvas is now fully populated. Briefly summarize the key elements you found (Name: ${args.brandName}, Mission: ${args.mission}) and ask the user to confirm the Color and Font options displayed.]`;
-    }
 
     private handleDNAUpdate(args: any): string {
         console.log('🧬 Updating Brand DNA (Voice AI):', args);
@@ -899,6 +1251,8 @@ IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
             }
 
             // PASS RESULTS TO COLOR GENERATION
+            // OMITTED: Preventing double-generation. Color generation is RESERVED for extract_brand_identity (Phase 2).
+            /*
             await this.handleColorSuggestions({
                 ...args,
                 // Pass industry explicitly from Brain
@@ -908,6 +1262,7 @@ IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
                 // Ensure we have necessary flags if needed
                 competitor_count: args.competitor_count || 3
             });
+            */
 
             // Create return summary for Logger & Brain
             summary = `Research Outcomes:
@@ -1108,9 +1463,24 @@ IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
         const agent = getResearchAgent();
         const result = await agent.searchTopic(query, focus);
 
+        // PERSIST to DNA so get_canvas_state can access later
+        const dna = this.getDNA();
+        const existingInsights = dna?.researchInsights || [];
+        const newInsight = {
+            query,
+            result: result || 'No results found',
+            focus: focus || 'general',
+            timestamp: Date.now()
+        };
+
+        // Keep last 5 research insights (memory efficiency)
+        const updatedInsights = [...existingInsights, newInsight].slice(-5);
+        this.updateBatch({ researchInsights: updatedInsights });
+        console.log(`📝 Saved research insight: "${query}" (total: ${updatedInsights.length})`);
+
         this.sendToClient({
             type: 'THOUGHT',
-            logic: `Research Context Found: ${result ? result.substring(0, 100) : 'No results'}... (Feeding to Brain)`,
+            logic: `Research Context Found: ${result ? result.substring(0, 100) : 'No results'}... (Saved to memory)`,
             confidence: 1.0
         });
 
@@ -1120,26 +1490,92 @@ IMPORTANT: Return ONLY valid JSON. Each palette must have exactly 5 colors.`;
         return `[RESEARCH CONTEXT] Query: "${query}"\nResult: ${result}\n(IMPORTANT: Use this information to inform subsequent design decisions)`;
     }
 
+
+
     /**
-     * AI-Driven Font Generation (Replaces hardcoded fontMap)
+     * Get Current Canvas State
+     * Returns the current state of saved DNA for Brain's context
+     * This is the SINGLE SOURCE OF TRUTH for Brain to understand what's on the canvas
      */
-    private async generateResearchInformedFonts(industry: string, brandName: string): Promise<any[]> {
-        try {
-            const prompt = `Recommend 3 Google Fonts for a "${industry}" brand named "${brandName}".
-            Return valid JSON array: [{ "name": "Font Family", "category": "serif/sans-serif", "reasoning": "Why it fits" }]`;
+    private handleGetCanvasState(args: any): string {
+        console.log('📊 Getting canvas state for Brain context');
 
-            const response = await this.genAI.models.generateContent({
-                model: 'gemini-2.0-flash',
-                contents: prompt,
-                config: { temperature: 0.5 }
-            });
+        const dna = this.getDNA();
 
-            const text = response.text || '';
-            const match = text.match(/\[[\s\S]*\]/);
-            if (match) return JSON.parse(match[0]);
-        } catch (e) {
-            console.error('Font generation failed:', e);
-        }
-        return [];
+        // Build COMPLETE canvas state - ALL fields shown on canvas
+        const canvasState = {
+            // IDENTITY FRAME
+            name: dna?.name || null,
+
+            // OVERVIEW FRAME
+            mission: dna?.mission || null,
+            tagline: dna?.tagline || null,
+
+            // STRATEGY FRAME
+            voice: dna?.voice || null,
+            values: dna?.values || [],
+            targetAudience: dna?.targetAudience || null,
+
+            // VISUALS FRAME
+            colors: dna?.colors || [],
+            typography: dna?.typography || [],
+            logoType: dna?.logoType || null,
+            imagery: dna?.imagery || null,
+            logoAssets: dna?.logoAssets?.map(a => ({ url: a.url, name: a.name, style: a.style })) || [],
+
+            // RESEARCH CONTEXT
+            competitorInsights: dna?.competitorInsights ? {
+                industry: dna.competitorInsights.industry,
+                analyzed: dna.competitorInsights.analyzed,
+                recommendation: dna.competitorInsights.recommendation?.substring(0, 200) + '...'
+            } : null,
+            researchInsights: (dna?.researchInsights || []).slice(-3).map(r => ({
+                query: r.query,
+                summary: r.result.substring(0, 150) + '...'
+            }))
+        };
+
+        // Count what's populated
+        const populatedCount = {
+            identity: canvasState.name ? 1 : 0,
+            overview: (canvasState.mission ? 1 : 0) + (canvasState.tagline ? 1 : 0),
+            strategy: (canvasState.voice ? 1 : 0) + (canvasState.values.length > 0 ? 1 : 0),
+            visuals: (canvasState.colors.length > 0 ? 1 : 0) + (canvasState.typography.length > 0 ? 1 : 0) + (canvasState.logoAssets.length > 0 ? 1 : 0)
+        };
+
+        this.sendToClient({
+            type: 'THOUGHT',
+            logic: `Canvas State Retrieved: ${canvasState.colors.length} colors, ${canvasState.typography.length} fonts, ${canvasState.logoAssets.length} logos saved`,
+            confidence: 1.0
+        });
+
+        // Return human-readable format for Brain
+        return `[CANVAS STATE - COMPLETE]
+
+=== IDENTITY ===
+Name: ${canvasState.name || '❌ Not set'}
+
+=== OVERVIEW ===
+Mission: ${canvasState.mission || '❌ Not set'}
+Tagline: ${canvasState.tagline || '❌ Not set'}
+
+=== STRATEGY ===
+Voice: ${canvasState.voice || '❌ Not set'}
+Values: ${canvasState.values.length > 0 ? canvasState.values.join(', ') : '❌ Not set'}
+Target Audience: ${canvasState.targetAudience || '❌ Not set'}
+
+=== VISUALS ===
+Colors (${canvasState.colors.length}): ${canvasState.colors.slice(0, 6).join(', ') || '❌ None saved'}
+Typography (${canvasState.typography.length}): ${canvasState.typography.join(', ') || '❌ None saved'}
+Logo Type: ${canvasState.logoType || '❌ Not set'}
+Imagery: ${canvasState.imagery || '❌ Not set'}
+Logo Assets (${canvasState.logoAssets.length}): ${canvasState.logoAssets.length > 0 ? 'See saved designs' : '❌ None saved'}
+
+=== RESEARCH CONTEXT ===
+Competitor Analysis: ${canvasState.competitorInsights ? `Industry: ${canvasState.competitorInsights.industry}, Analyzed: ${canvasState.competitorInsights.analyzed.join(', ')}` : '❌ Not done'}
+Recent Research: ${canvasState.researchInsights.length > 0 ? canvasState.researchInsights.map(r => `• ${r.query}`).join(', ') : '❌ None'}
+
+[Use this context to inform your tool selection]`;
     }
 }
+

@@ -10,6 +10,7 @@ export interface FontOption {
     pairing?: string;
     preview?: string;
     reasoning?: string;
+    isSelected?: boolean;
 }
 
 export interface TypographyNodeData {
@@ -58,7 +59,7 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
                         w-full p-3 rounded-lg border transition-all text-left
                         ${hoveredFont === font.id
                             ? 'border-indigo-400 bg-indigo-50 shadow-md'
-                            : 'border-slate-200 bg-white hover:border-slate-300'
+                            : (font.isSelected ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300')
                         }
                     `}
                 >
@@ -69,7 +70,12 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
                         >
                             {font.name}
                         </span>
-                        <div className="flex gap-2 items-center">
+                        {font.isSelected && (
+                            <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center ml-2">
+                                <Check className="w-2.5 h-2.5 text-white" />
+                            </div>
+                        )}
+                        <div className="flex gap-2 items-center ml-auto">
                             {font.pairing && (
                                 <span className="text-xs text-slate-400 font-normal">
                                     + {font.pairing}

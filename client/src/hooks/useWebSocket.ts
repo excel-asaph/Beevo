@@ -3,7 +3,7 @@ import type {
     ClientMessage,
     ServerMessage
 } from '@shared/messages';
-import type { BrandDNA, FontSuggestion, ColorPalette, LogoStructureOption, ImagerySuggestion } from '@shared/types';
+import type { BrandDNA, FontSuggestion, ColorPalette, LogoStructureOption, ImagerySuggestion, ResearchPhaseObject } from '@shared/types';
 
 // WebSocket connection states
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -14,6 +14,7 @@ interface UseWebSocketOptions {
     onFontSuggestions?: (fonts: FontSuggestion[], previewText: string) => void;
     onColorSuggestions?: (palettes: ColorPalette[]) => void;
     onDNAUpdate?: (dna: BrandDNA) => void;
+    onFullStateUpdate?: (state: ResearchPhaseObject) => void;
     onThought?: (logic: string) => void;
     onError?: (message: string) => void;
     onSessionStarted?: (sessionId: string) => void;
@@ -109,6 +110,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
 
                 case 'DNA_UPDATE':
                     opts.onDNAUpdate?.(message.dna);
+                    break;
+
+                case 'FULL_STATE_UPDATE':
+                    opts.onFullStateUpdate?.(message.state);
                     break;
 
                 case 'THOUGHT':

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { GoogleGenAI } from '@google/genai';
 import { GeminiLiveConnection } from '../gemini/LiveConnection';
 import { BrandStateManager } from '../state/BrandStateManager';
+import { stateManager } from '../services/StateManager';
 import {
     ClientMessage,
     ServerMessage,
@@ -32,6 +33,30 @@ interface Session {
 export class SessionManager {
     private sessions: Map<string, Session> = new Map();
 
+    constructor() {
+        // REACTIVE SYNC: Listen for global state updates
+        stateManager.on('stateUpdated', (newState: any) => {
+            console.log('🔄 [SessionManager] Detected global state update. Broadcasting to all sessions...');
+            // Broadcast to all active sessions
+            for (const [id, session] of this.sessions.entries()) {
+                if (session.isActive && session.ws.readyState === 1) { // 1 = OPEN
+                    // Sync session memory
+                    // Use updateBatch to ensure internal state matches disk
+                    session.stateManager.updateBatch(newState.brandDNA);
+
+                    // Send FULL state update (Single Source of Truth)
+                    console.log(`📦 [SessionManager] Broadcasting FULL state (v${newState.stateVersion}) to ${id}`);
+                    this.sendToClient(id, {
+                        type: 'FULL_STATE_UPDATE',
+                        state: newState
+                    });
+
+
+                }
+            }
+        });
+    }
+
     createSession(ws: WebSocket): string {
         const sessionId = uuidv4();
 
@@ -50,12 +75,46 @@ export class SessionManager {
 
         this.sessions.set(sessionId, session);
 
+        this.sessions.set(sessionId, session);
+
         // Send session ID to client
         this.sendToClient(sessionId, {
             type: 'CONNECTION_STATUS',
             status: 'connected',
             geminiConnected: false
         });
+
+        // ==========================================
+        // INITIAL STATE HYDRATION (Fix for State Loss)
+        // ==========================================
+        const existingState = stateManager.loadLatest();
+        if (existingState && existingState.brandDNA) {
+            console.log(`💧 Hydrating session ${sessionId} with existing state (v${existingState.stateVersion || '?'})`);
+
+            // 1. Populate Session State Manager
+            // (Using updateBatch to ensure all fields are correctly structured)
+            session.stateManager.updateBatch(existingState.brandDNA as any);
+
+            // 2. Send DNA Updates to Client
+
+
+            // 3. Send Colors/Fonts/etc if they exist
+            // 3. Send FULL State (Hydration)
+            console.log(`💧 Broadcasting FULL hydrated state (v${existingState.stateVersion || '?'})`);
+            this.sendToClient(sessionId, {
+                type: 'FULL_STATE_UPDATE',
+                state: existingState
+            });
+
+            // Hydrate internal session memory
+            if (existingState.colorPalettes?.palettes) session.currentPalettes = existingState.colorPalettes.palettes;
+            if (existingState.typographyPairings?.fonts) session.currentFonts = existingState.typographyPairings.fonts;
+
+            if (existingState.logoInspirations?.inspirations) {
+                // Send logo inspirations if we had a message type for it (we might need to check messages.ts)
+                // For now, we rely on DNA update which might include them if structure matches
+            }
+        }
 
         return sessionId;
     }
@@ -134,11 +193,7 @@ export class SessionManager {
                 // Callback for updating state
                 (field: string, value: any) => {
                     session.stateManager.update(field, value);
-                    // Broadcast update to client
-                    this.sendToClient(session.id, {
-                        type: 'DNA_UPDATE',
-                        dna: session.stateManager.getDNA()
-                    });
+                    // Broadcast removed: StateManager listener handles it
                 },
                 // Callback for storing color palettes (for click selection lookup)
                 (palettes: any[]) => { session.currentPalettes = palettes; },
@@ -158,11 +213,7 @@ export class SessionManager {
                 // Callback for batch updating state (single broadcast)
                 (updates: Record<string, any>) => {
                     session.stateManager.updateBatch(updates);
-                    // Broadcast SINGLE update to client
-                    this.sendToClient(session.id, {
-                        type: 'DNA_UPDATE',
-                        dna: session.stateManager.getDNA()
-                    });
+                    // Broadcast removed: StateManager listener handles it
                 }
             );
 
@@ -266,41 +317,26 @@ ${canvasInfo}
         if (selectionType === 'font') {
             session.stateManager.update('typography', [value]);
 
-            // Send DNA_UPDATE to client immediately
-            this.sendToClient(session.id, {
-                type: 'DNA_UPDATE',
-                dna: session.stateManager.getDNA(),
-                updatedField: 'typography'
-            });
+            // Persist to disk immediately (Listener will handle broadcast)
+            await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
         } else if (selectionType === 'color') {
             // Look up the palette by name to get actual colors
             const palette = session.currentPalettes.find(p => p.name === value);
             if (palette) {
                 session.stateManager.update('colors', palette.colors);
 
-                // Send DNA_UPDATE to client immediately
-                this.sendToClient(session.id, {
-                    type: 'DNA_UPDATE',
-                    dna: session.stateManager.getDNA(),
-                    updatedField: 'colors'
-                });
+                // Persist to disk immediately (Listener will handle broadcast)
+                await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
             } else {
                 console.warn(`⚠️ Palette "${value}" not found in currentPalettes`);
             }
         } else if (selectionType === 'structure') {
             session.stateManager.update('logoType', value);
-            this.sendToClient(session.id, {
-                type: 'DNA_UPDATE',
-                dna: session.stateManager.getDNA(),
-                updatedField: 'logoType'
-            });
+            await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+
         } else if (selectionType === 'imagery') {
             session.stateManager.update('imagery', value);
-            this.sendToClient(session.id, {
-                type: 'DNA_UPDATE',
-                dna: session.stateManager.getDNA(),
-                updatedField: 'imagery'
-            });
+            await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
         }
 
         // Also notify the AI about the selection so it can continue the conversation
@@ -469,11 +505,8 @@ ${canvasInfo}
                     if (coreData.mission) session.stateManager.update('mission', coreData.mission);
                     if (coreData.voice) session.stateManager.update('voice', coreData.voice);
 
-                    // Broadcast DNA update
-                    this.sendToClient(session.id, {
-                        type: 'DNA_UPDATE',
-                        dna: session.stateManager.getDNA()
-                    });
+                    // Persist to disk immediately (Listener will handle broadcast)
+                    await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
 
                     // Notify Voice AI to narrate progress
                     if (session.geminiConnection) {
@@ -549,11 +582,8 @@ ${canvasInfo}
                     if (visualData.logoType) session.stateManager.update('logoType', visualData.logoType);
                     if (visualData.imagery) session.stateManager.update('imagery', visualData.imagery);
 
-                    // Broadcast DNA update
-                    this.sendToClient(session.id, {
-                        type: 'DNA_UPDATE',
-                        dna: session.stateManager.getDNA()
-                    });
+                    // Persist to disk immediately (Listener will handle broadcast)
+                    await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
 
                     // Notify Voice AI to narrate completion
                     if (session.geminiConnection) {
@@ -570,11 +600,8 @@ ${canvasInfo}
     private async handleUpdateDNA(session: Session, field: string, value: any): Promise<void> {
         session.stateManager.update(field, value);
 
-        this.sendToClient(session.id, {
-            type: 'DNA_UPDATE',
-            dna: session.stateManager.getDNA(),
-            updatedField: field as any
-        });
+        // Persist to disk immediately (Listener will handle broadcast)
+        await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
     }
 
     private sendToClient(sessionId: string, message: ServerMessage): void {
@@ -584,172 +611,5 @@ ${canvasInfo}
         }
     }
 
-    // ============================================
-    // AGENTIC BRAND DISCOVERY - Research Agent
-    // ============================================
 
-    /**
-     * Perform competitor research for the brand.
-     * This is the core agentic workflow: search → analyze → generate with reasoning.
-     */
-    async performCompetitorResearch(sessionId: string, industry: string, brandName: string): Promise<void> {
-        const session = this.sessions.get(sessionId);
-        if (!session) return;
-
-        try {
-            // Phase 1: Announce research start
-            this.sendToClient(sessionId, {
-                type: 'RESEARCH_UPDATE',
-                status: 'started',
-                message: `Researching ${industry} brands...`
-            } as any);
-
-            // Phase 2: Use Gemini to search and analyze competitors
-            const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-
-            this.sendToClient(sessionId, {
-                type: 'RESEARCH_UPDATE',
-                status: 'searching',
-                message: `Finding top ${industry} competitors...`
-            } as any);
-
-            // Ask Gemini to identify key competitors with Deep Think
-            const competitorPrompt = `You are a brand strategist researching competitors for a new brand called "${brandName}" in the ${industry} industry.
-
-List 5-7 major competitor brands in this space and for each:
-1. Their primary brand colors (hex codes if you know them)
-2. Their font style (serif, sans-serif, display)
-3. Their brand voice/personality
-
-Format as JSON:
-{
-    "competitors": [
-        { "name": "Brand Name", "colors": ["#hex1", "#hex2"], "fontStyle": "sans-serif", "personality": "bold and energetic" }
-    ],
-    "commonPatterns": ["pattern1", "pattern2"],
-    "gap": "description of what's missing in the market"
-}`;
-
-            const competitorResponse = await genai.models.generateContent({
-                model: 'gemini-2.0-flash-exp',
-                contents: [{ role: 'user', parts: [{ text: competitorPrompt }] }]
-            });
-
-            const competitorText = competitorResponse.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-
-            // Parse competitor data
-            let competitorData: any;
-            try {
-                const jsonMatch = competitorText.match(/\{[\s\S]*\}/);
-                competitorData = jsonMatch ? JSON.parse(jsonMatch[0]) : { competitors: [], commonPatterns: [], gap: '' };
-            } catch {
-                competitorData = { competitors: [], commonPatterns: [], gap: '' };
-            }
-
-            const competitorNames = competitorData.competitors?.map((c: any) => c.name) || [];
-
-            this.sendToClient(sessionId, {
-                type: 'RESEARCH_UPDATE',
-                status: 'analyzing',
-                message: `Analyzing ${competitorNames.length} competitors...`,
-                competitors: competitorNames
-            } as any);
-
-            // Phase 3: Generate differentiated color palette with reasoning
-            this.sendToClient(sessionId, {
-                type: 'RESEARCH_UPDATE',
-                status: 'generating',
-                message: 'Generating differentiated brand identity...'
-            } as any);
-
-            const currentDNA = session.stateManager.getDNA();
-            const palettePrompt = `Based on competitor research:
-${JSON.stringify(competitorData, null, 2)}
-
-And the brand context:
-- Brand: ${brandName}
-- Industry: ${industry}
-- Voice: ${currentDNA.voice || 'Not defined yet'}
-- Mission: ${currentDNA.mission || 'Not defined yet'}
-
-Generate 3 unique color palette options that DIFFERENTIATE from competitors.
-For each palette, explain your strategic reasoning.
-
-Format as JSON:
-{
-    "palettes": [
-        {
-            "name": "Palette Name",
-            "colors": ["#hex1", "#hex2", "#hex3", "#hex4", "#hex5"],
-            "reasoning": "Strategic explanation of why these colors work and how they differentiate from competitors"
-        }
-    ],
-    "overallStrategy": "High-level color strategy explanation including what colors to avoid and why"
-}`;
-
-            const paletteResponse = await genai.models.generateContent({
-                model: 'gemini-2.0-flash-exp',
-                contents: [{ role: 'user', parts: [{ text: palettePrompt }] }]
-            });
-
-            const paletteText = paletteResponse.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-
-            let paletteData: any;
-            try {
-                const jsonMatch = paletteText.match(/\{[\s\S]*\}/);
-                paletteData = jsonMatch ? JSON.parse(jsonMatch[0]) : { palettes: [], overallStrategy: '' };
-            } catch {
-                paletteData = { palettes: [], overallStrategy: '' };
-            }
-
-            // Send palettes to client as COLOR_SUGGESTIONS
-            if (paletteData.palettes?.length > 0) {
-                this.sendToClient(sessionId, {
-                    type: 'COLOR_SUGGESTIONS',
-                    palettes: paletteData.palettes.map((p: any, i: number) => ({
-                        name: p.name || `Option ${i + 1}`,
-                        colors: p.colors || [],
-                        vibe: p.reasoning || ''
-                    }))
-                } as any);
-
-                // Send Thought Signature for the color strategy
-                this.sendToClient(sessionId, {
-                    type: 'THOUGHT_SIGNATURE',
-                    nodeId: 'colors',
-                    title: 'Color Strategy',
-                    reasoning: paletteData.overallStrategy || paletteData.palettes[0]?.reasoning || 'Colors selected based on competitor analysis.',
-                    confidence: 0.85
-                } as any);
-            }
-
-            // Mark research complete
-            this.sendToClient(sessionId, {
-                type: 'RESEARCH_UPDATE',
-                status: 'complete',
-                message: 'Research complete! Color options generated.',
-                competitors: competitorNames
-            } as any);
-
-        } catch (error) {
-            console.error('❌ Research agent error:', error);
-            this.sendToClient(sessionId, {
-                type: 'ERROR',
-                message: 'Failed to complete competitor research'
-            });
-        }
-    }
-
-    /**
-     * Helper to send a thought signature for any node
-     */
-    sendThoughtSignature(sessionId: string, nodeId: string, title: string, reasoning: string, confidence?: number): void {
-        this.sendToClient(sessionId, {
-            type: 'THOUGHT_SIGNATURE',
-            nodeId,
-            title,
-            reasoning,
-            confidence
-        } as any);
-    }
 }

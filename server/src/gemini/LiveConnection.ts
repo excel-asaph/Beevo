@@ -52,6 +52,47 @@ export class GeminiLiveConnection {
         return this.isPaused;
     }
 
+    /** Set the current phase and update Live's context accordingly */
+    public async setPhase(phase: 'discovery' | 'execution' | 'modification'): Promise<void> {
+        if (phase === 'modification' && this.liveSession && this.isConnected) {
+            console.log('🔄 Switching Live to MODIFICATION phase context');
+
+            try {
+                // Send as a system message that triggers a response
+                this.liveSession.sendClientContent({
+                    turns: [
+                        {
+                            role: 'user',
+                            parts: [{
+                                text: `[SYSTEM OVERRIDE - CRITICAL PHASE CHANGE]
+                                
+Your role has COMPLETELY CHANGED. You are NO LONGER doing brand discovery.
+The research is COMPLETE. The canvas is now visible.
+You are now THE MODIFIER.
+
+NEW BEHAVIOR - YOU MUST FOLLOW THIS EXACTLY:
+1. When user requests ANY change, ask: "Would you like me to [action]?"
+2. WAIT for user to say "yes" / "sure" / "do it"
+3. ONLY after confirmation, say "Updating now..."
+4. NEVER say "updating" before user confirms
+
+WRONG (DO NOT DO): "Let's update the brand name to Nike now."
+RIGHT (ALWAYS DO): "Would you like me to update your brand name to Nike?"
+
+Acknowledge this change by greeting the user and asking how you can help refine their brand.`
+                            }]
+                        }
+                    ],
+                    turnComplete: true  // Trigger a response
+                });
+                console.log('✅ Live context updated for modification phase');
+            } catch (error) {
+                console.error('❌ Failed to update Live phase context:', error);
+            }
+        }
+    }
+
+
     // Hybrid approach: ToolDecisionAgent for reliable tool execution
     private getDNA: () => any;
     private getFonts: () => Array<{ name: string; category: string }>;
@@ -86,11 +127,13 @@ export class GeminiLiveConnection {
             updateStateBatch,
             () => this.pause(),  // onPauseVoice - pause audio during research
             () => this.resume(), // onResumeVoice - resume after research
-            // ON PHASE CHANGE: Trigger Brain Switch
+            // ON PHASE CHANGE: Trigger Brain Switch AND update Live context
             (phase) => {
                 if (this.brain) {
                     this.brain.setPhase(phase);
                 }
+                // Also update Live's context for modification phase
+                this.setPhase(phase);
             }
         );
         // Store references for ToolDecisionAgent

@@ -206,4 +206,22 @@ export class SearchGroundingService {
     private buildSearchQuery(args: LogoSearchArgs): string {
         return `${args.styleKeywords} ${args.industry} branding examples ${args.mood || ''}`.trim();
     }
+
+    async search(query: string): Promise<string> {
+        console.log(`🔎 General Search: "${query}"`);
+        const tool: Tool = { googleSearch: {} };
+
+        try {
+            const response = await this.client.models.generateContent({
+                model: this.modelName,
+                contents: [{ role: 'user', parts: [{ text: query }] }],
+                config: { tools: [tool] }
+            });
+
+            return response.candidates?.[0]?.content?.parts?.[0]?.text || "No results found.";
+        } catch (error) {
+            console.error('❌ Search failed:', error);
+            return `Search failed: ${error}`;
+        }
+    }
 }

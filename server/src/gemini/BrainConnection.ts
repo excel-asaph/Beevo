@@ -11,26 +11,167 @@ import { MODELS } from '../../../shared/constants';
 import { ServerMessage } from '../../../shared/messages';
 import { ToolHandler } from './ToolHandler';
 import { BrandDNA } from '../../../shared/types';
+import { stateManager } from '../services/StateManager';
 
 // Tool declarations for the Brain (same as before, but ONLY here)
 const brainToolDeclarations: FunctionDeclaration[] = [
     {
-        name: "display_font_suggestions",
-        description: "Generate and display font options on the canvas. Supports quantity control, style/mood filtering, font pairing, and similarity matching. Call this for ANY font-related request.",
+        name: "start_brand_research",
+        description: "START the 5-phase brand research workflow. Triggers the Execution Engine which automates: 1) DNA Extraction 2) Competitor Research 3) Color Generation 4) Typography Selection. Call this when the user says 'start research', 'extract brand', 'build my brand', or after initial discovery discussion.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                summary: {
+                    type: Type.STRING,
+                    description: "Brief summary of user intent so far"
+                }
+            }
+        }
+    },
+
+    {
+        name: "display_palette_options",
+        description: "Single robust tool to Generate, Modify, or SELECT color palettes. To select, pass the full list back with `isSelected: true` on the chosen one(s). To delete, omit items from the list.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                palettes: {
+                    type: Type.ARRAY,
+                    description: "The INSTRUCTION: Provide the FULL desired state of the palette list. To ADD, append new items. To DELETE, omit items. To SELECT, set isSelected=true. The system will persist this exact state.",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            id: { type: Type.STRING, description: "Unique ID (preserve existing IDs)" },
+                            name: { type: Type.STRING, description: "Descriptive palette name" },
+                            colors: {
+                                type: Type.ARRAY,
+                                items: { type: Type.STRING },
+                                description: "Array of hex colors. MAX 5 colors per palette."
+                            },
+                            vibe: { type: Type.STRING, description: "Mood/feeling of the palette" },
+                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if this palette is selected by the user." }
+                        },
+                        required: ["name", "colors", "vibe"]
+                    }
+                },
+                palette_count: {
+                    type: Type.INTEGER,
+                    description: "Number of NEW palettes to generate. Total palettes cannot exceed 10."
+                },
+                colors_per_palette: {
+                    type: Type.INTEGER,
+                    description: "Colors in each palette (Max 5)."
+                },
+                base_palette: {
+                    type: Type.STRING,
+                    description: "Name of existing palette to base new ones on"
+                },
+                operation: {
+                    type: Type.STRING,
+                    description: "'generate' (create new), 'update' (modify/select/delete existing)"
+                },
+                mood_filter: { type: Type.STRING },
+                query: { type: Type.STRING }
+            },
+            required: []
+        }
+    },
+
+    {
+        name: "update_brand_name",
+        description: "Update the Brand Name. Call when user wants to rename the brand. Sets the name and marks it selected.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                name: { type: Type.STRING, description: "New brand name" }
+            },
+            required: ["name"]
+        }
+    },
+    {
+        name: "update_mission",
+        description: "Update the Mission Statement. Call when user wants to change the mission.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                mission: { type: Type.STRING, description: "New mission statement" }
+            },
+            required: ["mission"]
+        }
+    },
+    {
+        name: "update_tagline",
+        description: "Update the Tagline/Slogan. Call when user wants to change the tagline.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                tagline: { type: Type.STRING, description: "New tagline" }
+            },
+            required: ["tagline"]
+        }
+    },
+    {
+        name: "update_voice",
+        description: "Update the Brand Voice. Call when user wants to change the voice description.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                voice: { type: Type.STRING, description: "New brand voice description" }
+            },
+            required: ["voice"]
+        }
+    },
+    {
+        name: "update_values",
+        description: "Update the Core Values. Call when user wants to change the list of values.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                values: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of new values" }
+            },
+            required: ["values"]
+        }
+    },
+    {
+        name: "update_target_audience",
+        description: "Update the Target Audience. Call when user wants to change the target audience, customers, demographics, or who the brand serves.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                targetAudience: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of target audience segments" }
+            },
+            required: ["targetAudience"]
+        }
+    },
+    {
+        name: "update_mood",
+        description: "Update the Brand Mood/Feeling. Call when user wants to change the mood, tone, feeling, vibe, or emotional attributes of the brand.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                mood: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of mood/feeling descriptors (e.g., 'modern', 'natural', 'vibrant')" }
+            },
+            required: ["mood"]
+        }
+    },
+    {
+        name: "display_typography_options",
+        description: "Single robust tool to Generate, Modify, or SELECT fonts. To select, pass the full list back with `isSelected: true`. To delete, omit items.",
         parameters: {
             type: Type.OBJECT,
             properties: {
                 fonts: {
                     type: Type.ARRAY,
-                    description: "Array of fonts to display. Generate as many as user requests (1-20).",
+                    description: "The INSTRUCTION: Provide the FULL desired state of the font list. CRITICAL: If the user says 'SELECT' a font, you MUST set `isSelected: true` for that specific font in this list. To ADD, append new items. To DELETE, omit items. The system will persist this exact state.",
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            name: { type: Type.STRING, description: "Google Font family name (e.g., 'Roboto', 'Playfair Display')" },
-                            category: { type: Type.STRING, description: "Font category: serif, sans-serif, display, handwriting, monospace" },
-                            reasoning: { type: Type.STRING, description: "Why this font fits the brand" },
-                            weight: { type: Type.STRING, description: "Font weight: light, regular, medium, bold, black" },
-                            style: { type: Type.STRING, description: "Visual style: modern, classic, elegant, playful, professional, artistic" }
+                            id: { type: Type.STRING, description: "Unique ID (preserve existing)" },
+                            name: { type: Type.STRING, description: "Google Font family name" },
+                            category: { type: Type.STRING, description: "serif, sans-serif, etc." },
+                            reasoning: { type: Type.STRING },
+                            pairing: { type: Type.STRING },
+                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
                         },
                         required: ["name", "category", "reasoning"]
                     }
@@ -39,523 +180,98 @@ const brainToolDeclarations: FunctionDeclaration[] = [
                     type: Type.STRING,
                     description: "Text to preview fonts with (brand name, tagline, etc.)"
                 },
-                font_count: {
-                    type: Type.INTEGER,
-                    description: "Number of fonts to generate. Default 3, can be 1-20. Honor user's exact request."
-                },
-                style_filter: {
+                font_count: { type: Type.INTEGER, description: "Number of NEW fonts to generate. Total fonts cannot exceed 10." },
+                operation: {
                     type: Type.STRING,
-                    description: "Filter by category: serif, sans-serif, handwriting, display, monospace, script"
+                    description: "'generate' (create new), 'update' (modify/select/delete existing)"
                 },
-                mood_filter: {
-                    type: Type.STRING,
-                    description: "Filter by mood: sophisticated, playful, modern, classic, bold, elegant, minimal, artistic, corporate, friendly"
-                },
-                similar_to: {
-                    type: Type.STRING,
-                    description: "Find fonts similar to this font name. User says 'fonts like Roboto'"
-                },
-                pair_with: {
-                    type: Type.STRING,
-                    description: "Find fonts that pair well with this font (for heading+body combos)"
-                },
-                exclude_fonts: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Font names to exclude from suggestions"
-                },
-                include_variations: {
-                    type: Type.BOOLEAN,
-                    description: "If true, show same font in multiple weights/styles"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "The original user intent/query that triggered this tool"
-                }
-            },
-            required: ["fonts", "context_text"]
-        }
-    },
-    {
-        name: "generate_brand_colors",
-        description: "STEP 1 of Build: Generate color palettes. Call this immediately after research is complete.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                palettes: {
-                    type: Type.ARRAY,
-                    description: "Optional: Suggest specific palettes if user provided them. Usually empty to let AI generate.",
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            colors: { type: Type.ARRAY, items: { type: Type.STRING } },
-                            vibe: { type: Type.STRING }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    {
-        name: "generate_brand_fonts",
-        description: "STEP 2 of Build: Generate typography options. Call this AFTER color generation.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                fonts: {
-                    type: Type.ARRAY,
-                    description: "Optional: specific fonts if user requested them.",
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            name: { type: Type.STRING },
-                            category: { type: Type.STRING },
-                            reasoning: { type: Type.STRING }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    {
-        name: "finalize_brand_dna",
-        description: "STEP 3 (FINAL): Commit the Brand DNA and reveal the canvas. Call this ONLY after Colors and Fonts are generated.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                summary: { type: Type.STRING, description: "Brief summary of what was built." }
-            }
-        }
-    },
-    {
-        name: "update_live_brand_dna",
-        description: "Save or update Brand DNA fields after user confirms selection. WORKFLOW: 1) Display options (fonts/colors/logos), 2) User picks one, 3) CALL THIS TOOL to save their choice. When user says 'you should save something in the brand DNA and the likes you should call this tool', ALWAYS call this tool. Saves ALL data exactly as provided - if user selects 7 colors, save all 7.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                brandName: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Brand name - save exactly as user provides it"
-                },
-                mission: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Full mission statement - can be any length"
-                },
-                selectedColors: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    nullable: true,
-                    description: "ALL selected colors as hex codes. Save the ENTIRE array, not just first 5."
-                },
-                selectedFont: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Selected font family name"
-                },
-                voice: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Brand voice description (e.g., 'sophisticated', 'playful and energetic')"
-                },
-                tagline: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Brand tagline or slogan"
-                },
-                targetAudience: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Description of target audience"
-                },
-                secondaryFont: {
-                    type: Type.STRING,
-                    nullable: true,
-                    description: "Secondary/body font if user picks a font pair"
-                },
-                colorUsage: {
-                    type: Type.OBJECT,
-                    nullable: true,
-                    properties: {
-                        primary: { type: Type.STRING },
-                        secondary: { type: Type.STRING },
-                        accent: { type: Type.STRING },
-                        background: { type: Type.STRING },
-                        text: { type: Type.STRING }
-                    },
-                    description: "How colors should be used (primary, secondary, accent, etc.)"
-                },
-                logoType: {
-                    type: Type.STRING,
-                    description: "Logo structure: 'wordmark', 'lettermark', 'emblem', or 'combination mark'. ONLY these values."
-                },
-                imagery: {
-                    type: Type.STRING,
-                    description: "Visual elements: symbols, icons, or abstract shapes used in the logo."
-                },
-                savedLogos: {
-                    type: Type.ARRAY,
-                    description: "Array of logo objects to SAVE to Brand DNA. Use this when user says 'save this logo' or 'I like these'.",
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            url: { type: Type.STRING },
-                            name: { type: Type.STRING, description: "Brand name or alt text" },
-                            style: { type: Type.STRING, description: "Style tag (e.g. 'Minimal')" },
-                            reasoning: { type: Type.STRING, description: "Why user liked it" }
-                        },
-                        required: ["url"]
-                    }
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "The original user intent/query that triggered this tool"
-                }
+                style_filter: { type: Type.STRING },
+                query: { type: Type.STRING }
             },
             required: []
         }
     },
     {
         name: "display_logo_structure_options",
-        description: "Generate and display logo structure options (Wordmark, Lettermark, Emblem, Combination Mark). Call this when user wants to decide on the FORM of the logo. Provide DEEP expert analysis.",
+        description: "Single robust tool to Generate or SELECT logo structures. To select, pass the full list back with `isSelected: true`.",
         parameters: {
             type: Type.OBJECT,
             properties: {
                 options: {
                     type: Type.ARRAY,
-                    description: "List of structure options tailored to the brand",
+                    description: "The FULL desired state of the structure options list.",
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            type: { type: Type.STRING, description: "One of: 'wordmark', 'lettermark', 'emblem', 'combination'" },
-                            reasoning: { type: Type.STRING, description: "Why this structure fits the brand" },
-                            suitability: { type: Type.STRING, description: "High, Medium, or Low" }
+                            id: { type: Type.STRING },
+                            type: { type: Type.STRING, description: "wordmark, lettermark, emblem, combination" },
+                            reasoning: { type: Type.STRING },
+                            suitability: { type: Type.STRING },
+                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
                         },
                         required: ["type", "reasoning", "suitability"]
                     }
                 },
-                structure_count: {
-                    type: Type.INTEGER,
-                    description: "Number of options to generate. Default 3, range 1-5."
-                },
-                complexity_preference: {
-                    type: Type.STRING,
-                    description: "User preference for complexity: 'minimalist', 'moderate', 'detailed', 'adaptive'"
-                },
-                style_filter: {
-                    type: Type.STRING,
-                    description: "Filter by style: 'modern', 'vintage', 'tech', 'luxury', 'playful'"
-                },
-                industry_context: {
-                    type: Type.STRING,
-                    description: "Specific industry nuances to consider (e.g. 'SaaS logos usually prefer wordmarks')"
-                },
-                exclude_types: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Structure types to exclude (e.g. 'No mascots')"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "Original user intent"
-                }
+                structure_count: { type: Type.INTEGER },
+                query: { type: Type.STRING }
             },
-            required: ["options"]
+            required: []
+        }
+    },
+    {
+        name: "display_logo_inspirations",
+        description: "Single robust tool to SEARCH for or SELECT logo inspirations. To SEARCH, provide a `search_query`. To SELECT/MANAGE, provide the `inspirations` list with `isSelected: true` on chosen items.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                search_query: {
+                    type: Type.STRING,
+                    description: "If present, the tool will SEARCH the web for logos and APPEND them to the list."
+                },
+                inspirations: {
+                    type: Type.ARRAY,
+                    description: "The FULL desired state of the inspiration list. Use this to Delete (remove items), Reorder, or Select (mark `isSelected: true`).",
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            id: { type: Type.STRING },
+                            displayName: { type: Type.STRING },
+                            url: { type: Type.STRING },
+                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
+                        },
+                        required: ["id", "url"]
+                    }
+                },
+                style_keywords: { type: Type.STRING },
+                industry: { type: Type.STRING },
+                query: { type: Type.STRING }
+            },
+            required: []
         }
     },
     {
         name: "display_imagery_suggestions",
-        description: "Generate and display imagery/iconography concepts. Call this when user asks about 'symbols', 'icons', or 'imagery'. Provide DEEP creative direction.",
+        description: "Single robust tool to Generate or SELECT imagery concepts. To select, pass the full list back with `isSelected: true`.",
         parameters: {
             type: Type.OBJECT,
             properties: {
                 suggestions: {
                     type: Type.ARRAY,
-                    description: "List of imagery concepts",
+                    description: "The FULL desired state of the imagery list.",
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            concept: { type: Type.STRING, description: "Short name (e.g., 'Soaring Wing', 'Geometric Cube')" },
-                            description: { type: Type.STRING, description: "Detailed visual description" },
-                            visualStyle: { type: Type.STRING, description: "Style tag (e.g., 'Minimalist', 'Abstract')" }
+                            id: { type: Type.STRING },
+                            concept: { type: Type.STRING },
+                            description: { type: Type.STRING },
+                            visualStyle: { type: Type.STRING },
+                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
                         },
                         required: ["concept", "description", "visualStyle"]
                     }
                 },
-                suggestion_count: {
-                    type: Type.INTEGER,
-                    description: "Number of suggestions to generate. Default 3, range 1-6."
-                },
-                abstraction_level: {
-                    type: Type.STRING,
-                    description: "Level of abstraction: 'literal' (apple), 'abstract' (shape), 'symbolic' (metaphor), 'mixed'"
-                },
-                art_style: {
-                    type: Type.STRING,
-                    description: "Artistic style: 'geometric', 'organic', 'line_art', 'flat', '3d', 'sketch'"
-                },
-                mood_filter: {
-                    type: Type.STRING,
-                    description: "Mood to evoke: 'trust', 'speed', 'creativity', 'luxury', 'friendliness'"
-                },
-                focus_element: {
-                    type: Type.STRING,
-                    description: "Specific element to focus on: 'nature', 'technology', 'human', 'typography'"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "Original user intent"
-                }
-            },
-            required: ["suggestions"]
-        }
-    },
-    {
-        name: "research_competitors",
-        description: "Deep competitive intelligence using headless browser automation. Extracts logos, colors, typography, and design patterns from competitor websites. Supports visual analysis and trend synthesis.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                industry: {
-                    type: Type.STRING,
-                    description: "Industry to analyze (e.g., 'fitness', 'tech startup', 'luxury fashion')"
-                },
-                competitor_count: {
-                    type: Type.INTEGER,
-                    description: "Number of competitors to analyze. Default 5, range 3-10."
-                },
-                focus_areas: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "What to extract: ['logos', 'colors', 'typography', 'messaging', 'layout']. Default: all."
-                },
-                depth: {
-                    type: Type.STRING,
-                    description: "'quick' (homepage only, 30s) or 'comprehensive' (multi-page, 90s)"
-                },
-                specific_brands: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Optional: Force specific brands ['Nike', 'Adidas']. If empty, auto-discover top brands."
-                },
-                extract_assets: {
-                    type: Type.BOOLEAN,
-                    description: "If true, download logo images. If false, just describe them."
-                },
-                color_analysis: {
-                    type: Type.BOOLEAN,
-                    description: "If true, extract hex codes from screenshots using computer vision."
-                },
-                font_detection: {
-                    type: Type.BOOLEAN,
-                    description: "If true, detect typography from CSS/rendered text."
-                },
-                screenshot_mode: {
-                    type: Type.STRING,
-                    description: "'full' (entire homepage), 'hero' (above fold), 'logo_only' (header)"
-                },
-                exclude_brands: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Brands to skip (e.g., ['Reebok'])"
-                },
-                synthesis_prompt: {
-                    type: Type.STRING,
-                    description: "Custom question for synthesis (e.g., 'What makes a luxury tech logo?')"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "Original user intent that triggered this research"
-                },
-                // Brand DNA fields - Brain extracts these from conversation context during research
-                brandName: {
-                    type: Type.STRING,
-                    description: "Brand name mentioned in conversation"
-                },
-                mission: {
-                    type: Type.STRING,
-                    description: "Brand mission statement if discussed"
-                },
-                tagline: {
-                    type: Type.STRING,
-                    description: "Brand slogan/tagline if discussed"
-                },
-                values: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Core brand values (e.g., 'Quality', 'Innovation') if discussed"
-                },
-                voice: {
-                    type: Type.STRING,
-                    description: "Brand voice/personality (e.g., 'sophisticated and bold') if discussed"
-                },
-                targetAudience: {
-                    type: Type.STRING,
-                    description: "Target audience description if discussed"
-                }
-            },
-            required: ["industry", "query"]
-        }
-    },
-    {
-        name: "search_logo_inspiration",
-        description: "Search the web for real logo examples using Google Search grounding. Find existing logos that match desired styles, industries, and moods. Returns actual image URLs for display and inspiration.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                style_keywords: {
-                    type: Type.STRING,
-                    description: "Primary style descriptors (e.g., 'minimalist tech wordmark', 'bold geometric emblem', 'playful handwritten script')"
-                },
-                industry: {
-                    type: Type.STRING,
-                    description: "Target industry or niche (e.g., 'fitness', 'saas', 'luxury fashion', 'eco-friendly')"
-                },
-                result_count: {
-                    type: Type.INTEGER,
-                    description: "Number of logo examples to return. Default 6, range 3-12."
-                },
-                mood_filters: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Mood/vibe keywords: ['professional', 'playful', 'sophisticated', 'bold', 'minimal', 'vintage']"
-                },
-                color_preference: {
-                    type: Type.STRING,
-                    description: "Preferred color scheme (e.g., 'monochrome', 'blue and white', 'vibrant multicolor', 'pastel')"
-                },
-                logo_types: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Specific types to include: ['wordmark', 'emblem', 'lettermark', 'abstract', 'mascot', 'combination']"
-                },
-                exclude_types: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Logo types to exclude from results"
-                },
-                reference_brands: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Example brands with similar style (e.g., ['Stripe', 'Linear', 'Notion']). Used for 'logos like X' queries."
-                },
-                exclude_brands: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Brands to avoid in results (e.g., direct competitors)"
-                },
-                complexity_level: {
-                    type: Type.STRING,
-                    description: "'simple' (1-2 elements), 'moderate' (3-5 elements), 'complex' (detailed illustrations)"
-                },
-                text_emphasis: {
-                    type: Type.STRING,
-                    description: "'text-only' (pure wordmark), 'text-primary' (icon secondary), 'balanced', 'icon-primary', 'icon-only'"
-                },
-                use_cases: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Where logo will be used: ['social_media', 'business_card', 'website_header', 'app_icon', 'merchandise']"
-                },
-                cultural_context: {
-                    type: Type.STRING,
-                    description: "Target audience region/culture (e.g., 'western', 'asian', 'global', 'urban youth')"
-                },
-                era_preference: {
-                    type: Type.STRING,
-                    description: "Design era aesthetic (e.g., 'modern 2020s', 'retro 80s', 'classic timeless', 'futuristic')"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "REQUIRED: Original user intent that triggered this search"
-                }
-            },
-            required: ["style_keywords", "industry", "query"]
-        }
-    },
-    {
-        name: "verify_asset_compliance",
-        description: "Pixel-precise brand compliance audit using vision AI. Checks colors, style, readability, accessibility. Can fail assets or generate detailed reports.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                asset_url: {
-                    type: Type.STRING,
-                    description: "URL or path to the asset to audit"
-                },
-                asset_type: {
-                    type: Type.STRING,
-                    description: "'logo', 'banner', 'social_post', 'video_frame'"
-                },
-                brand_colors: {
-                    type: Type.ARRAY,
-                    items: { type: Type.STRING },
-                    description: "Required hex codes. Asset MUST contain these."
-                },
-                color_tolerance: {
-                    type: Type.NUMBER,
-                    description: "Allowed hex deviation. 0 = exact match, 15 = close enough. Default 10."
-                },
-                expected_style: {
-                    type: Type.STRING,
-                    description: "Required visual style (e.g., 'minimalist', 'bold wordmark')"
-                },
-                expected_mood: {
-                    type: Type.STRING,
-                    description: "Required emotional tone (e.g., 'sophisticated', 'playful')"
-                },
-                check_dimensions: {
-                    type: Type.BOOLEAN,
-                    description: "Verify asset meets size requirements"
-                },
-                required_dimensions: {
-                    type: Type.STRING,
-                    description: "e.g., 'output_dimensions' or 'square aspect ratio'"
-                },
-                check_readability: {
-                    type: Type.BOOLEAN,
-                    description: "Test if text is legible at small sizes"
-                },
-                check_accessibility: {
-                    type: Type.BOOLEAN,
-                    description: "Verify WCAG contrast ratios"
-                },
-                min_contrast_ratio: {
-                    type: Type.NUMBER,
-                    description: "WCAG standard. 4.5 (normal), 3.0 (large text), 7.0 (AAA)"
-                },
-                fail_on_mismatch: {
-                    type: Type.BOOLEAN,
-                    description: "If true, reject asset. If false, just warn."
-                },
-                generate_report: {
-                    type: Type.BOOLEAN,
-                    description: "Return detailed audit trail with 'Thought Signature'"
-                },
-                spatial_analysis: {
-                    type: Type.BOOLEAN,
-                    description: "Run pixel-level coordinate analysis (for 'Pixel-Precise Pointing' demo)"
-                },
-                query: {
-                    type: Type.STRING,
-                    description: "Original user intent"
-                }
-            },
-            required: ["asset_url", "brand_colors", "query"]
-        }
-    },
-    {
-        name: "get_canvas_state",
-        description: "Get the current state of the canvas including displayed options and saved DNA. Call this BEFORE making changes to understand what's currently shown to the user.",
-        parameters: {
-            type: Type.OBJECT,
-            properties: {
-                query: {
-                    type: Type.STRING,
-                    description: "What aspect of canvas state you need (e.g., 'current colors', 'displayed fonts', 'full state')"
-                }
+                suggestion_count: { type: Type.INTEGER },
+                query: { type: Type.STRING }
             },
             required: []
         }
@@ -633,10 +349,10 @@ export class BrainConnection {
         }
     }
 
-    // Called by ToolHandler when extract_brand_identity is about to execute
-    public markExtractBrandIdentityDecided() {
+    // Called by ToolHandler when start_brand_research is about to execute
+    public markStartResearchDecided() {
         this.extractBrandIdentityDecided = true;
-        console.log('🧠 [BrainConnection] extract_brand_identity marked as DECIDED - removing from future tool lists');
+        console.log('🧠 [BrainConnection] start_brand_research marked as DECIDED - removing from future tool lists');
     }
 
     constructor(
@@ -698,10 +414,7 @@ export class BrainConnection {
 
             // STALE ANALYSIS PREVENTION: If extract_brand_identity was already decided,
             // ensure we're in MODIFICATION phase (not stuck in EXECUTION from a parallel analysis)
-            if (this.extractBrandIdentityDecided && this.phase === 'execution') {
-                console.log('🧠 STALE ANALYSIS DETECTED: extract_brand_identity already decided but phase is still EXECUTION → forcing MODIFICATION');
-                this.setPhase('modification'); // Use setter to update timestamp
-            }
+
 
             // FILTER HISTORY FOR ISOLATION
             // If in Modification phase, only show history that belongs to THIS phase (or is very recent)
@@ -807,9 +520,9 @@ export class BrainConnection {
                             console.log(`🧠 Brain decided to call: ${toolName}`);
 
                             // IMMEDIATE FLAG SET: Prevent parallel Brain analyses from executing again
-                            if (toolName === 'finalize_brand_dna') {
+                            if (toolName === 'start_brand_research') {
                                 this.extractBrandIdentityDecided = true;
-                                console.log('🧠 [BrainConnection] finalize_brand_dna EXECUTING - blocking future calls');
+                                console.log('🧠 [BrainConnection] start_brand_research EXECUTING - blocking future calls');
                             }
 
                             this.interruptLive();
@@ -817,7 +530,7 @@ export class BrainConnection {
                             // Execute the tool
                             if (toolName) {
                                 // Pass conversation history for brand extraction
-                                if (toolName === 'research_competitors') {
+                                if (toolName === 'start_brand_research') {
                                     const historyString = this.conversationHistory
                                         .map(t => `${t.role.toUpperCase()}: ${t.transcript}`)
                                         .join('\n');
@@ -880,7 +593,7 @@ export class BrainConnection {
         // These tools should only be called ONCE per session. If already executed/decided, never include again.
         const oneTimeToolsExecuted: string[] = [];
         if (this.extractBrandIdentityDecided) {
-            oneTimeToolsExecuted.push('extract_brand_identity');
+            oneTimeToolsExecuted.push('start_brand_research');
         }
 
         // Filter out one-time tools that have been executed FIRST, before phase logic
@@ -888,29 +601,32 @@ export class BrainConnection {
 
         switch (phase) {
             case 'discovery':
-                // PHASE 1: LISTENER BRAIN - Only the handshake trigger
-                return availableTools.filter(t => t.name === 'research_competitors');
+                // PHASE 1: LISTENER BRAIN - Only the research start trigger
+                return availableTools.filter(t => t.name === 'start_brand_research' || t.name === 'general_research');
 
             case 'execution':
-                // PHASE 2: BUILDER BRAIN - Build tools (and Update tools for safety)
-                return availableTools.filter(t => [
-                    'generate_brand_colors',
-                    'generate_brand_fonts',
-                    'finalize_brand_dna'
-                ].includes(t.name || ''));
+                // PHASE 2: BUILDER BRAIN - Automated flow running, minimal interference
+                return availableTools.filter(t => t.name === 'general_research');
 
             case 'modification':
                 // PHASE 3: MODIFIER BRAIN - Change tools only
                 return availableTools.filter(t => [
-                    'display_color_suggestions',
-                    'display_font_suggestions',
-                    'update_live_brand_dna',
-                    'general_research',
-                    'get_canvas_state',
-                    'search_logo_inspiration',
+                    'display_typography_options',
+                    'display_palette_options',
                     'display_logo_structure_options',
-                    'display_imagery_suggestions'
+                    'display_imagery_suggestions',
+                    'search_logo_inspiration',
+                    'general_research',
+                    // Update Tools
+                    'update_brand_name',
+                    'update_mission',
+                    'update_tagline',
+                    'update_voice',
+                    'update_values',
+                    'update_target_audience',
+                    'update_mood'
                 ].includes(t.name || ''));
+
         }
     }
 
@@ -934,7 +650,7 @@ export class BrainConnection {
                     'YOU ARE "THE LISTENER".',
                     'ROLE: Passive observer of a conversation between a User and Gemini Live.',
                     'GOAL: Detect when the User and AI have agreed to "Start Building".',
-                    'TOOLS: You have ONE tool: `research_competitors` - the trigger to start building.',
+                    'TOOLS: You have ONE tool: `start_brand_research` - the trigger to start building.',
                     '',
                     'PROTOCOL:',
                     '1. LISTEN to the chat.',
@@ -948,7 +664,7 @@ export class BrainConnection {
                     '   - Industry OR Mission/Vibe? (REQUIRED)',
                     '   - If missing, DO NOT CALL TOOL. Wait for more chat.',
                     '5. TRIGGER: When you get the handshake:',
-                    '   - YOU MUST CALL `research_competitors` IMMEDIATELY.',
+                    '   - YOU MUST CALL `start_brand_research` IMMEDIATELY.',
                     '   - DO NOT just say "Starting now". YOU MUST EXECUTE THE TOOL.',
                     '   - If you send a text response like "Starting...", ensure the tool call is ATTACHED.',
                     '',
@@ -990,49 +706,95 @@ export class BrainConnection {
                 ].join('\n');
             }
 
-            case 'modification':
+            case 'modification': {
                 // PHASE 3: MODIFIER BRAIN - Post-canvas changes
-                // ISOLATED BRAIN: History is filtered to only include turns since this phase started.
+                // Load full research state for complete context
+                const researchState = stateManager.loadLatest();
+
+                // Build complete context from research state
+                const researchContext = researchState ? JSON.stringify({
+                    brandDNA: researchState.brandDNA,
+                    competitors: researchState.competitorResearch?.competitors?.map(c => c.name) || [],
+                    differentiationStrategy: researchState.competitorResearch?.differentiationOpportunity?.slice(0, 200) || 'N/A',
+                    colorPalettes: researchState.colorPalettes?.palettes?.map(p => ({ name: p.name, colors: p.colors })) || [],
+                    typography: researchState.typographyPairings?.fonts?.map(f => ({ name: f.name, pairing: f.pairing })) || [],
+                    logoInspirations: researchState.logoInspirations?.inspirations?.map(l => ({ id: l.id, displayName: l.displayName })) || [],
+                    imagery: researchState.imagery?.suggestions?.map(i => ({ concept: i.concept })) || [],
+                    generalResearch: researchState.generalResearch?.queries?.map(q => q.query) || []
+                }, null, 2) : 'No research state available';
+
+                // Detect empty sections for context awareness
+                const emptySections: string[] = [];
+                if (!researchState?.logoInspirations?.inspirations?.length) emptySections.push('logoInspirations (no logo search done yet)');
+                if (!researchState?.imagery?.suggestions?.length) emptySections.push('imagery (no imagery suggestions generated)');
+                if (!researchState?.logoStructures?.options?.length) emptySections.push('logoStructures (no logo types generated)');
+                if (!researchState?.generalResearch?.queries?.length) emptySections.push('generalResearch (no research queries done)');
+
+                const emptyWarning = emptySections.length > 0
+                    ? `\n⚠️ EMPTY SECTIONS (tell user if they reference these): ${emptySections.join(', ')}`
+                    : '';
+
                 const hasColors = dnaObj.colors && dnaObj.colors.length > 0;
                 const hasFonts = dnaObj.typography && dnaObj.typography.length > 0;
-                console.log(`🧠 Brain Mode: MODIFICATION (Modifier) - colors:${hasColors}, fonts:${hasFonts} - History filtered to isolate phase.`);
+
+                // Derive "Current Selection" from the Menu (researchState) if possible, as it tracks isSelected source of truth
+                const selectedPalette = researchState?.colorPalettes?.palettes?.find(p => p.isSelected);
+                const currentColors = selectedPalette ? selectedPalette.colors : (dnaObj.colors?.items || []);
+                const colorDisplay = currentColors.length > 0 ? currentColors.slice(0, 4).join(', ') : 'None Selected';
+
+                const selectedFontPair = researchState?.typographyPairings?.fonts?.find(f => f.isSelected);
+                const currentFonts = selectedFontPair
+                    ? [selectedFontPair.name, selectedFontPair.pairing].filter(Boolean)
+                    : (dnaObj.typography?.items || []);
+                const fontDisplay = currentFonts.length > 0 ? currentFonts.join(', ') : 'None Selected';
+
+                console.log(`🧠 Brain Mode: MODIFICATION (Modifier) - colors:${currentColors.length}, fonts:${currentFonts.length}`);
+
                 return [
-                    'YOU ARE "THE MODIFIER".',
+                    'YOU ARE "THE MODIFIER" (Architect).',
                     'ROLE: The canvas is COMPLETE. The User is looking at it.',
-                    'GOAL: Handle user requests to CHANGE/UPDATE specific fields or styles.',
-                    'CONTEXT: You are a FRESH AGENT. Do not care about the previous interview.',
+                    'GOAL: Handle user requests to CHANGE/UPDATE specific fields.',
                     '',
-                    '⛔ FORBIDDEN (NEVER CALL):',
-                    '- `extract_brand_identity` - Identity is EXTRACTED. Calling this will RESET and ANNOY the user.',
-                    '- `research_competitors` - Research is DONE',
+                    '🎯 FUZZY TOOL MATCHING (CRITICAL):',
+                    'User requests may not exactly match tool names. Use ~80% similarity matching:',
+                    '- "update voice" OR "change brand voice" OR "modify the tone" → `update_voice`',
+                    '- "change values" OR "update brand values" OR "modify core values" → `update_values`',
+                    '- "update mood" OR "change feeling" OR "modify vibe" → `update_mood`',
+                    '- "change audience" OR "update targets" OR "modify who we serve" → `update_target_audience`',
+                    '- "new colors" OR "generate palettes" OR "different color scheme" → `display_palette_options`',
+                    '- "new fonts" OR "different typography" OR "change typeface" → `display_typography_options`',
+                    'If the user request is ~80% related to a tool you have, USE THAT TOOL.',
                     '',
-                    '✅ YOUR TOOLS:',
-                    '- `update_live_brand_dna` - USE THIS for ANY text change (Name, Mission, Values, Tagline, etc.)',
-                    '- `display_color_suggestions` - User wants different colors',
-                    '- `display_font_suggestions` - User wants different fonts',
-                    '- `general_research` - User asks about design topics',
-                    '- `search_logo_inspiration` - User wants logo ideas',
+                    'HANDLING REQUESTS:',
+                    '1. SELECT: If user picks an option, call `display_...` with `isSelected: true`.',
+                    '2. UPDATE: If user wants to change text, call `update_...`.',
+                    '3. GENERATE: If user wants new options, call `display_...` with `count` or `query`.',
                     '',
-                    'SCENARIOS:',
-                    '1. "Change name to Nike" → Call `update_live_brand_dna` with { name: "Nike" }. DO NOT ask for mission/values again. You already have them.',
-                    '2. "I want warmer colors" → Call `display_color_suggestions`.',
-                    '3. "Change mission to..." → Call `update_live_brand_dna`.',
+                    '⚡ EXECUTION RULE: EXECUTE IMMEDIATELY upon clear user request.',
+                    '- User: "Change name to Nike" -> Call `update_brand_name` NOW.',
+                    '- User: "Generate 3 palettes" -> Call `display_palette_options` NOW.',
+                    '- DO NOT wait for permission if the request is direct.',
                     '',
-                    'CRITICAL CONTEXT:',
-                    'You HAVE the full brand identity below. If the user changes ONE thing, the rest remains VALID.',
-                    'DO NOT act like you know nothing. DO NOT start the interview over.',
+                    '⚠️ CONTEXT AWARENESS:',
+                    'If user references something that does NOT EXIST (e.g., "I like logo_3" but no logos),',
+                    'respond: "We haven\'t searched for logos yet. Would you like me to find some?"',
+                    emptyWarning,
                     '',
-                    'CURRENT CANVAS STATE (Visible to User):',
-                    `  Name: ${dnaObj.name || 'Unknown'}`,
-                    `  Mission: ${dnaObj.mission || 'Unknown'}`,
-                    `  Values: ${dnaObj.values ? dnaObj.values.join(', ') : 'Unknown'}`,
-                    `  Tagline: ${dnaObj.tagline || 'Unknown'}`,
-                    `  Colors: ${hasColors ? dnaObj.colors.slice(0, 4).join(', ') : 'None'}`,
-                    `  Fonts: ${hasFonts ? dnaObj.typography.join(', ') : 'None'}`,
+                    '📊 COMPLETE RESEARCH STATE (Your Knowledge Base):',
+                    researchContext,
+                    '',
+                    '📌 CURRENT CANVAS STATE (Visible to User):',
+                    `  Name: ${dnaObj.name?.value || 'Unknown'}`,
+                    `  Mission: ${dnaObj.mission?.value || 'Unknown'}`,
+                    `  Values: ${dnaObj.values?.items ? dnaObj.values.items.join(', ') : 'Unknown'}`,
+                    `  Tagline: ${dnaObj.tagline?.value || 'Unknown'}`,
+                    `  Colors: ${colorDisplay} (${researchState?.colorPalettes?.palettes?.length || 0} Options Available)`,
+                    `  Fonts: ${fontDisplay} (${researchState?.typographyPairings?.fonts?.length || 0} Options Available)`,
                     '',
                     `History (This Phase Only):`,
                     `${historyText}`
                 ].join('\n');
+            }
         }
     }
     /**

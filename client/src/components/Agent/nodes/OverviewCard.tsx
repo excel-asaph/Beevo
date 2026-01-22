@@ -32,7 +32,7 @@ export const OverviewCard: React.FC = () => {
                     <span className="section-title">Mission</span>
                 </div>
                 <p className="section-content">
-                    {mission || 'Your mission will appear here once extracted...'}
+                    {mission?.value || 'Your mission will appear here once extracted...'}
                 </p>
             </div>
 
@@ -43,7 +43,7 @@ export const OverviewCard: React.FC = () => {
                     <span className="section-title">Tagline</span>
                 </div>
                 <p className="section-content tagline">
-                    {tagline ? `"${tagline}"` : 'Your tagline will appear here...'}
+                    {tagline?.value ? `"${tagline.value}"` : 'Your tagline will appear here...'}
                 </p>
             </div>
 

@@ -5,16 +5,37 @@ export class BrandStateManager {
     private sessionId: string;
     private dna: BrandDNA;
     private progress: ProgressItem[] = [];
+    private stateHistory: { dna: BrandDNA; timestamp: number }[] = [];
+    private readonly MAX_HISTORY = 5;
 
     constructor(sessionId: string) {
         this.sessionId = sessionId;
         this.dna = {
-            name: '',
-            mission: '',
-            colors: [],
-            typography: [],
-            voice: ''
+            name: { value: '', isSelected: false },
+            mission: { value: '', isSelected: false },
+            colors: { items: [], isSelected: false },
+            typography: { items: [], isSelected: false },
+            values: { items: [], isSelected: false },
+            voice: { value: '', isSelected: false },
+            tagline: { value: '', isSelected: false },
+            targetAudience: { items: [], isSelected: false },
+            mood: { items: [], isSelected: false }
         };
+        this.saveSnapshot(); // Initial state
+    }
+
+    private saveSnapshot(): void {
+        this.stateHistory.unshift({
+            dna: JSON.parse(JSON.stringify(this.dna)),
+            timestamp: Date.now()
+        });
+        if (this.stateHistory.length > this.MAX_HISTORY) {
+            this.stateHistory.pop();
+        }
+    }
+
+    getHistory(): { dna: BrandDNA; timestamp: number }[] {
+        return [...this.stateHistory];
     }
 
     getDNA(): BrandDNA {
@@ -26,39 +47,68 @@ export class BrandStateManager {
     }
 
     update(field: string, value: any): void {
-        console.log(`📝 State update - ${field}:`, value);
+        const valueStr = value === undefined ? 'undefined' : JSON.stringify(value);
+        console.log(`📝 State update - ${field}:`, (valueStr || 'null').substring(0, 100));
+
+        // Helper to ensure structure
+        const ensureStructure = (val: any, isArray: boolean) => {
+            if (val && typeof val === 'object' && ('value' in val || 'items' in val)) return val;
+            return isArray
+                ? { items: Array.isArray(val) ? val : [val], isSelected: true }
+                : { value: val, isSelected: true };
+        };
 
         switch (field) {
             case 'name':
-                this.dna.name = value;
-                this.updateProgress('name', value);
+                this.dna.name = ensureStructure(value, false);
+                this.updateProgress('name', this.dna.name.value);
                 break;
 
             case 'mission':
-                this.dna.mission = value;
-                this.updateProgress('mission', value);
+                this.dna.mission = ensureStructure(value, false);
+                this.updateProgress('mission', this.dna.mission.value);
                 break;
 
             case 'colors':
-                this.dna.colors = Array.isArray(value) ? value : [value];
-                this.updateProgress('colors', this.dna.colors);
+                this.dna.colors = ensureStructure(value, true);
+                this.updateProgress('colors', this.dna.colors.items);
                 break;
 
             case 'typography':
-                this.dna.typography = Array.isArray(value) ? value : [value];
-                this.updateProgress('font', this.dna.typography[0]);
+                this.dna.typography = ensureStructure(value, true);
+                this.updateProgress('font', this.dna.typography.items[0]);
                 break;
 
             case 'voice':
-                this.dna.voice = value;
-                this.updateProgress('voice', value);
+                this.dna.voice = ensureStructure(value, false);
+                this.updateProgress('voice', this.dna.voice.value);
+                break;
+
+            case 'tagline':
+                this.dna.tagline = ensureStructure(value, false);
+                break;
+
+            case 'values':
+                this.dna.values = ensureStructure(value, true);
+                break;
+
+            case 'targetAudience':
+                this.dna.targetAudience = ensureStructure(value, true);
+                break;
+
+            case 'mood':
+                this.dna.mood = ensureStructure(value, true);
                 break;
 
             case 'logoUrl':
-                this.dna.logoUrl = value;
+                if (this.dna.logoUrl) {
+                    this.dna.logoUrl = { ...this.dna.logoUrl, value: value.value || value };
+                } else {
+                    this.dna.logoUrl = { value: value.value || value, isSelected: true };
+                }
                 break;
 
-            // Phase 9: Logo & Competitive Intelligence
+            // Phase 9: Logo & Competitive Intelligence (Legacy/Future fields)
             case 'logoStyle':
                 this.dna.logoStyle = value;
                 break;
@@ -83,17 +133,10 @@ export class BrandStateManager {
                 this.dna.logoAssets = value;
                 break;
 
-            case 'tagline':
-                this.dna.tagline = value;
-                break;
-
-            case 'values':
-                this.dna.values = value;
-                break;
-
             default:
                 console.warn(`Unknown field: ${field}`);
         }
+        this.saveSnapshot();
     }
 
     updateBatch(updates: Record<string, any>): void {

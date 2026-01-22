@@ -151,56 +151,57 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             audio.playAudio(base64Audio);
         },
 
-        onDNAUpdate: (dna) => {
-            console.log('📦 DNA Update (Store):', dna);
-            // Use store's granular update - NO REBUILD
-            updateDNA(dna);
 
-            // NOTE: Canvas transition is now controlled by RESEARCH_UPDATE
-            // We no longer auto-transition just because DNA has minimum fields
-            // This prevents the race condition where canvas appears before research finishes
 
-            addThinkingStep('Brand DNA updated', 'complete');
-        },
+        onFullStateUpdate: (state) => {
+            console.log('📦 FULL_STATE_UPDATE received:', state);
 
-        onColorSuggestions: (palettes: ColorPalette[]) => {
-            console.log('🎨 COLOR SUGGESTIONS RECEIVED:', palettes.length, palettes);
-            const options: ColorOption[] = palettes.map((p, i) => ({
-                id: `palette-${i}`,
-                name: p.name || `Palette ${i + 1}`,
-                colors: p.colors,
-                reasoning: (p as ColorPalette & { reasoning?: string }).reasoning,
-            }));
-            // Use store action - updates node granularly
-            setColorOptions(options);
-            console.log('🎨 Color options set in store:', options.length);
-            addThinkingStep('Generated color options', 'complete');
+            // 1. Update DNA
+            if (state.brandDNA) updateDNA(state.brandDNA);
 
-            // Transition to canvas when colors arrive
-            if (phase !== 'canvas') {
-                console.log('🎨 Colors received, transitioning to canvas');
-                setPhase('canvas');
+            // 2. Update Colors (with mapping)
+            if (state.colorPalettes?.palettes) {
+                // @ts-ignore - Assuming ColorOption handles isSelected is added to store type
+                const options = state.colorPalettes.palettes.map((p, i) => ({
+                    id: p.id || `palette-${i}`,
+                    name: p.name || `Palette ${i + 1}`,
+                    colors: p.colors,
+                    reasoning: (p as any).reasoning,
+                    vibe: (p as any).vibe,
+                    isSelected: p.isSelected
+                }));
+                setColorOptions(options);
+            }
+
+            // 3. Update Fonts (with mapping)
+            if (state.typographyPairings?.fonts) {
+                // @ts-ignore
+                const options = state.typographyPairings.fonts.map((f, i) => ({
+                    id: f.id || `font-${i}`,
+                    name: f.name,
+                    category: f.category || 'sans-serif',
+                    reasoning: f.reasoning,
+                    pairing: (f as any).pairing,
+                    isSelected: f.isSelected
+                }));
+                setFontOptions(options);
+            }
+
+            // 4. Update Logos
+            if (state.logoInspirations?.inspirations) {
+                const inspirations = state.logoInspirations.inspirations.map((l: any, i: number) => ({
+                    id: l.id || `logo-${i}`,
+                    url: l.url || l.imageUrl,
+                    brandName: l.displayName || l.brandName,
+                    source: l.source,
+                    description: l.description,
+                    isSelected: l.isSelected
+                }));
+                setLogoInspirations(inspirations);
             }
         },
 
-        onFontSuggestions: (fonts: FontSuggestion[]) => {
-            console.log('✍️ FONT SUGGESTIONS RECEIVED:', fonts.length, fonts);
-            const options: FontOption[] = fonts.map((f, i) => ({
-                id: `font-${i}`,
-                name: f.name,
-                category: (f.category as 'serif' | 'sans-serif' | 'display' | 'monospace') || 'sans-serif',
-                reasoning: f.reasoning,
-            }));
-            // Use store action - updates node granularly
-            setFontOptions(options);
-            console.log('✍️ Font options set in store:', options.length);
-            addThinkingStep('Generated typography options', 'complete');
 
-            // If we're still in onboarding/loading and got fonts, transition to canvas
-            if (phase !== 'canvas') {
-                setPhase('canvas');
-            }
-        },
 
         onLogoResearchResult: (logos, insights, screenshots) => {
             console.log('🖼️ Received logo research results:', logos.length);
@@ -291,7 +292,24 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         onThoughtSignature: (nodeId, title, reasoning, confidence) => {
             console.log('💡 Thought Signature:', nodeId, title);
             addThoughtSignature({ nodeId, title, reasoning, confidence });
-            addThinkingStep(`AI Reasoning: ${title}`, 'complete');
+
+            // Map phase ID to step index for ResearchScreen visibility
+            const stepMap: Record<string, number> = {
+                'identity': 0,
+                'competitors': 1,
+                'colors': 2,
+                'typography': 3,
+                'strategy': 4
+            };
+            const stepIndex = stepMap[nodeId] ?? 0;
+            const stepId = `step${stepIndex}-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+
+            // Add directly to thinking steps with correct ID and reasoning text
+            setThinkingSteps(prev => [...prev, {
+                id: stepId,
+                text: reasoning || title,
+                status: 'complete'
+            }]);
         },
 
         onError: (message) => {
@@ -463,7 +481,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     draggable: true,
                     data: {
                         label: '📛 Brand Name',
-                        content: dna.name,
+                        content: dna.name?.value,
                         color: 'yellow',
                         status: 'complete',
                     },
@@ -481,7 +499,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     draggable: true,
                     data: {
                         label: '🎯 Mission',
-                        content: dna.mission,
+                        content: dna.mission?.value,
                         color: 'blue',
                         status: 'complete',
                     },
@@ -498,7 +516,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     draggable: true,
                     data: {
                         label: '✨ Tagline',
-                        content: dna.tagline,
+                        content: dna.tagline?.value,
                         color: 'blue',
                         status: 'complete',
                     },
@@ -516,14 +534,14 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     draggable: true,
                     data: {
                         label: '💬 Brand Voice',
-                        content: dna.voice,
+                        content: dna.voice?.value,
                         color: 'purple',
                         status: 'complete',
                     },
                 });
             }
 
-            if (dna.values && dna.values.length > 0) {
+            if (dna.values && dna.values.items && dna.values.items.length > 0) {
                 derivedNodes.push({
                     id: 'values',
                     type: 'sticky',
@@ -533,8 +551,45 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     draggable: true,
                     data: {
                         label: '💎 Brand Values',
-                        content: dna.values,
+                        content: dna.values.items,
                         color: 'purple',
+                        displayMode: 'tags',
+                        status: 'complete',
+                    },
+                });
+            }
+
+            // --- Missing Nodes: Target Audience & Mood ---
+            if (dna.targetAudience && dna.targetAudience.items && dna.targetAudience.items.length > 0) {
+                derivedNodes.push({
+                    id: 'audience',
+                    type: 'sticky',
+                    parentId: FRAMES.strategy.id, // Adding to Strategy Frame
+                    extent: 'parent',
+                    position: existingPositions.get('audience') || { x: 20, y: 430 },
+                    draggable: true,
+                    data: {
+                        label: '👥 Target Audience',
+                        content: dna.targetAudience.items,
+                        color: 'purple',
+                        displayMode: 'list', // Verify if 'list' is supported by StickyNode, defaulting to 'tags' if not or standard string join
+                        status: 'complete',
+                    },
+                });
+            }
+
+            if (dna.mood && dna.mood.items && dna.mood.items.length > 0) {
+                derivedNodes.push({
+                    id: 'mood',
+                    type: 'sticky',
+                    parentId: FRAMES.overview.id, // Adding to Overview Frame
+                    extent: 'parent',
+                    position: existingPositions.get('mood') || { x: 20, y: 430 },
+                    draggable: true,
+                    data: {
+                        label: '🎭 Mood',
+                        content: dna.mood.items,
+                        color: 'blue',
                         displayMode: 'tags',
                         status: 'complete',
                     },
@@ -550,16 +605,19 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             let currentY = 50; // Start Y relative to frame
 
             // 1. COLORS
-            const colorsStatus = colorOptions.length > 0 ? 'options' : (dna.colors && dna.colors.length > 0 ? 'saved' : 'empty');
-            // Height estimates:
-            // Empty: ~120px
-            // Saved: ~150px
-            // Options: ~380px (Title + 3 large palette cards)
+            // 1. COLORS
+            const colorsStatus = colorOptions.length > 0 ? 'options' : (dna.colors?.items && dna.colors.items.length > 0 ? 'saved' : 'empty');
+            // Dynamic Height Calculation
+            const PALETTE_ITEM_HEIGHT = 100; // Approx height per palette card
+            const PALETTE_BASE_HEIGHT = 80;  // Header + padding
+
             let colorsHeight = 120;
             if (colorsStatus === 'saved') colorsHeight = 150;
-            if (colorsStatus === 'options') colorsHeight = 380;
+            if (colorsStatus === 'options') {
+                colorsHeight = PALETTE_BASE_HEIGHT + (colorOptions.length * PALETTE_ITEM_HEIGHT);
+            }
 
-            if (colorOptions.length > 0 || (dna.colors && dna.colors.length > 0)) {
+            if (colorOptions.length > 0 || (dna.colors?.items && dna.colors.items.length > 0)) {
                 derivedNodes.push({
                     id: 'colors',
                     type: 'palette',
@@ -574,7 +632,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         selectedPalette: colorsStatus === 'saved' ? {
                             id: 'selected',
                             name: 'Selected Colors',
-                            colors: dna.colors || [],
+                            colors: dna.colors?.items || [],
                         } : undefined,
                         onSelect: handleColorSelect,
                     },
@@ -585,16 +643,18 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
 
             // 2. TYPOGRAPHY
-            const typographyStatus = fontOptions.length > 0 ? 'options' : (dna.typography && dna.typography.length > 0 ? 'saved' : 'empty');
-            // Height estimates:
-            // Empty: ~120px
-            // Saved: ~150px
-            // Options: ~450px (Title + 3 large font cards)
+            const typographyStatus = fontOptions.length > 0 ? 'options' : (dna.typography?.items && dna.typography.items.length > 0 ? 'saved' : 'empty');
+            // Dynamic Height Calculation
+            const FONT_ITEM_HEIGHT = 120; // Approx height per font card
+            const FONT_BASE_HEIGHT = 80;
+
             let typographyHeight = 120;
             if (typographyStatus === 'saved') typographyHeight = 150;
-            if (typographyStatus === 'options') typographyHeight = 450;
+            if (typographyStatus === 'options') {
+                typographyHeight = FONT_BASE_HEIGHT + (fontOptions.length * FONT_ITEM_HEIGHT);
+            }
 
-            if (fontOptions.length > 0 || (dna.typography && dna.typography.length > 0)) {
+            if (fontOptions.length > 0 || (dna.typography?.items && dna.typography.items.length > 0)) {
                 derivedNodes.push({
                     id: 'typography',
                     type: 'typography',
@@ -606,7 +666,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         label: 'Typography',
                         status: typographyStatus,
                         options: fontOptions,
-                        selectedFonts: typographyStatus === 'saved' && dna.typography ? dna.typography.map((name, i) => ({
+                        selectedFonts: typographyStatus === 'saved' && dna.typography?.items ? dna.typography.items.map((name, i) => ({
                             id: `font-${i}`,
                             name,
                             category: 'sans-serif' as const,
@@ -887,9 +947,9 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 currentStep={researchStatus.step}
                 message={researchStatus.message || loadingMessage}
                 competitors={researchStatus.competitors}
-                thoughts={researchStatus.thoughts}
+                thoughts={thinkingSteps}
                 brandName={dna.name}
-                industry={dna.voice}
+                industry={dna.industry}
             />
         );
     }

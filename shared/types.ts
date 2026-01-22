@@ -7,43 +7,40 @@ export enum Junction {
     GUARDIAN = 'GUARDIAN'
 }
 
+export interface SelectableString {
+    value: string;
+    isSelected: boolean;
+}
+
+export interface SelectableArray {
+    items: string[];
+    isSelected: boolean;
+}
+
 export interface BrandDNA {
-    name: string;
-    mission: string;
-    colors: string[];
-    typography: string[];
-    voice: string;
-    tagline?: string;
-    values?: string[];
-    targetAudience?: string;
-    keywords?: string[];
-    logoUrl?: string;
-    // Phase 9: Logo & Competitive Intelligence
-    logoType?: string; // wordmark, lettermark, emblem, combination mark
-    imagery?: string; // symbols, icons, abstract shapes
+    name: SelectableString;
+    mission: SelectableString;
+
+    voice: SelectableString;
+    tagline: SelectableString;
+    values: SelectableArray;
+    targetAudience: SelectableArray;
+    mood: SelectableArray;
+    keywords?: SelectableArray;
+    logoUrl?: SelectableString;
+    industry?: SelectableString;
+    rationale?: string;
+
+    // Legacy/Optional fields kept for compatibility or future use
+    paletteCount?: number;
+    logoType?: string;
+    imagery?: string;
     designGoals?: string;
     logoInspiration?: string;
     logoUsageContexts?: string[];
-    competitorInsights?: {
-        industry: string;
-        analyzed: string[];
-        patterns: string;
-        recommendation: string;
-    };
-    // General research results - Brain can reference these for context
-    researchInsights?: Array<{
-        query: string;
-        result: string;
-        focus?: string;
-        timestamp: number;
-    }>;
-    logoAssets?: Array<{
-        id: string;
-        url: string;
-        name?: string; // Brand name or alt text
-        style?: string;
-        reasoning?: string;
-    }>;
+    competitorInsights?: any;
+    researchInsights?: any[];
+    logoAssets?: any[];
 }
 
 export interface SWOT {
@@ -73,39 +70,48 @@ export interface ThoughtSignature {
 
 // Font suggestion from AI
 export interface FontSuggestion {
+    id: string;
     name: string;
-    category: 'serif' | 'sans-serif' | 'display' | 'handwriting' | 'monospace';
+    category: 'serif' | 'sans-serif' | 'display' | 'handwriting' | 'monospace' | string;
     reasoning: string;
+    pairing?: string;
+    weight?: string;
+    style?: string;
+    isSelected: boolean;
 }
 
 // Color palette suggestion from AI
 export interface ColorPalette {
+    id: string;
     name: string;
     colors: string[];
     vibe: string;
+    isSelected: boolean;
 }
 
-// Logo structure suggestion
+// Logo structure suggestion (simplified - no literal types)
 export interface LogoStructureOption {
-    type: 'wordmark' | 'lettermark' | 'emblem' | 'combination';
+    id: string;
+    type: string;
     reasoning: string;
-    suitability: string; // High, Medium, Low
+    suitability: string;
+    isSelected: boolean;
 }
 
-// Imagery/Iconography suggestion
+// Imagery/Iconography suggestion (simplified)
 export interface ImagerySuggestion {
+    id: string;
     concept: string;
     description: string;
-    visualStyle: string;
+    isSelected: boolean;
 }
 
-// Logo search result/inspiration
+// Logo search result/inspiration (simplified per user feedback)
 export interface LogoInspiration {
     id: string;
+    displayName: string;
     url: string;
-    brandName?: string;
-    source?: string;
-    description?: string;
+    isSelected: boolean;
 }
 
 // Progress item for tracking finalized decisions
@@ -130,3 +136,82 @@ export interface ArchitectSession {
         previewText?: string;
     };
 }
+
+// ==========================================
+// RESEARCH EXECUTION PHASE TYPES
+// ==========================================
+
+export interface CompetitorResearch {
+    competitors: { name: string; domain: string; description: string }[];
+    differentiationOpportunity: string;
+    competitorBranding: { primaryColor?: string; secondaryColor?: string; name?: string; brandVibe?: string }[];
+    rationale?: string;
+}
+
+export interface ColorPalettes {
+    palettes: ColorPalette[];
+    rationale?: string;
+}
+
+export interface TypographyPairings {
+    fonts: FontSuggestion[];
+    rationale?: string;
+}
+
+// ==========================================
+// NEW: MODIFICATION PHASE TYPES
+// ==========================================
+
+// Logo structure options container
+export interface LogoStructures {
+    options: LogoStructureOption[];
+    rationale?: string;
+}
+
+// Logo inspiration library container
+export interface LogoInspirationLibrary {
+    inspirations: LogoInspiration[];
+    rationale?: string;
+}
+
+// Imagery options container
+export interface ImageryOptions {
+    suggestions: ImagerySuggestion[];
+    rationale?: string;
+}
+
+// General research query log
+export interface GeneralResearchQuery {
+    id: string;
+    query: string;
+    result: string;
+    timestamp: string;
+}
+
+export interface GeneralResearchLog {
+    queries: GeneralResearchQuery[];
+}
+
+// ==========================================
+// EXTENDED RESEARCH PHASE OBJECT
+// ==========================================
+
+export interface ResearchPhaseObject {
+    // Core sections (from execution phase)
+    brandDNA: BrandDNA;
+    competitorResearch: CompetitorResearch;
+    colorPalettes: ColorPalettes;
+    typographyPairings: TypographyPairings;
+
+    // New modification phase sections
+    logoStructures?: LogoStructures;
+    logoInspirations?: LogoInspirationLibrary;
+    imagery?: ImageryOptions;
+    generalResearch?: GeneralResearchLog;
+
+    // Metadata
+    summary: string;
+    timestamp: string;
+    stateVersion?: number;
+}
+

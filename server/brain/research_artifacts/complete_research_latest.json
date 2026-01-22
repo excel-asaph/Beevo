@@ -1,0 +1,191 @@
+{
+  "brandDNA": {
+    "name": {
+      "value": "Nike",
+      "isSelected": true
+    },
+    "mission": {
+      "value": "To deliver high-quality athletic shoes to underserved communities and empower the next generation through sports.",
+      "isSelected": true
+    },
+    "colors": {
+      "items": [],
+      "isSelected": false
+    },
+    "typography": {
+      "items": [
+        "Montserrat"
+      ],
+      "isSelected": true
+    },
+    "values": {
+      "items": [
+        "Caring",
+        "Sharing",
+        "Giving"
+      ],
+      "isSelected": true
+    },
+    "voice": {
+      "value": "Compassionate, inspiring, and dynamic.",
+      "isSelected": true
+    },
+    "tagline": {
+      "value": "Empowering Every Step.",
+      "isSelected": true
+    },
+    "targetAudience": {
+      "items": [
+        "Children in Africa",
+        "Community Leaders",
+        "Philanthropic Organizations"
+      ],
+      "isSelected": true
+    },
+    "mood": {
+      "items": [
+        "Energetic",
+        "Vibrant",
+        "Compassionate",
+        "Empowering"
+      ],
+      "isSelected": true
+    }
+  },
+  "competitorResearch": {
+    "competitors": [
+      {
+        "name": "Adidas AG",
+        "domain": "adidas.com",
+        "description": "A global leader in athletic footwear that integrates social impact through initiatives like 'Honoring Black Excellence' and partnerships with youth organizations to provide sports programming and educational access to underserved communities."
+      },
+      {
+        "name": "Under Armour, Inc.",
+        "domain": "underarmour.com",
+        "description": "An athletic performance brand focused on youth sports accessibility, investing in community programs like 'Project Rampart' to provide gear, coaching, and academic support to student-athletes in high-need urban areas."
+      },
+      {
+        "name": "Veja",
+        "domain": "veja-store.com",
+        "description": "A French footwear brand that prioritizes social impact by sourcing materials directly from producer associations in the Amazon and employing social inclusion programs for its logistics and distribution operations."
+      },
+      {
+        "name": "soleRebels",
+        "domain": "solerebels.com",
+        "description": "The world's first Fair Trade-certified footwear company, founded in Ethiopia to empower local artisans and create sustainable, high-quality jobs in an underserved community using traditional and recycled materials."
+      },
+      {
+        "name": "Allbirds, Inc.",
+        "domain": "allbirds.com",
+        "description": "A certified B Corp and leader in sustainable athletic footwear, known for its carbon-neutral business model and commitment to environmental and social transparency throughout its global supply chain."
+      }
+    ],
+    "differentiationOpportunity": "Avoid the 'Sustainable Beige' trap of Allbirds and the 'Aggressive Black' of Adidas. To stand out, a new brand should adopt an 'Energized Earth' palette. Use a vibrant, saturated 'Electric Terracotta' (#E2725B) as a primary color paired with a 'Deep Cobalt' (#0047AB). This combines the warmth of social impact and human connection with the energy of athletic performance, filling the gap between the 'too-quiet' eco-brands and the 'too-cold' corporate giants.",
+    "competitorBranding": [
+      {
+        "name": "Adidas AG",
+        "primaryColor": "#000000",
+        "secondaryColor": "#FFFFFF",
+        "brandVibe": "Heritage-driven, authoritative, and versatile performance."
+      },
+      {
+        "name": "Under Armour, Inc.",
+        "primaryColor": "#000000",
+        "secondaryColor": "#E11C24",
+        "brandVibe": "Aggressive, high-intensity, and grit-focused athleticism."
+      },
+      {
+        "name": "Veja",
+        "primaryColor": "#F5F5F5",
+        "secondaryColor": "#212121",
+        "brandVibe": "Minimalist, sophisticated, and ethically transparent."
+      },
+      {
+        "name": "soleRebels",
+        "primaryColor": "#4B5320",
+        "secondaryColor": "#FFD700",
+        "brandVibe": "Artisanal, vibrant, and grassroots-authentic."
+      },
+      {
+        "name": "Allbirds, Inc.",
+        "primaryColor": "#212121",
+        "secondaryColor": "#92A192",
+        "brandVibe": "Approachable, soft, and tech-minimalist comfort."
+      }
+    ],
+    "rationale": "Avoid the 'Sustainable Beige' trap of Allbirds and the 'Aggressive Black' of Adidas. To stand out, a new brand should adopt an 'Energized Earth' palette. Use a vibrant, saturated 'Electric Terracotta' (#E2725B) as a primary color paired with a 'Deep Cobalt' (#0047AB). This combines the warmth of social impact and human connection with the energy of athletic performance, filling the gap between the 'too-quiet' eco-brands and the 'too-cold' corporate giants."
+  },
+  "colorPalettes": {
+    "palettes": [
+      {
+        "name": "Kinetic Clay",
+        "colors": [
+          "#E2725B",
+          "#0047AB",
+          "#F9F1E7",
+          "#2E8B57",
+          "#333333"
+        ],
+        "vibe": "This palette centers on the 'Energized Earth' strategy. The Electric Terracotta provides a grounded, human warmth, while the Deep Cobalt adds a layer of professional athletic performance. The addition of Sea Green and Cream softens the tech-heavy feel of traditional athletic brands, emphasizing social impact and environmental compassion.",
+        "isSelected": false
+      },
+      {
+        "name": "Electric Pulse",
+        "colors": [
+          "#E2725B",
+          "#0047AB",
+          "#FFD700",
+          "#F0F8FF",
+          "#1A1A1A"
+        ],
+        "vibe": "A high-intensity mix designed for empowerment and movement. By pairing the primary Terracotta and Cobalt with a vibrant Gold, the brand communicates victory and excellence. It avoids the 'cold' feel of competitors by using an Alice Blue neutral instead of stark white, maintaining a sense of approachability.",
+        "isSelected": false
+      },
+      {
+        "name": "Social Vitality",
+        "colors": [
+          "#E2725B",
+          "#0047AB",
+          "#7FFF00",
+          "#5D3FD3",
+          "#FAF9F6"
+        ],
+        "vibe": "This palette is unapologetically bold and energetic. The Chartreuse highlight creates a visual 'pop' that signals innovation, while the Iris Purple complements the Cobalt to create a sophisticated, modern athletic aesthetic. It is designed to stand out in a digital-first environment where 'vibrant' and 'empowering' are the core messages.",
+        "isSelected": false
+      }
+    ],
+    "rationale": "These palettes are engineered to break the monotony of the athletic footwear market. By utilizing 'Electric Terracotta' (#E2725B) as the bridge between organic earthiness and high-energy performance, we satisfy the 'Social Impact' requirement without falling into the muted, passive tones of eco-conscious competitors. The 'Deep Cobalt' (#0047AB) provides the necessary 'sport-tech' gravity to compete with giants like Adidas, but without the aggressive, exclusionary feel of pure black. This strategic color balance positions the brand as both a high-performance choice and a compassionate social advocate."
+  },
+  "typographyPairings": {
+    "fonts": [
+      {
+        "category": "sans-serif",
+        "isSelected": false,
+        "id": "1",
+        "reasoning": "Modern, clean, and highly readable, perfect for a dynamic athletic brand.",
+        "pairing": "Open Sans",
+        "name": "Montserrat"
+      },
+      {
+        "name": "Archivo",
+        "category": "sans-serif",
+        "id": "2",
+        "reasoning": "A strong, high-contrast pairing that balances athletic power with humanistic warmth.",
+        "isSelected": true,
+        "pairing": "Lora"
+      },
+      {
+        "pairing": "Inter",
+        "id": "3",
+        "isSelected": false,
+        "reasoning": "Bold and impactful, ideal for headlines that need to grab attention.",
+        "name": "Bebas Neue",
+        "category": "display"
+      }
+    ],
+    "rationale": "User updated typography (CRUD/Select)"
+  },
+  "summary": "This comprehensive brand research report delineates a strategic evolution for Nike within the critical intersection of high-performance athletic footwear and localized social impact. By centering its mission on underserved communities and youth empowerment, the brand occupies a unique market white space situated between the clinical minimalism of established corporate giants and the muted, often stagnant aesthetics of niche sustainable startups. Our analysis of five primary competitors revealed a significant visual vacuum that current market leaders fail to address. To distinguish the brand from the Sustainable Beige trap exemplified by Allbirds and the Aggressive Black aesthetic traditional to Adidas, we have architected an Energized Earth identity. This strategic direction utilizes a vibrant Electric Terracotta to radiate human warmth and social connectivity, balanced by the professional vigor of Deep Cobalt. This sophisticated palette, supported by curated typography, effectively bridges the gap between grassroots advocacy and elite performance, establishing a visual language that is simultaneously aspirational, inclusive, and kinetic.",
+  "timestamp": "2026-01-22T22:42:37.521Z",
+  "stateVersion": 22
+}

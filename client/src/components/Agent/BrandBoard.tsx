@@ -12,6 +12,7 @@ import { TypographyCard } from './nodes/TypographyCard';
 import { ImageryCard } from './nodes/ImageryCard';
 import { VaultNode } from './nodes/VaultNode';
 import { VoiceOrbNode } from './nodes/VoiceOrbNode';
+import { LogoStructureCard } from './nodes/LogoStructureCard';
 
 // UI Components
 import { DropZone } from './DropZone';
@@ -32,12 +33,13 @@ interface MiroCanvasProps {
  */
 export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
     // ========== ZUSTAND STORE SUBSCRIPTIONS ==========
-    const { dna, colorOptions, fontOptions, logoInspirations, vaultStats, phase, loadingMessage } = useBrandStore(
+    const { dna, colorOptions, fontOptions, logoInspirations, logoOptions, vaultStats, phase, loadingMessage } = useBrandStore(
         useShallow((state) => ({
             dna: state.dna,
             colorOptions: state.colorOptions,
             fontOptions: state.fontOptions,
             logoInspirations: state.logoInspirations,
+            logoOptions: state.logoOptions,
             vaultStats: state.vaultStats,
             phase: state.phase,
             loadingMessage: state.loadingMessage,
@@ -55,6 +57,7 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
     const updateDNA = useBrandStore((state) => state.updateDNA);
     const setColorOptions = useBrandStore((state) => state.setColorOptions);
     const setFontOptions = useBrandStore((state) => state.setFontOptions);
+    const setLogoOptions = useBrandStore((state) => state.setLogoOptions);
     const setLogoInspirations = useBrandStore((state) => state.setLogoInspirations);
     const setVaultStats = useBrandStore((state) => state.setVaultStats);
     const setPhase = useBrandStore((state) => state.setPhase);
@@ -72,24 +75,46 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
         onDNAUpdate: (newDNA) => {
             console.log('📥 DNA Update received:', newDNA);
             updateDNA(newDNA);
-            // NOTE: Don't transition here - wait for RESEARCH_COMPLETE
         },
-        onColorSuggestions: (palettes) => {
-            console.log('🎨 Color suggestions:', palettes);
-            setColorOptions(palettes);
+        onFullStateUpdate: (state) => {
+            console.log('📦 FULL_STATE_UPDATE received:', state);
+            if (state.brandDNA) updateDNA(state.brandDNA);
+            if (state.colorPalettes?.palettes) setColorOptions(state.colorPalettes.palettes);
+            if (state.typographyPairings?.fonts) setFontOptions(state.typographyPairings.fonts);
+            if (state.logoStructures?.options) setLogoOptions(state.logoStructures.options);
+
+            if (state.logoInspirations?.inspirations) {
+                const mappedLogos = state.logoInspirations.inspirations.map((l: any, i: number) => ({
+                    id: l.id || `logo-${i}`,
+                    url: l.url || l.imageUrl,
+                    displayName: l.displayName || l.brandName || 'Unknown',
+                    source: l.source || '',
+                    description: l.description || '',
+                    isSelected: l.isSelected || false
+                }));
+                setLogoInspirations(mappedLogos);
+            }
+
+            // CHECK: IF WE HAVE VALID DATA, TRANSITION TO CANVAS
+            const hasColors = state.colorPalettes?.palettes && state.colorPalettes.palettes.length > 0;
+            const hasFonts = state.typographyPairings?.fonts && state.typographyPairings.fonts.length > 0;
+
+            if (hasColors && hasFonts) {
+                console.log('✅ FULL_STATE_UPDATE has valid data - transitioning to canvas');
+                setPhase('canvas');
+                setLoadingMessage('Startup complete');
+            }
         },
-        onFontSuggestions: (fonts) => {
-            console.log('🔤 Font suggestions:', fonts);
-            setFontOptions(fonts);
-        },
+
         onLogoResearchResult: (logos) => {
             console.log('🖼️ Logo inspirations:', logos);
             setLogoInspirations(logos.map((l: any, i: number) => ({
                 id: `logo-${i}`,
                 url: l.imageUrl || l.url,
-                brandName: l.brandName || 'Unknown',
+                displayName: l.brandName || l.displayName || 'Unknown',
                 source: l.source || '',
                 description: l.description || '',
+                isSelected: false
             })));
         },
         onVaultUpdate: (stats) => {
@@ -105,7 +130,7 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
             // Validation: ensure we have the minimum required data
             const hasColors = colorOptions.length > 0;
             const hasFonts = fontOptions.length > 0;
-            const hasBrandName = dna.name && dna.name.length > 0;
+            const hasBrandName = dna.name?.value && dna.name.value.length > 0;
 
             if (hasColors && hasFonts) {
                 console.log('✅ All required data present - showing canvas');
@@ -178,6 +203,15 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
         ws.sendSelection('font', font);
     }, [selectFont, ws]);
 
+    const handleLogoStructureSelect = useCallback((structureId: string) => {
+        // Find selection
+        const option = logoOptions.find(opt => opt.id === structureId);
+        if (option) {
+            // Optimistic update if store had action, but for now just send WS
+            ws.sendSelection('structure', option.type);
+        }
+    }, [logoOptions, ws]);
+
     const toggleVoice = useCallback(() => {
         if (voiceState === 'idle' || voiceState === 'inactive') {
             audio.start();
@@ -194,16 +228,18 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
     // ========== DERIVED DATA ==========
     const displayColors = colorOptions.length > 0
         ? colorOptions[0].colors
-        : dna.colors || [];
+        : dna.colors?.items || [];
+
+    const isColorSelected = colorOptions.length > 0 && !!colorOptions[0].isSelected;
 
     // Pass full font objects to preserve pairing data for display
     const displayFonts = fontOptions.length > 0
         ? fontOptions
-        : dna.typography?.map((name: string) => ({ name, category: 'sans-serif' })) || [];
+        : dna.typography?.items?.map((name: string) => ({ name, category: 'sans-serif' })) || [];
 
     const logoImages = logoInspirations.map(l => ({
         url: l.url,
-        label: l.brandName,
+        label: l.displayName,
     }));
 
     // ========== RENDER ==========
@@ -242,8 +278,8 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
                 {/* Row 1: Brand Name + Overview */}
                 <div className="canvas-row row-1">
                     <BrandNameCard
-                        name={dna.name || 'Your Brand'}
-                        tagline={dna.mission?.slice(0, 50)}
+                        name={dna.name?.value || 'Your Brand'}
+                        tagline={dna.tagline?.value || dna.mission?.value?.slice(0, 50)}
                     />
                     <OverviewCard />
                 </div>
@@ -253,14 +289,15 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
                     {/* @ts-ignore - FrameNode is used as a wrapper here */}
                     <FrameNode title="Brand Strategy" width={700}>
                         <StrategyCard
-                            mission={dna.mission}
-                            values={dna.values}
-                            voice={dna.voice}
+                            mission={dna.mission?.value}
+                            values={dna.values?.items}
+                            voice={dna.voice?.value}
                         />
                     </FrameNode>
                 </div>
 
                 {/* Row 3: Visual Identity Frame */}
+                {/* @ts-ignore */}
                 <div className="canvas-row row-3">
                     {/* @ts-ignore - FrameNode is used as a wrapper here */}
                     <FrameNode title="Visual Identity" width={900}>
@@ -268,22 +305,51 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
                             colors={displayColors}
                             paletteName="Color Palette"
                             onColorClick={handleColorSelect}
+                            isSelected={isColorSelected}
                         />
                         <TypographyCard
-                            fonts={displayFonts}
+                            fonts={displayFonts as any} // Cast to any to bypass strict type check for now if interface mismatch exists
                             onFontClick={handleFontSelect}
                         />
-                        {logoImages.length > 0 && (
-                            <ImageryCard
-                                images={logoImages}
-                                title="Logo Inspiration"
-                            />
-                        )}
                     </FrameNode>
                 </div>
 
-                {/* Row 4: Tools Frame */}
-                <div className="canvas-row row-4">
+                {/* Row 4: Logo & Imagery (Dynamic Spawn) */}
+                <AnimatePresence>
+                    {(logoOptions.length > 0 || logoImages.length > 0) && (
+                        <motion.div
+                            className="canvas-row row-4"
+                            initial={{ opacity: 0, y: 50, height: 0 }}
+                            animate={{ opacity: 1, y: 0, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.5, type: 'spring' }}
+                        >
+                            {/* @ts-ignore */}
+                            <FrameNode title="Logo & Imagery" width={900}>
+                                <div className="flex flex-col gap-6 w-full">
+                                    {/* Logo Structure Options */}
+                                    {logoOptions.length > 0 && (
+                                        <LogoStructureCard
+                                            options={logoOptions}
+                                            onSelect={handleLogoStructureSelect}
+                                        />
+                                    )}
+
+                                    {/* Imagery/Inspiration */}
+                                    {logoImages.length > 0 && (
+                                        <ImageryCard
+                                            images={logoImages}
+                                            title="Logo Inspiration"
+                                        />
+                                    )}
+                                </div>
+                            </FrameNode>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Row 5: Tools Frame */}
+                <div className="canvas-row row-5">
                     {/* @ts-ignore - FrameNode is used as a wrapper here */}
                     <FrameNode title="Tools" width={400}>
                         <VaultNode

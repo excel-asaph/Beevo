@@ -1,6 +1,6 @@
 // WebSocket message types for client-server communication
 
-import { BrandDNA, FontSuggestion, ColorPalette } from './types';
+import { BrandDNA, FontSuggestion, ColorPalette, ResearchPhaseObject } from './types';
 
 // ============================================
 // CLIENT → SERVER MESSAGES
@@ -239,12 +239,7 @@ export interface AuditResultMessage {
 
 export interface ResearchCompleteMessage {
     type: 'RESEARCH_COMPLETE';
-    summary: {
-        brandName: string;
-        colorsGenerated: number;
-        fontsGenerated: number;
-        competitorsFound: number;
-    };
+    dna: ResearchPhaseObject;
 }
 
 export type ServerMessage =
@@ -276,7 +271,13 @@ export type ServerMessage =
     | ResearchUpdateMessage
     | ThoughtSignatureMessage
     | ResearchCompleteMessage
+    | FullStateUpdateMessage
     | UIStateChangeMessage;
+
+export interface FullStateUpdateMessage {
+    type: 'FULL_STATE_UPDATE';
+    state: ResearchPhaseObject;
+}
 
 export interface VaultUpdateMessage {
     type: 'VAULT_UPDATE';
@@ -339,6 +340,7 @@ export function isServerMessage(msg: any): msg is ServerMessage {
         'COMPETITIVE_ANALYSIS', 'LOGO_CONCEPTS', 'AUDIT_RESULT',
         'LOGO_RESEARCH_PROGRESS', 'LOGO_RESEARCH_RESULT',
         'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS', 'VAULT_UPDATE',
-        'RESEARCH_UPDATE', 'THOUGHT_SIGNATURE'
+        'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS', 'VAULT_UPDATE',
+        'RESEARCH_UPDATE', 'THOUGHT_SIGNATURE', 'FULL_STATE_UPDATE', 'RESEARCH_COMPLETE'
     ].includes(msg.type);
 }

@@ -7,14 +7,16 @@ export interface ColorOption {
     name: string;
     colors: string[];
     reasoning?: string;
+    isSelected?: boolean;
 }
 
 export interface FontOption {
     id: string;
     name: string;
-    category: 'serif' | 'sans-serif' | 'display' | 'monospace';
+    category: 'serif' | 'sans-serif' | 'display' | 'monospace' | 'handwriting' | string;
     pairing?: string;
     reasoning?: string;
+    isSelected?: boolean;
 }
 
 // Thought Signature - AI reasoning attached to a specific node
@@ -102,8 +104,7 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
     dna: {
         name: '',
         mission: '',
-        colors: [],
-        typography: [],
+
         voice: '',
     },
     colorOptions: [],
@@ -140,15 +141,9 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
                 dna: { ...state.dna, ...patch }
             };
 
-            // If we are updating colors (and not just clearing them), clear options
-            if (patch.colors && patch.colors.length > 0) {
-                updates.colorOptions = [];
-            }
 
-            // If we are updating typography, clear font options
-            if (patch.typography && patch.typography.length > 0) {
-                updates.fontOptions = [];
-            }
+
+
 
             // If we are saving logos, clear inspiration options
             if (patch.logoAssets && patch.logoAssets.length > 0) {

@@ -5,9 +5,10 @@ import { Type, Check } from 'lucide-react';
 export interface FontOption {
     id?: string;
     name: string;
-    category?: 'serif' | 'sans-serif' | 'display' | 'monospace';
+    category?: 'serif' | 'sans-serif' | 'display' | 'monospace' | string;
     pairing?: string;
     reasoning?: string;
+    isSelected?: boolean;
 }
 
 interface TypographyCardProps {
@@ -70,7 +71,7 @@ export const TypographyCard: React.FC<TypographyCardProps> = ({ fonts, onFontCli
                                 w-full p-3 rounded-lg border transition-all text-left
                                 ${hoveredFont === fontId
                                     ? 'border-indigo-400 bg-indigo-50 shadow-md'
-                                    : 'border-slate-200 bg-white hover:border-slate-300'
+                                    : (font.isSelected ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300')
                                 }
                             `}
                         >
@@ -82,7 +83,12 @@ export const TypographyCard: React.FC<TypographyCardProps> = ({ fonts, onFontCli
                                 >
                                     {font.name}
                                 </span>
-                                <div className="flex gap-2 items-center">
+                                {font.isSelected && (
+                                    <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center ml-2">
+                                        <Check className="w-2.5 h-2.5 text-white" />
+                                    </div>
+                                )}
+                                <div className="flex gap-2 items-center ml-auto">
                                     {font.pairing && (
                                         <span className="text-xs text-slate-400 font-normal">
                                             + {font.pairing}

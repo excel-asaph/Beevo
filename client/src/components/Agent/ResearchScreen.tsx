@@ -54,11 +54,11 @@ const ThinkingStream: React.FC<{ thoughts: ThoughtItem[] }> = ({ thoughts }) => 
             {thoughts.map((thought) => (
                 <div
                     key={thought.id}
-                    className={`text-xs font-mono ${thought.status === 'active'
-                        ? 'text-amber-400'
+                    className={`text-xs font-mono ml-1 ${thought.status === 'active'
+                        ? 'text-amber-300'
                         : thought.status === 'complete'
-                            ? 'text-slate-500'
-                            : 'text-slate-600'
+                            ? 'text-slate-300'
+                            : 'text-slate-500'
                         }`}
                 >
                     <span className="mr-2">
@@ -304,9 +304,17 @@ export const ResearchScreen: React.FC<ResearchScreenProps> = ({
                             key={message}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="mt-1 text-xs text-slate-400 text-center"
+                            className="mt-1 text-xs text-center"
+                            style={{
+                                background: 'linear-gradient(90deg, rgba(148, 163, 184, 0.6) 0%, rgba(226, 232, 240, 1) 50%, rgba(148, 163, 184, 0.6) 100%)',
+                                backgroundSize: '200% 100%',
+                                WebkitBackgroundClip: 'text',
+                                backgroundClip: 'text',
+                                color: 'transparent',
+                                animation: 'shimmer 2s infinite linear'
+                            }}
                         >
-                            {message}
+                            {message}...
                         </motion.p>
 
                         {/* Steps */}

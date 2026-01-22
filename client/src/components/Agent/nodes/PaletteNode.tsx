@@ -8,13 +8,15 @@ export interface ColorOption {
     name: string;
     colors: string[];
     reasoning?: string;
+    isSelected?: boolean;
 }
 
 export interface PaletteNodeData {
     label: string;
     status: 'empty' | 'options' | 'saved' | 'locked';
     options?: ColorOption[];
-    selectedPalette?: ColorOption;
+    selectedPalette?: ColorOption; // Deprecated but kept for backward compatibility
+    selectedPalettes?: ColorOption[];
     onSelect?: (paletteId: string, context?: ColorOption) => void;
     onRegenerate?: () => void;
 }
@@ -49,12 +51,17 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
                         w-full p-3 rounded-lg border transition-all
                         ${hoveredPalette === palette.id
                             ? 'border-indigo-400 bg-indigo-50 shadow-md'
-                            : 'border-slate-200 bg-white hover:border-slate-300'
+                            : (palette.isSelected ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300')
                         }
                     `}
                 >
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-slate-700">{palette.name}</span>
+                        {palette.isSelected && (
+                            <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 text-white" />
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-1">
                         {palette.colors.map((color, i) => (
@@ -94,23 +101,36 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
     );
 
     const renderSaved = () => (
-        <div>
-            <div className="flex items-center justify-between mb-3">
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-slate-600">
-                    {nodeData.selectedPalette?.name || 'Selected Palette'}
+                    Selected Palettes
                 </span>
                 <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
                     <Check className="w-3 h-3 text-white" />
                 </div>
             </div>
 
-            <div className="flex gap-2 mb-3">
-                {nodeData.selectedPalette?.colors.map((color, i) => (
+            {/* Fallback for single legacy selection */}
+            {!nodeData.selectedPalettes && nodeData.selectedPalette && (
+                renderSingleSavedPalette(nodeData.selectedPalette, 0)
+            )}
+
+            {/* Render multiple selections */}
+            {nodeData.selectedPalettes?.map((palette, index) => renderSingleSavedPalette(palette, index))}
+        </div>
+    );
+
+    const renderSingleSavedPalette = (palette: ColorOption, index: number) => (
+        <div key={palette.id || index} className="pt-2 border-t border-slate-100 first:border-0 first:pt-0">
+            <div className="text-xs font-medium text-slate-700 mb-2">{palette.name}</div>
+            <div className="flex gap-2 mb-2">
+                {palette.colors.map((color, i) => (
                     <motion.div
                         key={i}
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: i * 0.05 }}
+                        transition={{ delay: index * 0.1 + i * 0.05 }}
                         className="flex-1 group relative"
                     >
                         <div
@@ -123,10 +143,9 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
                     </motion.div>
                 ))}
             </div>
-
-            {nodeData.selectedPalette?.reasoning && (
-                <p className="text-xs text-slate-500 mt-4 pt-3 border-t border-slate-100">
-                    {nodeData.selectedPalette.reasoning}
+            {palette.reasoning && (
+                <p className="text-xs text-slate-500 italic">
+                    {palette.reasoning}
                 </p>
             )}
         </div>

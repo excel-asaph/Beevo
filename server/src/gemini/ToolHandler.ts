@@ -164,36 +164,58 @@ export class ToolHandler {
                         contextSummary = `Research complete. Generated ${researchResult.colorPalettes.palettes.length} palettes and ${researchResult.typographyPairings.fonts.length} fonts. Canvas updated with AI reasoning.`;
                     }
                 }
-                // MODIFICATION: Typography
-                else if (fc.name === 'display_typography_options') {
-                    contextSummary = await this.handleTypographyOptions(fc.args);
+                // --- COLOR PALETTE TOOLS ---
+                else if (fc.name === 'create_color_palette') {
+                    contextSummary = await this.handleCreatePalette(fc.args);
                 }
-                // MODIFICATION: Colors
-                else if (fc.name === 'display_palette_options') {
-                    contextSummary = await this.handlePaletteOptions(fc.args);
+                else if (fc.name === 'delete_color_palette') {
+                    contextSummary = await this.handleDeletePalette(fc.args);
+                }
+                else if (fc.name === 'select_color_palettes') {
+                    contextSummary = await this.handleSelectPalette(fc.args);
+                }
+                else if (fc.name === 'unselect_color_palettes') {
+                    contextSummary = await this.handleUnselectPalette(fc.args);
+                }
+                else if (fc.name === 'update_colors_in_palette') {
+                    contextSummary = await this.handleUpdateColorsInPalette(fc.args);
+                }
+
+                // --- TYPOGRAPHY TOOLS ---
+                else if (fc.name === 'create_typography') {
+                    contextSummary = await this.handleCreateTypography(fc.args);
+                }
+                else if (fc.name === 'delete_typography') {
+                    contextSummary = await this.handleDeleteTypography(fc.args);
+                }
+                else if (fc.name === 'select_typography') {
+                    contextSummary = await this.handleSelectTypography(fc.args);
+                }
+                else if (fc.name === 'unselect_typography') {
+                    contextSummary = await this.handleUnselectTypography(fc.args);
                 }
 
                 // --- SINGLE VALUE UPDATES ---
                 else if (fc.name === 'update_brand_name') {
-                    contextSummary = await this.updateSingleValue('name', fc.args.name);
+                    contextSummary = await this.handleBrandUpdate('name', fc.args);
                 }
                 else if (fc.name === 'update_mission') {
-                    contextSummary = await this.updateSingleValue('mission', fc.args.mission);
+                    contextSummary = await this.handleBrandUpdate('mission', fc.args);
                 }
                 else if (fc.name === 'update_tagline') {
-                    contextSummary = await this.updateSingleValue('tagline', fc.args.tagline);
+                    contextSummary = await this.handleBrandUpdate('tagline', fc.args);
                 }
                 else if (fc.name === 'update_voice') {
-                    contextSummary = await this.updateSingleValue('voice', fc.args.voice);
+                    contextSummary = await this.handleBrandUpdate('voice', fc.args);
                 }
                 else if (fc.name === 'update_values') {
-                    contextSummary = await this.updateSingleValue('values', fc.args.values, true);
+                    contextSummary = await this.handleBrandUpdate('values', fc.args, true);
                 }
                 else if (fc.name === 'update_target_audience') {
-                    contextSummary = await this.updateSingleValue('targetAudience', fc.args.targetAudience, true);
+                    contextSummary = await this.handleBrandUpdate('targetAudience', fc.args, true);
                 }
                 else if (fc.name === 'update_mood') {
-                    contextSummary = await this.updateSingleValue('mood', fc.args.mood, true);
+                    contextSummary = await this.handleBrandUpdate('mood', fc.args, true);
                 }
 
                 // MODIFICATION: Logo Structure
@@ -245,149 +267,272 @@ export class ToolHandler {
     // MODIFICATION PHASE HANDLERS
     // ==========================================
 
-    private async handleTypographyOptions(args: any): Promise<string> {
-        this.setCanvasMode('fonts');
+    // ==========================================
+    // COLOR PALETTE HANDLERS
+    // ==========================================
 
+    private async handleCreatePalette(args: any): Promise<string> {
+        this.setCanvasMode('colors');
+        const currentState = stateManager.loadLatest();
+        const existingPalettes = currentState?.colorPalettes?.palettes || [];
 
-
-        // CASE 2: GENERATE (New options request)
-        // If specific 'generate' op or just context, we might generate.
-        // But for robust CRUD, we usually want to UPDATE based on LLM's full view.
-
-        // However, if args.fonts IS provided, that IS the new state (CRUD/Select result).
-        if (args.fonts && Array.isArray(args.fonts)) {
-            let newFonts: FontSuggestion[] = args.fonts;
-
-            // Enforce Limit
-            if (newFonts.length > 10) newFonts = newFonts.slice(0, 10);
-
-            // Re-index IDs to be stable numeric strings "1", "2", "3"...
-            newFonts = newFonts.map((f, index) => ({
-                ...f,
-                id: (index + 1).toString(), // STABLE NUMERIC ID
-                isSelected: !!f.isSelected
-            }));
-
-            // Count selected
-            const selectedCount = newFonts.filter(f => f.isSelected).reduce((acc, _) => acc + 1, 0);
-
-            // Save State
-            await stateManager.saveWithHistory('typographyPairings', {
-                fonts: newFonts,
-                rationale: 'User updated typography (CRUD/Select)'
-            });
-
-            return `Updated fonts. State is now saved with ${newFonts.length} fonts. ${selectedCount} are selected.`;
+        // Strict Limit Check (Max 10)
+        if (existingPalettes.length >= 10) {
+            return "Limit reached: Maximum 10 palettes allowed. Please delete some before creating new ones.";
         }
 
-        // GENERATE MODE (If no list provided)
-        const currentState = stateManager.loadLatest();
-        const dna = currentState?.brandDNA || this.getDNA();
-        const existingFonts = currentState?.typographyPairings?.fonts || [];
+        const count = Math.min(args.count || 1, 10 - existingPalettes.length);
+        const query = args.query || args.mood_filter || "modern";
 
-        if (existingFonts.length >= 10) return "Limit reached (10 fonts). Please delete some to generate more.";
-
-        const countToGenerate = Math.min(args.font_count || 3, 10 - existingFonts.length);
-
-        const result = await this.executionEngine.generateTypography(
-            dna,
-            countToGenerate,
-            args.style_filter || dna.mission.value
+        // Use Execution Engine to generate (Instruction: Create new based on context)
+        const newPalettes = await this.executionEngine.createModificationPalettes(
+            existingPalettes,
+            query,
+            count
         );
 
-        // Append and Re-index
-        const mergedFonts = [...existingFonts, ...result.fonts];
-        const finalFonts = mergedFonts.map((f, index) => ({
+        // Merge logic
+        const updatedPalettes = [...existingPalettes, ...newPalettes];
+
+        await stateManager.saveWithHistory('colorPalettes', {
+            palettes: updatedPalettes,
+            rationale: `Created new palettes based on: ${query}`
+        });
+
+        return `Created ${newPalettes.length} new palettes based on "${query}". Total palettes: ${updatedPalettes.length}.`;
+    }
+
+    private async handleDeletePalette(args: any): Promise<string> {
+        const instruction = args.instruction || args.names?.join(', '); // Fallback to names if old call
+        if (!instruction) return "No instruction provided for deletion.";
+
+        const currentState = stateManager.loadLatest();
+        const existingPalettes = currentState?.colorPalettes?.palettes || [];
+
+        // Resolve which palettes to delete (Now returns IDs)
+        const idsToDelete = await this.executionEngine.resolvePaletteSelector(existingPalettes, instruction);
+
+        if (idsToDelete.length === 0) return "I couldn't identify which palettes to delete. Please be more specific.";
+
+        // Filter out matching IDs
+        const keptPalettes = existingPalettes.filter(p => !idsToDelete.includes(p.id));
+
+        const deletedCount = existingPalettes.length - keptPalettes.length;
+
+        await stateManager.saveWithHistory('colorPalettes', {
+            palettes: keptPalettes,
+            rationale: `Deleted ${deletedCount} palettes`
+        });
+
+        return `Deleted ${deletedCount} palettes. Remaining: ${keptPalettes.length}.`;
+    }
+
+    private async handleSelectPalette(args: any): Promise<string> {
+        return this._updatePaletteSelection(args, true);
+    }
+
+    private async handleUnselectPalette(args: any): Promise<string> {
+        return this._updatePaletteSelection(args, false);
+    }
+
+    // Helper for Select/Unselect logic
+    private async _updatePaletteSelection(args: any, isSelected: boolean): Promise<string> {
+        const instruction = args.instruction;
+        const currentState = stateManager.loadLatest();
+        const palettes = currentState?.colorPalettes?.palettes || [];
+
+        if (!instruction) return "No instruction provided.";
+
+        // Resolve IDs
+        const targetIds = await this.executionEngine.resolvePaletteSelector(palettes, instruction);
+        
+        if (targetIds.length === 0) return `I couldn't identify which palettes to ${isSelected ? 'select' : 'unselect'}.`;
+
+        let changeCount = 0;
+        const updatedPalettes = palettes.map(p => {
+            const isTarget = targetIds.includes(p.id);
+            if (isTarget) {
+                changeCount++;
+                return { ...p, isSelected: isSelected };
+            }
+            return p;
+        });
+
+        await stateManager.saveWithHistory('colorPalettes', {
+            palettes: updatedPalettes,
+            rationale: `User ${isSelected ? 'selected' : 'unselected'} ${changeCount} palettes`
+        });
+
+        return `${isSelected ? 'Selected' : 'Unselected'} ${changeCount} palettes.`;
+    }
+
+    private async handleUpdateColorsInPalette(args: any): Promise<string> {
+        const { paletteName, instruction } = args;
+        if (!instruction) return "Missing instruction.";
+
+        const currentState = stateManager.loadLatest();
+        const palettes = currentState?.colorPalettes?.palettes || [];
+
+        // 1. Identify target palette(s)
+        let targetIndices: number[] = [];
+
+        if (paletteName) {
+            const idx = palettes.findIndex(p => p.name.toLowerCase().includes(paletteName.toLowerCase()));
+            if (idx !== -1) targetIndices.push(idx);
+        } else {
+            // Resolve from instruction (Using IDs now)
+            const targetIds = await this.executionEngine.resolvePaletteSelector(palettes, instruction);
+            targetIds.forEach(id => {
+                const idx = palettes.findIndex(p => p.id === id);
+                if (idx !== -1) targetIndices.push(idx);
+            });
+        }
+
+        if (targetIndices.length === 0) return "I couldn't find the palette you want to update.";
+
+        // 2. Refine each target
+        const updatedPalettes = [...palettes];
+        for (const idx of targetIndices) {
+            const currentPalette = updatedPalettes[idx];
+            console.log(`Refining palette ${currentPalette.name}...`);
+            const newColors = await this.executionEngine.refinePaletteColors(currentPalette, instruction);
+            // DIRECT REPLACE of colors array - strict contract
+            updatedPalettes[idx] = { ...currentPalette, colors: newColors };
+        }
+
+        await stateManager.saveWithHistory('colorPalettes', { palettes: updatedPalettes });
+        return `Updated colors in ${targetIndices.length} palette(s) based on: "${instruction}".`;
+    }
+
+
+    // ==========================================
+    // TYPOGRAPHY HANDLERS
+    // ==========================================
+
+    private async handleCreateTypography(args: any): Promise<string> {
+        this.setCanvasMode('fonts');
+        const currentState = stateManager.loadLatest();
+        const existingFonts = currentState?.typographyPairings?.fonts || [];
+
+        if (existingFonts.length >= 10) return "Limit reached (10 fonts). Delete some first.";
+
+        const count = Math.min(args.count || 1, 10 - existingFonts.length);
+        const query = args.query || args.instruction || "modern";
+
+        // Execution Engine: Create Modification
+        const newFonts = await this.executionEngine.createModificationTypography(
+            existingFonts,
+            query,
+            count
+        );
+
+        // Keep IDs simple and consistent
+        const merged = [...existingFonts, ...newFonts];
+        const finalFonts = merged.map((f, i) => ({
             ...f,
-            id: (index + 1).toString(),
-            isSelected: !!f.isSelected
+            id: (i + 1).toString()
         }));
 
         await stateManager.saveWithHistory('typographyPairings', {
             fonts: finalFonts,
-            rationale: result.rationale || 'Generated new fonts'
+            rationale: `Created new fonts: ${query}`
         });
 
-        return `Generated ${result.fonts.length} new fonts. Total: ${finalFonts.length}.`;
+        return `Created ${newFonts.length} new font pairings.`;
     }
 
-    private async handlePaletteOptions(args: any): Promise<string> {
-        this.setCanvasMode('colors');
+    private async handleDeleteTypography(args: any): Promise<string> {
+        const instruction = args.instruction || args.names?.join(', ');
+        if (!instruction) return "No instruction provided.";
 
-        // CASE 1: UPDATE / SELECT (List provided)
-        if (args.palettes && Array.isArray(args.palettes)) {
-            const palettes: ColorPalette[] = args.palettes;
-            const selectedCount = palettes.filter(p => p.isSelected).length;
-
-            // Save State
-            await stateManager.saveWithHistory('colorPalettes', {
-                palettes,
-                rationale: 'User updated palette selection'
-            });
-
-            if (selectedCount > 0) return `Updated palettes. ${selectedCount} palette(s) are now selected. [SYSTEM: Confirm these choices with the user.]`;
-            return `Updated palette options. No palettes are currently selected. [SYSTEM: Ask the user to pick a palette.]`;
-        }
-
-        // CASE 2: GENERATE (New options requested)
         const currentState = stateManager.loadLatest();
-        const dna = currentState?.brandDNA || this.getDNA();
-        const competitors = currentState?.competitorResearch;
-        const existingPalettes = currentState?.colorPalettes?.palettes || [];
+        const existing = currentState?.typographyPairings?.fonts || [];
 
-        // STRICT LIMIT: Max 10 palettes total
-        if (existingPalettes.length >= 10) {
-            return "Limit reached: You already have 10 color palettes. Please DELETE some before generating more. [SYSTEM: Suggest deleting unwanted palettes first.]";
-        }
+        const namesToDelete = await this.executionEngine.resolveTypographySelector(existing, instruction);
 
-        const countToGenerate = Math.min(args.palette_count || 3, 10 - existingPalettes.length);
+        if (namesToDelete.length === 0) return "I couldn't identify which fonts to delete.";
 
-        const result = await this.executionEngine.generateColorPalettes(
-            dna,
-            competitors, // Pass competitors (optional but good context)
-            countToGenerate,
-            args.mood_filter || dna.mission.value
+        // Filter
+        const kept = existing.filter(f =>
+            !namesToDelete.some(n => f.name.toLowerCase() === n.toLowerCase())
         );
 
-        // MERGE: Append new palettes to existing list
-        const updatedPalettes = [...existingPalettes, ...result.palettes];
+        // Re-index
+        const reindexed = kept.map((f, i) => ({ ...f, id: (i + 1).toString() }));
 
-        // Save
-        await stateManager.saveWithHistory('colorPalettes', {
-            palettes: updatedPalettes,
-            rationale: result.rationale || `Generated new palettes for mood: ${args.mood_filter || 'general'}`
+        await stateManager.saveWithHistory('typographyPairings', {
+            fonts: reindexed,
+            rationale: `Deleted fonts: ${namesToDelete.join(', ')}`
         });
 
-        // NOTE: Removed manual sendToClient - StateManager listener handles broadcast
+        return `Deleted ${existing.length - kept.length} fonts. Remaining: ${reindexed.length}.`;
+    }
 
-        const paletteNames = result.palettes.map(p => p.name).join(', ');
-        return `Generated ${result.palettes.length} new palettes: ${paletteNames}. [SYSTEM: The new palettes are now visible on the Brand Board. Ask the user if they want to review them now, or if you should describe the colors.]`;
+    private async handleSelectTypography(args: any): Promise<string> {
+        return this._updateFontSelection(args, true);
+    }
+
+    private async handleUnselectTypography(args: any): Promise<string> {
+        return this._updateFontSelection(args, false);
+    }
+
+    private async _updateFontSelection(args: any, isSelected: boolean): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction provided.";
+
+        const currentState = stateManager.loadLatest();
+        const fonts = currentState?.typographyPairings?.fonts || [];
+
+        const targetNames = await this.executionEngine.resolveTypographySelector(fonts, instruction);
+
+        if (targetNames.length === 0) return `I couldn't identify which fonts to ${isSelected ? 'select' : 'unselect'}.`;
+
+        let count = 0;
+        const updated = fonts.map(f => {
+            const match = targetNames.some(n => f.name.toLowerCase() === n.toLowerCase());
+            if (match) {
+                count++;
+                return { ...f, isSelected: isSelected };
+            }
+            return f;
+        });
+
+        await stateManager.saveWithHistory('typographyPairings', { fonts: updated });
+        return `${isSelected ? 'Selected' : 'Unselected'} ${count} fonts.`;
     }
 
     // --- HELPER FOR SINGLE VALUE UPDATES ---
-    private async updateSingleValue(field: keyof BrandDNA, value: any, isArray: boolean = false): Promise<string> {
-        if (value === undefined || value === null) return `Error: No value provided for ${field}`;
+    // --- HELPER FOR BRAND DNA UPDATES ---
+    private async handleBrandUpdate(field: keyof BrandDNA, args: any, isArray: boolean = false): Promise<string> {
+        const instruction = args.instruction;
+
+        if (!instruction) return `Error: No instruction provided for ${field}`;
+
+        // Always use ExecutionEngine to generate the new value based on instruction
+        const state = stateManager.loadLatest();
+        const currentObj = state?.brandDNA?.[field];
+        const currentContent = currentObj
+            ? (isArray ? (currentObj as any).items : (currentObj as any).value)
+            : (isArray ? [] : "");
+
+        const value = await this.executionEngine.refineBrandField(field, currentContent, instruction);
 
         const wrapped = isArray
             ? { items: value, isSelected: true }
             : { value: value, isSelected: true };
 
-        // Load state
-        const state = stateManager.loadLatest();
-        if (!state || !state.brandDNA) return "Error: No state found";
+        // Load state again to be safe (though we have it)
+        const latestState = stateManager.loadLatest();
+        if (!latestState || !latestState.brandDNA) return "Error: No state found";
 
         // Update persistence state
-        state.brandDNA[field] = wrapped as any;
-        // NOTE: StateManager.saveWithHistory emits 'stateUpdated' which SessionManager
-        // listens to and broadcasts DNA_UPDATE to all clients automatically.
-        await stateManager.saveWithHistory('brandDNA', state.brandDNA);
+        latestState.brandDNA[field] = wrapped as any;
+        await stateManager.saveWithHistory('brandDNA', latestState.brandDNA);
 
-        // Update in-memory session state (for simple access)
+        // Update in-memory session state
         this.updateState(field, wrapped);
 
-        // Broadcast removed: StateManager listener handles it
-
-        return `Updated ${field} to ${isArray ? (value as string[]).join(', ') : value}.`;
+        return `Updated ${field} based on instruction: "${instruction}".`;
     }
 
     // --- HELPER FOR SELECTIONS ---
@@ -568,4 +713,3 @@ export class ToolHandler {
         // Implementation placeholder - likely involves vision check
     }
 }
-

@@ -31,79 +31,79 @@ const brainToolDeclarations: FunctionDeclaration[] = [
     // --- BRAND DNA UPDATES ---
     {
         name: "update_brand_name",
-        description: "Update the Brand Name. Use 'instruction' to provide the new name or a directive to change it.",
+        description: "Update the Brand Name. Call when user wants to rename the brand. Sets the name and marks it selected.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "The new name or instruction." }
+                name: { type: Type.STRING, description: "New brand name" }
             },
-            required: ["instruction"]
+            required: ["name"]
         }
     },
     {
         name: "update_mission",
-        description: "Update the Mission Statement. Use 'instruction' to rewrite or Refine the mission.",
+        description: "Update the Mission Statement. Call when user wants to change the mission.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "Instruction for rewriting the mission." }
+                mission: { type: Type.STRING, description: "New mission statement" }
             },
-            required: ["instruction"]
+            required: ["mission"]
         }
     },
     {
         name: "update_tagline",
-        description: "Update the Tagline. Use 'instruction' to generate or set a new tagline.",
+        description: "Update the Tagline/Slogan. Call when user wants to change the tagline.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "Instruction for the new tagline." }
+                tagline: { type: Type.STRING, description: "New tagline" }
             },
-            required: ["instruction"]
+            required: ["tagline"]
         }
     },
     {
         name: "update_voice",
-        description: "Update the Brand Voice/Tone. Use 'instruction' to describe the new voice.",
+        description: "Update the Brand Voice. Call when user wants to change the voice description.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "Instruction describing the new voice." }
+                voice: { type: Type.STRING, description: "New brand voice description" }
             },
-            required: ["instruction"]
+            required: ["voice"]
         }
     },
     {
         name: "update_values",
-        description: "Update the Brand Values. Use 'instruction' to add, remove, or refine the list of values.",
+        description: "Update the Core Values. Call when user wants to change the list of values.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "Instruction for updating values." }
+                values: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of new values" }
             },
-            required: ["instruction"]
+            required: ["values"]
         }
     },
     {
         name: "update_target_audience",
-        description: "Update the Target Audience. Use 'instruction' to refine the audience segments.",
+        description: "Update the Target Audience. Call when user wants to change the target audience, customers, demographics, or who the brand serves.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "Instruction for updating target audience." }
+                targetAudience: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of target audience segments" }
             },
-            required: ["instruction"]
+            required: ["targetAudience"]
         }
     },
     {
         name: "update_mood",
-        description: "Update the Brand Mood/Vibe. Use 'instruction' to change the intended mood.",
+        description: "Update the Brand Mood/Feeling. Call when user wants to change the mood, tone, feeling, vibe, or emotional attributes of the brand.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                instruction: { type: Type.STRING, description: "Instruction for updating the mood." }
+                mood: { type: Type.ARRAY, items: { type: Type.STRING }, description: "List of mood/feeling descriptors (e.g., 'modern', 'natural', 'vibrant')" }
             },
-            required: ["instruction"]
+            required: ["mood"]
         }
     },
 
@@ -165,9 +165,9 @@ const brainToolDeclarations: FunctionDeclaration[] = [
             required: ["instruction"]
         }
     },
-    // --- TYPOGRAPHY TOOLS ---
+    // --- FONT TOOLS ---
     {
-        name: "create_typography",
+        name: "create_fonts",
         description: "Create new font pairing(s).",
         parameters: {
             type: Type.OBJECT,
@@ -179,7 +179,7 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
-        name: "delete_typography",
+        name: "delete_fonts",
         description: "Delete font pairing(s). Use 'instruction' to describe which to delete.",
         parameters: {
             type: Type.OBJECT,
@@ -190,7 +190,7 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
-        name: "select_typography",
+        name: "select_fonts",
         description: "Select font pairing(s). Use 'instruction' to describe which to select.",
         parameters: {
             type: Type.OBJECT,
@@ -201,7 +201,7 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
-        name: "unselect_typography",
+        name: "unselect_fonts",
         description: "Unselect font pairing(s). Use 'instruction' to describe which to unselect.",
         parameters: {
             type: Type.OBJECT,
@@ -212,88 +212,105 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
-        name: "display_logo_structure_options",
-        description: "Single robust tool to Generate or SELECT logo structures. To select, pass the full list back with `isSelected: true`.",
+        name: "create_logo_structures",
+        description: "Create/Recommend new Logo Structure options (e.g. Wordmark, Emblem).",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                options: {
-                    type: Type.ARRAY,
-                    description: "The FULL desired state of the structure options list.",
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            id: { type: Type.STRING },
-                            type: { type: Type.STRING, description: "wordmark, lettermark, emblem, combination" },
-                            reasoning: { type: Type.STRING },
-                            suitability: { type: Type.STRING },
-                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
-                        },
-                        required: ["type", "reasoning", "suitability"]
-                    }
-                },
-                structure_count: { type: Type.INTEGER },
-                query: { type: Type.STRING }
+                query: { type: Type.STRING, description: "Description of the structure request (e.g. 'simple wordmarks')." },
+                count: { type: Type.INTEGER, description: "Number of options to create. Default is 3." }
             },
-            required: []
+            required: ["query"]
         }
     },
     {
-        name: "display_logo_inspirations",
-        description: "Single robust tool to SEARCH for or SELECT logo inspirations. To SEARCH, provide a `search_query`. To SELECT/MANAGE, provide the `inspirations` list with `isSelected: true` on chosen items.",
+        name: "select_logo_structures",
+        description: "Select logo structure(s). Use 'instruction' to describe which to select.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                search_query: {
-                    type: Type.STRING,
-                    description: "If present, the tool will SEARCH the web for logos and APPEND them to the list."
-                },
-                inspirations: {
-                    type: Type.ARRAY,
-                    description: "The FULL desired state of the inspiration list. Use this to Delete (remove items), Reorder, or Select (mark `isSelected: true`).",
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            id: { type: Type.STRING },
-                            displayName: { type: Type.STRING },
-                            url: { type: Type.STRING },
-                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
-                        },
-                        required: ["id", "url"]
-                    }
-                },
-                style_keywords: { type: Type.STRING },
-                industry: { type: Type.STRING },
-                query: { type: Type.STRING }
+                instruction: { type: Type.STRING, description: "Instruction describing which structures to select." }
             },
-            required: []
+            required: ["instruction"]
         }
     },
     {
-        name: "display_imagery_suggestions",
-        description: "Single robust tool to Generate or SELECT imagery concepts. To select, pass the full list back with `isSelected: true`.",
+        name: "delete_logo_structures",
+        description: "Delete logo structure(s). Use 'instruction' to describe which to delete.",
         parameters: {
             type: Type.OBJECT,
             properties: {
-                suggestions: {
-                    type: Type.ARRAY,
-                    description: "The FULL desired state of the imagery list.",
-                    items: {
-                        type: Type.OBJECT,
-                        properties: {
-                            id: { type: Type.STRING },
-                            concept: { type: Type.STRING },
-                            description: { type: Type.STRING },
-                            visualStyle: { type: Type.STRING },
-                            isSelected: { type: Type.BOOLEAN, description: "Set to TRUE if selected." }
-                        },
-                        required: ["concept", "description", "visualStyle"]
-                    }
-                },
-                suggestion_count: { type: Type.INTEGER },
-                query: { type: Type.STRING }
+                instruction: { type: Type.STRING, description: "Instruction describing which structures to delete." }
             },
-            required: []
+            required: ["instruction"]
+        }
+    },
+    {
+        name: "create_logo_inspirations",
+        description: "Search for Logo Inspirations from the web.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                query: { type: Type.STRING, description: "Search query for logo styles (e.g. 'minimalist tech logos')." },
+                count: { type: Type.INTEGER, description: "Number of results to fetch." }
+            },
+            required: ["query"]
+        }
+    },
+    {
+        name: "select_logo_inspirations",
+        description: "Select logo inspiration(s). Use 'instruction' to describe which to select.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which inspirations to select." }
+            },
+            required: ["instruction"]
+        }
+    },
+    {
+        name: "delete_logo_inspirations",
+        description: "Delete logo inspiration(s). Use 'instruction' to describe which to delete.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which inspirations to delete." }
+            },
+            required: ["instruction"]
+        }
+    },
+    {
+        name: "create_imagery_suggestions",
+        description: "Generate Imagery/Photography suggestions.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                query: { type: Type.STRING, description: "Description of the imagery style." },
+                count: { type: Type.INTEGER, description: "Number of suggestions to create." }
+            },
+            required: ["query"]
+        }
+    },
+    {
+        name: "select_imagery_suggestions",
+        description: "Select imagery suggestion(s). Use 'instruction' to describe which to select.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which suggestions to select." }
+            },
+            required: ["instruction"]
+        }
+    },
+    {
+        name: "delete_imagery_suggestions",
+        description: "Delete imagery suggestion(s). Use 'instruction' to describe which to delete.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which suggestions to delete." }
+            },
+            required: ["instruction"]
         }
     },
     {
@@ -412,11 +429,24 @@ export class BrainConnection {
             // ---------------------------------------------------------
             // PREPARE CONTEXT
             // ---------------------------------------------------------
-            this.conversationHistory.push({
-                role: 'user',
-                transcript: userTranscript,
-                timestamp: now
-            });
+
+            // 1. Add AI Transcript if present (provides context for user's reply)
+            if (aiTranscript && aiTranscript.trim()) {
+                this.conversationHistory.push({
+                    role: 'assistant',
+                    transcript: aiTranscript,
+                    timestamp: now
+                });
+            }
+
+            // 2. Add User Transcript if present
+            if (userTranscript && userTranscript.trim()) {
+                this.conversationHistory.push({
+                    role: 'user',
+                    transcript: userTranscript,
+                    timestamp: now
+                });
+            }
 
             // Keep history manageable
             if (this.conversationHistory.length > 20) {
@@ -477,6 +507,7 @@ export class BrainConnection {
                         '   - If missing, DO NOT CALL TOOL. Wait for more chat.',
                         '5. TRIGGER: When you get the handshake:',
                         '   - YOU MUST CALL `start_brand_research` IMMEDIATELY.',
+                        '   - ARGUMENT `summary`: You MUST populate this with a detailed summary including Brand Name, Mission, Vibe, and any specific requests (e.g. "Nike" or "Minimalist").',
                         '   - DO NOT just say "Starting now". YOU MUST EXECUTE THE TOOL.',
                         '   - If you send a text response like "Starting...", ensure the tool call is ATTACHED.',
                         '',
@@ -572,13 +603,16 @@ export class BrainConnection {
                         '- "update mood" OR "change feeling" OR "modify vibe" → `update_mood`',
                         '- "change audience" OR "update targets" OR "modify who we serve" → `update_target_audience`',
                         '- "new colors" OR "generate palettes" OR "different color scheme" → `create_color_palette`',
-                        '- "new fonts" OR "different typography" OR "change typeface" → `create_typography`',
+                        '- "new fonts" OR "different typography" OR "change typeface" → `create_fonts`',
                         'If the user request is ~80% related to a tool you have, USE THAT TOOL.',
                         '',
                         'HANDLING REQUESTS:',
-                        '1. SELECT: If user picks an option, call `select_...` or for logos/imagery call `display_...` with `isSelected: true`.',
-                        '2. UPDATE: If user wants to change text, call `update_...` or `update_colors_in_palette`.',
-                        '3. GENERATE: If user wants new options, call `create_...` (for palettes/fonts) or `display_...` (logos/imagery).',
+                        '1. SELECT: If user picks an option, call `select_...` (e.g. `select_fonts`).',
+                        '2. UNSELECT: If user wants to remove/deselect an option, call `unselect_...` (e.g. `unselect_fonts`).',
+                        '3. UPDATE: If user wants to change text, call `update_...` or `update_colors_in_palette`.',
+                        '4. GENERATE: If user wants new options, call `create_...` (for palettes/fonts) or `create_logo_...`.',
+                        '5. DELETE: If user wants to permanently delete/remove an option, call `delete_...`.',
+                        '6. RESEARCH: If user asks for information/facts, call `general_research`.',
                         '',
                         '⚡ EXECUTION RULE: EXECUTE IMMEDIATELY upon clear user request.',
                         '- User: "Change name to Nike" -> Call `update_brand_name` NOW.',
@@ -610,17 +644,31 @@ export class BrainConnection {
             // ---------------------------------------------------------
             // CALL GEMINI WITH TOOLS
             // ---------------------------------------------------------
-            const model = this.client.getGenerativeModel({
-                model: MODELS.GEMINI_PRO_EXPERIMENTAL, // Use strongest model for reasoning
-                tools: brainTools
+            // UPDATED: Using correct @google/genai syntax
+            const response = await this.client.models.generateContent({
+                model: MODELS.ARCHITECT_TEXT, // User requested Gemini 3 Flash Preview for Brain
+                contents: [{ role: 'user', parts: [{ text: `SYSTEM_PROMPT:\n${systemPrompt}\n\nUSER_TRANSCRIPT (Last 30s):\n${userTranscript}` }] }],
+                config: {
+                    tools: brainTools
+                }
             });
 
-            const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: `SYSTEM_PROMPT:\n${systemPrompt}\n\nUSER_TRANSCRIPT (Last 30s):\n${userTranscript}` }] }]
-            });
+            // Parse function calls manually from the new SDK structure
+            const candidate = response.candidates?.[0];
+            const part = candidate?.content?.parts?.[0];
 
-            const response = result.response;
-            const functionCalls = response.functionCalls();
+            // Helper to normalize function calls from different SDK response shapes
+            let functionCalls: any[] = [];
+
+            if (part && 'functionCall' in part) {
+                // Single function call in part
+                functionCalls = [part.functionCall];
+            } else if (candidate?.content?.parts) {
+                // Check all parts for function calls
+                functionCalls = candidate.content.parts
+                    .filter((p: any) => 'functionCall' in p)
+                    .map((p: any) => p.functionCall);
+            }
 
             if (functionCalls && functionCalls.length > 0) {
                 console.log(`⚡ Brain Decided: Calls ${functionCalls.length} tools: ${functionCalls.map(fc => fc.name).join(', ')}`);
@@ -637,42 +685,38 @@ export class BrainConnection {
                     args: JSON.stringify(functionCalls[0].args)
                 });
 
-                // --- SPECIAL HANDLING FOR START RESEARCH ---
+                // --- MARK RESEARCH AS DECIDED ---
                 if (functionCalls.some(fc => fc.name === 'start_brand_research')) {
-                    if (this.extractBrandIdentityDecided) {
-                        console.log('🚫 [BrainConnection] SKIPPING Duplicate start_research call.');
-                        // Do not execute. 
-                    } else {
-                        // Mark as decided immediately before execution
-                        this.markStartResearchDecided();
+                    this.markStartResearchDecided();
+                }
 
-                        // Execute tool
-                        const toolResults = await this.toolHandler.handleToolCalls(functionCalls.map(fc => ({
-                            id: 'call_' + Math.random().toString(36).substr(2, 9),
-                            name: fc.name,
-                            args: fc.args
-                        })));
+                // Execute tools via Handler (Batch)
+                const toolCallsPayload = functionCalls.map(fc => ({
+                    id: 'call_' + Math.random().toString(36).substr(2, 9),
+                    name: fc.name,
+                    args: fc.args
+                }));
 
-                        // Log results
-                        toolResults.forEach(tr => {
-                            console.log(`✅ Tool Executed: ${tr.name} -> ${tr.response.result}`);
-                        });
-                    }
-                } else {
-                    // Normal execution for other tools
-                    const toolResults = await this.toolHandler.handleToolCalls(functionCalls.map(fc => ({
-                        id: 'call_' + Math.random().toString(36).substr(2, 9),
-                        name: fc.name,
-                        args: fc.args
-                    })));
+                try {
+                    const toolResults = await this.toolHandler.handleToolCalls(toolCallsPayload);
 
+                    // Log and track results
                     toolResults.forEach(tr => {
                         console.log(`✅ Tool Executed: ${tr.name} -> ${tr.response.result}`);
+                        this.toolExecutionHistory.push({
+                            id: tr.id,
+                            name: tr.name,
+                            timestamp: Date.now(),
+                            args: JSON.stringify(tr.name === 'start_brand_research' ? { summary: '...' } : {}), // Simplified for history to avoid huge logs
+                            result: tr.response.result
+                        });
                     });
+                } catch (err) {
+                    console.error('❌ Tool Execution Error:', err);
                 }
-            } else {
-                console.log('🤔 Brain Decided: No Action.');
             }
+
+
 
         } catch (error) {
             console.error('❌ Brain Analysis Error:', error);

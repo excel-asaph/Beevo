@@ -400,10 +400,10 @@ export class ExecutionEngine {
 
 
     // ==========================================
-    // MODIFICATION PHASE: TYPOGRAPHY
+    // MODIFICATION PHASE: FONTS
     // ==========================================
 
-    async createModificationTypography(
+    async createModificationFonts(
         currentFonts: any[],
         query: string,
         count: number = 1
@@ -431,7 +431,7 @@ export class ExecutionEngine {
         return JSON.parse(text).fonts || [];
     }
 
-    async resolveTypographySelector(
+    async resolveFontSelector(
         currentFonts: any[],
         instruction: string
     ): Promise<string[]> {
@@ -455,6 +455,104 @@ export class ExecutionEngine {
         });
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
         return JSON.parse(text).names || [];
+    }
+
+    // ==========================================
+    // MODIFICATION PHASE: LOGO STRUCTURES
+    // ==========================================
+    async createLogoStructures(query: string, count: number = 3): Promise<any[]> {
+        console.log(`🔹 Mod: Creating ${count} logo structures for "${query}"`);
+        const prompt = `
+        Recommend ${count} logo structure types (e.g., Wordmark, Monogram, Emblem) for the brand.
+        REQUEST: "${query}"
+        OUTPUT JSON: { "structures": [ { "type": "Wordmark", "suitability": "High", "reasoning": "...", "isSelected": false } ] }
+        `;
+        const response = await this.genAI.models.generateContent({
+            model: MODELS.ARCHITECT_TEXT,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: { responseMimeType: 'application/json' }
+        });
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+        const items = JSON.parse(text).structures || [];
+        return items.map((item: any, i: number) => ({ ...item, id: `structure-${Date.now()}-${i}` }));
+    }
+
+    async resolveLogoStructureSelector(current: any[], instruction: string): Promise<string[]> {
+        return this.resolveSelectorGeneric(current, instruction, "structures");
+    }
+
+    // ==========================================
+    // MODIFICATION PHASE: IMAGERY
+    // ==========================================
+    async createImagerySuggestions(query: string, count: number = 3): Promise<any[]> {
+        console.log(`🔹 Mod: Creating ${count} imagery suggestions for "${query}"`);
+        const prompt = `
+         Suggest ${count} visual imagery concepts/styles for the brand photography/assets.
+         REQUEST: "${query}"
+         OUTPUT JSON: { "suggestions": [ { "concept": "Urban Life", "description": "...", "visualStyle": "...", "isSelected": false } ] }
+         `;
+        const response = await this.genAI.models.generateContent({
+            model: MODELS.ARCHITECT_TEXT,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: { responseMimeType: 'application/json' }
+        });
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+        const items = JSON.parse(text).suggestions || [];
+        return items.map((item: any, i: number) => ({ ...item, id: `imagery-${Date.now()}-${i}` }));
+    }
+
+    async resolveImagerySelector(current: any[], instruction: string): Promise<string[]> {
+        return this.resolveSelectorGeneric(current, instruction, "imagery suggestions");
+    }
+
+    // ==========================================
+    // MODIFICATION PHASE: LOGO INSPIRATIONS (SEARCH)
+    // ==========================================
+    async searchLogoInspirations(query: string, count: number = 4): Promise<any[]> {
+        // Start with a simulation or "AI curated" list since we don't have real search here yet.
+        console.log(`🔹 Mod: Searching (simulated) logo inspirations for "${query}"`);
+        // In a real app, this would call a Search API.
+        // Here we'll generate concepts and assign placeholder URLs.
+        const prompt = `
+         Generate ${count} descriptions of existing real-world logo styles that match: "${query}".
+         OUTPUT JSON: { "results": [ { "displayName": "Nike-like Minimal", "description": "Simple swoosh..." } ] }
+         `;
+        const response = await this.genAI.models.generateContent({
+            model: MODELS.ARCHITECT_TEXT,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: { responseMimeType: 'application/json' }
+        });
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+        const items = JSON.parse(text).results || [];
+        return items.map((item: any, i: number) => ({
+            id: `insp-${Date.now()}-${i}`,
+            displayName: item.displayName,
+            url: `https://via.placeholder.com/300x200?text=${encodeURIComponent(item.displayName)}`, // Placeholder
+            isSelected: false,
+            description: item.description
+        }));
+    }
+
+    async resolveLogoInspirationSelector(current: any[], instruction: string): Promise<string[]> {
+        return this.resolveSelectorGeneric(current, instruction, "inspirations");
+    }
+
+    // GENERIC RESOLVER HELPER
+    private async resolveSelectorGeneric(currentInfo: any[], instruction: string, itemType: string): Promise<string[]> {
+        const prompt = `
+        Identify which items match the user's instruction.
+        ITEMS: ${JSON.stringify(currentInfo.map(i => ({ id: i.id, name: i.name || i.type || i.concept || i.displayName })))}
+        INSTRUCTION: "${instruction}"
+        TASK: Return the IDs of the ${itemType} the user is referring to.
+        OUTPUT JSON: { "ids": [] }
+        `;
+        const response = await this.genAI.models.generateContent({
+            model: MODELS.ARCHITECT_TEXT,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: { responseMimeType: 'application/json' }
+        });
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+        return JSON.parse(text).ids || [];
     }
 
     // ==========================================

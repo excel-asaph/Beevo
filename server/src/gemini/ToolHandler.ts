@@ -111,8 +111,12 @@ export class ToolHandler {
                         this.onPauseVoice();
 
                         // Run 5-Phase Execution Engine with REAL-TIME thought streaming
+                        // Fix for Hallucination: Use the 'summary' from Brain args as the primary context
+                        const contextString = fc.args.summary || this.conversationHistory || "Brand: Unknown";
+                        console.log(`🧠 [ToolHandler] Starting research with context: "${contextString.substring(0, 100)}..."`);
+
                         const researchResult = await this.executionEngine.runFullResearchCycle(
-                            this.conversationHistory,
+                            contextString,
                             // NEW: Real-time streaming callback (replaces batch replay)
                             (stepIndex, nodeId, title, reasoning) => {
                                 // Send THOUGHT_SIGNATURE for each step as it happens
@@ -181,18 +185,18 @@ export class ToolHandler {
                     contextSummary = await this.handleUpdateColorsInPalette(fc.args);
                 }
 
-                // --- TYPOGRAPHY TOOLS ---
-                else if (fc.name === 'create_typography') {
-                    contextSummary = await this.handleCreateTypography(fc.args);
+                // --- FONT TOOLS ---
+                else if (fc.name === 'create_fonts') {
+                    contextSummary = await this.handleCreateFonts(fc.args);
                 }
-                else if (fc.name === 'delete_typography') {
-                    contextSummary = await this.handleDeleteTypography(fc.args);
+                else if (fc.name === 'delete_fonts') {
+                    contextSummary = await this.handleDeleteFonts(fc.args);
                 }
-                else if (fc.name === 'select_typography') {
-                    contextSummary = await this.handleSelectTypography(fc.args);
+                else if (fc.name === 'select_fonts') {
+                    contextSummary = await this.handleSelectFonts(fc.args);
                 }
-                else if (fc.name === 'unselect_typography') {
-                    contextSummary = await this.handleUnselectTypography(fc.args);
+                else if (fc.name === 'unselect_fonts') {
+                    contextSummary = await this.handleUnselectFonts(fc.args);
                 }
 
                 // --- SINGLE VALUE UPDATES ---
@@ -219,16 +223,34 @@ export class ToolHandler {
                 }
 
                 // MODIFICATION: Logo Structure
-                else if (fc.name === 'display_logo_structure_options') {
-                    contextSummary = await this.handleLogoStructureOptions(fc.args);
+                else if (fc.name === 'create_logo_structures') {
+                    contextSummary = await this.handleCreateLogoStructures(fc.args);
+                }
+                else if (fc.name === 'select_logo_structures') {
+                    contextSummary = await this.handleSelectLogoStructures(fc.args);
+                }
+                else if (fc.name === 'delete_logo_structures') {
+                    contextSummary = await this.handleDeleteLogoStructures(fc.args);
                 }
                 // MODIFICATION: Imagery
-                else if (fc.name === 'display_imagery_suggestions') {
-                    contextSummary = await this.handleImagerySuggestions(fc.args);
+                else if (fc.name === 'create_imagery_suggestions') {
+                    contextSummary = await this.handleCreateImagerySuggestions(fc.args);
+                }
+                else if (fc.name === 'select_imagery_suggestions') {
+                    contextSummary = await this.handleSelectImagerySuggestions(fc.args);
+                }
+                else if (fc.name === 'delete_imagery_suggestions') {
+                    contextSummary = await this.handleDeleteImagerySuggestions(fc.args);
                 }
                 // MODIFICATION: Logo Inspiration
-                else if (fc.name === 'display_logo_inspirations') {
-                    contextSummary = await this.handleLogoInspirations(fc.args);
+                else if (fc.name === 'create_logo_inspirations') {
+                    contextSummary = await this.handleCreateLogoInspirations(fc.args);
+                }
+                else if (fc.name === 'select_logo_inspirations') {
+                    contextSummary = await this.handleSelectLogoInspirations(fc.args);
+                }
+                else if (fc.name === 'delete_logo_inspirations') {
+                    contextSummary = await this.handleDeleteLogoInspirations(fc.args);
                 }
                 // GENERAL
                 else if (fc.name === 'general_research') {
@@ -345,7 +367,7 @@ export class ToolHandler {
 
         // Resolve IDs
         const targetIds = await this.executionEngine.resolvePaletteSelector(palettes, instruction);
-        
+
         if (targetIds.length === 0) return `I couldn't identify which palettes to ${isSelected ? 'select' : 'unselect'}.`;
 
         let changeCount = 0;
@@ -406,10 +428,10 @@ export class ToolHandler {
 
 
     // ==========================================
-    // TYPOGRAPHY HANDLERS
+    // FONT HANDLERS
     // ==========================================
 
-    private async handleCreateTypography(args: any): Promise<string> {
+    private async handleCreateFonts(args: any): Promise<string> {
         this.setCanvasMode('fonts');
         const currentState = stateManager.loadLatest();
         const existingFonts = currentState?.typographyPairings?.fonts || [];
@@ -420,7 +442,7 @@ export class ToolHandler {
         const query = args.query || args.instruction || "modern";
 
         // Execution Engine: Create Modification
-        const newFonts = await this.executionEngine.createModificationTypography(
+        const newFonts = await this.executionEngine.createModificationFonts(
             existingFonts,
             query,
             count
@@ -441,20 +463,20 @@ export class ToolHandler {
         return `Created ${newFonts.length} new font pairings.`;
     }
 
-    private async handleDeleteTypography(args: any): Promise<string> {
+    private async handleDeleteFonts(args: any): Promise<string> {
         const instruction = args.instruction || args.names?.join(', ');
         if (!instruction) return "No instruction provided.";
 
         const currentState = stateManager.loadLatest();
         const existing = currentState?.typographyPairings?.fonts || [];
 
-        const namesToDelete = await this.executionEngine.resolveTypographySelector(existing, instruction);
+        const namesToDelete = await this.executionEngine.resolveFontSelector(existing, instruction);
 
         if (namesToDelete.length === 0) return "I couldn't identify which fonts to delete.";
 
         // Filter
         const kept = existing.filter(f =>
-            !namesToDelete.some(n => f.name.toLowerCase() === n.toLowerCase())
+            !namesToDelete.some((n: string) => f.name.toLowerCase() === n.toLowerCase())
         );
 
         // Re-index
@@ -468,11 +490,11 @@ export class ToolHandler {
         return `Deleted ${existing.length - kept.length} fonts. Remaining: ${reindexed.length}.`;
     }
 
-    private async handleSelectTypography(args: any): Promise<string> {
+    private async handleSelectFonts(args: any): Promise<string> {
         return this._updateFontSelection(args, true);
     }
 
-    private async handleUnselectTypography(args: any): Promise<string> {
+    private async handleUnselectFonts(args: any): Promise<string> {
         return this._updateFontSelection(args, false);
     }
 
@@ -483,13 +505,13 @@ export class ToolHandler {
         const currentState = stateManager.loadLatest();
         const fonts = currentState?.typographyPairings?.fonts || [];
 
-        const targetNames = await this.executionEngine.resolveTypographySelector(fonts, instruction);
+        const targetNames = await this.executionEngine.resolveFontSelector(fonts, instruction);
 
         if (targetNames.length === 0) return `I couldn't identify which fonts to ${isSelected ? 'select' : 'unselect'}.`;
 
         let count = 0;
         const updated = fonts.map(f => {
-            const match = targetNames.some(n => f.name.toLowerCase() === n.toLowerCase());
+            const match = targetNames.some((n: string) => f.name.toLowerCase() === n.toLowerCase());
             if (match) {
                 count++;
                 return { ...f, isSelected: isSelected };
@@ -504,24 +526,34 @@ export class ToolHandler {
     // --- HELPER FOR SINGLE VALUE UPDATES ---
     // --- HELPER FOR BRAND DNA UPDATES ---
     private async handleBrandUpdate(field: keyof BrandDNA, args: any, isArray: boolean = false): Promise<string> {
+        // Direct value check (User-requested schema)
+        // args[field] might be 'name', 'mission', 'voice', etc.
+        let directValue = args[field];
         const instruction = args.instruction;
 
-        if (!instruction) return `Error: No instruction provided for ${field}`;
+        let finalValue: any = null;
 
-        // Always use ExecutionEngine to generate the new value based on instruction
-        const state = stateManager.loadLatest();
-        const currentObj = state?.brandDNA?.[field];
-        const currentContent = currentObj
-            ? (isArray ? (currentObj as any).items : (currentObj as any).value)
-            : (isArray ? [] : "");
+        if (directValue !== undefined && directValue !== null) {
+            // CASE 1: Direct Value Provided (Brain did the work)
+            finalValue = directValue;
+        } else if (instruction) {
+            // CASE 2: Instruction Provided (Execution Engine does the work)
+            const state = stateManager.loadLatest();
+            const currentObj = state?.brandDNA?.[field];
+            const currentContent = currentObj
+                ? (isArray ? (currentObj as any).items : (currentObj as any).value)
+                : (isArray ? [] : "");
 
-        const value = await this.executionEngine.refineBrandField(field, currentContent, instruction);
+            finalValue = await this.executionEngine.refineBrandField(field, currentContent, instruction);
+        } else {
+            return `Error: No value or instruction provided for ${field}`;
+        }
 
         const wrapped = isArray
-            ? { items: value, isSelected: true }
-            : { value: value, isSelected: true };
+            ? { items: finalValue, isSelected: true }
+            : { value: finalValue, isSelected: true };
 
-        // Load state again to be safe (though we have it)
+        // Load state again to be safe
         const latestState = stateManager.loadLatest();
         if (!latestState || !latestState.brandDNA) return "Error: No state found";
 
@@ -532,7 +564,7 @@ export class ToolHandler {
         // Update in-memory session state
         this.updateState(field, wrapped);
 
-        return `Updated ${field} based on instruction: "${instruction}".`;
+        return `Updated ${field}.`;
     }
 
     // --- HELPER FOR SELECTIONS ---
@@ -599,88 +631,97 @@ export class ToolHandler {
         return `Processed ${options.length} logo options: ${typeList}. [SYSTEM: The logo structures are now on the board. Ask the user if they want to review them.]`;
     }
 
-    private async handleImagerySuggestions(args: any): Promise<string> {
-        // Uniform logic: args.suggestions holds the state (new or updated)
-        const rawSuggestions = args.suggestions || [];
-
-        const suggestions: ImagerySuggestion[] = rawSuggestions.map((s: any, i: number) => ({
-            id: s.id || `imagery-${Date.now()}-${i + 1}`,
-            concept: s.concept || '',
-            description: s.description || '',
-            isSelected: !!s.isSelected
-        }));
-
+    private async handleCreateImagerySuggestions(args: any): Promise<string> {
+        this.setCanvasMode('none' as any); // Imagery mode technically exists on client but maybe not in TS types
+        const count = args.count || 3;
+        const query = args.query;
+        const suggestions = await this.executionEngine.createImagerySuggestions(query, count);
         await stateManager.saveWithHistory('imagery', {
             suggestions,
-            rationale: args.rationale || 'AI-generated imagery suggestions'
+            rationale: `Generated imagery concepts: ${query}`
         });
-
         this.sendToClient({ type: 'IMAGERY_SUGGESTIONS', suggestions } as any);
-
-        const conceptList = suggestions.slice(0, 3).map(s => s.concept).join(', ');
-        return `Processed ${suggestions.length} imagery suggestions including ${conceptList}. [SYSTEM: Imagery concepts are now on the board. Ask the user's opinion on them.]`;
+        return `Created ${suggestions.length} imagery suggestions.`;
     }
 
-    private async handleLogoInspirations(args: any): Promise<string> {
-        // CASE 1: SEARCH (Generate/Append)
-        if (args.search_query) {
-            // Use SearchService
-            const results = await this.searchService.searchLogoInspirationFromWeb({
-                styleKeywords: args.search_query,
-                industry: 'branding'
-            });
+    private async handleSelectImagerySuggestions(args: any): Promise<string> {
+        return this._updateImagerySelection(args, true);
+    }
 
-            // Load existing to append to
-            const currentState = stateManager.loadLatest();
-            const existing = currentState?.logoInspirations?.inspirations || [];
-            const nextIndex = existing.length + 1;
+    private async handleDeleteImagerySuggestions(args: any): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction.";
+        const state = stateManager.loadLatest();
+        const current = state?.imagery?.suggestions || [];
+        const ids = await this.executionEngine.resolveImagerySelector(current, instruction);
+        if (ids.length === 0) return "Could not find items to delete.";
+        const kept = current.filter(s => !ids.includes(s.id));
+        await stateManager.saveWithHistory('imagery', { suggestions: kept });
+        this.sendToClient({ type: 'IMAGERY_SUGGESTIONS', suggestions: kept } as any);
+        return `Deleted ${current.length - kept.length} items.`;
+    }
 
-            // Transform to schema
-            const newInspirations: LogoInspiration[] = results.map((r, i) => ({
-                id: `logo_${nextIndex + i}`,
-                displayName: `logo_${nextIndex + i}`,
-                url: r.url,
-                isSelected: false
-            }));
+    private async _updateImagerySelection(args: any, isSelected: boolean): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction.";
+        const state = stateManager.loadLatest();
+        const current = state?.imagery?.suggestions || [];
+        const ids = await this.executionEngine.resolveImagerySelector(current, instruction);
+        if (ids.length === 0) return "Could not identify items.";
+        const updated = current.map(s => {
+            if (ids.includes(s.id)) return { ...s, isSelected: isSelected };
+            return s;
+        });
+        await stateManager.saveWithHistory('imagery', { suggestions: updated });
+        this.sendToClient({ type: 'IMAGERY_SUGGESTIONS', suggestions: updated } as any);
+        return `${isSelected ? 'Selected' : 'Unselected'} ${ids.length} items.`;
+    }
 
-            const combined = [...existing, ...newInspirations];
+    private async handleCreateLogoInspirations(args: any): Promise<string> {
+        this.setCanvasMode('none' as any);
+        const count = args.count || 4;
+        const query = args.query;
+        // Search Logic via Execution Engine
+        const inspirations = await this.executionEngine.searchLogoInspirations(query, count);
+        await stateManager.saveWithHistory('logoInspirations', {
+            inspirations,
+            rationale: `Searched for: ${query}`
+        });
+        this.sendToClient({ type: 'LOGO_INSPIRATION_RESULTS', results: inspirations } as any);
+        return `Found ${inspirations.length} logo inspirations.`;
+    }
 
-            // Save
-            await stateManager.saveWithHistory('logoInspirations', {
-                inspirations: combined,
-                rationale: `Added ${newInspirations.length} results for "${args.search_query}"`
-            });
+    private async handleSelectLogoInspirations(args: any): Promise<string> {
+        return this._updateInspirationSelection(args, true);
+    }
 
-            // Send full list
-            this.sendToClient({
-                type: 'LOGO_INSPIRATION_RESULTS',
-                results: combined
-            } as any);
+    private async handleDeleteLogoInspirations(args: any): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction.";
+        const state = stateManager.loadLatest();
+        const current = state?.logoInspirations?.inspirations || [];
+        const ids = await this.executionEngine.resolveLogoInspirationSelector(current, instruction);
+        if (ids.length === 0) return "Could not find items to delete.";
+        const kept = current.filter(i => !ids.includes(i.id));
+        await stateManager.saveWithHistory('logoInspirations', { inspirations: kept });
+        this.sendToClient({ type: 'LOGO_INSPIRATIONS', inspirations: kept } as any);
+        return `Deleted ${current.length - kept.length} items.`;
+    }
 
-            return `I found ${newInspirations.length} new logo inspirations for "${args.search_query}". Total ${combined.length} items available. [SYSTEM: Tell the user you found new logos. Ask if they want to see the "Mood Board" on the canvas.]`;
-        }
-
-        // CASE 2: MANAGE (Update/Select/Delete)
-        if (args.inspirations) {
-            const newInspirations: LogoInspiration[] = args.inspirations;
-            const selectedCount = newInspirations.filter(i => i.isSelected).length;
-
-            // Save
-            await stateManager.saveWithHistory('logoInspirations', {
-                inspirations: newInspirations,
-                rationale: 'User updated logo inspiration selection'
-            });
-
-            // Send update
-            this.sendToClient({
-                type: 'LOGO_INSPIRATION_RESULTS',
-                results: newInspirations
-            } as any);
-
-            return `Updated logo inspirations. ${selectedCount} items are currently selected. [SYSTEM: Confirm the selection. Ask if they want to search for more.]`;
-        }
-
-        return "No action taken. Please provide search_query or inspirations list.";
+    private async _updateInspirationSelection(args: any, isSelected: boolean): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction.";
+        const state = stateManager.loadLatest();
+        const current = state?.logoInspirations?.inspirations || [];
+        const ids = await this.executionEngine.resolveLogoInspirationSelector(current, instruction);
+        if (ids.length === 0) return "Could not identify items.";
+        const updated = current.map(item => {
+            if (ids.includes(item.id)) return { ...item, isSelected: isSelected };
+            return item;
+        });
+        await stateManager.saveWithHistory('logoInspirations', { inspirations: updated });
+        this.sendToClient({ type: 'LOGO_INSPIRATIONS', inspirations: updated } as any);
+        return `${isSelected ? 'Selected' : 'Unselected'} ${ids.length} items.`;
     }
 
     private async handleGeneralResearch(args: any): Promise<string> {
@@ -712,4 +753,57 @@ export class ToolHandler {
         console.log('Verify asset compliance triggered', args);
         // Implementation placeholder - likely involves vision check
     }
+    private async handleCreateLogoStructures(args: any): Promise<string> {
+        this.setCanvasMode('none' as any);
+        const count = args.count || 3;
+        const query = args.query;
+        const structures = await this.executionEngine.createLogoStructures(query, count);
+        await stateManager.saveWithHistory('logoStructures', {
+            options: structures,
+            rationale: `Created logo structures: ${query}`
+        });
+        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options: structures } as any);
+        return `Created ${structures.length} logo structure options.`;
+    }
+
+    private async handleSelectLogoStructures(args: any): Promise<string> {
+        return this._updateStructureSelection(args, true);
+    }
+
+    private async handleDeleteLogoStructures(args: any): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction.";
+
+        const state = stateManager.loadLatest();
+        const current = state?.logoStructures?.options || [];
+
+        const targetIds = await this.executionEngine.resolveLogoStructureSelector(current, instruction);
+
+        if (targetIds.length === 0) return "Could not find structures to delete.";
+
+        const kept = current.filter((s: any) => !targetIds.includes(s.id));
+
+        await stateManager.saveWithHistory('logoStructures', { options: kept });
+        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options: kept } as any);
+
+        return `Deleted ${current.length - kept.length} structures.`;
+    }
+
+    private async _updateStructureSelection(args: any, isSelected: boolean): Promise<string> {
+        const instruction = args.instruction;
+        if (!instruction) return "No instruction.";
+        const state = stateManager.loadLatest();
+        const current = state?.logoStructures?.options || [];
+        const targetIds = await this.executionEngine.resolveLogoStructureSelector(current, instruction);
+        if (targetIds.length === 0) return "Could not identify structures.";
+        const updated = current.map(s => {
+            if (targetIds.includes(s.id)) return { ...s, isSelected: isSelected };
+            return s;
+        });
+        await stateManager.saveWithHistory('logoStructures', { options: updated });
+        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options: updated } as any);
+        return `${isSelected ? 'Selected' : 'Unselected'} ${targetIds.length} structures.`;
+    }
+
+
 }

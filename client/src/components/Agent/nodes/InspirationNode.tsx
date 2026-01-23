@@ -38,26 +38,46 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
                         transition={{ delay: index * 0.05 }}
                         onHoverStart={() => setHoveredLogo(logo.id)}
                         onHoverEnd={() => setHoveredLogo(null)}
-                        // onClick={() => nodeData.onSelect?.(logo.id)} // Selection disabled for now until logic defined
+                        onClick={() => nodeData.onSelect?.(logo.id)}
                         className={`
-                            relative group overflow-hidden rounded-lg border transition-all aspect-square
-                            ${hoveredLogo === logo.id
-                                ? 'border-pink-400 ring-2 ring-pink-100 shadow-md'
-                                : 'border-slate-200 bg-white hover:border-slate-300'
+                            relative group overflow-hidden rounded-lg border transition-all flex flex-col
+                            ${logo.isSelected
+                                ? 'border-emerald-500 ring-2 ring-emerald-100 shadow-md bg-emerald-50/10'
+                                : hoveredLogo === logo.id
+                                    ? 'border-pink-400 ring-2 ring-pink-100 shadow-md'
+                                    : 'border-slate-200 bg-white hover:border-slate-300'
                             }
                         `}
                     >
-                        <img
-                            src={logo.url}
-                            alt={logo.brandName || 'Logo inspiration'}
-                            className="w-full h-full object-cover"
-                        />
+                        <div className="aspect-square w-full relative overflow-hidden bg-slate-50">
+                            <img
+                                src={logo.url}
+                                alt={logo.brandName || 'Logo inspiration'}
+                                className="w-full h-full object-cover"
+                            />
+                            {/* Overlay on hover or selection */}
+                            <div className={`absolute inset-0 transition-opacity flex items-center justify-center
+                                ${logo.isSelected ? 'bg-emerald-500/20 opacity-100' : hoveredLogo === logo.id ? 'bg-black/10 opacity-100' : 'opacity-0'}
+                            `}>
+                                {logo.isSelected && (
+                                    <div className="bg-emerald-500 text-white rounded-full p-1 shadow-sm transform scale-100 transition-transform">
+                                        <Check className="w-5 h-5" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
 
-                        {/* Overlay on hover */}
-                        <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${hoveredLogo === logo.id ? 'opacity-100' : 'opacity-0'}`}>
-                            {/* <Check className="text-white w-6 h-6" /> */}
-                            {/* Just showing brand name for now */}
-                            <span className="text-white text-xs font-semibold px-2 text-center">{logo.brandName}</span>
+                        {/* Always visible label */}
+                        <div className={`
+                            w-full py-1.5 px-2 border-t transition-colors
+                            ${logo.isSelected ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100'}
+                        `}>
+                            <span className={`
+                                text-xs font-medium truncate block w-full text-center
+                                ${logo.isSelected ? 'text-emerald-700' : 'text-slate-600'}
+                            `}>
+                                {logo.brandName}
+                            </span>
                         </div>
                     </motion.button>
                 ))}

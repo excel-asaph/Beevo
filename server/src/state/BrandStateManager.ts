@@ -13,8 +13,6 @@ export class BrandStateManager {
         this.dna = {
             name: { value: '', isSelected: false },
             mission: { value: '', isSelected: false },
-            colors: { items: [], isSelected: false },
-            typography: { items: [], isSelected: false },
             values: { items: [], isSelected: false },
             voice: { value: '', isSelected: false },
             tagline: { value: '', isSelected: false },
@@ -69,15 +67,7 @@ export class BrandStateManager {
                 this.updateProgress('mission', this.dna.mission.value);
                 break;
 
-            case 'colors':
-                this.dna.colors = ensureStructure(value, true);
-                this.updateProgress('colors', this.dna.colors.items);
-                break;
 
-            case 'typography':
-                this.dna.typography = ensureStructure(value, true);
-                this.updateProgress('font', this.dna.typography.items[0]);
-                break;
 
             case 'voice':
                 this.dna.voice = ensureStructure(value, false);
@@ -109,13 +99,7 @@ export class BrandStateManager {
                 break;
 
             // Phase 9: Logo & Competitive Intelligence (Legacy/Future fields)
-            case 'logoStyle':
-                this.dna.logoStyle = value;
-                break;
 
-            case 'logoMood':
-                this.dna.logoMood = value;
-                break;
 
             case 'logoInspiration':
                 this.dna.logoInspiration = value;

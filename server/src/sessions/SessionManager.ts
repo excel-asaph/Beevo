@@ -276,7 +276,7 @@ export class SessionManager {
         }
 
         return `[CURRENT STATE]
-Brand DNA: name="${dna.name || ''}", mission="${dna.mission || ''}", typography=${JSON.stringify(dna.typography || [])}, colors=${JSON.stringify(dna.colors || [])}, voice="${dna.voice || ''}"
+Brand DNA: name="${dna.name?.value || ''}", mission="${dna.mission?.value || ''}", voice="${dna.voice?.value || ''}"
 ${canvasInfo}
 [END STATE]`;
     }

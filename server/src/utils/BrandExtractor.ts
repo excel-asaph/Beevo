@@ -27,14 +27,14 @@ const REQUIRED_FIELDS = ['name', 'mission', 'values', 'voice', 'tagline', 'targe
 export function identifyGaps(dna: Partial<BrandDNA>): string[] {
     const gaps: string[] = [];
 
-    if (!dna.name?.trim()) gaps.push('name');
-    if (!dna.mission?.trim()) gaps.push('mission');
-    if (!dna.values || dna.values.length === 0) gaps.push('values');
-    if (!dna.voice?.trim()) gaps.push('voice');
-    if (!dna.tagline?.trim()) gaps.push('tagline');
-    if (!dna.targetAudience?.trim()) gaps.push('targetAudience');
+    if (!dna.name?.value?.trim()) gaps.push('name');
+    if (!dna.mission?.value?.trim()) gaps.push('mission');
+    if (!dna.values?.items || dna.values.items.length === 0) gaps.push('values');
+    if (!dna.voice?.value?.trim()) gaps.push('voice');
+    if (!dna.tagline?.value?.trim()) gaps.push('tagline');
+    if (!dna.targetAudience?.items || dna.targetAudience.items.length === 0) gaps.push('targetAudience');
     // Industry is often inferred from context
-    if (!dna.competitorInsights?.industry) gaps.push('industry');
+    if (!dna.industry?.value) gaps.push('industry');
 
     return gaps;
 }
@@ -61,13 +61,13 @@ export async function extractMissingIdentity(
 
     // Build current state description
     const currentStateDesc = [
-        `Name: ${currentDNA.name || 'MISSING'}`,
-        `Mission: ${currentDNA.mission || 'MISSING'}`,
-        `Values: ${currentDNA.values?.join(', ') || 'MISSING'}`,
-        `Voice: ${currentDNA.voice || 'MISSING'}`,
-        `Tagline: ${currentDNA.tagline || 'MISSING'}`,
-        `Target Audience: ${currentDNA.targetAudience || 'MISSING'}`,
-        `Industry: ${currentDNA.competitorInsights?.industry || 'MISSING'}`
+        `Name: ${currentDNA.name?.value || 'MISSING'}`,
+        `Mission: ${currentDNA.mission?.value || 'MISSING'}`,
+        `Values: ${currentDNA.values?.items?.join(', ') || 'MISSING'}`,
+        `Voice: ${currentDNA.voice?.value || 'MISSING'}`,
+        `Tagline: ${currentDNA.tagline?.value || 'MISSING'}`,
+        `Target Audience: ${currentDNA.targetAudience?.items?.join(', ') || 'MISSING'}`,
+        `Industry: ${currentDNA.industry?.value || 'MISSING'}`
     ].join('\n');
 
     // Brand-focused extraction prompt
@@ -125,17 +125,17 @@ If you cannot extract a field with confidence, omit it from the response.`;
 
         // Filter out any fields that are already present in DNA
         const filtered: ExtractionResult = {};
-        if (extracted.name && !currentDNA.name?.trim()) filtered.name = extracted.name;
-        if (extracted.mission && !currentDNA.mission?.trim()) filtered.mission = extracted.mission;
-        if (extracted.values?.length && (!currentDNA.values || currentDNA.values.length === 0)) {
+        if (extracted.name && !currentDNA.name?.value?.trim()) filtered.name = extracted.name;
+        if (extracted.mission && !currentDNA.mission?.value?.trim()) filtered.mission = extracted.mission;
+        if (extracted.values?.length && (!currentDNA.values?.items || currentDNA.values.items.length === 0)) {
             filtered.values = extracted.values;
         }
-        if (extracted.voice && !currentDNA.voice?.trim()) filtered.voice = extracted.voice;
-        if (extracted.tagline && !currentDNA.tagline?.trim()) filtered.tagline = extracted.tagline;
-        if (extracted.targetAudience && !currentDNA.targetAudience?.trim()) {
+        if (extracted.voice && !currentDNA.voice?.value?.trim()) filtered.voice = extracted.voice;
+        if (extracted.tagline && !currentDNA.tagline?.value?.trim()) filtered.tagline = extracted.tagline;
+        if (extracted.targetAudience && (!currentDNA.targetAudience?.items || currentDNA.targetAudience.items.length === 0)) {
             filtered.targetAudience = extracted.targetAudience;
         }
-        if (extracted.industry && !currentDNA.competitorInsights?.industry) {
+        if (extracted.industry && !currentDNA.industry?.value) {
             filtered.industry = extracted.industry;
         }
 

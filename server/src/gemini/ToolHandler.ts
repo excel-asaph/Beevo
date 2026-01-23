@@ -2,11 +2,15 @@ import {
     ServerMessage,
     FontSuggestionsMessage,
     ColorSuggestionsMessage,
-    DNAUpdateMessage
+    DNAUpdateMessage,
+    LogoResearchProgressMessage,
+    LogoResearchResultMessage,
+    LogoConceptsMessage
 } from '../../../shared/messages';
 import { FontSuggestion, ColorPalette, BrandDNA, LogoStructureOption, ImagerySuggestion, LogoInspiration } from '../../../shared/types';
 import { GoogleGenAI } from '@google/genai';
 import { SearchGroundingService } from './SearchGroundingService';
+import { getLogoStrategist, BrandContext } from '../agents/LogoStrategist';
 import { BrainLogger } from '../utils/BrainLogger';
 import { ResearchLogger } from '../utils/ResearchLogger';
 import { ExecutionEngine } from '../services/ExecutionEngine';
@@ -229,6 +233,9 @@ export class ToolHandler {
                 else if (fc.name === 'select_logo_structures') {
                     contextSummary = await this.handleSelectLogoStructures(fc.args);
                 }
+                else if (fc.name === 'unselect_logo_structures') {
+                    contextSummary = await this.handleUnselectLogoStructures(fc.args);
+                }
                 else if (fc.name === 'delete_logo_structures') {
                     contextSummary = await this.handleDeleteLogoStructures(fc.args);
                 }
@@ -239,6 +246,9 @@ export class ToolHandler {
                 else if (fc.name === 'select_imagery_suggestions') {
                     contextSummary = await this.handleSelectImagerySuggestions(fc.args);
                 }
+                else if (fc.name === 'unselect_imagery_suggestions') {
+                    contextSummary = await this.handleUnselectImagerySuggestions(fc.args);
+                }
                 else if (fc.name === 'delete_imagery_suggestions') {
                     contextSummary = await this.handleDeleteImagerySuggestions(fc.args);
                 }
@@ -248,6 +258,9 @@ export class ToolHandler {
                 }
                 else if (fc.name === 'select_logo_inspirations') {
                     contextSummary = await this.handleSelectLogoInspirations(fc.args);
+                }
+                else if (fc.name === 'unselect_logo_inspirations') {
+                    contextSummary = await this.handleUnselectLogoInspirations(fc.args);
                 }
                 else if (fc.name === 'delete_logo_inspirations') {
                     contextSummary = await this.handleDeleteLogoInspirations(fc.args);
@@ -648,6 +661,10 @@ export class ToolHandler {
         return this._updateImagerySelection(args, true);
     }
 
+    private async handleUnselectImagerySuggestions(args: any): Promise<string> {
+        return this._updateImagerySelection(args, false);
+    }
+
     private async handleDeleteImagerySuggestions(args: any): Promise<string> {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
@@ -678,21 +695,126 @@ export class ToolHandler {
     }
 
     private async handleCreateLogoInspirations(args: any): Promise<string> {
+        console.log('🔍 Starting BROWSER-BASED logo research:', args);
         this.setCanvasMode('none' as any);
-        const count = args.count || 4;
-        const query = args.query;
-        // Search Logic via Execution Engine
-        const inspirations = await this.executionEngine.searchLogoInspirations(query, count);
-        await stateManager.saveWithHistory('logoInspirations', {
-            inspirations,
-            rationale: `Searched for: ${query}`
-        });
-        this.sendToClient({ type: 'LOGO_INSPIRATION_RESULTS', results: inspirations } as any);
-        return `Found ${inspirations.length} logo inspirations.`;
+
+        const query = args.query || 'modern logo';
+
+        // Get brand context - Prefer latest state from file
+        const state = stateManager.loadLatest();
+        const dna = state?.brandDNA || this.getDNA();
+
+        const brandContext: BrandContext = {
+            name: dna.name?.value || 'Brand',
+            industry: dna.industry?.value || 'business',
+            mission: dna.mission?.value || '',
+            voice: dna.voice?.value || '',
+            style: query
+        };
+
+        // Send initial progress
+        this.sendToClient({
+            type: 'LOGO_RESEARCH_PROGRESS',
+            phase: 'starting',
+            source: 'Browser Agent',
+            progress: 0,
+            message: `Starting logo research for ${brandContext.industry} industry...`
+        } as LogoResearchProgressMessage);
+
+        try {
+            // Get the strategist (singleton with browser)
+            const strategist = await getLogoStrategist();
+
+            // Run research with progress callbacks
+            const results = await strategist.researchLogos(
+                brandContext,
+                (phase, source, progress, message) => {
+                    console.log(`📊 Research progress: ${phase} | ${source} | ${progress}% | ${message}`);
+                    this.sendToClient({
+                        type: 'LOGO_RESEARCH_PROGRESS',
+                        phase: phase as 'starting' | 'browsing' | 'analyzing' | 'complete',
+                        source,
+                        progress,
+                        message
+                    } as LogoResearchProgressMessage);
+                }
+            );
+
+            console.log(`✅ Research complete: ${results.logos.length} logos found`);
+
+            // Send final results
+            this.sendToClient({
+                type: 'LOGO_RESEARCH_RESULT',
+                logos: results.logos,
+                insights: results.insights,
+                screenshots: results.screenshots
+            } as LogoResearchResultMessage);
+
+            // Backward compatibility
+            this.sendToClient({
+                type: 'LOGO_CONCEPTS',
+                concepts: results.logos.map(logo => ({
+                    id: logo.id,
+                    url: logo.imageUrl,
+                    source: logo.source,
+                    style: logo.style,
+                    mood: 'discovered',
+                    reasoning: logo.designPrinciples.join(', '),
+                    alt_text: `${logo.brandName} logo`
+                }))
+            });
+
+            // Save to State Manager
+            const inspirations: LogoInspiration[] = results.logos.map(l => ({
+                id: l.id,
+                displayName: l.brandName,
+                url: l.imageUrl,
+                isSelected: false
+            }));
+
+            await stateManager.saveWithHistory('logoInspirations', {
+                inspirations,
+                rationale: `Searched for: ${query}. Insights: ${results.insights.recommendation}`
+            });
+
+            this.sendToClient({ type: 'LOGO_INSPIRATION_RESULTS', results: inspirations } as any);
+
+            return `Research complete! Found ${results.logos.length} logos. ${results.insights.recommendation}`;
+
+        } catch (error) {
+            console.error('❌ Logo research failed:', error);
+
+            this.sendToClient({
+                type: 'LOGO_RESEARCH_PROGRESS',
+                phase: 'complete',
+                source: 'Error',
+                progress: 100,
+                message: 'Research encountered an error. showing fallback.'
+            } as LogoResearchProgressMessage);
+
+            // Fallback to SearchGroundingService (Simulated/API)
+            // Search Logic via Execution Engine (Original Logic)
+            try {
+                const count = args.count || 4;
+                const inspirations = await this.executionEngine.searchLogoInspirations(query, count);
+                await stateManager.saveWithHistory('logoInspirations', {
+                    inspirations,
+                    rationale: `Fallback search for: ${query}`
+                });
+                this.sendToClient({ type: 'LOGO_INSPIRATION_RESULTS', results: inspirations } as any);
+                return `Browser agent failed, but I found ${inspirations.length} simulated logo inspirations.`;
+            } catch (e) {
+                return "Failed to search for logos.";
+            }
+        }
     }
 
     private async handleSelectLogoInspirations(args: any): Promise<string> {
         return this._updateInspirationSelection(args, true);
+    }
+
+    private async handleUnselectLogoInspirations(args: any): Promise<string> {
+        return this._updateInspirationSelection(args, false);
     }
 
     private async handleDeleteLogoInspirations(args: any): Promise<string> {
@@ -768,6 +890,10 @@ export class ToolHandler {
 
     private async handleSelectLogoStructures(args: any): Promise<string> {
         return this._updateStructureSelection(args, true);
+    }
+
+    private async handleUnselectLogoStructures(args: any): Promise<string> {
+        return this._updateStructureSelection(args, false);
     }
 
     private async handleDeleteLogoStructures(args: any): Promise<string> {

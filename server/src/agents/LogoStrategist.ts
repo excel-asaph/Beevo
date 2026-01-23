@@ -129,7 +129,9 @@ export class LogoStrategist {
             await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
             // Build search query for logo inspiration
-            const searchQuery = encodeURIComponent(`${context.industry} logo design inspiration`);
+            // Strict user rule: Query must be based on industry from DNA
+            const industry = context.industry || 'Business';
+            const searchQuery = encodeURIComponent(`${industry} logo design inspiration`);
             const url = `https://www.google.com/search?q=${searchQuery}&tbm=isch`;
 
             console.log(`🔍 Google Images: ${url}`);
@@ -165,10 +167,14 @@ export class LogoStrategist {
 
             images.forEach((img, index) => {
                 if (img.imageUrl) {
+                    // Generate a clean, handle-able name for the user to reference
+                    // User requested simple "logo_n" format
+                    const cleanName = `logo_${index + 1}`;
+
                     logos.push({
-                        id: `google-${index}`,
+                        id: String(index + 1),
                         imageUrl: img.imageUrl,
-                        brandName: img.title.slice(0, 50), // Truncate long titles
+                        brandName: cleanName,
                         source: 'Google Images',
                         style: 'Design Inspiration',
                         designPrinciples: ['Discovered', 'Trending']

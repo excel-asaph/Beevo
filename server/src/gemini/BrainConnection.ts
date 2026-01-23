@@ -235,6 +235,17 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
+        name: "unselect_logo_structures",
+        description: "Unselect logo structure(s). Use 'instruction' to describe which to unselect.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which structures to unselect." }
+            },
+            required: ["instruction"]
+        }
+    },
+    {
         name: "delete_logo_structures",
         description: "Delete logo structure(s). Use 'instruction' to describe which to delete.",
         parameters: {
@@ -269,6 +280,17 @@ const brainToolDeclarations: FunctionDeclaration[] = [
         }
     },
     {
+        name: "unselect_logo_inspirations",
+        description: "Unselect logo inspiration(s). Use 'instruction' to describe which to unselect.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which inspirations to unselect." }
+            },
+            required: ["instruction"]
+        }
+    },
+    {
         name: "delete_logo_inspirations",
         description: "Delete logo inspiration(s). Use 'instruction' to describe which to delete.",
         parameters: {
@@ -298,6 +320,17 @@ const brainToolDeclarations: FunctionDeclaration[] = [
             type: Type.OBJECT,
             properties: {
                 instruction: { type: Type.STRING, description: "Instruction describing which suggestions to select." }
+            },
+            required: ["instruction"]
+        }
+    },
+    {
+        name: "unselect_imagery_suggestions",
+        description: "Unselect imagery suggestion(s). Use 'instruction' to describe which to unselect.",
+        parameters: {
+            type: Type.OBJECT,
+            properties: {
+                instruction: { type: Type.STRING, description: "Instruction describing which suggestions to unselect." }
             },
             required: ["instruction"]
         }
@@ -520,8 +553,9 @@ export class BrainConnection {
 
                 case 'execution':
                     // PHASE 2: BUILDER BRAIN - Sequential Atomic Tools
-                    const hasColors = dnaObj.colors && dnaObj.colors.items && dnaObj.colors.items.length > 0;
-                    const hasFonts = dnaObj.typography && dnaObj.typography.items && dnaObj.typography.items.length > 0;
+                    const fullState = stateManager.loadLatest();
+                    const hasColors = fullState?.colorPalettes?.palettes && fullState.colorPalettes.palettes.length > 0;
+                    const hasFonts = fullState?.typographyPairings?.fonts && fullState.typographyPairings.fonts.length > 0;
 
                     console.log(`🧠 Brain Mode: EXECUTION (Sequential Builder). Colors: ${hasColors}, Fonts: ${hasFonts}`);
 
@@ -580,13 +614,13 @@ export class BrainConnection {
 
                     // Derive "Current Selection" from the Menu (researchState) if possible, as it tracks isSelected source of truth
                     const selectedPalette = researchState?.colorPalettes?.palettes?.find(p => p.isSelected);
-                    const currentColors = selectedPalette ? selectedPalette.colors : (dnaObj.colors?.items || []);
+                    const currentColors = selectedPalette ? selectedPalette.colors : [];
                     const colorDisplay = currentColors.length > 0 ? currentColors.slice(0, 4).join(', ') : 'None Selected';
 
                     const selectedFontPair = researchState?.typographyPairings?.fonts?.find(f => f.isSelected);
                     const currentFonts = selectedFontPair
                         ? [selectedFontPair.name, selectedFontPair.pairing].filter(Boolean)
-                        : (dnaObj.typography?.items || []);
+                        : [];
                     const fontDisplay = currentFonts.length > 0 ? currentFonts.join(', ') : 'None Selected';
 
                     console.log(`🧠 Brain Mode: MODIFICATION (Modifier) - colors:${currentColors.length}, fonts:${currentFonts.length}`);

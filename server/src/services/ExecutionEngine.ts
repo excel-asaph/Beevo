@@ -109,14 +109,7 @@ export class ExecutionEngine {
             targetAudience: toSelectableArray(extracted.targetAudience || ['General public']),
             mood: toSelectableArray(extracted.mood || ['Modern']),
             paletteCount: extracted.paletteCount || 3,
-            rationale: extracted.rationale || 'Extracted from conversation analysis.',
-
-            // Legacy/Optional initializations
-            designGoals: '',
-            logoType: '',
-            imagery: ''
-            // Removed: logoInspiration, logoUsageContexts, competitorInsights, researchInsights, logoAssets
-            // to ensure strict adherence to file schema.
+            rationale: extracted.rationale || 'Extracted from conversation analysis.'
         };
 
         return dna;
@@ -196,7 +189,7 @@ export class ExecutionEngine {
         // CRITICAL: Assign unique IDs here so they are stable from birth
         const palettes = (result.palettes || []).map((p: any, index: number) => ({
             ...p,
-            id: `palette-${Date.now()}-${index}`,
+            id: String(index + 1),
             isSelected: false
         }));
         return { palettes, rationale: result.rationale };
@@ -245,8 +238,9 @@ export class ExecutionEngine {
         const result = JSON.parse(text);
 
         // Return raw fonts (IDs handled by ToolHandler), but initialized selection
-        const fonts = (result.fonts || []).map((f: any) => ({
+        const fonts = (result.fonts || []).map((f: any, index: number) => ({
             ...f,
+            id: String(index + 1),
             isSelected: false
         }));
         return { fonts, rationale: result.rationale };
@@ -338,10 +332,11 @@ export class ExecutionEngine {
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
         const rawPalettes = JSON.parse(text).palettes || [];
 
-        // Assign IDs immediately
+        // Assign IDs based on total count
+        const startId = currentPalettes.length + 1;
         return rawPalettes.map((p: any, i: number) => ({
             ...p,
-            id: `palette-${Date.now()}-${i}`,
+            id: String(startId + i),
             isSelected: false
         }));
     }
@@ -474,7 +469,7 @@ export class ExecutionEngine {
         });
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
         const items = JSON.parse(text).structures || [];
-        return items.map((item: any, i: number) => ({ ...item, id: `structure-${Date.now()}-${i}` }));
+        return items.map((item: any, i: number) => ({ ...item, id: String(i + 1) }));
     }
 
     async resolveLogoStructureSelector(current: any[], instruction: string): Promise<string[]> {
@@ -498,7 +493,7 @@ export class ExecutionEngine {
         });
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
         const items = JSON.parse(text).suggestions || [];
-        return items.map((item: any, i: number) => ({ ...item, id: `imagery-${Date.now()}-${i}` }));
+        return items.map((item: any, i: number) => ({ ...item, id: String(i + 1) }));
     }
 
     async resolveImagerySelector(current: any[], instruction: string): Promise<string[]> {
@@ -525,7 +520,7 @@ export class ExecutionEngine {
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
         const items = JSON.parse(text).results || [];
         return items.map((item: any, i: number) => ({
-            id: `insp-${Date.now()}-${i}`,
+            id: String(i + 1),
             displayName: item.displayName,
             url: `https://via.placeholder.com/300x200?text=${encodeURIComponent(item.displayName)}`, // Placeholder
             isSelected: false,
@@ -595,6 +590,12 @@ export class ExecutionEngine {
             competitorResearch: competitors,
             colorPalettes: palettes,
             typographyPairings: fonts,
+
+            // Initialize Modification Phase sections
+            logoStructures: { options: [] },
+            logoInspirations: { inspirations: [] },
+            imagery: { suggestions: [] },
+
             summary,
             timestamp: new Date().toISOString(),
             stateVersion: 1 // Initial version for new research

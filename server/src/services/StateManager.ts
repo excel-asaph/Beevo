@@ -135,8 +135,6 @@ export class StateManager extends EventEmitter {
             brandDNA: {
                 name: { value: '', isSelected: true },
                 mission: { value: '', isSelected: true },
-                colors: { items: [], isSelected: true },
-                typography: { items: [], isSelected: true },
                 voice: { value: '', isSelected: true },
                 tagline: { value: '', isSelected: true },
                 values: { items: [], isSelected: true },

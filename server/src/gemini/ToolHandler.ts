@@ -879,13 +879,24 @@ export class ToolHandler {
         this.setCanvasMode('none' as any);
         const count = args.count || 3;
         const query = args.query;
-        const structures = await this.executionEngine.createLogoStructures(query, count);
+
+        // Load current state to append to existing list
+        const currentState = stateManager.loadLatest();
+        const currentOptions = currentState?.logoStructures?.options || [];
+
+        // Create new structures (engine handles ID generation based on currentOptions length)
+        const newStructures = await this.executionEngine.createLogoStructures(currentOptions, query, count);
+
+        // Append new structures to the existing list
+        const updatedOptions = [...currentOptions, ...newStructures];
+
         await stateManager.saveWithHistory('logoStructures', {
-            options: structures,
-            rationale: `Created logo structures: ${query}`
+            options: updatedOptions,
+            rationale: `Created ${newStructures.length} new logo structures for: ${query}`
         });
-        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options: structures } as any);
-        return `Created ${structures.length} logo structure options.`;
+
+        // Removed sendToClient to rely on StateManager full state broadcast (Architecture/FullSync)
+        return `Created ${newStructures.length} new logo structure options. Total: ${updatedOptions.length}.`;
     }
 
     private async handleSelectLogoStructures(args: any): Promise<string> {
@@ -909,26 +920,46 @@ export class ToolHandler {
 
         const kept = current.filter((s: any) => !targetIds.includes(s.id));
 
-        await stateManager.saveWithHistory('logoStructures', { options: kept });
-        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options: kept } as any);
+        // Re-index IDs to ensure sequential order (1..N) preventing collisions on next create
+        // This matches the Typography implementation (handleDeleteFonts)
+        const reindexed = kept.map((s: any, i: number) => ({ ...s, id: String(i + 1) }));
 
-        return `Deleted ${current.length - kept.length} structures.`;
+        await stateManager.saveWithHistory('logoStructures', {
+            options: reindexed,
+            rationale: `Deleted ${targetIds.length} structures`
+        });
+
+        // No need to send specific message, StateManager broadcast handles it
+        return `Deleted ${current.length - kept.length} structures. Remaining: ${reindexed.length}.`;
     }
 
     private async _updateStructureSelection(args: any, isSelected: boolean): Promise<string> {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
+
         const state = stateManager.loadLatest();
         const current = state?.logoStructures?.options || [];
+
         const targetIds = await this.executionEngine.resolveLogoStructureSelector(current, instruction);
+
         if (targetIds.length === 0) return "Could not identify structures.";
+
+        let changeCount = 0;
         const updated = current.map(s => {
-            if (targetIds.includes(s.id)) return { ...s, isSelected: isSelected };
+            if (targetIds.includes(s.id)) {
+                changeCount++;
+                return { ...s, isSelected: isSelected };
+            }
             return s;
         });
-        await stateManager.saveWithHistory('logoStructures', { options: updated });
-        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options: updated } as any);
-        return `${isSelected ? 'Selected' : 'Unselected'} ${targetIds.length} structures.`;
+
+        await stateManager.saveWithHistory('logoStructures', {
+            options: updated,
+            rationale: `User ${isSelected ? 'selected' : 'unselected'} ${changeCount} logo structures`
+        });
+
+        // No need to send specific message, StateManager broadcast handles it
+        return `${isSelected ? 'Selected' : 'Unselected'} ${changeCount} structures.`;
     }
 
 

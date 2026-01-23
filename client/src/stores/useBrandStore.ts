@@ -102,10 +102,13 @@ interface BrandStore {
 export const useBrandStore = create<BrandStore>((set, get) => ({
     // Initial State
     dna: {
-        name: '',
-        mission: '',
-
-        voice: '',
+        name: { value: '', isSelected: false },
+        mission: { value: '', isSelected: false },
+        voice: { value: '', isSelected: false },
+        tagline: { value: '', isSelected: false },
+        values: { items: [], isSelected: false },
+        targetAudience: { items: [], isSelected: false },
+        mood: { items: [], isSelected: false }
     },
     colorOptions: [],
     fontOptions: [],
@@ -140,10 +143,6 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
             const updates: Partial<BrandStore> = {
                 dna: { ...state.dna, ...patch }
             };
-
-
-
-
 
             // If we are saving logos, clear inspiration options
             if (patch.logoAssets && patch.logoAssets.length > 0) {
@@ -181,30 +180,15 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
     },
 
     selectColor: (paletteId) => {
+        // Handled via WebSocket usually, this might be legacy or local optimisitic update
+        // Left empty to prevent direct DNA mutation if relying on server
         const state = get();
-        const selected = state.colorOptions.find(p => p.id === paletteId);
-        if (selected) {
-            // Update DNA with selected colors
-            set((s) => ({
-                dna: { ...s.dna, colors: selected.colors },
-                colorOptions: [] // Clear options
-            }));
-        }
+        // Implementation removed to prefer WS selection source of truth
     },
 
     selectFont: (fontId) => {
-        const state = get();
-        const selected = state.fontOptions.find(f => f.id === fontId);
-        if (selected) {
-            // Add to typography array, remove from options
-            set((s) => ({
-                dna: {
-                    ...s.dna,
-                    typography: [...(s.dna.typography || []), selected.name]
-                },
-                fontOptions: s.fontOptions.filter(f => f.id !== fontId)
-            }));
-        }
+        // Handled via WebSocket selection
+        // Implementation removed to prefer WS selection source of truth
     },
 
     setVoiceState: (voiceState) => set({ voiceState }),

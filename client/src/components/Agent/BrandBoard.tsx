@@ -81,7 +81,10 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
             if (state.brandDNA) updateDNA(state.brandDNA);
             if (state.colorPalettes?.palettes) setColorOptions(state.colorPalettes.palettes);
             if (state.typographyPairings?.fonts) setFontOptions(state.typographyPairings.fonts);
-            if (state.logoStructures?.options) setLogoOptions(state.logoStructures.options);
+            if (state.logoStructures?.options) {
+                console.log('📦 Setting logo options from FULL_STATE:', state.logoStructures.options.length);
+                setLogoOptions(state.logoStructures.options);
+            }
 
             if (state.logoInspirations?.inspirations) {
                 const mappedLogos = state.logoInspirations.inspirations.map((l: any, i: number) => ({
@@ -112,10 +115,17 @@ export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
                 id: `logo-${i}`,
                 url: l.imageUrl || l.url,
                 displayName: l.brandName || l.displayName || 'Unknown',
-                source: l.source || '',
                 description: l.description || '',
                 isSelected: false
             })));
+        },
+        onLogoStructureOptions: (options) => {
+            console.log('🏗️ Logo Structure Options received via WS:', options);
+            if (options && options.length > 0) {
+                setLogoOptions(options);
+            } else {
+                console.warn('⚠️ Received empty logo structure options');
+            }
         },
         onVaultUpdate: (stats) => {
             console.log('🏦 Vault update:', stats);

@@ -9,6 +9,13 @@ export interface LogoStructureCardProps {
 }
 
 export const LogoStructureCard: React.FC<LogoStructureCardProps> = ({ options, onSelect }) => {
+    // Debug log
+    React.useEffect(() => {
+        if (options && options.length > 0) {
+            console.log('🎨 LogoStructureCard rendering with options:', options.length);
+        }
+    }, [options]);
+
     if (!options || options.length === 0) return null;
 
     return (
@@ -27,36 +34,45 @@ export const LogoStructureCard: React.FC<LogoStructureCardProps> = ({ options, o
                         layout
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.02, translateY: -2 }}
                         onClick={() => onSelect && onSelect(option.id)}
                         className={`
-                            relative p-5 rounded-xl border cursor-pointer transition-all duration-200
+                            relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 group overflow-hidden
                             ${option.isSelected
-                                ? 'bg-indigo-500/10 border-indigo-500 shadow-indigo-500/20 shadow-lg'
-                                : 'bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:bg-slate-800'}
+                                ? 'bg-white border-green-500 shadow-xl'
+                                : 'bg-gray-50 border-gray-200 hover:border-green-300 hover:bg-white shadow-md'}
                         `}
                     >
                         {/* selection indicator */}
-                        {option.isSelected && (
-                            <div className="absolute top-3 right-3 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center shadow-sm">
-                                <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                            </div>
-                        )}
+                        <div className={`
+                            absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300
+                            ${option.isSelected
+                                ? 'bg-green-500 scale-100 shadow-lg shadow-green-500/50'
+                                : 'bg-gray-200 scale-90 opacity-0 group-hover:opacity-100'}
+                        `}>
+                            <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                        </div>
 
-                        <div className="flex flex-col h-full">
-                            <h4 className={`text-lg font-bold mb-2 ${option.isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
+                        {/* Background Gradient Blob - reduced intensity and changed colors for light mode */}
+                        <div className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-[50px] transition-all duration-500 ${option.isSelected ? 'bg-green-500/10' : 'bg-gray-200/50 group-hover:bg-green-500/5'
+                            }`} />
+
+                        <div className="flex flex-col h-full relative z-10">
+                            <h4 className={`text-xl font-bold mb-3 tracking-tight ${option.isSelected ? 'text-gray-900' : 'text-gray-800'}`}>
                                 {option.type}
                             </h4>
 
-                            <p className="text-sm text-slate-400 mb-3 flex-grow">
+                            <p className="text-sm text-gray-600 font-medium leading-relaxed mb-4 flex-grow">
                                 {option.reasoning}
                             </p>
 
-                            <div className="pt-3 mt-auto border-t border-slate-700/50 flex items-start gap-2">
-                                <Info className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
-                                <span className="text-xs text-slate-500">
-                                    {option.suitability}
-                                </span>
+                            <div className="pt-4 mt-auto border-t border-gray-100 flex items-center gap-2">
+                                <div className={`px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold ${option.suitability.toLowerCase() === 'high' ? 'bg-green-100 text-green-700' :
+                                    option.suitability.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                                        'bg-gray-100 text-gray-500'
+                                    }`}>
+                                    {option.suitability} Match
+                                </div>
                             </div>
                         </div>
                     </motion.div>

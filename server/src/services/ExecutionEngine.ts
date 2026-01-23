@@ -455,21 +455,46 @@ export class ExecutionEngine {
     // ==========================================
     // MODIFICATION PHASE: LOGO STRUCTURES
     // ==========================================
-    async createLogoStructures(query: string, count: number = 3): Promise<any[]> {
+    async createLogoStructures(currentOptions: any[], query: string, count: number = 3): Promise<any[]> {
         console.log(`🔹 Mod: Creating ${count} logo structures for "${query}"`);
+
+        // 1. Efficiently track existing types using a Set for O(1) lookups and correct list management
+        const existingTypes = new Set(currentOptions.map((o: any) => o.type));
+
         const prompt = `
         Recommend ${count} logo structure types (e.g., Wordmark, Monogram, Emblem) for the brand.
+        
         REQUEST: "${query}"
         OUTPUT JSON: { "structures": [ { "type": "Wordmark", "suitability": "High", "reasoning": "...", "isSelected": false } ] }
         `;
+
         const response = await this.genAI.models.generateContent({
             model: MODELS.ARCHITECT_TEXT,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: { responseMimeType: 'application/json' }
         });
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-        const items = JSON.parse(text).structures || [];
-        return items.map((item: any, i: number) => ({ ...item, id: String(i + 1) }));
+        const rawItems = JSON.parse(text).structures || [];
+
+        // 2. Post-processing filter to ensure uniqueness (Code Firewall)
+        // We filter out any type that is already present in the existing collection OR earlier in this new batch
+        const uniqueItems = rawItems.filter((item: any) => {
+            if (existingTypes.has(item.type)) {
+                return false;
+            }
+            // Add to set to prevent duplicates within the *new* batch itself
+            existingTypes.add(item.type);
+            return true;
+        });
+
+        // Calculate new IDs starting after the last existing ID
+        const startId = currentOptions.length;
+
+        return uniqueItems.map((item: any, i: number) => ({
+            ...item,
+            id: String(startId + i + 1), // 1-based indexing continued
+            isSelected: false // User rule: Default to false
+        }));
     }
 
     async resolveLogoStructureSelector(current: any[], instruction: string): Promise<string[]> {
@@ -557,9 +582,10 @@ export class ExecutionEngine {
         dna: BrandDNA,
         competitors: CompetitorResearch,
         palettes: ColorPalettes,
-        fonts: TypographyPairings
+        fonts: TypographyPairings,
+        logoStructures: { options: any[] } = { options: [] }
     ): Promise<ResearchPhaseObject> {
-        console.log('🔹 Phase 5: Finalizing research...');
+        console.log('🔹 Phase 6: Finalizing research...');
 
         // GENERATE VERBOSE SUMMARY
         const summaryPrompt = `
@@ -591,8 +617,8 @@ export class ExecutionEngine {
             colorPalettes: palettes,
             typographyPairings: fonts,
 
-            // Initialize Modification Phase sections
-            logoStructures: { options: [] },
+            // Initialize Modification Phase sections (Logo Structures populated from Phase 5)
+            logoStructures: logoStructures,
             logoInspirations: { inspirations: [] },
             imagery: { suggestions: [] },
 
@@ -700,14 +726,28 @@ export class ExecutionEngine {
         }
 
         // =========================================
-        // PHASE 5: FINALIZATION
+        // PHASE 5: LOGO STRUCTURE GENERATION
         // =========================================
-        onStreamThought?.(4, 'strategy', 'Finalizing', `Compiling brand strategy for ${dna.name.value}...`);
+        onStreamThought?.(4, 'logo', 'Logo Architecture', `Defining logo structure options for ${dna.industry?.value}...`);
         await sleep(DELAY_MS);
 
-        const result = await this.finalizeResearch(dna, competitors, palettes, fonts);
+        const logoStructures = await this.createLogoStructures([], dna.industry?.value || 'Brand', 3);
 
-        onStreamThought?.(4, 'strategy', 'Research Complete', `Brand identity complete: ${dna.name.value}`);
+        // Stream each structure created with delay
+        for (const ls of logoStructures) {
+            onStreamThought?.(4, 'logo', 'Structure Option', `${ls.type}: ${ls.reasoning?.slice(0, 50)}...`);
+            await sleep(DELAY_MS);
+        }
+
+        // =========================================
+        // PHASE 6: FINALIZATION
+        // =========================================
+        onStreamThought?.(5, 'strategy', 'Finalizing', `Compiling brand strategy for ${dna.name.value}...`);
+        await sleep(DELAY_MS);
+
+        const result = await this.finalizeResearch(dna, competitors, palettes, fonts, { options: logoStructures });
+
+        onStreamThought?.(5, 'strategy', 'Research Complete', `Brand identity complete: ${dna.name.value}`);
 
         return result;
     }

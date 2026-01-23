@@ -331,8 +331,24 @@ ${canvasInfo}
                 console.warn(`⚠️ Palette "${value}" not found in currentPalettes`);
             }
         } else if (selectionType === 'structure') {
-            session.stateManager.update('logoType', value);
-            await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+            // Updated to handle array-based LogoStructureOption selection
+            const currentState = stateManager.loadLatest();
+            const currentOptions = currentState?.logoStructures?.options || [];
+
+            if (currentOptions.length > 0) {
+                // Toggle isSelected based on ID match
+                const updatedOptions = currentOptions.map(opt => ({
+                    ...opt,
+                    isSelected: opt.id === value
+                }));
+
+                await stateManager.saveWithHistory('logoStructures', {
+                    options: updatedOptions,
+                    rationale: `User manually selected logo structure: ${value}`
+                });
+            } else {
+                console.warn('⚠️ No logo structures found to select from.');
+            }
 
         } else if (selectionType === 'imagery') {
             session.stateManager.update('imagery', value);

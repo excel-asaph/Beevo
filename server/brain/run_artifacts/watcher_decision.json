@@ -1,0 +1,45 @@
+{
+  "thoughts": "The current baseline, while on-brand, lacks the 'kinetic' energy required to push CTR past the target. The headline 'Every Step Ignites a Dream' is slightly too abstract and passive. To move the score to 45.0, I am shifting the copy to an action-oriented 'Power the Path' narrative. I am also implementing the 'Earth-Tech' differentiation strategy by adding subtle 'Digital Lavender' rim lighting to the video asset to separate the product from the organic background, enhancing the premium tech feel. I've moved the layout to a right-aligned configuration to create a more dynamic visual flow that contrasts with the left-to-right impact of the shoe in the video.",
+  "changes": {
+    "headline": {
+      "text": "TURN DUST INTO DISTANCE.",
+      "color": "#F5F5F0",
+      "fontFamily": "Space Grotesk",
+      "fontWeight": "800",
+      "fontSize": "72px",
+      "textShadow": "2px 2px 4px rgba(0,0,0,0.5)"
+    },
+    "subhead": {
+      "text": "High-performance gear for the world's toughest playgrounds. We engineer elite footwear for children in underserved regions, turning every rugged path into a launchpad for growth.",
+      "color": "#F5F5F0",
+      "fontFamily": "Inter",
+      "fontSize": "22px"
+    },
+    "cta": {
+      "text": "JOIN THE MOVEMENT",
+      "backgroundColor": "#CCFF00",
+      "color": "#2D2D2D",
+      "fontFamily": "Space Grotesk",
+      "padding": "18px 40px",
+      "borderRadius": "4px"
+    },
+    "layout_config": {
+      "overlay_gradient": "linear-gradient(to left, rgba(45, 45, 45, 0.9) 0%, rgba(45, 45, 45, 0.4) 40%, transparent 100%)",
+      "container_styles": {
+        "justifyContent": "right",
+        "alignItems": "center",
+        "textAlign": "right"
+      }
+    },
+    "video_asset": {
+      "prompt_signature": "Extreme macro high-speed photography: An athletic shoe in Electric Lime #CCFF00 impacts a Deep Terracotta #C04000 earth surface. A kinetic explosion of dry mud and dust particles is frozen in mid-air. Worm's-eye perspective. Lighting: Cinematic mix of warm sunset ochre and high-tech Digital Lavender #E6E6FA rim lighting on the shoe's technical mesh. High contrast, hyper-detailed textures.",
+      "attributes": {
+        "lighting": "Kinetic Earth-Tech (Ochre meets Digital Lavender)",
+        "color_grade": "#C04000",
+        "camera_movement": "Frozen motion, subtle dolly-in",
+        "subject_focus": "Tactile outsole tread and exploding dust"
+      }
+    }
+  },
+  "confidence": 92
+}

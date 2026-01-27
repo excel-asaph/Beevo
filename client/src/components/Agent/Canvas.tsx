@@ -25,6 +25,7 @@ import { VaultNode } from './nodes/VaultNode';
 import { FrameNode } from './nodes/FrameNode';
 import { ThoughtSignatureNode } from './nodes';
 import { LogoStructureNode } from './nodes/LogoStructureNode';
+import { ImageryNode } from './nodes/ImageryNode';
 
 // UI Components
 import { ThinkingPanel, ThinkingPhase, ThinkingStep } from './ThinkingPanel';
@@ -52,6 +53,7 @@ const nodeTypes: NodeTypes = {
     frame: FrameNode,
     thoughtSignature: ThoughtSignatureNode,
     logoStructure: LogoStructureNode,
+    imagery: ImageryNode,
 };
 
 export type CanvasPhase = 'onboarding' | 'loading' | 'canvas';
@@ -66,15 +68,16 @@ const FRAMES = {
     overview: { id: 'frame-overview', title: 'Overview', x: 380, y: 80, minWidth: 300, minHeight: 250, color: 'blue' as const },
     strategy: { id: 'frame-strategy', title: 'Brand Strategy', x: 730, y: 80, minWidth: 300, minHeight: 350, color: 'purple' as const },
 
-    visuals: { id: 'frame-visuals', title: 'Visual Identity', x: 1080, y: 80, minWidth: 900, minHeight: 550, color: 'green' as const },
-    tools: { id: 'frame-tools', title: 'Tools', x: 2030, y: 80, minWidth: 300, minHeight: 450, color: 'default' as const },
+    visuals: { id: 'frame-visuals', title: 'Visual Identity', x: 1080, y: 80, minWidth: 500, minHeight: 550, color: 'green' as const },
+    logo: { id: 'frame-logo', title: 'Logo Direction', x: 1700, y: 80, minWidth: 500, minHeight: 550, color: 'green' as const },
+    tools: { id: 'frame-tools', title: 'Tools', x: 2250, y: 80, minWidth: 300, minHeight: 450, color: 'default' as const },
 };
 
 export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     // ========== ZUSTAND STORE - SPLIT SUBSCRIPTIONS FOR STABILITY ==========
 
     // Brand data slice - uses shallow comparison to prevent re-renders when values haven't changed
-    const { dna, colorOptions, fontOptions, logoInspirations, logoOptions, vaultStats, thoughtSignatures, researchStatus, phase, loadingMessage } = useBrandStore(
+    const { dna, colorOptions, fontOptions, logoInspirations, logoOptions, imageryOptions, vaultStats, thoughtSignatures, researchStatus, phase, loadingMessage } = useBrandStore(
         useShallow((state) => ({
             dna: state.dna,
             colorOptions: state.colorOptions,
@@ -82,6 +85,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
             logoInspirations: state.logoInspirations,
             logoOptions: state.logoOptions,
+            imageryOptions: state.imageryOptions,
             vaultStats: state.vaultStats,
             thoughtSignatures: state.thoughtSignatures,
             researchStatus: state.researchStatus,
@@ -105,6 +109,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
     const setLogoInspirations = useBrandStore((state) => state.setLogoInspirations);
     const setLogoOptions = useBrandStore((state) => state.setLogoOptions);
+    const setImageryOptions = useBrandStore((state) => state.setImageryOptions);
     const setVaultStats = useBrandStore((state) => state.setVaultStats); // New
     const setPhase = useBrandStore((state) => state.setPhase);
     const setLoadingMessage = useBrandStore((state) => state.setLoadingMessage);
@@ -218,6 +223,14 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             console.log('🏗️ Logo Structure Options received via WS:', options);
             if (options && options.length > 0) {
                 setLogoOptions(options);
+            }
+        },
+
+        onImagerySuggestions: (suggestions) => {
+            console.log('🎨 Imagery Suggestions received via WS:', suggestions);
+            if (suggestions && suggestions.length > 0) {
+                setImageryOptions(suggestions);
+                addThinkingStep(`Created ${suggestions.length} imagery concepts`, 'complete');
             }
         },
 
@@ -343,11 +356,22 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         }
     });
 
-    // Audio stream
+    // Audio stream with VAD
     const audio = useAudioStream({
         onAudioData: (base64Audio) => {
             ws.sendAudio(base64Audio);
-        }
+        },
+        // VAD: Signal activity start when user begins speaking
+        onSpeechStart: () => {
+            console.log('🎙️ VAD: User started speaking, signaling activity start');
+            ws.sendActivityStart();
+        },
+        // VAD: Signal activity end when user stops speaking
+        onSpeechEnd: () => {
+            console.log('🎤 VAD: User finished speaking, signaling activity end');
+            ws.sendActivityEnd();
+        },
+        silenceThresholdMs: 1500 // 1.5s of silence triggers speech end (increased for natural pauses)
     });
 
     // Connect on mount
@@ -443,6 +467,15 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             addThinkingStep(`Selected logo structure: ${option.type}`, 'complete');
         }
     }, [logoOptions, ws, addThinkingStep]);
+
+    const handleImagerySelect = useCallback((id: string) => {
+        const option = imageryOptions.find(opt => opt.id === id);
+        if (option) {
+            ws.sendSelection('imagery', option.id);
+            console.log('Selected imagery:', option.concept, option.id);
+            addThinkingStep(`Selected imagery concept: ${option.concept}`, 'complete');
+        }
+    }, [imageryOptions, ws, addThinkingStep]);
 
     // Vault Upload Handler
     const handleVaultUpload = useCallback((files: File[]) => {
@@ -711,19 +744,39 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             // Push down next node
             currentY += typographyHeight + PADDING;
 
+            // 3. IMAGERY CONCEPTS (New Node)
+            if (imageryOptions.length > 0) {
+                derivedNodes.push({
+                    id: 'imagery',
+                    type: 'imagery',
+                    parentId: FRAMES.visuals.id,
+                    extent: 'parent',
+                    position: { x: 20, y: currentY },
+                    draggable: false,
+                    data: {
+                        label: 'Imagery Concepts',
+                        options: imageryOptions,
+                        onSelect: handleImagerySelect,
+                    },
+                });
 
-            // 3. LOGO STRUCTURES
-            const logoStructuresStatus = logoOptions.length > 0 ? 'options' : 'empty';
-            let logoStructuresHeight = 120;
-            if (logoStructuresStatus === 'options') logoStructuresHeight = 350; // Approx
+                // Calculate height for imagery node to push potential future nodes down
+                // Approx height: Header (60) + Rows * CardHeight (~150)
+                // Grid is 2 columns, so rows = ceil(length / 2)
+                const rows = Math.ceil(imageryOptions.length / 2);
+                const IMAGERY_HEIGHT = 60 + (rows * 200);
+                currentY += IMAGERY_HEIGHT + PADDING;
+            }
+
 
             if (logoOptions.length > 0) {
                 derivedNodes.push({
                     id: 'logoStructures',
                     type: 'logoStructure',
-                    parentId: FRAMES.visuals.id,
+                    parentId: FRAMES.logo.id,
                     extent: 'parent',
-                    position: { x: 20, y: currentY },
+                    // Start at top of Logo Frame
+                    position: { x: 20, y: 50 },
                     draggable: false,
                     data: {
                         label: 'Logo Structures',
@@ -732,28 +785,24 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     },
                 });
             }
-            // Push down next node
+            // Logo column Y tracking
+            let logoY = 50;
+            const LOGO_STRUCTURE_HEIGHT = 380; // Approx height for grid
+
             if (logoOptions.length > 0) {
-                currentY += logoStructuresHeight + PADDING;
+                logoY += LOGO_STRUCTURE_HEIGHT + PADDING;
             }
 
             // 4. LOGO INSPIRATION
             const inspirationStatus = (dna.logoAssets && dna.logoAssets.length > 0) ? 'saved' : (logoInspirations.length > 0 ? 'options' : 'empty');
-            // Height estimates:
-            // Empty: ~120px
-            // Saved: ~300px (Grid)
-            // Options: ~400px (Grid + Button)
-            let inspirationHeight = 120;
-            if (inspirationStatus === 'saved') inspirationHeight = 300;
-            if (inspirationStatus === 'options') inspirationHeight = 400;
 
             if (logoInspirations.length > 0 || (dna.logoAssets && dna.logoAssets.length > 0)) {
                 derivedNodes.push({
                     id: 'inspiration',
                     type: 'inspiration',
-                    parentId: FRAMES.visuals.id,
+                    parentId: FRAMES.logo.id,
                     extent: 'parent',
-                    position: { x: 20, y: currentY }, // Always enforce calculated Y
+                    position: { x: 20, y: logoY }, // Follows Structures in Logo Frame
                     draggable: false,
                     data: {
                         label: 'Logo Inspiration',
@@ -828,7 +877,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             return derivedNodes;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dna, colorOptions, fontOptions, logoInspirations, logoOptions, vaultStats, thoughtSignatures, phase]);
+    }, [dna, colorOptions, fontOptions, logoInspirations, logoOptions, imageryOptions, vaultStats, thoughtSignatures, phase]);
 
     // ========== EFFECT 2: Update voice orb state only ==========
     // Runs frequently during conversation, but only updates the voiceOrb node data

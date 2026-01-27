@@ -1,0 +1,49 @@
+{
+    "id": "proof_section_v1",
+    "meta": {
+        "strategy": "Leveraging a trend-based forensic analysis to demonstrate shoe longevity in extreme terrains, emphasizing the reliability of Nike's social welfare initiative through material endurance.",
+        "tone": "Energetic, compassionate, and playful",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "Footwear in Action"
+    },
+    "content": {
+        "headline": "PLAY WITHOUT EXPIRATION.",
+        "subhead": "In the world's toughest terrains, a broken shoe is a broken promise. We engineer Nike footwear to survive 1,200km of monsoon mud and jagged rock so that for these children, play never has to stop.",
+        "graphic_caption": "SURVIVAL DATA: While standard shoes degrade at 400km, our soles retain 79% traction after 1,200km. Built to outlast the journey.",
+        "data_points": [
+            {
+                "label": "0 KM",
+                "value": 100,
+                "unit": "%"
+            },
+            {
+                "label": "400 KM",
+                "value": 94,
+                "unit": "%"
+            },
+            {
+                "label": "800 KM",
+                "value": 87,
+                "unit": "%"
+            },
+            {
+                "label": "1200 KM",
+                "value": 79,
+                "unit": "%"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "trend",
+        "primary_color": "#E5FF00",
+        "accent_color": "#FF3E11",
+        "show_labels": true,
+        "animation_duration": 1.5
+    },
+    "styles": {
+        "backgroundColor": "#2D2D2D",
+        "color": "#F5F5F0",
+        "fontFamily": "Rubik"
+    },
+    "variant_id": "proof_v1769486425811"
+}

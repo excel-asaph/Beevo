@@ -103,6 +103,7 @@ export interface ImagerySuggestion {
     id: string;
     concept: string;
     description: string;
+    visualStyle?: string;
     isSelected: boolean;
 }
 
@@ -215,3 +216,36 @@ export interface ResearchPhaseObject {
     stateVersion?: number;
 }
 
+
+// ==========================================
+// LANDING PAGE BLOCK TYPES
+// ==========================================
+
+export interface ProofBlockConfig {
+    id: string;
+    variant_id: string;
+    meta: {
+        strategy: string;
+        tone: string;
+        active_variant: string;
+        selected_imagery_concept?: string;
+    };
+    content: {
+        headline: string;
+        subhead: string;
+        graphic_caption: string;
+        data_points: { label: string; value: string | number; unit?: string }[];
+    };
+    graphic_config: {
+        type: 'progress' | 'trend' | 'stat' | string;
+        primary_color: string;
+        accent_color: string;
+        show_labels: boolean;
+        animation_duration?: number;
+    };
+    styles: {
+        backgroundColor: string;
+        color: string;
+        fontFamily: string;
+    };
+}

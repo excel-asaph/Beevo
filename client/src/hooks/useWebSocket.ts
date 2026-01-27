@@ -52,6 +52,8 @@ interface UseWebSocketReturn {
     sendText: (text: string) => boolean;
     sendSelection: (selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string, context?: any) => boolean;
     sendInterrupt: () => boolean;
+    sendActivityEnd: () => boolean;
+    sendActivityStart: () => boolean;
     sendFile: (file: File, base64Data: string, target?: 'extraction' | 'vault') => boolean;
 }
 
@@ -140,6 +142,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
                     opts.onLogoConcepts?.(message.concepts);
                     break;
 
+                case 'IMAGERY_SUGGESTIONS':
+                    opts.onImagerySuggestions?.(message.suggestions);
+                    break;
+
                 // Thinking levels for hackathon
                 case 'THINKING_START':
                     opts.onThinkingStart?.(message.timestamp);
@@ -165,9 +171,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
                     opts.onLogoStructureOptions?.(message.options);
                     break;
 
-                case 'IMAGERY_SUGGESTIONS':
-                    opts.onImagerySuggestions?.(message.suggestions);
-                    break;
+
 
                 case 'VAULT_UPDATE':
                     opts.onVaultUpdate?.(message.stats);
@@ -263,6 +267,16 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         return sendMessage({ type: 'INTERRUPT' });
     }, [sendMessage]);
 
+    // VAD: Signal that user has finished speaking
+    const sendActivityEnd = useCallback(() => {
+        return sendMessage({ type: 'ACTIVITY_END' });
+    }, [sendMessage]);
+
+    // VAD: Signal that user has started speaking
+    const sendActivityStart = useCallback(() => {
+        return sendMessage({ type: 'ACTIVITY_START' });
+    }, [sendMessage]);
+
     // NEW: Send file content to server
     const sendFile = useCallback((file: File, base64Data: string, target?: 'extraction' | 'vault') => {
         return sendMessage({
@@ -295,6 +309,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         sendText,
         sendSelection,
         sendInterrupt,
+        sendActivityEnd,
+        sendActivityStart,
         sendFile
     };
 }

@@ -91,3 +91,4 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, thinkingStat
         </div>
     );
 };
+

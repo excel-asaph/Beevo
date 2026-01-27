@@ -9,6 +9,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@ricky0123/vad-web": "^0.0.30",
         "@xyflow/react": "^12.10.0",
         "framer-motion": "^12.26.2",
         "lucide-react": "^0.562.0",

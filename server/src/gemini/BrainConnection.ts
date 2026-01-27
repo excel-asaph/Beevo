@@ -598,6 +598,7 @@ export class BrainConnection {
                         typography: researchState.typographyPairings?.fonts?.map(f => ({ name: f.name, pairing: f.pairing })) || [],
                         logoInspirations: researchState.logoInspirations?.inspirations?.map(l => ({ id: l.id, displayName: l.displayName })) || [],
                         imagery: researchState.imagery?.suggestions?.map(i => ({ concept: i.concept })) || [],
+                        logoStructures: researchState.logoStructures?.options?.map(s => ({ type: s.type, isSelected: s.isSelected })) || [],
                         generalResearch: researchState.generalResearch?.queries?.map(q => q.query) || []
                     }, null, 2) : 'No research state available';
 
@@ -623,7 +624,10 @@ export class BrainConnection {
                         : [];
                     const fontDisplay = currentFonts.length > 0 ? currentFonts.join(', ') : 'None Selected';
 
-                    console.log(`🧠 Brain Mode: MODIFICATION (Modifier) - colors:${currentColors.length}, fonts:${currentFonts.length}`);
+                    const selectedStructure = researchState?.logoStructures?.options?.find(s => s.isSelected);
+                    const structureDisplay = selectedStructure ? selectedStructure.type : 'None Selected';
+
+                    console.log(`🧠 Brain Mode: MODIFICATION (Modifier) - colors:${currentColors.length}, fonts:${currentFonts.length}, struct:${structureDisplay}`);
 
                     systemPrompt = [
                         'YOU ARE "THE MODIFIER" (Architect).',
@@ -648,10 +652,10 @@ export class BrainConnection {
                         '5. DELETE: If user wants to permanently delete/remove an option, call `delete_...`.',
                         '6. RESEARCH: If user asks for information/facts, call `general_research`.',
                         '',
-                        '⚡ EXECUTION RULE: EXECUTE IMMEDIATELY upon clear user request.',
-                        '- User: "Change name to Nike" -> Call `update_brand_name` NOW.',
-                        '- User: "Generate 3 palettes" -> Call `create_color_palette` NOW.',
-                        '- DO NOT wait for permission if the request is direct.',
+                        '⚡ EXECUTION RULE: PREFER CONFIRMATION for significant changes.',
+                        '- User: "Change name to Nike" -> Respond: "Shall I update the name to Nike?"',
+                        '- User: "Generate 3 palettes" -> Respond: "I can generate new palettes. Ready?"',
+                        '- ONLY execute immediately if the user explicitly confirms (e.g. "Yes", "Do it", "Go ahead").',
                         '',
                         '⚠️ CONTEXT AWARENESS:',
                         'If user references something that does NOT EXIST (e.g., "I like logo_3" but no logos),',
@@ -668,6 +672,7 @@ export class BrainConnection {
                         `  Tagline: ${dnaObj.tagline?.value || 'Unknown'}`,
                         `  Colors: ${colorDisplay} (${researchState?.colorPalettes?.palettes?.length || 0} Options Available)`,
                         `  Fonts: ${fontDisplay} (${researchState?.typographyPairings?.fonts?.length || 0} Options Available)`,
+                        `  Logo Structure: ${structureDisplay} (${researchState?.logoStructures?.options?.length || 0} Options Available)`,
                         '',
                         `History (This Phase Only):`,
                         `${historyText}`

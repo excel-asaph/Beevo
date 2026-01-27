@@ -210,6 +210,12 @@ Acknowledge this change by greeting the user and asking how you can help refine 
                     systemInstruction: SYSTEM_INSTRUCTIONS.ARCHITECT_AUDIO_ONLY,
                     inputAudioTranscription: {},
                     outputAudioTranscription: {},
+                    // VAD: Disable automatic activity detection - client controls when speech ends
+                    realtimeInputConfig: {
+                        automaticActivityDetection: {
+                            disabled: true
+                        }
+                    }
                 }
             });
 
@@ -331,6 +337,63 @@ Acknowledge this change by greeting the user and asking how you can help refine 
             console.log('🛑 Live session interrupted by Brain tool call');
         } catch (error) {
             console.error('Error interrupting Live session:', error);
+        }
+    }
+
+    // VAD: Track if we've signaled activity start
+    private activityStarted: boolean = false;
+
+    /**
+     * VAD: Signal that user has started speaking
+     */
+    public signalActivityStart(): void {
+        if (!this.liveSession || !this.isConnected) {
+            console.warn('⚠️ Cannot signal activity start - not connected');
+            return;
+        }
+
+        if (this.activityStarted) {
+            return; // Already signaled
+        }
+
+        try {
+            this.liveSession.sendRealtimeInput({
+                activityStart: {}
+            });
+            this.activityStarted = true;
+            console.log('🎙️ Activity start signaled - Gemini knows user is speaking');
+        } catch (error) {
+            console.error('Error signaling activity start:', error);
+        }
+    }
+
+    /**
+     * VAD: Signal that user has finished speaking
+     * This triggers Gemini to process the buffered audio and respond
+     */
+    public signalActivityEnd(): void {
+        if (!this.liveSession || !this.isConnected) {
+            console.warn('⚠️ Cannot signal activity end - not connected');
+            return;
+        }
+
+        if (!this.activityStarted) {
+            console.warn('⚠️ Cannot signal activity end - activity not started');
+            return;
+        }
+
+        try {
+            // Send activityEnd to trigger processing
+            this.liveSession.sendRealtimeInput({
+                activityEnd: {}
+            });
+            this.activityStarted = false; // Reset for next utterance
+            console.log('🎤 Activity end signaled - Gemini will now process audio');
+
+            // Also flush to Brain for tool analysis
+            this.flushBufferToBrain();
+        } catch (error) {
+            console.error('Error signaling activity end:', error);
         }
     }
 

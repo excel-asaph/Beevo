@@ -11,6 +11,7 @@ export declare const SYSTEM_INSTRUCTIONS: {
     ARCHITECT: string;
     ARCHITECT_AUDIO_ONLY: string;
     GUARDIAN: string;
+    ARCHITECT_MODIFICATION: string;
 };
 export declare const AUDIO_CONFIG: {
     INPUT_SAMPLE_RATE: number;

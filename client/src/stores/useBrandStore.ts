@@ -179,14 +179,14 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
         }));
     },
 
-    selectColor: (paletteId) => {
+    selectColor: (_paletteId) => {
         // Handled via WebSocket usually, this might be legacy or local optimisitic update
         // Left empty to prevent direct DNA mutation if relying on server
-        const state = get();
+        const _state = get();
         // Implementation removed to prefer WS selection source of truth
     },
 
-    selectFont: (fontId) => {
+    selectFont: (_fontId) => {
         // Handled via WebSocket selection
         // Implementation removed to prefer WS selection source of truth
     },

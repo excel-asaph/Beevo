@@ -1,4 +1,4 @@
-import { BrandDNA, FontSuggestion, ColorPalette } from './types';
+import { BrandDNA, FontSuggestion, ColorPalette, ResearchPhaseObject } from './types';
 export interface StartSessionMessage {
     type: 'START_SESSION';
 }
@@ -27,12 +27,15 @@ export interface UpdateDNAMessage {
 export interface InterruptRequestMessage {
     type: 'INTERRUPT';
 }
+export interface ActivityEndMessage {
+    type: 'ACTIVITY_END';
+}
 export interface UIStateChangeMessage {
     type: 'UI_STATE_CHANGE';
     mode: 'chat' | 'thinking' | 'canvas';
     overlayVisible: boolean;
 }
-export type ClientMessage = StartSessionMessage | EndSessionMessage | AudioChunkMessage | TextInputMessage | SelectionEventMessage | UpdateDNAMessage | InterruptRequestMessage | FileUploadMessage;
+export type ClientMessage = StartSessionMessage | EndSessionMessage | AudioChunkMessage | TextInputMessage | SelectionEventMessage | UpdateDNAMessage | InterruptRequestMessage | ActivityEndMessage | FileUploadMessage;
 export interface FileUploadMessage {
     type: 'FILE_UPLOAD';
     base64: string;
@@ -188,8 +191,13 @@ export interface ResearchCompleteMessage {
         fontsGenerated: number;
         competitorsFound: number;
     };
+    dna: ResearchPhaseObject;
 }
-export type ServerMessage = SessionStartedMessage | SessionEndedMessage | ServerAudioChunkMessage | TranscriptionMessage | FontSuggestionsMessage | ColorSuggestionsMessage | DNAUpdateMessage | InterruptMessage | ToolProcessingStartMessage | ToolProcessingEndMessage | ProgressUpdateMessage | ThoughtMessage | ThinkingStartMessage | ThinkingStreamMessage | ThinkingEndMessage | ErrorMessage | ConnectionStatusMessage | CompetitiveAnalysisMessage | LogoConceptsMessage | AuditResultMessage | LogoResearchProgressMessage | LogoResearchResultMessage | LogoStructureOptionsMessage | ImagerySuggestionsMessage | VaultUpdateMessage | ResearchUpdateMessage | ThoughtSignatureMessage | ResearchCompleteMessage | UIStateChangeMessage;
+export type ServerMessage = SessionStartedMessage | SessionEndedMessage | ServerAudioChunkMessage | TranscriptionMessage | FontSuggestionsMessage | ColorSuggestionsMessage | DNAUpdateMessage | InterruptMessage | ToolProcessingStartMessage | ToolProcessingEndMessage | ProgressUpdateMessage | ThoughtMessage | ThinkingStartMessage | ThinkingStreamMessage | ThinkingEndMessage | ErrorMessage | ConnectionStatusMessage | CompetitiveAnalysisMessage | LogoConceptsMessage | AuditResultMessage | LogoResearchProgressMessage | LogoResearchResultMessage | LogoStructureOptionsMessage | ImagerySuggestionsMessage | VaultUpdateMessage | ResearchUpdateMessage | ThoughtSignatureMessage | ResearchCompleteMessage | FullStateUpdateMessage | UIStateChangeMessage;
+export interface FullStateUpdateMessage {
+    type: 'FULL_STATE_UPDATE';
+    state: ResearchPhaseObject;
+}
 export interface VaultUpdateMessage {
     type: 'VAULT_UPDATE';
     stats: {

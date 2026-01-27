@@ -5,7 +5,7 @@ export const MODELS = {
   ARCHITECT_LIVE: 'gemini-2.0-flash-exp',          // Reliable Multimodal Live model
   ARCHITECT_TEXT: 'gemini-3-flash-preview',    // User requested specific model
   FORGE_IMAGE: 'imagen-3.0-generate-002',  // Latest Imagen
-  FORGE_VIDEO: 'veo-2.0-generate-preview', // Latest Veo
+  FORGE_VIDEO: 'veo-3.1-generate-preview', // Latest Veo
   GUARDIAN: 'gemini-2.5-pro',              // Best for precise visual auditing
 };
 

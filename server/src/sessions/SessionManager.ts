@@ -172,6 +172,14 @@ export class SessionManager {
                 await this.handleInterrupt(session);
                 break;
 
+            case 'ACTIVITY_END':
+                await this.handleActivityEnd(session);
+                break;
+
+            case 'ACTIVITY_START':
+                await this.handleActivityStart(session);
+                break;
+
             case 'FILE_UPLOAD':
                 this.handleFileUpload(session, message);
                 break;
@@ -390,6 +398,22 @@ ${canvasInfo}
 
         // Send interrupt acknowledgement to client
         this.sendToClient(session.id, { type: 'INTERRUPT' });
+    }
+
+    private async handleActivityEnd(session: Session): Promise<void> {
+        console.log(`🎤 Activity end received for session: ${session.id}`);
+
+        if (session.geminiConnection) {
+            session.geminiConnection.signalActivityEnd();
+        }
+    }
+
+    private async handleActivityStart(session: Session): Promise<void> {
+        console.log(`🎙️ Activity start received for session: ${session.id}`);
+
+        if (session.geminiConnection) {
+            session.geminiConnection.signalActivityStart();
+        }
     }
 
     private async handleFileUpload(session: Session, message: any): Promise<void> {

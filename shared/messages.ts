@@ -41,6 +41,14 @@ export interface InterruptRequestMessage {
     type: 'INTERRUPT';
 }
 
+export interface ActivityEndMessage {
+    type: 'ACTIVITY_END';
+}
+
+export interface ActivityStartMessage {
+    type: 'ACTIVITY_START';
+}
+
 export interface UIStateChangeMessage {
     type: 'UI_STATE_CHANGE';
     mode: 'chat' | 'thinking' | 'canvas';
@@ -55,6 +63,8 @@ export type ClientMessage =
     | SelectionEventMessage
     | UpdateDNAMessage
     | InterruptRequestMessage
+    | ActivityEndMessage
+    | ActivityStartMessage
     | FileUploadMessage;
 
 export interface FileUploadMessage {
@@ -239,6 +249,12 @@ export interface AuditResultMessage {
 
 export interface ResearchCompleteMessage {
     type: 'RESEARCH_COMPLETE';
+    summary: {
+        brandName: string;
+        colorsGenerated: number;
+        fontsGenerated: number;
+        competitorsFound: number;
+    };
     dna: ResearchPhaseObject;
 }
 

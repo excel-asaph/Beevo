@@ -5,10 +5,11 @@ import { ArchitectMain } from './components/Architect';
 import { Forge } from './components/Forge';
 import { Guardian } from './components/Guardian';
 import { AgentCanvas } from './components/Agent';
+import { DynamicLandingPage } from './components/DynamicLandingPage';
 import { Junction } from '@shared/types';
-import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles } from 'lucide-react';
+import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay } from 'lucide-react';
 
-type ViewMode = 'dashboard' | 'agent';
+type ViewMode = 'dashboard' | 'agent' | 'landing_page';
 
 const SidebarItem: React.FC<{
     active: boolean;
@@ -20,10 +21,10 @@ const SidebarItem: React.FC<{
     <button
         onClick={onClick}
         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${active
-                ? accent
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/40'
-                    : 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            ? accent
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-900/40'
+                : 'bg-blue-600 text-white shadow-lg shadow-blue-900/40'
+            : 'text-slate-400 hover:bg-slate-800 hover:text-white'
             }`}
     >
         {icon}
@@ -35,12 +36,30 @@ const SidebarItem: React.FC<{
 );
 
 const MainLayout: React.FC = () => {
-    const { currentJunction, setJunction, thoughtStream } = useBrand();
-    const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
+    const { currentJunction, setJunction } = useBrand();
+
+    // Check URL for mode (for headless testing/snapshots)
+    const initialMode = (new URLSearchParams(window.location.search).get('mode') as ViewMode) || 'dashboard';
+    const [viewMode, setViewMode] = useState<ViewMode>(initialMode);
 
     // If in Agent mode, render the full-screen Agent Canvas
     if (viewMode === 'agent') {
         return <AgentCanvas onBack={() => setViewMode('dashboard')} />;
+    }
+
+    // If in Landing Page mode, render the Dynamic Landing Page
+    if (viewMode === 'landing_page') {
+        return (
+            <div className="relative w-full h-full">
+                <button
+                    onClick={() => setViewMode('dashboard')}
+                    className="absolute top-4 right-4 z-50 px-4 py-2 bg-black/50 text-white hover:bg-black rounded-lg backdrop-blur-sm transition-colors border border-white/10"
+                >
+                    Exit Preview
+                </button>
+                <DynamicLandingPage />
+            </div>
+        );
     }
 
     return (
@@ -61,12 +80,19 @@ const MainLayout: React.FC = () => {
 
                 <nav className="flex-1 p-4 space-y-2">
                     {/* Agent Canvas - Featured at top */}
-                    <div className="pb-3 mb-3 border-b border-slate-800">
+                    <div className="pb-3 mb-3 border-b border-slate-800 space-y-2">
                         <SidebarItem
                             active={false}
                             onClick={() => setViewMode('agent')}
                             icon={<Sparkles size={20} />}
                             label="Agent Canvas"
+                            accent
+                        />
+                        <SidebarItem
+                            active={false}
+                            onClick={() => setViewMode('landing_page')}
+                            icon={<MonitorPlay size={20} />}
+                            label="Live Landing Page"
                             accent
                         />
                     </div>
@@ -98,24 +124,16 @@ const MainLayout: React.FC = () => {
                     />
                 </nav>
 
-                {/* Thought Stream Feed */}
-                <div className="p-4 border-t border-slate-800 bg-slate-900/50 h-1/3 flex flex-col">
-                    <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center">
-                        <Activity className="w-3 h-3 mr-1" /> Thought Stream
-                    </h3>
-                    <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
-                        {thoughtStream.map(thought => (
-                            <div key={thought.id} className="text-xs p-2 rounded bg-slate-800 border border-slate-700/50">
-                                <span className={`inline-block px-1 rounded text-[10px] font-bold mb-1 ${thought.junction === Junction.STRATEGIST ? 'bg-blue-900 text-blue-300' :
-                                    thought.junction === Junction.ARCHITECT ? 'bg-purple-900 text-purple-300' :
-                                        thought.junction === Junction.FORGE ? 'bg-orange-900 text-orange-300' :
-                                            'bg-teal-900 text-teal-300'
-                                    }`}>
-                                    {thought.junction}
-                                </span>
-                                <p className="text-slate-300 leading-snug">{thought.logic}</p>
-                            </div>
-                        ))}
+                <div className="p-4 border-t border-slate-800">
+                    <div className="bg-slate-800/50 rounded-xl p-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                            <Activity className="w-4 h-4 text-green-400" />
+                            <span className="text-sm font-medium text-slate-300">System Status</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                            <span>Intelligence</span>
+                            <span className="text-green-400">Active</span>
+                        </div>
                     </div>
                 </div>
             </aside>

@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import dotenv from 'dotenv';
 import { SessionManager } from './sessions/SessionManager';
 import { WS_CONFIG } from '../../shared/constants';
+import { MetricsService } from './services/MetricsService';
 
 // Load environment variables from root .env.local
 dotenv.config({ path: '../.env.local' });
@@ -14,6 +15,15 @@ const wss = new WebSocketServer({ server });
 
 // Session manager handles all client connections
 const sessionManager = new SessionManager();
+const metricsService = new MetricsService();
+
+app.use(express.json());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -21,6 +31,18 @@ app.get('/health', (req, res) => {
         status: 'ok',
         activeSessions: sessionManager.getActiveSessionCount()
     });
+});
+
+// Tracking Endpoint
+app.post('/api/tracking/event', async (req, res) => {
+    try {
+        const event = req.body;
+        await metricsService.trackEvent(event);
+        res.json({ status: 'tracked' });
+    } catch (error) {
+        console.error('Metrics Error:', error);
+        res.status(500).json({ error: 'Failed to track event' });
+    }
 });
 
 // WebSocket connection handler

@@ -3,11 +3,15 @@ import { AUDIO_CONFIG } from '@shared/constants';
 
 interface UseAudioStreamOptions {
     onAudioData?: (base64Audio: string) => void;
+    onSpeechStart?: () => void; // VAD: Called when user starts speaking
+    onSpeechEnd?: () => void; // VAD: Called when user stops speaking
+    silenceThresholdMs?: number; // VAD: How long silence before triggering onSpeechEnd (default 400ms)
 }
 
 interface UseAudioStreamReturn {
     isRecording: boolean;
     isMuted: boolean;
+    isSpeaking: boolean; // VAD: True when user is actively speaking
     startRecording: () => Promise<void>;
     stopRecording: () => void;
     toggleMute: () => void;
@@ -18,6 +22,7 @@ interface UseAudioStreamReturn {
 export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStreamReturn {
     const [isRecording, setIsRecording] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     // Audio context refs
     const inputContextRef = useRef<AudioContext | null>(null);
@@ -26,6 +31,11 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
     const processorRef = useRef<ScriptProcessorNode | null>(null);
     const nextPlayTimeRef = useRef<number>(0);
     const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
+
+    // VAD refs
+    const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const isSpeakingRef = useRef(false);
+    const lastSpeechTimeRef = useRef<number>(0);
 
     // Store options in ref
     const optionsRef = useRef(options);
@@ -36,6 +46,19 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
     useEffect(() => {
         isMutedRef.current = isMuted;
     }, [isMuted]);
+
+    // VAD: Calculate RMS (volume level) of audio chunk
+    const calculateRMS = useCallback((audioData: Float32Array): number => {
+        let sum = 0;
+        for (let i = 0; i < audioData.length; i++) {
+            sum += audioData[i] * audioData[i];
+        }
+        return Math.sqrt(sum / audioData.length);
+    }, []);
+
+    // VAD: Threshold for detecting speech (increased to reduce false positives from background noise)
+    const SPEECH_THRESHOLD = 0.05;
+    const SILENCE_THRESHOLD_MS = optionsRef.current.silenceThresholdMs || 400;
 
     const startRecording = useCallback(async () => {
         try {
@@ -71,6 +94,39 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
 
                 const inputData = event.inputBuffer.getChannelData(0);
 
+                // VAD: Check if user is speaking
+                const rms = calculateRMS(inputData);
+                const isSpeakingNow = rms > SPEECH_THRESHOLD;
+
+                if (isSpeakingNow) {
+                    // User is speaking
+                    lastSpeechTimeRef.current = Date.now();
+                    if (!isSpeakingRef.current) {
+                        isSpeakingRef.current = true;
+                        setIsSpeaking(true);
+                        console.log('🎙️ Speech started');
+                        optionsRef.current.onSpeechStart?.(); // Notify that speech started
+                    }
+                    // Clear any pending silence timer
+                    if (silenceTimerRef.current) {
+                        clearTimeout(silenceTimerRef.current);
+                        silenceTimerRef.current = null;
+                    }
+                } else if (isSpeakingRef.current) {
+                    // User was speaking but now silent - start silence timer
+                    if (!silenceTimerRef.current) {
+                        silenceTimerRef.current = setTimeout(() => {
+                            if (isSpeakingRef.current) {
+                                isSpeakingRef.current = false;
+                                setIsSpeaking(false);
+                                console.log('🎤 Speech ended - triggering onSpeechEnd');
+                                optionsRef.current.onSpeechEnd?.();
+                            }
+                            silenceTimerRef.current = null;
+                        }, SILENCE_THRESHOLD_MS);
+                    }
+                }
+
                 // Convert Float32 audio to Int16
                 const int16Data = new Int16Array(inputData.length);
                 for (let i = 0; i < inputData.length; i++) {
@@ -95,13 +151,13 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
             processor.connect(inputContext.destination);
 
             setIsRecording(true);
-            console.log('🎤 Recording started');
+            console.log('🎤 Recording started with VAD enabled');
 
         } catch (error) {
             console.error('Failed to start recording:', error);
             throw error;
         }
-    }, [isMuted]); // logic remains the same, ref handles the internal state check
+    }, [isMuted, calculateRMS]); // logic remains the same, ref handles the internal state check
 
     const stopRecording = useCallback(() => {
         // Stop media stream
@@ -210,6 +266,7 @@ export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStr
     return {
         isRecording,
         isMuted,
+        isSpeaking,
         startRecording,
         stopRecording,
         toggleMute,

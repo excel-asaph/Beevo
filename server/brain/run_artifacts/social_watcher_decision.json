@@ -1,0 +1,59 @@
+{
+    "thoughts": "The current dwell time is extremely low, suggesting users are skimming the high-level numbers and bouncing because the layout feels like a standard 'features' block. By shifting to a BLUEPRINT strategy, we transform the section from a list of cards into a cohesive technical 'system'. We will use a more sophisticated color palette (Deep Navy and Copper) to evoke executive authority. The 'Evidence Items' are now decoupled from the testimonials to allow for a dual-scanning path: logic-driven stats for the left brain and narrative quotes for the right brain. The centered headline maintains alignment with the hero section while the grid below uses a structured 1280px container with technical 'architectural' markers (border-accents and mono-spaced sub-labels) to force eye-fixation and increase dwell time.",
+    "changes": {
+        "layout_strategy": "BLUEPRINT",
+        "headline": "The Blueprint for Digital Dominance",
+        "subhead": "A systematic approach to infrastructure, ROI acceleration, and operational efficiency—validated by the Salesack partner network.",
+        "visual_code": "<section class='py-24 bg-[#F8F9FA]' style='font-family:\"Montserrat\", sans-serif;'><div class='max-w-7xl mx-auto px-6'><div class='text-center mb-20'><span class='text-xs font-black tracking-[0.3em] uppercase text-[#E29578] mb-4 block'>Systemic Validation</span><h2 class='text-5xl font-black text-[#1A3C40] tracking-tight mb-6'>The Blueprint of Impact</h2><p class='text-xl text-[#006D77] max-w-2xl mx-auto font-medium'>Precision-engineered frameworks designed to replace digital friction with scalable momentum.</p></div><div class='grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#83C5BE]/30 rounded-3xl overflow-hidden shadow-2xl'><div class='p-12 border-r border-[#83C5BE]/30 flex flex-col bg-white'><div class='mb-12'><span class='text-[10px] font-bold text-[#E29578] uppercase tracking-widest'>Module 01: Infrastructure</span><div class='mt-4 flex items-baseline gap-2'><span class='text-5xl font-black text-[#1A3C40]'>14</span><span class='text-xl font-bold text-[#006D77]'>Days</span></div><p class='text-xs font-mono uppercase text-[#83C5BE] mt-2'>Mean Global Deployment Time</p></div><div class='relative'><div class='absolute -left-4 top-0 w-1 h-full bg-[#E29578] opacity-50'></div><p class='text-lg leading-relaxed text-[#1A3C40] font-medium italic mb-8'>\"Salesack didn't just give us a website; they built the digital foundation that allowed our boutique to go global in weeks.\"</p></div><div class='mt-auto flex items-center gap-4'><img src='/assets/testimonial_1_challenger.png' class='w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all shadow-md'/><div class='text-left'><p class='text-sm font-bold text-[#1A3C40]'>Sarah Jenkins</p><p class='text-[10px] uppercase tracking-wider text-[#006D77]'>Founder, Bloom Retail</p></div></div></div><div class='p-12 border-r border-[#83C5BE]/30 flex flex-col bg-[#1A3C40] relative'><div class='absolute top-0 right-0 p-4'><div class='w-8 h-8 border-t border-r border-[#E29578] opacity-40'></div></div><div class='mb-12'><span class='text-[10px] font-bold text-[#83C5BE] uppercase tracking-widest'>Module 02: Acquisition</span><div class='mt-4 flex items-baseline gap-2'><span class='text-5xl font-black text-white'>3.2x</span><span class='text-xl font-bold text-[#E29578]'>ROI</span></div><p class='text-xs font-mono uppercase text-[#83C5BE] opacity-60 mt-2'>Predictable Growth Engine</p></div><div class='relative'><div class='absolute -left-4 top-0 w-1 h-full bg-[#E29578]'></div><p class='text-lg leading-relaxed text-white font-medium italic mb-8'>\"The lead generation platform is a game-changer. We finally have a predictable growth engine instead of guessing where the next client comes from.\"</p></div><div class='mt-auto flex items-center gap-4'><img src='/assets/testimonial_2_challenger.png' class='w-12 h-12 rounded-lg shadow-md border border-white/10'/><div class='text-left'><p class='text-sm font-bold text-white'>Marcus Thorne</p><p class='text-[10px] uppercase tracking-wider text-[#83C5BE]'>CEO, Thorne Logistics</p></div></div></div><div class='p-12 flex flex-col bg-white'><div class='mb-12'><span class='text-[10px] font-bold text-[#E29578] uppercase tracking-widest'>Module 03: Efficiency</span><div class='mt-4 flex items-baseline gap-2'><span class='text-5xl font-black text-[#1A3C40]'>40</span><span class='text-xl font-bold text-[#006D77]'>hr/m</span></div><p class='text-xs font-mono uppercase text-[#83C5BE] mt-2'>Operational Capacity Reclaimed</p></div><div class='relative'><div class='absolute -left-4 top-0 w-1 h-full bg-[#E29578] opacity-50'></div><p class='text-lg leading-relaxed text-[#1A3C40] font-medium italic mb-8'>\"Transitioning online felt impossible until Salesack stepped in. Their custom software simplified our entire workflow.\"</p></div><div class='mt-auto flex items-center gap-4'><img src='/assets/testimonial_3_challenger.png' class='w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all shadow-md'/><div class='text-left'><p class='text-sm font-bold text-[#1A3C40]'>Elena Rodriguez</p><p class='text-[10px] uppercase tracking-wider text-[#006D77]'>Director, Artistry Hub</p></div></div></div></div></div></section>",
+        "evidence_items": [
+            {
+                "id": "ev_1",
+                "label": "Deployment Velocity",
+                "value": "14",
+                "unit": "Days",
+                "visual_type": "technical_stat"
+            },
+            {
+                "id": "ev_2",
+                "label": "Capital Efficiency",
+                "value": "3.2x",
+                "unit": "ROI",
+                "visual_type": "technical_stat"
+            },
+            {
+                "id": "ev_3",
+                "label": "Operational Surplus",
+                "value": "40",
+                "unit": "hrs/mo",
+                "visual_type": "technical_stat"
+            }
+        ],
+        "testimonials": [
+            {
+                "id": "t1",
+                "name": "Sarah Jenkins",
+                "title": "Founder",
+                "company": "Bloom Retail",
+                "quote": "Salesack didn't just give us a website; they built the digital foundation that allowed our boutique to go global in weeks.",
+                "image_prompt": "High-contrast professional portrait, architectural background"
+            },
+            {
+                "id": "t2",
+                "name": "Marcus Thorne",
+                "title": "CEO",
+                "company": "Thorne Logistics",
+                "quote": "The lead generation platform is a game-changer. We finally have a predictable growth engine instead of guessing.",
+                "image_prompt": "Close-up executive headshot, corporate lighting"
+            },
+            {
+                "id": "t3",
+                "name": "Elena Rodriguez",
+                "title": "Director",
+                "company": "Artistry Hub",
+                "quote": "Transitioning online felt impossible until Salesack stepped in. Their software simplified our entire workflow.",
+                "image_prompt": "Professional woman, studio lighting, clean background"
+            }
+        ]
+    },
+    "confidence": 95
+}

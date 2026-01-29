@@ -2,6 +2,7 @@
 // for real-time competitor research
 
 import { GoogleGenAI } from '@google/genai';
+import { MODELS } from '../../../shared/constants.js';
 
 export interface CompetitorInfo {
     name: string;
@@ -60,7 +61,7 @@ export class ResearchAgent {
         try {
             // Use Gemini 3 Flash with Google Search grounding
             const response = await this.ai.models.generateContent({
-                model: 'gemini-3-flash-preview',
+                model: MODELS.ARCHITECT_TEXT,
                 contents: `You are a brand strategist researching competitors.
 
 Industry: ${industry}
@@ -189,7 +190,7 @@ IMPORTANT:
     }> {
         try {
             const response = await this.ai.models.generateContent({
-                model: 'gemini-3-flash-preview',
+                model: MODELS.ARCHITECT_TEXT,
                 contents: `You are a brand strategist analyzing the ${industry} industry.
 
 Competitors: ${competitors.map(c => c.name).join(', ')}
@@ -264,7 +265,7 @@ Return JSON:
 
         try {
             const response = await this.ai.models.generateContent({
-                model: 'gemini-3-flash-preview',
+                model: MODELS.ARCHITECT_TEXT,
                 contents: `You are a research assistant.
 Query: ${query}
 Focus: ${focus}

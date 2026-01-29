@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
+import { useBrand } from '../../context/BrandContext';
 
 // Types matching our Schema
 interface HeroSchema {
@@ -34,6 +35,7 @@ interface HeroBlockProps {
 }
 
 export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
+    const { dna } = useBrand();
     const { track } = useTracking(config.id);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [hasTrackedRetention, setHasTrackedRetention] = useState(false);
@@ -42,6 +44,7 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
     const handleTimeUpdate = () => {
         if (videoRef.current && !hasTrackedRetention) {
             if (videoRef.current.currentTime > 3) {
+                console.log("💎 Milestone Reached: 3s Retention (Hero)");
                 track('view_3s');
                 setHasTrackedRetention(true);
             }
@@ -85,25 +88,59 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
             />
 
             {/* Layer 2: Content Overlay */}
-            <div className="relative z-20 max-w-4xl p-8">
-                <h1 style={config.overlay_content.headline.styles}>
-                    {config.overlay_content.headline.text}
-                </h1>
+            <div
+                className="relative z-20 w-full h-full px-6 lg:px-8 flex flex-col items-center justify-center"
+                style={config.layout_config.container_styles}
+            >
+                {/* Dynamic Logo Injection */}
+                {dna?.logoUrl?.value && (
+                    <div className="absolute top-8 left-8 md:top-12 md:left-12 z-50 animate-in fade-in slide-in-from-top-4 duration-1000">
+                        <img
+                            src={dna.logoUrl.value}
+                            alt="Brand Logo"
+                            className="h-12 md:h-16 w-auto object-contain drop-shadow-xl filter brightness-0 invert"
+                        />
+                    </div>
+                )}
 
-                <h2 style={config.overlay_content.subhead.styles}>
-                    {config.overlay_content.subhead.text}
-                </h2>
+                <div className="max-w-7xl w-full mx-auto flex flex-col items-center text-center">
+                    <div className="max-w-4xl flex flex-col items-center">
+                        <h1
+                            className="leading-tight"
+                            style={{
+                                ...config.overlay_content.headline.styles,
+                                textAlign: 'center'
+                            }}
+                        >
+                            {config.overlay_content.headline.text}
+                        </h1>
 
-                <button
-                    style={{
-                        ...config.overlay_content.cta.styles,
-                        cursor: 'pointer',
-                        marginTop: '2rem' // Ensure some spacing
-                    }}
-                    onClick={handleCtaClick}
-                >
-                    {config.overlay_content.cta.text}
-                </button>
+                        <p
+                            className="mt-6 leading-relaxed opacity-90"
+                            style={{
+                                ...config.overlay_content.subhead.styles,
+                                textAlign: 'center',
+                                marginTop: '1.5rem' // Ensure consistent spacing
+                            }}
+                        >
+                            {config.overlay_content.subhead.text}
+                        </p>
+
+                        <button
+                            className="transition-transform hover:scale-105 active:scale-95"
+                            style={{
+                                ...config.overlay_content.cta.styles,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                            onClick={handleCtaClick}
+                        >
+                            {config.overlay_content.cta.text}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );

@@ -1,0 +1,68 @@
+{
+    "spec_section_v1": {
+        "variant_id": "spec_section_v1",
+        "views": 30,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 43,
+        "dwell_sum_ms": 1411784,
+        "velocity_sum": 0,
+        "last_updated": "2026-01-29T00:28:44.791Z"
+    },
+    "hero_section_v1": {
+        "variant_id": "hero_section_v1",
+        "views": 54,
+        "clicks": 4,
+        "retention_count": 19,
+        "retention_sum_ms": 57000,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
+        "velocity_sum": 0,
+        "last_updated": "2026-01-29T00:26:21.608Z"
+    },
+    "proof_section_v1": {
+        "variant_id": "proof_section_v1",
+        "views": 0,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 13,
+        "dwell_sum_ms": 51773,
+        "velocity_sum": 0,
+        "last_updated": "2026-01-29T00:32:12.755Z"
+    },
+    "pas_section_v1": {
+        "variant_id": "pas_section_v1",
+        "views": 0,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 15,
+        "dwell_sum_ms": 241060,
+        "velocity_sum": 0,
+        "last_updated": "2026-01-29T00:32:12.672Z"
+    },
+    "offer_section_v1": {
+        "variant_id": "offer_section_v1",
+        "views": 5,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 4,
+        "dwell_sum_ms": 85805,
+        "velocity_sum": 0,
+        "last_updated": "2026-01-29T00:28:42.031Z"
+    },
+    "social_section_v1": {
+        "variant_id": "social_section_v1",
+        "views": 5,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 4,
+        "dwell_sum_ms": 17107,
+        "velocity_sum": 3795.9863329541463,
+        "last_updated": "2026-01-29T00:28:43.726Z"
+    }
+}

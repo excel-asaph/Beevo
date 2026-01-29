@@ -1,0 +1,61 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1769599193156",
+    "meta": {
+        "strategy": "Verified mobility impact through executive validation and regional authority advocacy.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "GRID"
+    },
+    "content": {
+        "headline": "Pioneering the Future of African Transit",
+        "subhead": "See how leaders across the continent are integrating Bluetone’s autonomous technology to create a more accessible, sustainable future.",
+        "testimonials": [
+            {
+                "id": "t1",
+                "name": "Amara Okafor",
+                "title": "Director of Urban Planning",
+                "company": "Lagos City Development Authority",
+                "quote": "Bluetone has completely redefined our approach to urban density. Their autonomous transit systems are not just tech-forward; they are culturally adaptive and respect our city's unique flow.",
+                "image_prompt": "A professional portrait of a Nigerian woman in her 40s, wearing elegant corporate attire. High-end business photography, soft natural lighting, blurred modern urban skyline in the background, sharp focus, 8k resolution.",
+                "image_url": "/assets/testimonial_1_challenger.png"
+            },
+            {
+                "id": "t2",
+                "name": "Kofi Mensah",
+                "title": "Chief Operations Officer",
+                "company": "Pan-African Logistics Group",
+                "quote": "The efficiency gains we've seen since adopting Bluetone’s law-abiding robots for last-mile delivery are staggering. They bridge the infrastructure gap seamlessly and sustainably.",
+                "image_prompt": "A sharp, high-fidelity headshot of a Ghanaian male executive in a charcoal suit. Modern office setting with glass walls, warm professional lighting, confident expression, ultra-realistic textures.",
+                "image_url": "/assets/testimonial_2_challenger.png"
+            },
+            {
+                "id": "t3",
+                "name": "Sarah Ibrahim",
+                "title": "Minister of Transport",
+                "company": "East African Regional Commission",
+                "quote": "Our goal of 50% accessibility is finally within reach. Bluetone provides the missing link between cutting-edge innovation and the regulatory realities of our diverse landscapes.",
+                "image_prompt": "A professional business portrait of an Ethiopian woman, wearing a stylish blazer. Bright morning light, background features a hint of a modern transport hub, high-contrast professional photography.",
+                "image_url": "/assets/testimonial_3_challenger.png"
+            },
+            {
+                "id": "t4",
+                "name": "David Zulu",
+                "title": "Lead Infrastructure Architect",
+                "company": "Cape Town Smart City Initiative",
+                "quote": "Designing cities around Bluetone vehicles has allowed us to reduce emissions while significantly increasing transit reliability for thousands of daily commuters.",
+                "image_prompt": "A sophisticated headshot of a South African man in a creative executive role, wearing a smart casual sweater. Background is a bright, modern architectural studio, cinematic lighting, professional depth of field.",
+                "image_url": "/assets/testimonial_4_challenger.png"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#F4F1DE] py-20 font-['Exo_2']\"><div class=\"max-w-7xl mx-auto px-6 text-center mb-16\"><h2 class=\"text-4xl md:text-5xl font-bold text-[#3D405B] mb-4 uppercase tracking-tight\">Pioneering the Future of African Transit</h2><p class=\"text-xl text-[#2D5A27] max-w-2xl mx-auto\">See how leaders across the continent are integrating Bluetone’s autonomous technology to create a more accessible, sustainable future.</p></div><div class=\"max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10\"><div class=\"bg-white p-8 rounded-2xl shadow-sm border-l-8 border-[#E2725B]\"><div class=\"flex items-center mb-6\"><img src=\"/assets/testimonial_1_challenger.png\" class=\"w-20 h-20 rounded-full object-cover mr-4\"/><div class=\"text-left\"><h4 class=\"font-bold text-[#3D405B] text-lg\">Amara Okafor</h4><p class=\"text-sm text-[#40E0D0] font-semibold uppercase\">Lagos City Development</p></div></div><p class=\"text-lg italic text-[#3D405B]\">\"Bluetone has completely redefined our approach to urban density. Their autonomous transit systems are not just tech-forward; they are culturally adaptive.\"</p></div><div class=\"bg-white p-8 rounded-2xl shadow-sm border-l-8 border-[#2D5A27]\"><div class=\"flex items-center mb-6\"><img src=\"/assets/testimonial_2_challenger.png\" class=\"w-20 h-20 rounded-full object-cover mr-4\"/><div class=\"text-left\"><h4 class=\"font-bold text-[#3D405B] text-lg\">Kofi Mensah</h4><p class=\"text-sm text-[#40E0D0] font-semibold uppercase\">Pan-African Logistics</p></div></div><p class=\"text-lg italic text-[#3D405B]\">\"The efficiency gains we've seen since adopting Bluetone’s law-abiding robots are staggering. They bridge the infrastructure gap seamlessly.\"</p></div><div class=\"bg-white p-8 rounded-2xl shadow-sm border-l-8 border-[#40E0D0]\"><div class=\"flex items-center mb-6\"><img src=\"/assets/testimonial_3_challenger.png\" class=\"w-20 h-20 rounded-full object-cover mr-4\"/><div class=\"text-left\"><h4 class=\"font-bold text-[#3D405B] text-lg\">Sarah Ibrahim</h4><p class=\"text-sm text-[#E2725B] font-semibold uppercase\">East African Commission</p></div></div><p class=\"text-lg italic text-[#3D405B]\">\"Our goal of 50% accessibility is finally within reach. Bluetone provides the missing link between innovation and regulatory reality.\"</p></div><div class=\"bg-white p-8 rounded-2xl shadow-sm border-l-8 border-[#3D405B]\"><div class=\"flex items-center mb-6\"><img src=\"/assets/testimonial_4_challenger.png\" class=\"w-20 h-20 rounded-full object-cover mr-4\"/><div class=\"text-left\"><h4 class=\"font-bold text-[#3D405B] text-lg\">David Zulu</h4><p class=\"text-sm text-[#E2725B] font-semibold uppercase\">Smart City Initiative</p></div></div><p class=\"text-lg italic text-[#3D405B]\">\"Designing cities around Bluetone vehicles has allowed us to reduce emissions while significantly increasing transit reliability for commuters.\"</p></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#F4F1DE",
+        "color": "#3D405B",
+        "fontFamily": "Exo 2"
+    }
+}

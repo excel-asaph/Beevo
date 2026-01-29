@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { BrandDNA, CampaignAsset, Junction, ThoughtSignature } from '@shared/types';
 
+
 interface BrandContextType {
   dna: BrandDNA | null;
   setDna: React.Dispatch<React.SetStateAction<BrandDNA | null>>;
@@ -38,6 +39,7 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const updateAssetStatus = (id: string, status: CampaignAsset['status'], feedback?: string) => {
     setAssets(prev => prev.map(a => a.id === id ? { ...a, status, feedback } : a));
   };
+
 
   return (
     <BrandContext.Provider value={{

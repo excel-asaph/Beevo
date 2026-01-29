@@ -1,6 +1,7 @@
 import { WebSocket } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { GoogleGenAI } from '@google/genai';
+import { MODELS } from '../../../shared/constants.js';
 import { GeminiLiveConnection } from '../gemini/LiveConnection';
 import { BrandStateManager } from '../state/BrandStateManager';
 import { stateManager } from '../services/StateManager';
@@ -447,7 +448,7 @@ ${canvasInfo}
         if (!apiKey) return;
 
         // Use the large-context model for ingestion/storage
-        const model = 'gemini-1.5-pro-latest'; // Changed to latest pro model for better context handling
+        const model = MODELS.STRATEGIST;
         const ai = new GoogleGenAI({ apiKey });
 
         try {
@@ -506,7 +507,7 @@ ${canvasInfo}
 
         const ai = new GoogleGenAI({ apiKey });
         // Use Gemini 3 Flash for fast, high-quality extraction
-        const model = 'gemini-3-flash-preview';
+        const model = MODELS.ARCHITECT_TEXT;
 
         try {
             // STAGE 1: Fast Core DNA Extraction (Name, Mission, Voice)

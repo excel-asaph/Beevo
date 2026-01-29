@@ -6,8 +6,9 @@ import { Forge } from './components/Forge';
 import { Guardian } from './components/Guardian';
 import { AgentCanvas } from './components/Agent';
 import { DynamicLandingPage } from './components/DynamicLandingPage';
+import { LogoStudioSidebar } from './components/LogoStudio/LogoStudioSidebar';
 import { Junction } from '@shared/types';
-import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay } from 'lucide-react';
+import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon } from 'lucide-react';
 
 type ViewMode = 'dashboard' | 'agent' | 'landing_page';
 
@@ -41,6 +42,7 @@ const MainLayout: React.FC = () => {
     // Check URL for mode (for headless testing/snapshots)
     const initialMode = (new URLSearchParams(window.location.search).get('mode') as ViewMode) || 'dashboard';
     const [viewMode, setViewMode] = useState<ViewMode>(initialMode);
+    const [isLogoStudioOpen, setIsLogoStudioOpen] = useState(false);
 
     // If in Agent mode, render the full-screen Agent Canvas
     if (viewMode === 'agent') {
@@ -99,6 +101,13 @@ const MainLayout: React.FC = () => {
 
                     {/* Original navigation items */}
                     <SidebarItem
+                        active={isLogoStudioOpen}
+                        onClick={() => setIsLogoStudioOpen(true)}
+                        icon={<Hexagon size={20} />}
+                        label="Logo Studio"
+                        accent
+                    />
+                    <SidebarItem
                         active={currentJunction === Junction.STRATEGIST}
                         onClick={() => setJunction(Junction.STRATEGIST)}
                         icon={<Search size={20} />}
@@ -151,6 +160,7 @@ const MainLayout: React.FC = () => {
                     {currentJunction === Junction.GUARDIAN && <Guardian />}
                 </div>
             </main>
+            <LogoStudioSidebar isOpen={isLogoStudioOpen} onClose={() => setIsLogoStudioOpen(false)} />
         </div>
     );
 }

@@ -4,7 +4,8 @@ export enum Junction {
     STRATEGIST = 'STRATEGIST',
     ARCHITECT = 'ARCHITECT',
     FORGE = 'FORGE',
-    GUARDIAN = 'GUARDIAN'
+    GUARDIAN = 'GUARDIAN',
+    LOGO_STUDIO = 'LOGO_STUDIO'
 }
 
 export interface SelectableString {
@@ -28,6 +29,7 @@ export interface BrandDNA {
     mood: SelectableArray;
     keywords?: SelectableArray;
     logoUrl?: SelectableString;
+    logoVariants?: any; // 8-file kit
     industry?: SelectableString;
     rationale?: string;
 
@@ -53,11 +55,12 @@ export interface SWOT {
 
 export interface CampaignAsset {
     id: string;
-    type: 'image' | 'video';
+    type: 'image' | 'video' | 'logo_kit';
     url: string;
     prompt: string;
     status: 'pending' | 'completed' | 'failed';
     feedback?: string;
+    variants?: any; // For flexible storage of kit items
 }
 
 export interface ThoughtSignature {
@@ -221,6 +224,18 @@ export interface ResearchPhaseObject {
 // LANDING PAGE BLOCK TYPES
 // ==========================================
 
+export type LayoutStrategy = 'SPLIT' | 'CLOUDS' | 'TRIPTYCH' | 'FORENSIC_GRID';
+
+export interface EvidenceItem {
+    id: string;
+    label: string;
+    value: string | number;
+    unit?: string;
+    description?: string;
+    icon?: string;
+    visual_type?: 'chart' | 'stat' | 'icon' | 'mini-trend';
+}
+
 export interface ProofBlockConfig {
     id: string;
     variant_id: string;
@@ -228,24 +243,180 @@ export interface ProofBlockConfig {
         strategy: string;
         tone: string;
         active_variant: string;
+        layout_strategy: LayoutStrategy;
         selected_imagery_concept?: string;
     };
     content: {
         headline: string;
         subhead: string;
         graphic_caption: string;
-        data_points: { label: string; value: string | number; unit?: string }[];
+        evidence_items: EvidenceItem[];
     };
     graphic_config: {
-        type: 'progress' | 'trend' | 'stat' | string;
+        type: 'generative' | string;
         primary_color: string;
         accent_color: string;
         show_labels: boolean;
         animation_duration?: number;
+        visual_code: string; // The full Tailwind/Grid JSX produced by AI
     };
     styles: {
         backgroundColor: string;
         color: string;
         fontFamily: string;
+        maxWidth?: string;
+    };
+}
+
+// ==========================================
+// PAS (PROBLEM-AGITATION-SOLUTION) TYPES
+// ==========================================
+
+export interface PASStep {
+    id: string;
+    phase: 'PROBLEM' | 'AGITATION' | 'SOLUTION';
+    title: string;
+    description: string;
+    icon?: string;
+    visual_highlight?: string; // e.g. a color or a specific Tailwind accent
+}
+
+export interface PASBlockConfig {
+    id: string;
+    variant_id: string;
+    meta: {
+        strategy: string;
+        tone: string;
+        active_variant: string;
+        layout_strategy: LayoutStrategy;
+    };
+    content: {
+        headline: string;
+        steps: PASStep[];
+        closing_statement: string;
+    };
+    graphic_config: {
+        type: 'generative';
+        visual_code: string; // AI generated visual sequence
+    };
+    styles: {
+        backgroundColor: string;
+        color: string;
+        fontFamily: string;
+    };
+}
+// ==========================================
+// INTERACTIVE SPEC BLOCK TYPES
+// ==========================================
+
+export interface SpecNode {
+    id: string;
+    label: string;
+    description: string;
+    icon?: string;
+    technical_specs?: Record<string, string>;
+}
+
+export interface SpecBlockConfig {
+    id: string;
+    variant_id: string;
+    meta: {
+        strategy: string;
+        tone: string;
+        active_variant: string;
+        layout_strategy: LayoutStrategy | 'NODES' | 'BLUEPRINT';
+    };
+    content: {
+        headline: string;
+        subhead: string;
+        nodes: SpecNode[];
+    };
+    graphic_config: {
+        type: 'generative';
+        visual_code: string; // AI generated interactive HTML/JS
+    };
+    styles: {
+        backgroundColor: string;
+        color: string;
+        fontFamily: string;
+    };
+}
+// ==========================================
+// SOCIAL / TESTIMONIAL BLOCK TYPES
+// ==========================================
+
+export interface Testimonial {
+    id: string;
+    name: string;
+    title: string;
+    company: string;
+    quote: string;
+    image_url: string; // Path to public asset
+}
+
+export interface SocialBlockConfig {
+    id: string;
+    variant_id: string;
+    meta: {
+        strategy: string;
+        tone: string;
+        active_variant: string;
+    };
+    content: {
+        headline: string;
+        subhead: string;
+        testimonials: Testimonial[];
+    };
+    styles: {
+        backgroundColor: string;
+        color: string;
+        fontFamily: string;
+    };
+    graphic_config: {
+        type: 'generative';
+        visual_code: string; // The injected grid/masonry HTML
+    };
+}
+// ==========================================
+// OFFER / CONVERSION BLOCK TYPES
+// ==========================================
+
+export interface OfferTier {
+    id: string;
+    name: string;
+    price: string;
+    interval?: string; // e.g. / mo
+    description: string;
+    features: string[];
+    cta_text: string;
+    is_highlighted: boolean;
+    badge?: string; // e.g. "Best Value"
+}
+
+export interface OfferBlockConfig {
+    id: string;
+    variant_id: string;
+    meta: {
+        strategy: string;
+        tone: string;
+        industry: string;
+        offer_type: 'one-time' | 'subscription' | 'lead-gen' | 'custom';
+        layout_strategy: LayoutStrategy;
+    };
+    content: {
+        headline: string;
+        subhead: string;
+        tiers: OfferTier[];
+        guarantee_text?: string;
+    };
+    styles: {
+        backgroundColor: string;
+        color: string;
+        fontFamily: string;
+        accentColor: string;
+    };
+    graphic_config: {
+        type: 'generative';
+        visual_code: string; // The injected price cards / bundle HTML
     };
 }

@@ -1,0 +1,79 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_section_v1_initial",
+    "meta": {
+        "strategy": "Venture-grade Scalability Model: Transitioning from pilot validation to sovereign-level autonomous infrastructure, focusing on high-trust regulatory compliance and localized hardware durability.",
+        "offer_type": "subscription",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "industry": "Electric and Autonomous Transportation"
+    },
+    "content": {
+        "headline": "The Future of African Mobility, Integrated",
+        "subhead": "Deploy sustainable, autonomous transport networks tailored to your region's unique infrastructure and regulatory landscape.",
+        "tiers": [
+            {
+                "id": "pilot-node",
+                "name": "Pilot Node",
+                "price": "$4,500",
+                "description": "Localized proof-of-concept for gated communities, industrial parks, or campus environments.",
+                "features": [
+                    "Up to 5 Autonomous EV Shuttles",
+                    "Bluetone Core OS Licensing",
+                    "Basic Regulatory Sandbox Support",
+                    "24/7 Remote Fleet Monitoring",
+                    "Bi-annual Hardware Maintenance"
+                ],
+                "cta_text": "Start Pilot",
+                "badge": "Entry",
+                "interval": "per month",
+                "is_highlighted": false
+            },
+            {
+                "id": "urban-network",
+                "name": "Urban Network",
+                "price": "$12,500",
+                "description": "Scaling mobility solutions for municipal districts with high-density transit requirements.",
+                "features": [
+                    "Up to 25 Autonomous EV Units",
+                    "Full Infrastructure Integration",
+                    "Advanced V2X Connectivity Kit",
+                    "Priority Regulatory Compliance",
+                    "Dedicated Local Ops Team"
+                ],
+                "cta_text": "Scale Network",
+                "badge": "Most Popular",
+                "interval": "per month",
+                "is_highlighted": true
+            },
+            {
+                "id": "sovereign-fleet",
+                "name": "Sovereign Fleet",
+                "price": "Custom",
+                "description": "Nationwide mobility transformation for government agencies and logistics conglomerates.",
+                "features": [
+                    "Unlimited Fleet Capacity",
+                    "White-label OS Deployment",
+                    "Custom Regulatory Frameworks",
+                    "Localized Assembly Support",
+                    "Strategic Venture Advisory"
+                ],
+                "cta_text": "Request Proposal",
+                "badge": "Enterprise",
+                "interval": "annually",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "Backed by the Bluetone 100% Reliability & Safety Guarantee"
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"w-full py-20 bg-[#3D405B] text-[#F4F1DE] font-sans\"><div class=\"max-w-7xl mx-auto px-6\"><div class=\"text-center mb-16\"><h2 class=\"text-4xl md:text-5xl font-bold mb-4\">The Future of African Mobility, Integrated</h2><p class=\"text-xl text-[#40E0D0] max-w-2xl mx-auto opacity-90\">Deploy sustainable, autonomous transport networks tailored to your region's unique infrastructure and regulatory landscape.</p></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\"> <div data-tier-id=\"pilot-node\" class=\"relative p-8 rounded-2xl bg-[#2D5A27]/20 border border-[#F4F1DE]/10 flex flex-col h-full\"><span class=\"inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#40E0D0] mb-4\">Entry</span><h3 class=\"text-2xl font-bold mb-2\">Pilot Node</h3><div class=\"mb-6\"><span class=\"text-4xl font-bold\">$4,500</span><span class=\"text-sm opacity-60\">/per month</span></div><p class=\"text-sm mb-8 opacity-80 leading-relaxed\">Localized proof-of-concept for gated communities, industrial parks, or campus environments.</p><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#40E0D0]\">✓</span>Up to 5 Autonomous EV Shuttles</li><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#40E0D0]\">✓</span>Bluetone Core OS Licensing</li><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#40E0D0]\">✓</span>Basic Regulatory Sandbox Support</li></ul><button data-cta-id=\"start-pilot\" class=\"w-full py-4 px-6 rounded-lg font-bold border-2 border-[#F4F1DE] hover:bg-[#F4F1DE] hover:text-[#3D405B] transition-all duration-300\">Start Pilot</button></div> <div data-tier-id=\"urban-network\" class=\"relative p-8 rounded-2xl bg-[#F4F1DE] text-[#3D405B] shadow-2xl flex flex-col h-full transform scale-105 z-10 border-t-8 border-[#E2725B]\"><span class=\"absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#E2725B] text-[#F4F1DE] text-xs font-bold rounded-full\">MOST POPULAR</span><h3 class=\"text-2xl font-bold mb-2\">Urban Network</h3><div class=\"mb-6\"><span class=\"text-4xl font-bold text-[#2D5A27]\">$12,500</span><span class=\"text-sm opacity-60\">/per month</span></div><p class=\"text-sm mb-8 opacity-90 leading-relaxed\">Scaling mobility solutions for municipal districts with high-density transit requirements.</p><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#2D5A27]\">✓</span>Up to 25 Autonomous EV Units</li><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#2D5A27]\">✓</span>Full Infrastructure Integration</li><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#2D5A27]\">✓</span>Advanced V2X Connectivity Kit</li></ul><button data-cta-id=\"scale-network\" class=\"w-full py-4 px-6 rounded-lg font-bold bg-[#3D405B] text-[#F4F1DE] hover:opacity-90 transition-all duration-300 shadow-lg shadow-[#3D405B]/20\">Scale Network</button></div> <div data-tier-id=\"sovereign-fleet\" class=\"relative p-8 rounded-2xl bg-[#2D5A27]/20 border border-[#F4F1DE]/10 flex flex-col h-full\"><span class=\"inline-block px-3 py-1 text-xs font-bold uppercase tracking-widest text-[#E2725B] mb-4\">Enterprise</span><h3 class=\"text-2xl font-bold mb-2\">Sovereign Fleet</h3><div class=\"mb-6\"><span class=\"text-4xl font-bold\">Custom</span></div><p class=\"text-sm mb-8 opacity-80 leading-relaxed\">Nationwide mobility transformation for government agencies and logistics conglomerates.</p><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#40E0D0]\">✓</span>Unlimited Fleet Capacity</li><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#40E0D0]\">✓</span>White-label OS Deployment</li><li class=\"flex items-start gap-3 text-sm\"><span class=\"text-[#40E0D0]\">✓</span>Strategic Venture Advisory</li></ul><button data-cta-id=\"request-proposal\" class=\"w-full py-4 px-6 rounded-lg font-bold border-2 border-[#40E0D0] text-[#40E0D0] hover:bg-[#40E0D0] hover:text-[#3D405B] transition-all duration-300\">Request Proposal</button></div></div><div class=\"mt-12 text-center opacity-60 text-sm\"><p>Backed by the Bluetone 100% Reliability & Safety Guarantee</p></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2",
+        "accentColor": "#40E0D0"
+    }
+}

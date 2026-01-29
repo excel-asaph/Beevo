@@ -15,13 +15,13 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/hero_metrics.json');
+const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
 const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block_challenger.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_snapshot.png');
+const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_decision.json');
 
 // Models
-const WATCHER_MODEL = 'gemini-3-flash-preview';
 
 puppeteer.use(StealthPlugin());
 
@@ -140,21 +140,26 @@ export class ProofWatcher {
                 const newProof = {
                     ...currentProof,
                     variant_id: `proof_v${Date.now()}`,
+                    meta: {
+                        ...currentProof.meta,
+                        layout_strategy: (optimization as any).changes.layout_strategy || currentProof.meta.layout_strategy
+                    },
                     content: {
                         ...currentProof.content,
                         headline: (optimization as any).changes.headline || currentProof.content.headline,
                         subhead: (optimization as any).changes.subhead || currentProof.content.subhead,
-                        graphic_caption: (optimization as any).changes.graphic_caption || currentProof.content.graphic_caption
+                        graphic_caption: (optimization as any).changes.graphic_caption || currentProof.content.graphic_caption,
+                        evidence_items: (optimization as any).changes.evidence_items || currentProof.content.evidence_items
                     },
                     graphic_config: {
                         ...currentProof.graphic_config,
-                        type: (optimization as any).changes.graphic_type || currentProof.graphic_config.type,
-                        primary_color: (optimization as any).changes.primary_color || currentProof.graphic_config.primary_color,
-                        accent_color: (optimization as any).changes.accent_color || currentProof.graphic_config.accent_color
+                        type: 'generative',
+                        visual_code: (optimization as any).changes.visual_code || currentProof.graphic_config.visual_code
                     }
                 };
 
                 await fs.writeFile(CHALLENGER_FILE, JSON.stringify(newProof, null, 4));
+                await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
                 console.log("🚀 Optimization Applied! Section 2 Mutated.");
             }
         } catch (error) {

@@ -1,62 +1,62 @@
 {
     "id": "hero_section_v1",
-    "variant_id": "hero_v1769471402253",
     "meta": {
-        "strategy": "Rejects the 'Charity Blue' trope in favor of 'Warm Activism' and 'Earth-Tech'. The palette uses Deep Terracotta to ground the brand in the physical reality of the terrain, while Electric Lime signals premium performance and high-tech durability. This positions the brand as a high-performance athletic gear company that happens to have a humanitarian heart, rather than a donor-only organization.",
-        "tone": "Energetic, compassionate, and playful",
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
         "active_variant": "challenger"
     },
     "visual_asset": {
         "type": "video",
-        "source_id": "veo_video_hero_challenger.mp4",
-        "prompt_signature": "Extreme macro high-speed photography: An athletic shoe in Electric Lime #CCFF00 impacts a Deep Terracotta #C04000 earth surface. A kinetic explosion of dry mud and dust particles is frozen in mid-air. Worm's-eye perspective. Lighting: Cinematic mix of warm sunset ochre and high-tech Digital Lavender #E6E6FA rim lighting on the shoe's technical mesh. High contrast, hyper-detailed textures.",
+        "source_id": "veo_hero_001_generated",
+        "prompt_signature": "Fast-paced cinematic tracking shot. Start with a macro close-up of the glowing cultural patterns on the shuttle's chassis as sensors pulse, then whip-pan out to reveal a high-speed convoy gliding through a lush, vertical forest skyscraper district during a vibrant orange sunset. 4k, Unreal Engine 5 aesthetic.",
         "attributes": {
-            "lighting": "Kinetic Earth-Tech (Ochre meets Digital Lavender)",
-            "color_grade": "#C04000",
-            "camera_movement": "Frozen motion, subtle dolly-in",
-            "subject_focus": "Tactile outsole tread and exploding dust"
+            "lighting": "Cinematic golden hour balanced with cool cyan LED accents from the smart city infrastructure.",
+            "camera_movement": "Dynamic low-angle tracking shot that smoothly transitions into a wide aerial sweep.",
+            "subject_focus": "The adaptive autonomous sensor array on the lead vehicle, symbolizing precision and regulatory compliance.",
+            "color_grade": "#40E0D0"
         }
     },
     "overlay_content": {
         "headline": {
-            "text": "TURN DUST INTO DISTANCE.",
+            "text": "Powering Africa’s Autonomous Future",
             "styles": {
-                "color": "#F5F5F0",
-                "fontFamily": "Space Grotesk",
+                "color": "#FFFFFF",
+                "fontFamily": "Exo 2",
+                "fontSize": "4rem",
                 "fontWeight": "800",
-                "fontSize": "72px",
-                "textShadow": "2px 2px 4px rgba(0,0,0,0.5)"
+                "textShadow": "1px 1px 2px rgba(0,0,0,0.1)"
             }
         },
         "subhead": {
-            "text": "High-performance gear for the world's toughest playgrounds. We engineer elite footwear for children in underserved regions, turning every rugged path into a launchpad for growth.",
+            "text": "The transport solution built for local landscapes and global tech standards.",
             "styles": {
-                "color": "#F5F5F0",
-                "fontFamily": "Inter",
-                "fontSize": "22px",
-                "marginTop": "1.5rem"
+                "color": "#F3F3F3",
+                "fontFamily": "Exo 2",
+                "fontSize": "1.5rem",
+                "marginTop": "1rem"
             }
         },
         "cta": {
-            "text": "JOIN THE MOVEMENT",
+            "text": "See the Future",
             "action_id": "scroll_to_offer",
             "styles": {
-                "backgroundColor": "#CCFF00",
-                "color": "#2D2D2D",
-                "fontFamily": "Space Grotesk",
-                "padding": "18px 40px",
-                "borderRadius": "4px",
-                "marginTop": "2.5rem"
+                "backgroundColor": "#E2725B",
+                "color": "#F4F1DE",
+                "fontFamily": "Exo 2",
+                "padding": "12px 24px",
+                "borderRadius": "4px"
             }
         }
     },
     "layout_config": {
-        "overlay_gradient": "linear-gradient(to left, rgba(45, 45, 45, 0.9) 0%, rgba(45, 45, 45, 0.4) 40%, transparent 100%)",
         "container_styles": {
-            "justifyContent": "right",
+            "justifyContent": "center",
             "alignItems": "center",
-            "textAlign": "right",
-            "padding": "8%"
-        }
-    }
+            "textAlign": "center",
+            "padding": "40px",
+            "backdropFilter": "none"
+        },
+        "overlay_gradient": "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%)"
+    },
+    "variant_id": "hero_v1769599719130"
 }

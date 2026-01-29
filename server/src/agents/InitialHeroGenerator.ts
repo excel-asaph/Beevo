@@ -1,6 +1,15 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
+import { MODELS } from '@shared/constants';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load env vars
+dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
@@ -25,7 +34,7 @@ interface BrandResearch {
 
 export class InitialHeroGenerator {
     private client: GoogleGenAI;
-    private modelName = 'gemini-3-flash-preview'; // User requested Gemini 3
+    private modelName = MODELS.ARCHITECT_TEXT;
 
     constructor() {
         const apiKey = process.env.GEMINI_API_KEY;
@@ -159,7 +168,7 @@ export class InitialHeroGenerator {
 
 
     private async generateVideoAsset(attributes: any) {
-        console.log("🎥 Connecting to Veo (veo-3.1-generate-preview)...");
+        console.log("🎥 Connecting to Veo...");
 
         const veoPrompt = `
         Cinematic 4K video.
@@ -175,7 +184,7 @@ export class InitialHeroGenerator {
             // 1. Submit Generation Request
             // @ts-ignore - The SDK types might lag behind the bleeding edge methods
             let operation = await this.client.models.generateVideos({
-                model: 'veo-3.1-generate-preview',
+                model: MODELS.FORGE_VIDEO_HQ,
                 prompt: veoPrompt,
                 config: {
                     aspectRatio: '16:9', // Optional but good for Hero
@@ -340,4 +349,10 @@ export class InitialHeroGenerator {
         if (!text) throw new Error("Failed to generate overlay content");
         return JSON.parse(text);
     }
+}
+
+// Auto-run if executed directly
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    const generator = new InitialHeroGenerator();
+    generator.generate().catch(console.error);
 }

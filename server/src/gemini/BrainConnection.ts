@@ -521,6 +521,10 @@ export class BrainConnection {
             switch (this.phase) {
                 case 'discovery':
                     // PHASE 1: LISTENER BRAIN - Discovery Mode
+                    if (this.extractBrandIdentityDecided) {
+                        console.log('🧠 [BrainConnection] Research already DECIDED. Skipping analysis.');
+                        return;
+                    }
                     console.log('🧠 Brain Mode: DISCOVERY (Listener)');
                     systemPrompt = [
                         'YOU ARE "THE LISTENER".',

@@ -602,8 +602,7 @@ export class ToolHandler {
                 rationale: 'User updated logo structure selection'
             });
 
-            this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options } as any);
-            this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options } as any);
+            // Removed redundant sendToClient
             return `Updated logo structures. ${selectedCount} selected. [SYSTEM: Confirm the update and ask the user if they want to review the structures on the board.]`;
         }
 
@@ -638,7 +637,7 @@ export class ToolHandler {
             rationale: args.rationale || 'AI-generated logo structure options'
         });
 
-        this.sendToClient({ type: 'LOGO_STRUCTURE_OPTIONS', options } as any);
+        // Removed redundant sendToClient
 
         const typeList = options.map(o => o.type).join(', ');
         return `Processed ${options.length} logo options: ${typeList}. [SYSTEM: The logo structures are now on the board. Ask the user if they want to review them.]`;
@@ -653,7 +652,7 @@ export class ToolHandler {
             suggestions,
             rationale: `Generated imagery concepts: ${query}`
         });
-        this.sendToClient({ type: 'IMAGERY_SUGGESTIONS', suggestions } as any);
+        // Removed redundant sendToClient - relies on StateManager broadcast
         return `Created ${suggestions.length} imagery suggestions.`;
     }
 
@@ -674,7 +673,7 @@ export class ToolHandler {
         if (ids.length === 0) return "Could not find items to delete.";
         const kept = current.filter(s => !ids.includes(s.id));
         await stateManager.saveWithHistory('imagery', { suggestions: kept });
-        this.sendToClient({ type: 'IMAGERY_SUGGESTIONS', suggestions: kept } as any);
+        // Removed redundant sendToClient - relies on StateManager broadcast
         return `Deleted ${current.length - kept.length} items.`;
     }
 
@@ -690,7 +689,7 @@ export class ToolHandler {
             return s;
         });
         await stateManager.saveWithHistory('imagery', { suggestions: updated });
-        this.sendToClient({ type: 'IMAGERY_SUGGESTIONS', suggestions: updated } as any);
+        // Removed redundant sendToClient - relies on StateManager broadcast
         return `${isSelected ? 'Selected' : 'Unselected'} ${ids.length} items.`;
     }
 

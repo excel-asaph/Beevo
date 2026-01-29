@@ -5,6 +5,8 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { Browser, Page } from 'puppeteer';
 import { GoogleGenAI } from '@google/genai';
+import { MODELS } from '@shared/constants';
+import { LogoBlockConfig } from '@shared/types';
 
 // Enable stealth mode to bypass bot detection
 puppeteer.use(StealthPlugin());
@@ -216,7 +218,7 @@ Provide analysis in JSON format:
 }`;
 
             const result = await this.ai.models.generateContent({
-                model: 'gemini-2.0-flash',
+                model: MODELS.ARCHITECT_TEXT,
                 contents: prompt
             });
 

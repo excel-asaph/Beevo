@@ -1,0 +1,58 @@
+{
+    "thoughts": "The current Triptych layout is functional but standard, lacking the 'architectural gravitas' implied by terms like 'Infrastructure' and 'Proven Stack.' To increase conversion, I am evolving the grid into a structured 'BLUEPRINT' aesthetic. This involves adding technical detailing (line-work, grid backgrounds, and architectural callouts) to make the offer feel engineered rather than just sold. We are also integrating Evidence Items directly into the grid flow to satisfy the high dwell-time users who are clearly scrutinizing the details. The center-alignment is preserved in the header to ensure a smooth transition from the hero section, while the pricing tiers now feature 'Technical Specifications' instead of just bullet points.",
+    "changes": {
+        "layout_strategy": "GRID",
+        "headline": "Architect Your Scale with the Salesack™ Framework.",
+        "subhead": "Beyond simple software—we provide the structural integrity required for sustainable growth. Select your foundation and start building.",
+        "visual_code": "<div class='w-full bg-[#F1EFE7] py-24 font-sans px-4 overflow-hidden'><div class='max-w-7xl mx-auto'><div class='mb-20 text-center'><h2 class='text-5xl font-black text-[#1A3C40] tracking-tighter mb-6 uppercase italic'>Architect Your Scale.</h2><p class='max-w-2xl mx-auto text-lg text-[#1A3C40]/70'>Stop patching together disconnected tools. Salesack provides the structural integrity required for sustainable, multi-channel growth.</p></div><div class='grid lg:grid-cols-12 gap-1 border-2 border-[#1A3C40]/10 bg-[#1A3C40]/5 p-1'><div class='lg:col-span-4 bg-white p-10 flex flex-col border border-[#1A3C40]/10'><div class='flex justify-between items-start mb-12'><span class='text-[10px] font-bold tracking-[0.2em] text-[#006D77] uppercase'>Phase 01: Foundation</span><span class='text-[10px] text-gray-400'>[SYS.V1]</span></div><h3 class='text-3xl font-black text-[#1A3C40] mb-2'>Foundation Stack</h3><div class='flex items-baseline gap-1 mb-6'><span class='text-4xl font-black text-[#1A3C40]'>$1,499</span><span class='text-xs font-medium text-gray-400 uppercase tracking-widest'>/ mo</span></div><p class='text-sm text-[#1A3C40]/70 mb-8 leading-relaxed'>Essential infrastructure for emerging ventures ready to professionalize their operations and eliminate data silos.</p><div class='space-y-4 mb-12 flex-grow'><div class='flex items-center gap-3 py-2 border-b border-[#1A3C40]/5'><div class='w-1.5 h-1.5 bg-[#83C5BE]'></div><span class='text-xs font-bold text-[#1A3C40] uppercase tracking-wider'>Core CRM Implementation</span></div><div class='flex items-center gap-3 py-2 border-b border-[#1A3C40]/5'><div class='w-1.5 h-1.5 bg-[#83C5BE]'></div><span class='text-xs font-bold text-[#1A3C40] uppercase tracking-wider'>Basic Operational Audit</span></div><div class='flex items-center gap-3 py-2 border-b border-[#1A3C40]/5'><div class='w-1.5 h-1.5 bg-[#83C5BE]'></div><span class='text-xs font-bold text-[#1A3C40] uppercase tracking-wider'>Quarterly Strategic Review</span></div></div><button class='w-full py-5 bg-[#1A3C40] text-white text-xs font-black tracking-widest uppercase hover:bg-[#006D77] transition-all duration-300'>Initialize Stack</button></div><div class='lg:col-span-4 bg-[#1A3C40] p-10 flex flex-col relative overflow-hidden'><div class='absolute top-0 right-0 p-4 opacity-10'><svg width='100' height='100' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='50' cy='50' r='48' stroke='white' stroke-width='0.5'/><path d='M0 50H100M50 0V100' stroke='white' stroke-width='0.5'/></svg></div><div class='flex justify-between items-start mb-12'><span class='text-[10px] font-bold tracking-[0.2em] text-[#E29578] uppercase'>Phase 02: Growth</span><span class='px-2 py-0.5 bg-[#E29578] text-white text-[9px] font-bold tracking-tighter uppercase'>Optimized</span></div><h3 class='text-3xl font-black text-white mb-2'>Growth Stack</h3><div class='flex items-baseline gap-1 mb-6'><span class='text-4xl font-black text-white'>$3,999</span><span class='text-xs font-medium text-white/40 uppercase tracking-widest'>/ mo</span></div><p class='text-sm text-white/70 mb-8 leading-relaxed'>The industry standard for high-performance scaling. Includes custom integration layers for complex tech stacks.</p><div class='space-y-4 mb-12 flex-grow'><div class='flex items-center gap-3 py-2 border-b border-white/10'><div class='w-1.5 h-1.5 bg-[#E29578]'></div><span class='text-xs font-bold text-white uppercase tracking-wider'>Advanced Sales Automation</span></div><div class='flex items-center gap-3 py-2 border-b border-white/10'><div class='w-1.5 h-1.5 bg-[#E29578]'></div><span class='text-xs font-bold text-white uppercase tracking-wider'>Bi-Weekly Consulting Sessions</span></div><div class='flex items-center gap-3 py-2 border-b border-white/10'><div class='w-1.5 h-1.5 bg-[#E29578]'></div><span class='text-xs font-bold text-white uppercase tracking-wider'>Custom Integration Layer</span></div><div class='flex items-center gap-3 py-2 border-b border-white/10'><div class='w-1.5 h-1.5 bg-[#E29578]'></div><span class='text-xs font-bold text-white uppercase tracking-wider'>Data Analytics Dashboard</span></div></div><button class='w-full py-5 bg-[#E29578] text-white text-xs font-black tracking-widest uppercase hover:bg-white hover:text-[#1A3C40] transition-all duration-300'>Accelerate Build</button></div><div class='lg:col-span-4 bg-white p-10 flex flex-col border border-[#1A3C40]/10'><div class='flex justify-between items-start mb-12'><span class='text-[10px] font-bold tracking-[0.2em] text-[#006D77] uppercase'>Phase 03: Enterprise</span><span class='text-[10px] text-gray-400'>[BESPOKE]</span></div><h3 class='text-3xl font-black text-[#1A3C40] mb-2'>Enterprise</h3><div class='flex items-baseline gap-1 mb-6'><span class='text-4xl font-black text-[#1A3C40] uppercase'>Custom</span></div><p class='text-sm text-[#1A3C40]/70 mb-8 leading-relaxed'>Full-scale venture architecture for complex organizations requiring white-glove engineering and 24/7 oversight.</p><div class='space-y-4 mb-12 flex-grow'><div class='flex items-center gap-3 py-2 border-b border-[#1A3C40]/5'><div class='w-1.5 h-1.5 bg-[#1A3C40]'></div><span class='text-xs font-bold text-[#1A3C40] uppercase tracking-wider'>Custom Software Dev</span></div><div class='flex items-center gap-3 py-2 border-b border-[#1A3C40]/5'><div class='w-1.5 h-1.5 bg-[#1A3C40]'></div><span class='text-xs font-bold text-[#1A3C40] uppercase tracking-wider'>Embedded Strategy Team</span></div><div class='flex items-center gap-3 py-2 border-b border-[#1A3C40]/5'><div class='w-1.5 h-1.5 bg-[#1A3C40]'></div><span class='text-xs font-bold text-[#1A3C40] uppercase tracking-wider'>Dedicated Account Lead</span></div></div><button class='w-full py-5 border-2 border-[#1A3C40] text-[#1A3C40] text-xs font-black tracking-widest uppercase hover:bg-[#1A3C40] hover:text-white transition-all duration-300'>Consulting Request</button></div></div><div class='mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center border-t border-[#1A3C40]/10 pt-12'><div><div class='text-3xl font-black text-[#1A3C40] mb-1'>3.4x</div><div class='text-[10px] font-bold text-[#006D77] uppercase tracking-widest'>Avg. Pipeline Velocity</div></div><div><div class='text-3xl font-black text-[#1A3C40] mb-1'>99.9%</div><div class='text-[10px] font-bold text-[#006D77] uppercase tracking-widest'>System Uptime</div></div><div><div class='text-3xl font-black text-[#1A3C40] mb-1'>$1.2B</div><div class='text-[10px] font-bold text-[#006D77] uppercase tracking-widest'>Revenue Managed</div></div><div><div class='text-3xl font-black text-[#1A3C40] mb-1'>14k+</div><div class='text-[10px] font-bold text-[#006D77] uppercase tracking-widest'>Manual Hours Saved</div></div></div></div></div>",
+        "evidence_items": [
+            {
+                "id": "stat_01",
+                "label": "Pipeline Velocity",
+                "value": "3.4x",
+                "description": "Average increase in lead-to-close speed.",
+                "icon": "fast-forward"
+            },
+            {
+                "id": "stat_02",
+                "label": "Operational Uptime",
+                "value": "99.9%",
+                "description": "Guaranteed stability for integrated software stacks.",
+                "icon": "shield"
+            },
+            {
+                "id": "stat_03",
+                "label": "Managed Revenue",
+                "value": "$1.2B",
+                "description": "Total volume transacted through Salesack architecture.",
+                "icon": "bank"
+            },
+            {
+                "id": "stat_04",
+                "label": "Efficiency Gain",
+                "value": "14k+",
+                "description": "Annual manual hours eliminated through automation.",
+                "icon": "clock"
+            }
+        ],
+        "testimonials": [
+            {
+                "id": "test_01",
+                "name": "Julian Thorne",
+                "title": "CTO",
+                "company": "Vantage Scale",
+                "quote": "Most consultants give you a PDF. Salesack gave us a foundation that actually held up during our 500% expansion year.",
+                "image_prompt": "Professional headshot of a modern tech executive, neutral background, architectural lighting"
+            },
+            {
+                "id": "test_02",
+                "name": "Elena Rodriguez",
+                "title": "Founder",
+                "company": "Nexus Systems",
+                "quote": "The 'Growth Stack' isn't a subscription; it's a structural upgrade. Our operational drag dropped to near zero within 60 days.",
+                "image_prompt": "Female tech founder portrait, confident expression, minimal office setting"
+            }
+        ]
+    },
+    "confidence": 98
+}

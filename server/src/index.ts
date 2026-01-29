@@ -45,6 +45,20 @@ app.post('/api/tracking/event', async (req, res) => {
     }
 });
 
+// Broadcast Refresh Endpoint (For Agents)
+app.post('/api/broadcast/refresh', (req, res) => {
+    console.log('📢 BROADCAST: Triggering client refresh for optimization sync...');
+    const message = JSON.stringify({ type: 'FULL_STATE_UPDATE', force_refresh: true });
+
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+        }
+    });
+
+    res.json({ status: 'broadcasted' });
+});
+
 // WebSocket connection handler
 wss.on('connection', (ws: WebSocket) => {
     console.log('🔌 New WebSocket connection');

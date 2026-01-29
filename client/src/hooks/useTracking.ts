@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 export type TrackingEvent = {
     blockId: string;
-    eventType: 'view_3s' | 'cta_click' | 'scroll_depth' | 'proof_dwell_summary';
+    eventType: 'view_3s' | 'cta_click' | 'scroll_depth' | 'proof_dwell_summary' | 'pas_dwell_summary' | 'spec_dwell_summary' | 'spec_interaction' | 'social_dwell_summary' | 'social_scroll_velocity' | 'view_component' | 'offer_dwell_summary' | 'offer_cta_click';
     meta?: any;
     timestamp: number;
 };
@@ -17,8 +17,9 @@ export const useTracking = (blockId: string) => {
         };
 
         // Send to backend
+        console.log(`%c 🎯 METRIC SENT: ${eventType} `, 'background: #222; color: #bada55; padding: 2px 5px; border-radius: 3px;', { blockId, ...meta });
         try {
-            fetch('http://localhost:3000/api/tracking/event', {
+            fetch('/api/tracking/event', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

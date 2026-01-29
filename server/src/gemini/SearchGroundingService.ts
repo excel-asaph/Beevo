@@ -1,4 +1,5 @@
 import { GoogleGenAI, Tool } from '@google/genai';
+import { MODELS } from '@shared/constants';
 
 export interface LogoSearchResult {
     id: string;
@@ -22,7 +23,7 @@ interface LogoSearchArgs {
 
 export class SearchGroundingService {
     private client: GoogleGenAI;
-    private modelName = 'gemini-2.0-flash'; // Optimized for speed and grounding
+    private modelName = MODELS.ARCHITECT_TEXT; // Optimized for speed and grounding
 
     constructor(apiKey: string) {
         this.client = new GoogleGenAI({ apiKey });
@@ -30,7 +31,7 @@ export class SearchGroundingService {
 
     async searchLogoInspirationFromWeb(args: LogoSearchArgs): Promise<LogoSearchResult[]> {
         const count = args.count || 6;
-        console.log(`🔍 Starting Optimized Image Discovery for ${count} logos...`);
+        console.log(`Starting Optimized Image Discovery for ${count} logos...`);
 
         // Phase 1: Use Grounding to find actual brands and their design assets
         const discoveredBrands = await this.discoverLogoPages(args);

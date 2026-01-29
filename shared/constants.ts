@@ -1,12 +1,13 @@
 // Shared constants between client and server
 
 export const MODELS = {
-  STRATEGIST: 'gemini-2.5-pro',            // Best for deep reasoning & strategy
-  ARCHITECT_LIVE: 'gemini-2.0-flash-exp',          // Reliable Multimodal Live model
-  ARCHITECT_TEXT: 'gemini-3-flash-preview',    // User requested specific model
-  FORGE_IMAGE: 'imagen-3.0-generate-002',  // Latest Imagen
-  FORGE_VIDEO: 'veo-3.1-generate-preview', // Latest Veo
-  GUARDIAN: 'gemini-2.5-pro',              // Best for precise visual auditing
+  STRATEGIST: 'gemini-3-pro-preview',
+  ARCHITECT_LIVE: 'gemini-2.5-flash-native-audio-preview-12-2025',
+  ARCHITECT_TEXT: 'gemini-3-flash-preview', // Brain model
+  FORGE_IMAGE: 'gemini-2.5-flash-image',
+  FORGE_VIDEO: 'veo-3.1-fast-generate-preview', // General video
+  FORGE_VIDEO_HQ: 'veo-3.1-generate-preview', // HQ video
+  GUARDIAN: 'gemini-3-pro-preview', // Vision/Reasoning
 };
 
 export const SYSTEM_INSTRUCTIONS = {

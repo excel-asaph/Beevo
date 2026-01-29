@@ -1,5 +1,5 @@
 
-import fs from 'fs/promises';
+import { MODELS } from '@shared/constants';
 import path from 'path';
 import { GoogleGenAI } from '@google/genai';
 
@@ -13,7 +13,7 @@ export interface VideoAttributes {
 
 export class VideoGenerator {
     private client: GoogleGenAI;
-    private modelName = 'veo-3.1-generate-preview';
+    private modelName = MODELS.FORGE_VIDEO_HQ;
 
     constructor(apiKey: string) {
         this.client = new GoogleGenAI({ apiKey });

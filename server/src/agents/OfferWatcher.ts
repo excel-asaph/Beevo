@@ -1,0 +1,153 @@
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { GoogleGenAI } from '@google/genai';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import dotenv from 'dotenv';
+import { NanoBananaService } from '../services/NanoBananaService.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
+
+// Configuration
+const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/offer_block_challenger.json');
+const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
+const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/offer_watcher_snapshot.png');
+const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/offer_watcher_decision.json');
+
+puppeteer.use(StealthPlugin());
+
+export class OfferWatcher {
+    private client: GoogleGenAI;
+    private nanoBanana: NanoBananaService;
+
+    constructor() {
+        const apiKey = process.env.GEMINI_API_KEY || '';
+        this.client = new GoogleGenAI({ apiKey });
+        this.nanoBanana = new NanoBananaService(apiKey);
+    }
+
+    async captureSnapshot(): Promise<Buffer | null> {
+        console.log("📸 OfferWatcher: Capturing order block snapshot...");
+        let browser;
+        try {
+            browser = await puppeteer.launch({ headless: true });
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1440, height: 900 });
+            const url = `http://localhost:3000/?mode=landing_page`;
+            await page.goto(url, { waitUntil: 'networkidle0' });
+
+            await page.evaluate(() => {
+                const el = document.querySelector('[data-component="offer-block"]');
+                if (el) el.scrollIntoView();
+            });
+
+            await new Promise(r => setTimeout(r, 1500));
+
+            const element = await page.$('[data-component="offer-block"]');
+            if (!element) throw new Error("Offer block not found");
+
+            const screenshot = await element.screenshot({ encoding: 'binary' });
+            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
+            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+
+            return Buffer.from(screenshot);
+        } catch (e) {
+            console.error("❌ Offer Snapshot failed:", e);
+            return null;
+        } finally {
+            if (browser) await browser.close();
+        }
+    }
+
+    async analyzeAndOptimize() {
+        console.log("🕵️ OfferWatcher Agent: Waking up...");
+
+        const [metricsRaw, challengerRaw, researchRaw] = await Promise.all([
+            fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(CHALLENGER_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
+        ]);
+
+        const metricsInfo = JSON.parse(metricsRaw);
+        const currentOffer = JSON.parse(challengerRaw);
+        const researchCtx = JSON.parse(researchRaw);
+
+        const variantId = currentOffer.id || 'offer_section_v1';
+        const data = metricsInfo[variantId];
+
+        // 1. Data Threshold Check
+        if (!data || (data.views || 0) < 5) {
+            console.log(`🕵️ OfferWatcher: Not enough data. Views: ${data?.views || 0}`);
+            return;
+        }
+
+        const conversionRate = (data.clicks / data.views) * 100;
+        const avgDwell = data.dwell_count ? (data.dwell_sum_ms / data.dwell_count) : 0;
+
+        console.log(`📊 PERF: CR=${conversionRate.toFixed(1)}% | Avg Dwell=${avgDwell.toFixed(0)}ms`);
+
+        // 2. Forensic Decision
+        if (conversionRate > 5) {
+            console.log("🏆 STATUS: CHAMPION. Conversion rate is healthy.");
+            return;
+        }
+
+        console.log("📉 STATUS: LOW CONVERSION. Initiating Offer Mutation...");
+
+        // 3. Vision Audit
+        const snapshot = await this.captureSnapshot();
+
+        try {
+            const performance = { conversionRate, avgDwell };
+            const nanoContext = {
+                brandName: researchCtx.brandDNA?.name?.value || "Our Brand",
+                mission: researchCtx.brandDNA?.mission?.value || "",
+                rationale: researchCtx.brandDNA?.rationale?.value || researchCtx.brandDNA?.rationale || "",
+                mood: researchCtx.brandDNA?.mood?.items || [],
+                colors: researchCtx.colorPalettes?.palettes?.filter((p: any) => p.isSelected).flatMap((p: any) => p.colors) || [],
+                fonts: researchCtx.typographyPairings?.fonts?.filter((f: any) => f.isSelected).map((f: any) => f.name) || [],
+                imagery: [],
+                brandDNA: researchCtx.brandDNA
+            };
+
+            const optimization = await this.nanoBanana.refineVisual(currentOffer, performance, nanoContext, snapshot || undefined);
+
+            console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
+
+            if ((optimization as any).confidence > 70) {
+                const newOffer = {
+                    ...currentOffer,
+                    variant_id: `offer_v${Date.now()}`,
+                    meta: {
+                        ...currentOffer.meta,
+                        layout_strategy: (optimization as any).changes.layout_strategy || currentOffer.meta.layout_strategy
+                    },
+                    content: {
+                        ...currentOffer.content,
+                        headline: (optimization as any).changes.headline || currentOffer.content.headline,
+                        subhead: (optimization as any).changes.subhead || currentOffer.content.subhead,
+                        tiers: (optimization as any).changes.tiers || currentOffer.content.tiers
+                    },
+                    graphic_config: {
+                        ...currentOffer.graphic_config,
+                        visual_code: (optimization as any).changes.visual_code || currentOffer.graphic_config.visual_code
+                    }
+                };
+
+                await fs.writeFile(CHALLENGER_FILE, JSON.stringify(newOffer, null, 4));
+                await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
+                console.log("🚀 Optimization Applied! Offer Evolved.");
+            }
+        } catch (error) {
+            console.error("❌ OfferWatcher Error:", error);
+        }
+    }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    new OfferWatcher().analyzeAndOptimize().catch(console.error);
+}

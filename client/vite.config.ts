@@ -12,6 +12,11 @@ export default defineConfig(({ mode }) => {
                 '/ws': {
                     target: 'ws://localhost:3001',
                     ws: true,
+                },
+                '/api': {
+                    target: 'http://localhost:3001',
+                    changeOrigin: true,
+                    secure: false,
                 }
             }
         },

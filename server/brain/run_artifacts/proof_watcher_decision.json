@@ -1,0 +1,65 @@
+{
+    "thoughts": "The current dwell time of 2ms indicates a total lack of visual engagement, likely due to a 'Forensic' layout that feels too clinical and data-dense for an initial scan. By pivoting to a TRIPTYCH strategy, we create three distinct architectural pillars of value that align with the center-balanced hero section above. This reduces cognitive load while maintaining the 'Executive Dashboard' aesthetic. I have restructured the visual code to use a high-contrast dark theme with glowing accent points (#E29578) to draw the eye toward the most significant growth metrics.",
+    "changes": {
+        "layout_strategy": "TRIPTYCH",
+        "headline": "Architecting the Future of Lead Acquisition",
+        "subhead": "Beyond simple outreach—Salesack provides the structural integrity required for rapid market dominance and predictable revenue scaling.",
+        "visual_code": "<div class=\"w-full max-w-7xl mx-auto py-12 px-4\" style=\"font-family: 'Montserrat';\"><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\"><div class=\"relative p-8 bg-[#1A3C40] rounded-2xl border border-[#006D77]/50 shadow-xl overflow-hidden group hover:border-[#E29578] transition-all duration-500\"><div class=\"absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity\"><svg width=\"80\" height=\"80\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#83C5BE\" stroke-width=\"1\"><path d=\"M2 20h20M2 12h20M2 4h20\"/></svg></div><span class=\"text-[#E29578] text-xs font-bold uppercase tracking-[0.3em]\">Pillar 01</span><h4 class=\"text-[#F1EFE7] text-xl font-light mt-4 mb-8\">Velocity Core</h4><div class=\"flex items-baseline gap-2\"><span class=\"text-5xl font-bold text-[#F1EFE7] tracking-tighter\">312%</span><span class=\"text-[#83C5BE] text-sm\">Growth</span></div><p class=\"text-[#83C5BE] text-sm mt-4 leading-relaxed\">Automated funnel optimization cycles designed for maximum lead conversion speed.</p><div class=\"mt-8 h-1 w-full bg-[#006D77]/30\"><div class=\"h-full bg-[#E29578] w-[78%] animate-pulse\"></div></div></div><div class=\"relative p-8 bg-[#006D77] rounded-2xl border border-[#83C5BE]/30 shadow-2xl transform md:-translate-y-4\"><div class=\"flex justify-between items-center mb-10\"><div class=\"px-3 py-1 bg-[#1A3C40] rounded text-[10px] text-[#83C5BE] font-bold uppercase tracking-widest\">Mainframe Active</div><div class=\"w-2 h-2 rounded-full bg-[#E29578] animate-ping\"></div></div><span class=\"text-[#F1EFE7] text-xs font-bold uppercase tracking-[0.3em]\">Pillar 02</span><h4 class=\"text-[#F1EFE7] text-xl font-light mt-4 mb-8\">Stability Engine</h4><div class=\"flex items-baseline gap-2\"><span class=\"text-5xl font-bold text-[#F1EFE7] tracking-tighter\">99.98%</span></div><p class=\"text-[#F1EFE7]/80 text-sm mt-4 leading-relaxed\">Enterprise-grade infrastructure uptime ensuring your growth ecosystem never sleeps.</p><div class=\"mt-10 grid grid-cols-4 gap-1 h-12 items-end\"><div class=\"bg-[#F1EFE7]/20 h-1/2\"></div><div class=\"bg-[#F1EFE7]/40 h-3/4\"></div><div class=\"bg-[#E29578] h-full\"></div><div class=\"bg-[#F1EFE7]/30 h-2/3\"></div></div></div><div class=\"relative p-8 bg-[#1A3C40] rounded-2xl border border-[#006D77]/50 shadow-xl group hover:border-[#83C5BE] transition-all duration-500\"><span class=\"text-[#E29578] text-xs font-bold uppercase tracking-[0.3em]\">Pillar 03</span><h4 class=\"text-[#F1EFE7] text-xl font-light mt-4 mb-8\">Revenue Multiplier</h4><div class=\"flex items-baseline gap-2\"><span class=\"text-5xl font-bold text-[#F1EFE7] tracking-tighter\">4.2x</span><span class=\"text-[#83C5BE] text-sm\">Yield</span></div><p class=\"text-[#83C5BE] text-sm mt-4 leading-relaxed\">Average annualized revenue increase for partners integrated into the Salesack framework.</p><div class=\"mt-8 flex gap-2\"><div class=\"flex-1 h-1 bg-[#83C5BE]/50\"></div><div class=\"flex-1 h-1 bg-[#83C5BE]/50\"></div><div class=\"flex-1 h-1 bg-[#E29578]\"></div></div></div></div></div>",
+        "evidence_items": [
+            {
+                "id": "stat_01",
+                "label": "Conversion Velocity",
+                "value": "312%",
+                "description": "Speed of funnel movement.",
+                "icon": "Zap",
+                "unit": "Percentage",
+                "visual_type": "Progress Bar"
+            },
+            {
+                "id": "stat_02",
+                "label": "System Uptime",
+                "value": "99.98%",
+                "description": "Critical reliability.",
+                "icon": "Shield",
+                "unit": "Uptime",
+                "visual_type": "Digital Clock"
+            },
+            {
+                "id": "stat_03",
+                "label": "Revenue Multiplier",
+                "value": "4.2x",
+                "description": "Average subscriber growth.",
+                "icon": "TrendingUp",
+                "unit": "Multiplier",
+                "visual_type": "Growth Chart"
+            }
+        ],
+        "testimonials": [
+            {
+                "id": "t1",
+                "name": "Marcus Thorne",
+                "title": "Director of Growth",
+                "company": "Nexus Systems",
+                "quote": "Salesack didn't just give us leads; they gave us a structural advantage over our competitors.",
+                "image_prompt": "Professional man in his 40s, minimalist office background, architectural lighting"
+            },
+            {
+                "id": "t2",
+                "name": "Elena Rodriguez",
+                "title": "CEO",
+                "company": "Vantage Flow",
+                "quote": "The reliability of the Salesack infrastructure is unmatched. We scaled 4x without a single minute of downtime.",
+                "image_prompt": "Professional woman, modern tech environment, blue and orange ambient lighting"
+            },
+            {
+                "id": "t3",
+                "name": "David Chen",
+                "title": "Head of Sales Ops",
+                "company": "CloudScale",
+                "quote": "The conversion velocity metrics are transformative. We're closing deals 3x faster than last quarter.",
+                "image_prompt": "Young professional, tech startup vibe, soft focus background"
+            }
+        ]
+    },
+    "confidence": 98
+}

@@ -5,18 +5,27 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import dotenv from 'dotenv';
+import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load env vars
+dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
+
 // Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/hero_metrics.json');
+const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
 const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/hero_block_challenger.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const VIDEO_FILE = path.resolve(__dirname, '../../../client/public/assets/veo_video_hero_challenger.mp4');
+const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/hero_watcher_snapshot.png');
+const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/hero_watcher_decision.json');
 
 // Models
-const WATCHER_MODEL = 'gemini-3-flash-preview'; // As requested by user
+
+
+const WATCHER_MODEL = MODELS.ARCHITECT_TEXT;
 
 puppeteer.use(StealthPlugin());
 
@@ -34,9 +43,15 @@ export class HeroWatcher {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            await page.goto('http://localhost:5173', { waitUntil: 'networkidle0' });
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
+            await page.goto(url, { waitUntil: 'networkidle0' });
             await page.waitForSelector('[data-component="hero-block"]', { timeout: 5000 });
             const screenshot = await page.screenshot({ encoding: 'binary' });
+
+            // Save for user visibility
+            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
+            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+
             return Buffer.from(screenshot);
         } catch (e) {
             console.error("❌ Snapshot failed (Is Client Running?):", e);
@@ -108,25 +123,33 @@ export class HeroWatcher {
             **CONTEXT**:
             Brand: "${researchCtx.brandDNA?.name?.value}"
             Strategy: "${researchCtx.brandDNA?.rationale?.value}"
-            Video Prompt: "${currentHero.content?.video_prompt}"
+            Video Prompt: "${currentHero.visual_asset?.prompt_signature}"
             
             **TASK (Deep Think)**:
-            1. **Search**: Search for "${researchCtx.industry || 'Modern'} high converting hero sections" to find benchmarks.
-            2. **Analyze**: Look at the Snapshot and Video. Why are users failing to click or stay?
+            1. **Analyze**: Look at the Snapshot and Video. 
+               - **READABILITY**: Does the text blend into the background? Check contrast (Target: 4.5:1).
+               - **RETAIN**: Why are users failing to click or stay?
             3. **Diagnose**: 
-               - If CTR < 25%: Fix the Headline/CTA.
-               - If Retention < 40%: Fix the Video (it's boring/irrelevant).
-            4. **Mutate**: Propose a Specfic Fix.
+               - If Contrast < 4.5:1: Use a lighter/darker color from palette OR add backdrop blur.
+               - If Retention < 40%: Refine the video movement/subject.
+            4. **Mutate**: Propose a Specific Fix.
             
             **OUTPUT JSON**:
             {
-                "thoughts": "Your analysis...",
+                "thoughts": "Your analysis of metrics and visual contrast...",
                 "fix_type": "VIDEO" | "COPY" | "VISUAL",
+                "contrast_audit": "Pass/Fail - Explanation",
                 "changes": {
                     "headline": "New Headline",
                     "subhead": "New Subhead",
                     "cta_text": "New CTA",
-                    "video_prompt": "Refined Video Prompt"
+                    "video_prompt": "Refined Video Prompt",
+                    "visual_fixes": {
+                        "headline_color": "#Hex picked from palette for contrast",
+                        "subhead_color": "#Hex picked from palette for contrast",
+                        "container_blur": "blur(8px)" | "none",
+                        "overlay_gradient": "e.g. linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8))"
+                    }
                 },
                 "confidence": 0-100
             }
@@ -141,13 +164,15 @@ export class HeroWatcher {
                 model: WATCHER_MODEL,
                 contents: [{ role: 'user', parts }],
                 config: {
-                    tools: [{ googleSearch: {} }], // Live Grounding
                     responseMimeType: "application/json"
                 }
             });
 
             const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
             const optimization = JSON.parse(responseText);
+
+            // Save for user visibility
+            await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
 
             console.log("\n🧠 WATCHER DIAGNOSIS:\n", optimization.thoughts);
             console.log("\n💡 PROPOSED FIX:", optimization.changes);
@@ -157,22 +182,101 @@ export class HeroWatcher {
                 const newHero = {
                     ...currentHero,
                     variant_id: `hero_v${Date.now()}`,
-                    content: {
-                        ...currentHero.content,
-                        headline: optimization.changes.headline,
-                        subhead: optimization.changes.subhead,
-                        cta: { ...currentHero.content.cta, text: optimization.changes.cta_text },
-                        video_prompt: optimization.changes.video_prompt
+                    overlay_content: {
+                        ...currentHero.overlay_content,
+                        headline: {
+                            ...currentHero.overlay_content.headline,
+                            text: optimization.changes.headline,
+                            styles: {
+                                ...currentHero.overlay_content.headline.styles,
+                                color: optimization.changes.visual_fixes?.headline_color || currentHero.overlay_content.headline.styles.color
+                            }
+                        },
+                        subhead: {
+                            ...currentHero.overlay_content.subhead,
+                            text: optimization.changes.subhead,
+                            styles: {
+                                ...currentHero.overlay_content.subhead.styles,
+                                color: optimization.changes.visual_fixes?.subhead_color || currentHero.overlay_content.subhead.styles.color
+                            }
+                        },
+                        cta: {
+                            ...currentHero.overlay_content.cta,
+                            text: optimization.changes.cta_text
+                        }
+                    },
+                    layout_config: {
+                        ...currentHero.layout_config,
+                        overlay_gradient: optimization.changes.visual_fixes?.overlay_gradient || currentHero.layout_config.overlay_gradient,
+                        container_styles: {
+                            ...currentHero.layout_config.container_styles,
+                            backdropFilter: optimization.changes.visual_fixes?.container_blur || currentHero.layout_config.container_styles.backdropFilter
+                        }
+                    },
+                    visual_asset: {
+                        ...currentHero.visual_asset,
+                        prompt_signature: optimization.changes.video_prompt
                     }
                 };
                 await fs.writeFile(CHALLENGER_FILE, JSON.stringify(newHero, null, 4));
                 console.log("🚀 Applied Fix! New Challenger Deployed.");
+
+                // NEW: Automatic "Bake" Loop
+                if (optimization.fix_type === 'VIDEO' || optimization.fix_type === 'VISUAL') {
+                    console.log("🔥 Fix type is VIDEO/VISUAL. Triggering Asset Bake (Veo)...");
+                    await this.bakeVideo(newHero);
+                }
+
             } else {
                 console.log("⚠️ Confidence too low. No changes made.");
             }
 
         } catch (error) {
             console.error("❌ Watcher Error:", error);
+        }
+    }
+
+    private async bakeVideo(config: any) {
+        const attrs = config.visual_asset?.attributes || {};
+        const prompt = config.visual_asset?.prompt_signature;
+
+        const veoPrompt = `
+        Cinematic 4K video.
+        Description: ${prompt}
+        Lighting: ${attrs.lighting || 'Cinematic'}.
+        Movement: ${attrs.camera_movement || 'Steady'}.
+        Focus: ${attrs.subject_focus || 'Main subject'}.
+        Color: ${attrs.color_grade || '#FFFFFF'}.
+        `;
+
+        try {
+            console.log("🎥 Connecting to Veo...");
+            // @ts-ignore
+            let operation = await this.client.models.generateVideos({
+                model: MODELS.FORGE_VIDEO_HQ,
+                prompt: veoPrompt,
+                config: { aspectRatio: '16:9' }
+            });
+
+            while (!operation.done) {
+                console.log("...Generating Asset (Waiting 5s)...")
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+                // @ts-ignore
+                operation = await this.client.operations.getVideosOperation({ operation });
+            }
+
+            const videos = operation.response?.generatedVideos;
+            if (!videos || !videos.length) throw new Error("No videos returned.");
+
+            // @ts-ignore
+            await this.client.files.download({
+                file: videos[0].video!,
+                downloadPath: VIDEO_FILE,
+            });
+
+            console.log(`✅ Success! Video baked directly to assets: ${VIDEO_FILE}`);
+        } catch (error) {
+            console.error("❌ Video Bake Failed:", error);
         }
     }
 }

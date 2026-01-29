@@ -1,4 +1,5 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import { MODELS } from '@shared/constants';
 
 export interface NanoBananaContext {
     brandName: string;
@@ -12,27 +13,38 @@ export interface NanoBananaContext {
 
 export interface NanoBananaResult {
     strategy: string;
+    layout_strategy: 'SPLIT' | 'CLOUDS' | 'TRIPTYCH' | 'FORENSIC_GRID';
     selected_imagery_concept: string;
     headline: string;
     subhead: string;
     graphic_caption: string;
-    data_points: Array<{ label: string; value: number; unit?: string }>;
-    graphic_type: 'progress' | 'trend' | 'stat';
+    evidence_items: Array<{
+        id: string;
+        label: string;
+        value: string | number;
+        unit?: string;
+        description?: string;
+        icon?: string;
+        visual_type?: 'chart' | 'stat' | 'icon' | 'mini-trend';
+    }>;
+    graphic_type: 'generative';
     primary_color: string;
     accent_color: string;
     backgroundColor: string;
     textColor: string;
+    visual_code: string; // The full Tailwind/Grid layout logic
 }
 
 export class NanoBananaService {
     private client: GoogleGenAI;
-    private modelName = 'gemini-3-flash-preview';
+    private textModel = MODELS.ARCHITECT_TEXT;
+    private imageModel = MODELS.FORGE_IMAGE;
 
     constructor(apiKey: string) {
         this.client = new GoogleGenAI({ apiKey });
     }
 
-    async generateInitialVisual(context: NanoBananaContext): Promise<NanoBananaResult> {
+    async generateProofVisual(context: NanoBananaContext): Promise<NanoBananaResult> {
         const prompt = `
             You are a 'Data Visualization Architect' specializing in high-fidelity "Nano Banana" style Trust Graphics.
             "Nano Banana" is the NAME OF THE VISUAL STYLE (Minimalist, analytical, high-contrast, forensic). 
@@ -48,23 +60,44 @@ export class NanoBananaService {
             ${JSON.stringify(context.imagery)}
             
             **DESIGN GUARDRAILS**:
-            - **Colors**: ${JSON.stringify(context.colors)}
+            - **Colors**: ${JSON.stringify(context.colors)} (Primary/Secondary)
             - **Fonts**: ${JSON.stringify(context.fonts)}
+            - **Typography Rule**: You MUST apply these specific fonts. If ${JSON.stringify(context.fonts[0])} is provided, use it for all text. Do NOT use generic 'font-mono' or 'font-sans' classes unless requested for a specific aesthetic, but even then, prioritize brand fonts.
+
+            **STRICT CONTENT GUARDRAILS (PROHIBITED)**:
+            - **CRITICAL**: The HTML/UI you generate must be "Executive Dashboard" style, NOT "Debug Consoles". Do NOT put "v1.0", "Alpha", or underscores in the UI elements.
+            - NO underscores in labels (e.g. "CRM_SYNC_01" -> "Pipeline Synchronization").
+            - NO "Dev-Speak" or System IDs (e.g. "Module: Lead_Gen_Alpha" -> "Module: Growth Engine").
+            - **EXCEPTION**: You MUST preserve impressive NUMBERS (e.g. "99.9% Uptime", "4.8x ROI"). Keep the stats, but make the labels "Executive-Level Branding".
 
             **TASK**:
-            1. Create a "Trust Signature" using data for the brand "${context.brandName}". 
-            2. Cross-correlate the data with one of the user's imagery concepts.
-            3. Choose a chart type (progress | trend | stat).
-            4. Return the visual configuration.
+            1. **Layout Strategy**: Choose a grid pattern (SPLIT | CLOUDS | TRIPTYCH | FORENSIC_GRID). 
+            2. **Evidence**: Generate 3-6 distinct pieces of evidence (stats, durability claims, performance benchmarks) for the brand "${context.brandName}".
+            3. **Generative Layout**: Write a high-fidelity 'visual_code' string. 
+               - Use CSS Grid (grid-cols-12) or Flexbox.
+               - Ensure it matches the chosen Layout Strategy.
+               - Make it responsive (e.g., stacked on mobile, grid on desktop).
+               - Include subtle micro-animations (animate-pulse, hover effects).
+            4. Return the full structural configuration.
 
-            **CRITICAL**: Do NOT use the phrase "Nano Banana" in the headline or data labels unless the user explicitly requested it in the brand mission.
-            Use the actual brand name: "${context.brandName}".
+            **DESIGN GUIDELINES**:
+            - 'SPLIT': Text on one side (col-span-5), complex visual dashboard on the other (col-span-7).
+            - 'CLOUDS': Modular cards in a grid-cols-2 or 3.
+            - 'TRIPTYCH': Three balanced vertical columns.
+            - Use ACTUAL colors: ${JSON.stringify(context.colors)}.
+
+            **CRITICAL**: 
+            - Use ONLY Tailwind classes. No external scripts. 
+            - The visual_code is a standalone inner container.
+            - **BOUNDARIES**: The code will be rendered inside a 'max-w-7xl' (1280px) centered container.
+            - **ALIGNMENT**: For high-impact storytelling, prioritize center-aligned headline structures within the grid.
+            - **RESPONSIVENESS**: Always start mobile-first (grid-cols-1) and scale to lg:grid-cols-12.
 
             Return JSON.
         `;
 
         const response = await this.client.models.generateContent({
-            model: this.modelName,
+            model: this.textModel,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
                 responseMimeType: 'application/json',
@@ -72,35 +105,111 @@ export class NanoBananaService {
                     type: Type.OBJECT,
                     properties: {
                         strategy: { type: Type.STRING },
+                        layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH', 'FORENSIC_GRID'] },
                         selected_imagery_concept: { type: Type.STRING },
                         headline: { type: Type.STRING },
                         subhead: { type: Type.STRING },
                         graphic_caption: { type: Type.STRING },
-                        data_points: {
+                        evidence_items: {
                             type: Type.ARRAY,
                             items: {
                                 type: Type.OBJECT,
                                 properties: {
+                                    id: { type: Type.STRING },
                                     label: { type: Type.STRING },
-                                    value: { type: Type.NUMBER },
-                                    unit: { type: Type.STRING }
+                                    value: { type: Type.STRING },
+                                    unit: { type: Type.STRING },
+                                    description: { type: Type.STRING },
+                                    icon: { type: Type.STRING },
+                                    visual_type: { type: Type.STRING }
                                 },
-                                required: ["label", "value"]
+                                required: ["id", "label", "value"]
                             }
                         },
-                        graphic_type: { type: Type.STRING, enum: ["progress", "trend", "stat"] },
+                        graphic_type: { type: Type.STRING },
                         primary_color: { type: Type.STRING },
                         accent_color: { type: Type.STRING },
                         backgroundColor: { type: Type.STRING },
-                        textColor: { type: Type.STRING }
+                        textColor: { type: Type.STRING },
+                        visual_code: { type: Type.STRING }
                     },
-                    required: ["strategy", "selected_imagery_concept", "headline", "subhead", "graphic_caption", "data_points", "graphic_type", "primary_color", "accent_color", "backgroundColor", "textColor"]
+                    required: ["strategy", "layout_strategy", "selected_imagery_concept", "headline", "subhead", "graphic_caption", "evidence_items", "graphic_type", "primary_color", "accent_color", "backgroundColor", "textColor", "visual_code"]
                 }
             }
         });
 
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!text) throw new Error("NanoBanana generation failed");
+        const result = JSON.parse(text);
+
+        return result;
+    }
+
+    async generatePASVisual(context: NanoBananaContext): Promise<any> {
+        const prompt = `
+            You are a 'Conversion Copywriter' and 'Layout Architect'.
+            Create a "Nano Banana" style PAS (Problem-Agitation-Solution) section.
+            
+            **BRAND CONTEXT**:
+            - Brand Name: "${context.brandName}"
+            - Mission: "${context.mission}"
+            - Rationale (The Core Strategy): "${context.rationale}"
+            - Mood/Tone: ${context.mood.join(', ')}
+            
+            **VOICE**: Use the Brand DNA voice consistently across all 3 phases.
+            
+            **TASK**:
+            1. **PAS Strategy**: Identify a core PROBLEM childhood athletics/accessibility solves, AGITATE the consequences of inaction, and present "${context.brandName}" as the SOLUTION. Use the "Insane Rationale": "${context.rationale}".
+            2. **Layout Strategy**: Choose a grid pattern (SPLIT | CLOUDS | TRIPTYCH).
+            3. **Generative Code**: Write 'visual_code' string:
+               - **IMPORTANT**: Start the string with a valid HTML tag (e.g. \`<section ...\`). Do NOT omit the opening bracket.
+               - Use a high-impact CSS Grid (grid-cols-12).
+               - Respect the 1280px (max-w-7xl) container contract.
+             **DESIGN GUARDRAILS**:
+            - **Colors**: ${JSON.stringify(context.colors)}
+            - **Fonts**: ${JSON.stringify(context.fonts)}
+            - **Typography Rule**: Strictly use these fonts: ${JSON.stringify(context.fonts)}. 
+
+            Return JSON.
+        `;
+
+        const response = await this.client.models.generateContent({
+            model: this.textModel,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        strategy: { type: Type.STRING },
+                        layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH'] },
+                        headline: { type: Type.STRING },
+                        steps: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    id: { type: Type.STRING },
+                                    phase: { type: Type.STRING, enum: ['PROBLEM', 'AGITATION', 'SOLUTION'] },
+                                    title: { type: Type.STRING },
+                                    description: { type: Type.STRING }
+                                },
+                                required: ["id", "phase", "title", "description"]
+                            }
+                        },
+                        closing_statement: { type: Type.STRING },
+                        backgroundColor: { type: Type.STRING },
+                        textColor: { type: Type.STRING },
+                        primary_color: { type: Type.STRING },
+                        visual_code: { type: Type.STRING }
+                    },
+                    required: ["strategy", "layout_strategy", "headline", "steps", "closing_statement", "backgroundColor", "textColor", "visual_code"]
+                }
+            }
+        });
+
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("PAS generation failed");
         return JSON.parse(text);
     }
 
@@ -117,7 +226,8 @@ export class NanoBananaService {
         }
 
         const prompt = `
-            You are 'Watcher', optimizing a "Nano Banana" style Proof section.
+            You are 'Watcher', a Senior UX Architect and Conversion Strategist.
+            Optimize this "Nano Banana" section by evolving its GRID STRUCTURE.
             
             **CURRENT PERFORMANCE**:
             - Avg Dwell Time: ${performance.avgDwell}ms (Goal: 2000ms+)
@@ -125,30 +235,26 @@ export class NanoBananaService {
             **CURRENT CONFIG**:
             ${JSON.stringify(current)}
 
-            **BRAND CONTEXT**:
-            - Brand Name: "${context.brandName}"
-            - Mission: "${context.mission}"
-            - Imagery: ${JSON.stringify(context.imagery)}
-
             **TASK**:
-            1. Analyze the Snapshot (if provided). Why are users scrolling past?
-            2. Mutate the strategy to increase informational density or emotional resonance for "${context.brandName}".
-            3. Ensure the colors and labels provide high "Stop Power".
-
-            **CRITICAL**: Do NOT use the term "Nano Banana" as the brand or product name. 
-            Use "${context.brandName}".
+            1. Analyze the current layout and informational density.
+            2. Mutate the Grid Strategy (SPLIT | CLOUDS | TRIPTYCH) if needed.
+            3. Rewrite the 'visual_code' to be more immersive or intuitive.
+            4. Ensure "${context.brandName}" storytelling remains central.
+            5. **ALIGNMENT ALERT**: The Hero section above is strictly center-aligned. Ensure your layout feels balanced—avoid heavy left-side-only weights.
+            6. **BOUNDARY CONTRACT**: Your code operates within a 1280px (max-w-7xl) limit.
 
             **OUTPUT JSON**:
             {
-                "thoughts": "Detailed forensic diagnosis of why users aren't stopping and what you're changing",
+                "thoughts": "Detailed forensic diagnosis of layout effectiveness",
                 "changes": {
+                    "layout_strategy": "String",
                     "headline": "String",
                     "subhead": "String",
-                    "graphic_caption": "String",
-                    "graphic_type": "progress | stat | trend",
-                    "primary_color": "Hex",
-                    "accent_color": "Hex"
-                },
+                "visual_code": "Updated HTML/Tailwind (Include data-tier-id and data-cta-id for offer tracking)",
+                "evidence_items": "Array of 3-6 items",
+                "testimonials": "Array of testimonials (typically 3-6 items)",
+                "tiers": "Updated Offer Tiers (if offer section)"
+            },
                 "confidence": 0-100
             }
         `;
@@ -156,7 +262,7 @@ export class NanoBananaService {
         parts.push({ text: prompt });
 
         const response = await this.client.models.generateContent({
-            model: this.modelName,
+            model: this.imageModel,
             contents: [{ role: 'user', parts }],
             config: {
                 responseMimeType: 'application/json',
@@ -167,14 +273,43 @@ export class NanoBananaService {
                         changes: {
                             type: Type.OBJECT,
                             properties: {
+                                layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH', 'FORENSIC_GRID', 'MASONRY', 'GRID', 'STACK', 'BLUEPRINT', 'NODES'] },
                                 headline: { type: Type.STRING },
                                 subhead: { type: Type.STRING },
-                                graphic_caption: { type: Type.STRING },
-                                graphic_type: { type: Type.STRING },
-                                primary_color: { type: Type.STRING },
-                                accent_color: { type: Type.STRING }
+                                visual_code: { type: Type.STRING },
+                                evidence_items: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            id: { type: Type.STRING },
+                                            label: { type: Type.STRING },
+                                            value: { type: Type.STRING },
+                                            unit: { type: Type.STRING },
+                                            description: { type: Type.STRING },
+                                            icon: { type: Type.STRING },
+                                            visual_type: { type: Type.STRING }
+                                        },
+                                        required: ["id", "label", "value"]
+                                    }
+                                },
+                                testimonials: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            id: { type: Type.STRING },
+                                            name: { type: Type.STRING },
+                                            title: { type: Type.STRING },
+                                            company: { type: Type.STRING },
+                                            quote: { type: Type.STRING },
+                                            image_prompt: { type: Type.STRING }
+                                        },
+                                        required: ["id", "name", "title", "company", "quote", "image_prompt"]
+                                    }
+                                }
                             },
-                            required: ["headline", "subhead", "graphic_caption", "graphic_type", "primary_color", "accent_color"]
+                            required: ["layout_strategy", "headline", "subhead", "visual_code"]
                         },
                         confidence: { type: Type.NUMBER }
                     },
@@ -198,4 +333,230 @@ export class NanoBananaService {
             throw e;
         }
     }
+
+    async generateSpecVisual(context: NanoBananaContext): Promise<any> {
+        const prompt = `
+            You are a 'Technical Product Architect' and 'Interaction Designer'.
+            Create a "Nano Banana" style Interactive Spec (The Technical Blueprint) for "${context.brandName}".
+            "Nano Banana" is the NAME OF THE VISUAL STYLE (Forensic, blueprint-heavy, high-fidelity). 
+            
+            **BRAND CONTEXT**:
+            - Brand: "${context.brandName}"
+            - Strategy: "${context.rationale}"
+            - Colors: ${JSON.stringify(context.colors)}
+            
+            **TASK**:
+            1. **Technical Nodes**: Identify 3-5 core technical "Spec Nodes" for the brand (e.g. for Salesack: "CRM Mirroring", "Outreach Engine", "Lead Scoring Logic").
+            2. **Layout Strategy**: Choose a grid pattern (BLUEPRINT | NODES | TRIPTYCH).
+            3. **INTERACTION ENGINE**: 
+               - Write 'visual_code' string using HTML/Tailwind.
+               - **REQUIRED**: Use INLINE Vanilla JS (within the HTML string) to handle interactions.
+               - use brand colors for hover states: ${JSON.stringify(context.colors)}.
+               - Center-align the core schematic.
+            
+            **DESIGN GUARDRAILS**:
+            - **Colors**: ${JSON.stringify(context.colors)}
+            - **Fonts**: ${JSON.stringify(context.fonts)}
+            - **Typography Rule**: Use ${JSON.stringify(context.fonts[0])} for all labels and descriptions.
+            
+            **STRICT CONTENT GUARDRAILS (PROHIBITED)**:
+            - **CRITICAL**: The HTML/UI you generate must be "Executive Dashboard" style, NOT "Debug Consoles". Do NOT put "v1.0", "Alpha", or underscores in the UI elements.
+            - NO underscores in labels (e.g. "CRM_SYNC_01" -> "Pipeline Synchronization").
+            - NO "Dev-Speak" or System IDs (e.g. "Module: Lead_Gen_Alpha" -> "Module: Growth Engine").
+            - **EXCEPTION**: You MUST preserve impressive NUMBERS (e.g. "99.9% Uptime", "4.8x ROI"). Keep the stats, but make the labels "Executive-Level Branding".
+            - Use a 'Blueprint' feel (thin grid lines, subtle glows, precisely aligned nodes).
+            - Ensure it's responsive (Stack on mobile, Blueprint schematic on desktop).
+            - Contract: The code will render inside a 'max-w-7xl' container.
+
+            Return JSON.
+        `;
+
+        const response = await this.client.models.generateContent({
+            model: this.textModel,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        strategy: { type: Type.STRING },
+                        layout_strategy: { type: Type.STRING, enum: ['BLUEPRINT', 'NODES', 'TRIPTYCH'] },
+                        headline: { type: Type.STRING },
+                        subhead: { type: Type.STRING },
+                        nodes: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    id: { type: Type.STRING },
+                                    label: { type: Type.STRING },
+                                    description: { type: Type.STRING },
+                                    icon: { type: Type.STRING }
+                                },
+                                required: ["id", "label", "description"]
+                            }
+                        },
+                        backgroundColor: { type: Type.STRING },
+                        textColor: { type: Type.STRING },
+                        primary_color: { type: Type.STRING },
+                        visual_code: { type: Type.STRING }
+                    },
+                    required: ["strategy", "layout_strategy", "headline", "subhead", "nodes", "backgroundColor", "textColor", "visual_code"]
+                }
+            }
+        });
+
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Spec generation failed");
+        return JSON.parse(text);
+    }
+
+    async generateSocialVisual(context: NanoBananaContext): Promise<any> {
+        const prompt = `
+            You are a 'Social Proof Architect'.
+            Create a "Nano Banana" style Verified Testimonials section (Section 5).
+            
+            **BRAND CONTEXT**:
+            - Brand Name: "${context.brandName}"
+            - Mission: "${context.mission}"
+            - Rationale: "${context.rationale}"
+            - Colors: ${JSON.stringify(context.colors)}
+            - Fonts: ${JSON.stringify(context.fonts)}
+            
+            **TASK**:
+            1. **Testimonials**: Generate 3-6 high-fidelity, professional personas (Full Name, Executive Title, Company Name). Choose the count that best fits your chosen layout.
+            2. **Quotes**: Write 1-2 sentence powerful testimonials using the Brand DNA voice. Do NOT use jargon or dev-speak.
+            3. **Headshot Prompts**: For EACH persona, write a detailed photography prompt for generating a "Human-like, professional, high-end business portrait" using an image AI. 
+            4. **Layout Strategy**: Choose a grid pattern (MASONRY | GRID | STACK).
+            5. **Visual Layout**: Write 'visual_code' string:
+               - Use the chosen layout strategy.
+               - **IMPORTANT**: Use placeholders for images: \`/assets/testimonial_1_challenger.png\` to \`/assets/testimonial_4_challenger.png\`.
+               - Ensure high contrast and professional executive look.
+               - Center-align the section headline.
+            
+            **DESIGN GUARDRAILS**:
+            - NO underscores in names or titles.
+            - NO generic "User 1" names.
+            - Contract: max-w-7xl centered container.
+            
+            Return JSON.
+        `;
+
+        const response = await this.client.models.generateContent({
+            model: this.textModel,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        strategy: { type: Type.STRING },
+                        layout_strategy: { type: Type.STRING, enum: ['MASONRY', 'GRID', 'STACK'] },
+                        headline: { type: Type.STRING },
+                        subhead: { type: Type.STRING },
+                        testimonials: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    id: { type: Type.STRING },
+                                    name: { type: Type.STRING },
+                                    title: { type: Type.STRING },
+                                    company: { type: Type.STRING },
+                                    quote: { type: Type.STRING },
+                                    image_prompt: { type: Type.STRING }
+                                },
+                                required: ["id", "name", "title", "company", "quote", "image_prompt"]
+                            }
+                        },
+                        backgroundColor: { type: Type.STRING },
+                        textColor: { type: Type.STRING },
+                        visual_code: { type: Type.STRING }
+                    },
+                    required: ["strategy", "layout_strategy", "headline", "subhead", "testimonials", "backgroundColor", "textColor", "visual_code"]
+                }
+            }
+        });
+
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Social generation failed");
+        return JSON.parse(text);
+    }
+
+    async generateOfferVisual(context: NanoBananaContext): Promise<any> {
+        const prompt = `
+            You are a 'Conversion Rate Optimization (CRO) Expert' and 'Venture Strategist'.
+            Create a "Nano Banana" style Offer Section (Final Block) for "${context.brandName}".
+            
+            **BRAND CONTEXT**:
+            - Brand Name: "${context.brandName}"
+            - Industry: "${(context as any).brandDNA?.industry?.value || 'General'}"
+            - Brand DNA Rationale: "${context.rationale}"
+            
+            **TASK**:
+            1. **Offer Strategy**: Based on the industry and strategy, choose an offer type ('one-time' | 'subscription' | 'lead-gen' | 'custom').
+            2. **Tiers**: Generate 1-3 tiers (e.g., "The Starter", "The Pro", "The Enterprise").
+            3. **Layout Strategy**: Choose a grid pattern (SPLIT | CLOUDS | TRIPTYCH).
+            4. **Visual Layout (STRICT TRACKING)**: Write 'visual_code' string using HTML/Tailwind:
+               - Each tier card must have a \`data-tier-id="[tier-id]"\` attribute.
+               - Every button or clickable action MUST have a \`data-cta-id="[action-slug]"\` attribute.
+               - **OPTIONAL**: You can still include \`onclick="window.track('offer_cta_click', { tierId: '[tier-id]', actionId: '[action-slug]' })"\` for redundancy.
+               - The visual code must render the cards, pricing, and features described in the JSON.
+               - Ensure absolute adherence to the brand's mood (${context.mood.join(', ')}) and colors (${JSON.stringify(context.colors)}).
+            
+            **DESIGN GUARDRAILS**:
+            - 'Executive Dashboard' aesthetic. No generic landing page templates.
+            - Ensure it feels like a "Closing Deal" (High trust, clear value, zero friction).
+            - Contract: max-w-7xl centered container.
+            
+            Return JSON.
+        `;
+
+        const response = await this.client.models.generateContent({
+            model: this.textModel,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: {
+                responseMimeType: 'application/json',
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        strategy: { type: Type.STRING },
+                        offer_type: { type: Type.STRING, enum: ['one-time', 'subscription', 'lead-gen', 'custom'] },
+                        layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH'] },
+                        headline: { type: Type.STRING },
+                        subhead: { type: Type.STRING },
+                        tiers: {
+                            type: Type.ARRAY,
+                            items: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    id: { type: Type.STRING },
+                                    name: { type: Type.STRING },
+                                    price: { type: Type.STRING },
+                                    interval: { type: Type.STRING },
+                                    description: { type: Type.STRING },
+                                    features: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                    cta_text: { type: Type.STRING },
+                                    is_highlighted: { type: Type.BOOLEAN },
+                                    badge: { type: Type.STRING }
+                                },
+                                required: ["id", "name", "price", "description", "features", "cta_text"]
+                            }
+                        },
+                        guarantee_text: { type: Type.STRING },
+                        backgroundColor: { type: Type.STRING },
+                        textColor: { type: Type.STRING },
+                        accentColor: { type: Type.STRING },
+                        visual_code: { type: Type.STRING }
+                    },
+                    required: ["strategy", "offer_type", "layout_strategy", "headline", "subhead", "tiers", "backgroundColor", "textColor", "accentColor", "visual_code"]
+                }
+            }
+        });
+
+        const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!text) throw new Error("Offer generation failed");
+        return JSON.parse(text);
+    }
 }
+

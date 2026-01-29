@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 
@@ -39,7 +39,6 @@ interface BrandResearch {
 export class InitialProofGenerator {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
-    private modelName = 'gemini-3-flash-preview';
 
     constructor() {
         const apiKey = process.env.GEMINI_API_KEY;
@@ -90,7 +89,7 @@ export class InitialProofGenerator {
 
         // === STEP 1: GENERATE STRATEGY & CONTENT (Service Call) ===
         console.log("[Step 1] Requesting Trust Visualization from NanoBananaService...");
-        const generatedData = await this.nanoBanana.generateInitialVisual(context);
+        const generatedData = await this.nanoBanana.generateProofVisual(context);
 
         challenger.meta.strategy = generatedData.strategy;
         challenger.meta.selected_imagery_concept = generatedData.selected_imagery_concept;
@@ -99,7 +98,12 @@ export class InitialProofGenerator {
             headline: generatedData.headline,
             subhead: generatedData.subhead,
             graphic_caption: generatedData.graphic_caption,
-            data_points: generatedData.data_points
+            evidence_items: generatedData.evidence_items
+        };
+
+        challenger.meta = {
+            ...challenger.meta,
+            layout_strategy: generatedData.layout_strategy as any
         };
 
         challenger.graphic_config = {
@@ -107,7 +111,8 @@ export class InitialProofGenerator {
             primary_color: generatedData.primary_color,
             accent_color: generatedData.accent_color,
             show_labels: true,
-            animation_duration: 1.5
+            animation_duration: 1.5,
+            visual_code: generatedData.visual_code
         };
 
         challenger.styles = {

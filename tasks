@@ -46,3 +46,39 @@ Available Models:
 - models/gemini-2.5-flash-native-audio-latest
 - models/gemini-2.5-flash-native-audio-preview-09-2025
 - models/gemini-2.5-flash-native-audio-preview-12-2025
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+an issue since the nav-links and button are deep linked to the forms it means after the intial we can let hero and offer generate these forms and linking after intital what it should generate after intial is it's normal style.
+
+
+"variant_id": "spec_v1769762681268"
+
+
+active_blocks (The Variants): The actual content of 
+hero_block.json
+, offer_block.json, etc. This defines what the user sees.
+system_config (The Rules): This file (
+server/brain/system_config.json
+) contains your Drivers and Targets (e.g., "Target CTR: 25%", "Directives: Use Blue").
+Why store this? Because if you change your Directive or Target, the "context" of the experiment changes, so we want to preserve that rule set alongside the visual content.
+
+
+Now we would be creating new attribute in the hero_block.json  json structure but in the herointitilize and watcher we dont give it any schema we just give it the attributes we want it to generate and it will generate it in the hero_block.json file, but for offer we have it in side of the code it self i.e iun 
+InitialHeroGenerator.ts
+ and 
+HeroWatcher.ts
+ so now we want to add3stuf to this schema in the file and we tell the ai to give usduring geneating the json (extar stuuf a formcontent for contatc nav, another one for the link and cta hero button, then we have the styles of the nav which is the font going to be used and the colro all from our selected fonts and also the palettes, but selected palletes must contatst hero vide) but for offer we dont need to add any schema we jsut use waht is itn the 
+types.ts#L409
+  that all so we just get these data the naming of the links and the connecteion of the links nad buttons tothose formis done by us manually byu code, this is what oi ams saying do you understand what i am saying?

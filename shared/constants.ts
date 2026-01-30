@@ -6,7 +6,7 @@ export const MODELS = {
   ARCHITECT_TEXT: 'gemini-3-flash-preview', // Brain model
   FORGE_IMAGE: 'gemini-2.5-flash-image',
   FORGE_VIDEO: 'veo-3.1-fast-generate-preview', // General video
-  FORGE_VIDEO_HQ: 'veo-3.1-generate-preview', // HQ video
+  FORGE_VIDEO_HQ: 'veo-3.1-fast-generate-preview', // HQ video
   GUARDIAN: 'gemini-3-pro-preview', // Vision/Reasoning
 };
 

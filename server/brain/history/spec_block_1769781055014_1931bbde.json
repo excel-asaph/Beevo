@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1769780842426",
+    "meta": {
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "Bluetone Nexus Core: V1.0",
+        "subhead": "A forensic diagnostic of the synchronization mesh bridging autonomous precision with African regulatory intelligence.",
+        "nodes": [
+            {
+                "id": "node-1",
+                "label": "Spatial Intelligence Core",
+                "description": "High-fidelity mesh geometry designed for non-standard road environments with 99.9% obstacle recognition accuracy.",
+                "icon": "radar"
+            },
+            {
+                "id": "node-2",
+                "label": "Regulatory Harmony Engine",
+                "description": "Real-time compliance ledger that translates local transport statutes into autonomous operation protocols.",
+                "icon": "shield-check"
+            },
+            {
+                "id": "node-3",
+                "label": "Kinetic Energy Recovery",
+                "description": "Proprietary harvesting logic optimizing battery life by 34% across high-heat and varied terrain profiles.",
+                "icon": "battery-bolt"
+            },
+            {
+                "id": "node-4",
+                "label": "Decentralized Fleet Logic",
+                "description": "Peer-to-peer coordination system allowing vehicle swarms to operate with 0.05ms latency without central cloud reliance.",
+                "icon": "network"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class=\"w-full bg-[#242636] p-8 md:p-16 font-['Exo_2'] text-[#F4F1DE] selection:bg-[#40E0D0]/30\"><div class=\"max-w-7xl mx-auto\"><div class=\"grid grid-cols-1 md:grid-cols-2 gap-px bg-[#40E0D0]/10 border border-[#40E0D0]/20 rounded-xl overflow-hidden shadow-2xl\"><div data-tier-id=\"node-1\" class=\"group relative bg-[#2A2D3E] p-8 transition-all hover:bg-[#2F3248]\"><div class=\"absolute top-4 left-4 text-[10px] font-mono text-[#40E0D0]/60 tracking-widest\">SENS_ARRAY_01</div><div class=\"flex flex-col h-full justify-between gap-6\"><div class=\"pt-4\"><h3 class=\"text-2xl font-bold uppercase tracking-tight text-[#40E0D0]\">Topographic Cognition</h3><p class=\"mt-3 text-sm leading-relaxed opacity-70\">99.9% obstacle recognition tailored for non-standard road environments and unmapped terrain.</p></div><div class=\"flex items-center justify-between border-t border-[#40E0D0]/10 pt-4\"><div class=\"flex items-center gap-2 text-xs font-mono text-[#40E0D0]\"><span class=\"w-2 h-2 rounded-full bg-[#40E0D0] animate-pulse\"></span> LATENCY: 0.02ms</div><div class=\"text-[10px] font-bold opacity-40\">V1.0_CORE</div></div></div></div><div data-tier-id=\"node-2\" class=\"group relative bg-[#2A2D3E] p-8 transition-all hover:bg-[#2F3248]\"><div class=\"absolute top-4 right-4 text-[10px] font-mono text-[#E2725B]/60 tracking-widest text-right\">COMP_LAYER_02</div><div class=\"flex flex-col h-full justify-between gap-6\"><div class=\"pt-4\"><h3 class=\"text-2xl font-bold uppercase tracking-tight text-[#E2725B]\">Legislation Sync</h3><p class=\"mt-3 text-sm leading-relaxed opacity-70\">Real-time ledger translating diverse transport statutes into localized autonomous operation protocols.</p></div><div class=\"flex items-center justify-between border-t border-[#E2725B]/10 pt-4\"><div class=\"flex items-center gap-2 text-xs font-mono text-[#E2725B]\">STATUS: 100% ALIGNED</div><div class=\"text-[10px] font-bold opacity-40\">GOV_LINK</div></div></div></div><div data-tier-id=\"node-3\" class=\"group relative bg-[#2A2D3E] p-8 transition-all hover:bg-[#2F3248]\"><div class=\"absolute top-4 left-4 text-[10px] font-mono text-[#50C878]/60 tracking-widest\">THERM_LOGIC_03</div><div class=\"flex flex-col h-full justify-between gap-6\"><div class=\"pt-4\"><h3 class=\"text-2xl font-bold uppercase tracking-tight text-[#50C878]\">Kinetic Harvesting</h3><p class=\"mt-3 text-sm leading-relaxed opacity-70\">Proprietary logic optimizing battery cycles by 34% across high-heat profiles and varied terrain.</p></div><div class=\"flex items-center justify-between border-t border-[#50C878]/10 pt-4\"><div class=\"flex items-center gap-2 text-xs font-mono text-[#50C878]\">EFFICIENCY: +34.2%</div><div class=\"text-[10px] font-bold opacity-40\">PWR_MGT</div></div></div></div><div data-tier-id=\"node-4\" class=\"group relative bg-[#2A2D3E] p-8 transition-all hover:bg-[#2F3248]\"><div class=\"absolute top-4 right-4 text-[10px] font-mono text-[#40E0D0]/60 tracking-widest text-right\">EDGE_SWARM_04</div><div class=\"flex flex-col h-full justify-between gap-6\"><div class=\"pt-4\"><h3 class=\"text-2xl font-bold uppercase tracking-tight text-[#40E0D0]\">Decentralized Path</h3><p class=\"mt-3 text-sm leading-relaxed opacity-70\">P2P fleet coordination ensuring sub-ms response times without reliance on central cloud infrastructure.</p></div><div class=\"flex items-center justify-between border-t border-[#40E0D0]/10 pt-4\"><div class=\"flex items-center gap-2 text-xs font-mono text-[#40E0D0]\">NODES: 4,096 SYNCED</div><div class=\"text-[10px] font-bold opacity-40\">NET_FABRIC</div></div></div></div></div><div class=\"mt-12 flex items-center justify-center gap-8 opacity-40 grayscale hover:grayscale-0 transition-all duration-700\"><div class=\"h-px w-24 bg-gradient-to-r from-transparent to-[#40E0D0]\"></div><div class=\"text-[10px] font-mono uppercase tracking-[0.5em] text-[#40E0D0]\">System Integrity Verified</div><div class=\"h-px w-24 bg-gradient-to-l from-transparent to-[#40E0D0]\"></div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

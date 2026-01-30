@@ -12,7 +12,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.join(process.cwd(), 'client/public/assets/pas_block_challenger.json');
+const OUTPUT_PATH = path.join(process.cwd(), 'server/brain/staging/pas_block_staging.json');
 
 export class InitialPASGenerator {
     private nanoBanana: NanoBananaService;
@@ -50,9 +50,11 @@ export class InitialPASGenerator {
         const generatedData = await this.nanoBanana.generatePASVisual(context);
 
         // 4. Transform into PASBlockConfig
-        const challenger: any = {
+        // 4. Transform into PASBlockConfig
+        const variantId = `pas_v${Date.now()}`;
+        const config: any = {
             id: "pas_section_v1",
-            variant_id: `pas_v${Date.now()}`,
+            variant_id: variantId,
             meta: {
                 strategy: generatedData.strategy,
                 tone: research.brandDNA.voice.value,
@@ -76,9 +78,11 @@ export class InitialPASGenerator {
         };
 
         // 5. Save
-        console.log("💾 Saving PAS Challenger v1...");
-        await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
-        console.log("✅ Done.");
+        console.log("Saving Staged PAS Block...");
+        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+        await fs.writeFile(OUTPUT_PATH, JSON.stringify(config, null, 4));
+
+        console.log(`✅ Staged PAS Block Saved: ${OUTPUT_PATH}`);
     }
 }
 

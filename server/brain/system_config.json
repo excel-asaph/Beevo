@@ -19,6 +19,8 @@
         },
         "pas": {
             "target_dwell_ms": 3000,
+            "target_scroll_depth": 60,
+            "min_views_data": 5,
             "min_dwell_events": 5,
             "watcher_confidence_min": 70
         },
@@ -59,5 +61,6 @@
         "spec_directive": "",
         "social_directive": "",
         "offer_directive": ""
-    }
+    },
+    "current_state_hash": "4507af8d2bdf"
 }

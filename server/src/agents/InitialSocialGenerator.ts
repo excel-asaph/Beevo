@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
+import { MediaService } from '../services/MediaService.js';
 import { SocialBlockConfig } from '../../../shared/types.js';
 import { MODELS } from '../../../shared/constants.js';
 
@@ -15,7 +16,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.join(process.cwd(), 'client/public/assets/social_block_challenger.json');
+const OUTPUT_PATH = path.join(process.cwd(), 'server/brain/staging/social_block_staging.json');
 const ASSETS_DIR = path.join(process.cwd(), 'client/public/assets');
 
 export class InitialSocialGenerator {
@@ -43,6 +44,7 @@ export class InitialSocialGenerator {
 
         const context = {
             brandName: research.brandDNA.name?.value || "The Brand",
+            voice: research.brandDNA.voice?.value || "Professional",
             mission: research.brandDNA.mission.value,
             rationale: typeof research.brandDNA.rationale === 'string' ? research.brandDNA.rationale : research.brandDNA.rationale.value,
             mood: research.brandDNA.mood.items,
@@ -51,13 +53,15 @@ export class InitialSocialGenerator {
             imagery: research.brandDNA.imagerySuggestions?.items?.filter((i: any) => i.isSelected) || []
         };
 
-        // 3. Request Social from NanoBanana
-        console.log("[Step 1] Requesting Social Visualization from NanoBananaService...");
+        // 3. Request Social from NanoBanana (Stage 1: Metadata)
+        console.log("[Step 1] Requesting Testimonial Metadata from NanoBananaService...");
         const generatedData = await this.nanoBanana.generateSocialVisual(context);
 
         // 4. Generate Images for Testimonials
         console.log("[Step 2] Generating Human-like Headshots for Testimonials...");
         const testimonials = generatedData.testimonials;
+
+        const variantId = `social_v${Date.now()}`;
 
         for (let i = 0; i < testimonials.length; i++) {
             const t = testimonials[i];
@@ -65,28 +69,41 @@ export class InitialSocialGenerator {
             const imagePath = path.join(ASSETS_DIR, imageName);
 
             console.log(`...Baking Headshot for ${t.name} (${t.title})`);
-            await this.generateImage(t.image_prompt, imagePath);
-            t.image_url = `/assets/${imageName}`;
+            const archivedPath = await this.generateImage(t.image_prompt, imagePath, variantId);
+            t.image_url = archivedPath;
         }
 
-        // 5. Transform into SocialBlockConfig
+        // 5. Request Final visual_code (Stage 2: Linked HTML)
+        console.log("[Step 3] Requesting Final Linked HTML (visual_code) from NanoBananaService...");
+        // We use refineVisual as a way to "re-render" the block with the now-baked image URLs
+        const refinement = await this.nanoBanana.refineVisual(
+            generatedData,
+            { avgDwell: 0, avgVelocity: 0 },
+            context,
+            undefined,
+            "Regenerate the 'visual_code' to be the COMPLETE section HTML. You MUST use the actual 'image_url' values provided in the testimonials array for the <img> src attributes."
+        );
+
+        const finalData = refinement.changes;
+
+        // 6. Transform into SocialBlockConfig
         const challenger: SocialBlockConfig = {
             id: "social_section_v1",
-            variant_id: `social_v${Date.now()}`,
+            variant_id: variantId,
             meta: {
-                strategy: generatedData.strategy,
-                tone: research.brandDNA.voice?.value || "Professional",
+                strategy: "Social Proof based on Brand Voice",
+                tone: context.voice,
                 active_variant: "challenger",
-                layout_strategy: generatedData.layout_strategy
-            },
+                layout_strategy: finalData.layout_strategy || generatedData.layout_strategy
+            } as any,
             content: {
-                headline: generatedData.headline,
-                subhead: generatedData.subhead,
-                testimonials: testimonials
+                headline: finalData.headline || generatedData.headline,
+                subhead: finalData.subhead || generatedData.subhead,
+                testimonials: finalData.testimonials || testimonials
             },
             graphic_config: {
                 type: 'generative',
-                visual_code: generatedData.visual_code
+                visual_code: finalData.visual_code || generatedData.visual_code
             },
             styles: {
                 backgroundColor: generatedData.backgroundColor,
@@ -95,13 +112,14 @@ export class InitialSocialGenerator {
             }
         };
 
-        // 6. Save
-        console.log("💾 Saving Social Challenger v1...");
+        // 7. Save
+        console.log(`Saving Staged Social Block to: ${OUTPUT_PATH}`);
+        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
         await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
         console.log("✅ Done.");
     }
 
-    private async generateImage(prompt: string, outputPath: string) {
+    private async generateImage(prompt: string, outputPath: string, variantId: string) {
         try {
             console.log(`🎨 Requesting Image via generateContent (Model: ${MODELS.FORGE_IMAGE})...`);
 
@@ -127,8 +145,27 @@ export class InitialSocialGenerator {
             }
 
             if (imageBase64) {
-                await fs.writeFile(outputPath, Buffer.from(imageBase64, 'base64'));
-                console.log(`✅ Image Saved: ${outputPath}`);
+                // CHANGED: Use MediaService to archive timestamped asset
+                const mediaService = MediaService.getInstance();
+                const buffer = Buffer.from(imageBase64, 'base64');
+
+                // We want to return the RELATIVE PATH to the caller so they can put it in the testimonial object
+                // The Caller currently passes `outputPath` which is the staging location... wait.
+                // The caller passes `path.join(ASSETS_DIR, imageName)` where `imageName` is `testimonial_1_challenger.png`.
+                // We want to IGNORE that output path and use MediaService instead.
+
+                // We will overwrite the caller's logic slightly in the next step, but for now let's change this method signature?
+                // Actually, let's keep the signature but ignore outputPath or use it as a hint for the filename base.
+                const filenameBase = `testimonial_${Date.now()}`; // Unique prefix
+                const relativePath = await mediaService.archiveAsset(
+                    filenameBase,
+                    "png",
+                    buffer,
+                    variantId
+                );
+
+                console.log(`✅ Image Archived via MediaService: ${relativePath}`);
+                return relativePath;
             } else {
                 throw new Error("No inlineData found in response parts");
             }
@@ -136,6 +173,7 @@ export class InitialSocialGenerator {
         } catch (error) {
             console.error(`❌ Image generation failed for prompt: ${prompt}`, error);
             console.warn("Using placeholder for testimonial headshot.");
+            return "/assets/placeholders/social_placeholder.png";
         }
     }
 }

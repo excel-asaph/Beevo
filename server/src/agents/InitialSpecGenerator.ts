@@ -13,7 +13,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.join(process.cwd(), 'client/public/assets/spec_block_challenger.json');
+const OUTPUT_PATH = path.join(process.cwd(), 'server/brain/staging/spec_block_staging.json');
 
 export class InitialSpecGenerator {
     private nanoBanana: NanoBananaService;
@@ -51,9 +51,10 @@ export class InitialSpecGenerator {
         const generatedData = await this.nanoBanana.generateSpecVisual(context);
 
         // 4. Transform into SpecBlockConfig
-        const challenger: SpecBlockConfig = {
+        const variantId = `spec_v${Date.now()}`;
+        const config: SpecBlockConfig = {
             id: "spec_section_v1",
-            variant_id: `spec_v${Date.now()}`,
+            variant_id: variantId,
             meta: {
                 strategy: generatedData.strategy,
                 tone: research.brandDNA.voice?.value || "Professional",
@@ -77,9 +78,11 @@ export class InitialSpecGenerator {
         };
 
         // 5. Save
-        console.log("💾 Saving Spec Challenger v1...");
-        await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
-        console.log("✅ Done.");
+        console.log("Saving Staged Spec Block...");
+        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+        await fs.writeFile(OUTPUT_PATH, JSON.stringify(config, null, 4));
+
+        console.log(`✅ Staged Spec Block Saved: ${OUTPUT_PATH}`);
     }
 }
 

@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1769784185245",
+    "meta": {
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "Autonomous Infrastructure Specification",
+        "subhead": "The technical blueprint for cultural-adaptive transport and regulatory synchronization.",
+        "nodes": [
+            {
+                "id": "node-nav",
+                "label": "Adaptive Navigation Matrix",
+                "description": "Proprietary spatial awareness engine designed for 99.8% precision in unmapped or evolving terrain environments.",
+                "icon": "map"
+            },
+            {
+                "id": "node-reg",
+                "label": "Compliance Synchronization",
+                "description": "Real-time legal-tech handshake ensuring 100% adherence to pan-African transport regulations and cross-border protocols.",
+                "icon": "shield"
+            },
+            {
+                "id": "node-energy",
+                "label": "Renewable Power Grid",
+                "description": "Solar-optimized battery management system providing 4.5x greater range efficiency for long-distance logistics.",
+                "icon": "bolt"
+            },
+            {
+                "id": "node-secure",
+                "label": "Verified Ledger Transit",
+                "description": "Immutable asset tracking protocol utilizing encrypted architecture for high-value cargo security.",
+                "icon": "lock"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class='relative w-full min-h-[600px] flex items-center justify-center p-8 overflow-hidden' style='font-family: \"Exo 2\", sans-serif; background-image: radial-gradient(circle, #40E0D022 1px, transparent 1px); background-size: 40px 40px;'> <svg class='absolute inset-0 w-full h-full pointer-events-none' preserveAspectRatio='xMidYMid slice'> <defs> <filter id='glow'> <feGaussianBlur stdDeviation='2' result='coloredBlur'/> <feMerge> <feMergeNode in='coloredBlur'/> <feMergeNode in='SourceGraphic'/> </feMerge> </filter> </defs> <path id='line-node-nav' d='M 200,150 L 640,300' stroke='#40E0D0' stroke-width='1' fill='none' stroke-dasharray='5,5' opacity='0.3'/> <path id='line-node-reg' d='M 1080,150 L 640,300' stroke='#40E0D0' stroke-width='1' fill='none' stroke-dasharray='5,5' opacity='0.3'/> <path id='line-node-energy' d='M 200,450 L 640,300' stroke='#40E0D0' stroke-width='1' fill='none' stroke-dasharray='5,5' opacity='0.3'/> <path id='line-node-secure' d='M 1080,450 L 640,300' stroke='#40E0D0' stroke-width='1' fill='none' stroke-dasharray='5,5' opacity='0.3'/> </svg> <div id='central-core' class='relative z-10 w-48 h-48 rounded-full border-4 border-[#40E0D0] flex flex-col items-center justify-center bg-[#3D405B] shadow-[0_0_30px_#40E0D033] transition-all duration-500'> <div class='text-[#40E0D0] text-xs tracking-widest mb-1 uppercase font-bold'>System Core</div> <div class='text-[#F4F1DE] text-2xl font-black'>BLUETONE</div> <div class='text-[#E2725B] text-[10px] mt-2 font-mono'>v2.0 ACTIVE</div> </div> <div class='absolute w-full h-full top-0 left-0 flex flex-wrap pointer-events-none'> <div id='nav-card' onmouseenter='const l=document.getElementById(\"line-node-nav\"); l.setAttribute(\"stroke-width\", \"3\"); l.setAttribute(\"opacity\", \"1\"); l.setAttribute(\"stroke\", \"#E2725B\");' onmouseleave='const l=document.getElementById(\"line-node-nav\"); l.setAttribute(\"stroke-width\", \"1\"); l.setAttribute(\"opacity\", \"0.3\"); l.setAttribute(\"stroke\", \"#40E0D0\");' class='pointer-events-auto absolute top-[100px] left-[5%] md:left-[10%] w-64 p-4 border border-[#F4F1DE44] bg-[#3D405B]/80 backdrop-blur-md transition-all hover:border-[#E2725B] hover:translate-y-[-5px]'> <div class='text-[#E2725B] text-[10px] font-bold tracking-[0.2em] mb-1'>PRECISION NAV</div> <div class='text-[#F4F1DE] text-sm font-bold mb-2 uppercase'>Adaptive Navigation</div> <div class='text-[#F4F1DE99] text-[11px] leading-relaxed'>Spatial awareness engine optimized for unmapped terrain. <span class='text-[#40E0D0] font-bold'>99.8% Efficiency.</span></div> </div> <div id='reg-card' onmouseenter='const l=document.getElementById(\"line-node-reg\"); l.setAttribute(\"stroke-width\", \"3\"); l.setAttribute(\"opacity\", \"1\"); l.setAttribute(\"stroke\", \"#2D5A27\");' onmouseleave='const l=document.getElementById(\"line-node-reg\"); l.setAttribute(\"stroke-width\", \"1\"); l.setAttribute(\"opacity\", \"0.3\"); l.setAttribute(\"stroke\", \"#40E0D0\");' class='pointer-events-auto absolute top-[100px] right-[5%] md:right-[10%] w-64 p-4 border border-[#F4F1DE44] bg-[#3D405B]/80 backdrop-blur-md transition-all hover:border-[#2D5A27] hover:translate-y-[-5px]'> <div class='text-[#2D5A27] text-[10px] font-bold tracking-[0.2em] mb-1'>POLICY SYNC</div> <div class='text-[#F4F1DE] text-sm font-bold mb-2 uppercase'>Compliance Engine</div> <div class='text-[#F4F1DE99] text-[11px] leading-relaxed'>Real-time legal-tech handshake for cross-border transit. <span class='text-[#40E0D0] font-bold'>100% Compliant.</span></div> </div> <div id='energy-card' onmouseenter='const l=document.getElementById(\"line-node-energy\"); l.setAttribute(\"stroke-width\", \"3\"); l.setAttribute(\"opacity\", \"1\"); l.setAttribute(\"stroke\", \"#40E0D0\");' onmouseleave='const l=document.getElementById(\"line-node-energy\"); l.setAttribute(\"stroke-width\", \"1\"); l.setAttribute(\"opacity\", \"0.3\"); l.setAttribute(\"stroke\", \"#40E0D0\");' class='pointer-events-auto absolute bottom-[100px] left-[5%] md:left-[10%] w-64 p-4 border border-[#F4F1DE44] bg-[#3D405B]/80 backdrop-blur-md transition-all hover:border-[#40E0D0] hover:translate-y-[5px]'> <div class='text-[#40E0D0] text-[10px] font-bold tracking-[0.2em] mb-1'>SOLAR MESH</div> <div class='text-[#F4F1DE] text-sm font-bold mb-2 uppercase'>Renewable Power Grid</div> <div class='text-[#F4F1DE99] text-[11px] leading-relaxed'>Solar-optimized energy management for regional fleets. <span class='text-[#E2725B] font-bold'>4.5x Range ROI.</span></div> </div> <div id='secure-card' onmouseenter='const l=document.getElementById(\"line-node-secure\"); l.setAttribute(\"stroke-width\", \"3\"); l.setAttribute(\"opacity\", \"1\"); l.setAttribute(\"stroke\", \"#E2725B\");' onmouseleave='const l=document.getElementById(\"line-node-secure\"); l.setAttribute(\"stroke-width\", \"1\"); l.setAttribute(\"opacity\", \"0.3\"); l.setAttribute(\"stroke\", \"#40E0D0\");' class='pointer-events-auto absolute bottom-[100px] right-[5%] md:right-[10%] w-64 p-4 border border-[#F4F1DE44] bg-[#3D405B]/80 backdrop-blur-md transition-all hover:border-[#E2725B] hover:translate-y-[5px]'> <div class='text-[#E2725B] text-[10px] font-bold tracking-[0.2em] mb-1'>LEDGER CORE</div> <div class='text-[#F4F1DE] text-sm font-bold mb-2 uppercase'>Verified Transit</div> <div class='text-[#F4F1DE99] text-[11px] leading-relaxed'>Encrypted architecture for secure high-value logistics. <span class='text-[#40E0D0] font-bold'>Zero Breach Policy.</span></div> </div> </div> </div>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

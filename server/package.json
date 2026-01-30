@@ -16,12 +16,15 @@
         "puppeteer": "^24.34.0",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin-stealth": "^2.11.2",
+        "sqlite": "^5.1.1",
+        "sqlite3": "^5.1.7",
         "uuid": "^11.1.0",
         "ws": "^8.18.0"
     },
     "devDependencies": {
         "@types/express": "^5.0.0",
         "@types/node": "^22.14.0",
+        "@types/sqlite3": "^5.1.0",
         "@types/uuid": "^10.0.0",
         "@types/ws": "^8.18.0",
         "tsx": "^4.19.0",

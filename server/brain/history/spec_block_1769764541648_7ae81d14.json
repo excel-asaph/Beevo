@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1769762681268",
+    "meta": {
+        "strategy": "Bluetone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "Bluetone Technical Architecture",
+        "subhead": "Forensic Blueprint for Autonomous Continental Transport",
+        "nodes": [
+            {
+                "id": "reg-engine",
+                "label": "Regulatory Synthesis Core",
+                "description": "Autonomous alignment with multi-jurisdictional transit statutes and legal frameworks.",
+                "icon": "shield"
+            },
+            {
+                "id": "geo-array",
+                "label": "Terrain Intelligence Array",
+                "description": "High-fidelity spatial processing delivering 99.8% precision in unmapped environments.",
+                "icon": "map"
+            },
+            {
+                "id": "mesh-net",
+                "label": "Resilient Mesh Protocol",
+                "description": "Distributed architecture maintaining 4.8x connectivity resilience across low-bandwidth sectors.",
+                "icon": "signal"
+            },
+            {
+                "id": "cult-logic",
+                "label": "Cultural Synergy Layer",
+                "description": "Cognitive behavioral interface bridging technical logic with local transit paradigms.",
+                "icon": "users"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<link href=\"https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap\" rel=\"stylesheet\"><div id=\"blueprint-container\" class=\"w-full min-h-[650px] bg-[#3D405B] relative flex flex-col items-center justify-center p-12 overflow-hidden border border-[#40E0D0]/30\" style=\"font-family:'Exo 2', sans-serif; background-image: radial-gradient(rgba(64, 224, 208, 0.1) 1px, transparent 1px); background-size: 40px 40px;\"><div class=\"absolute inset-0 border-[20px] border-[#3D405B] z-10 pointer-events-none\"></div><div class=\"z-20 text-center mb-12\"><h2 class=\"text-[#40E0D0] uppercase tracking-[0.3em] text-sm font-bold mb-2\">System Overview</h2><div class=\"h-[1px] w-48 bg-gradient-to-r from-transparent via-[#40E0D0] to-transparent mx-auto\"></div></div><div class=\"relative flex flex-wrap justify-center gap-8 w-full max-w-5xl z-20\"><div id=\"core-hub\" class=\"w-48 h-48 rounded-full border-2 border-[#40E0D0] flex items-center justify-center relative mb-8 lg:mb-0\"><div class=\"absolute inset-0 rounded-full animate-pulse border-4 border-[#40E0D0]/20\"></div><div class=\"text-center\"><div class=\"text-[#40E0D0] font-bold text-xl tracking-tighter\">BLUETONE</div><div class=\"text-[10px] text-[#F4F1DE]/60 uppercase tracking-widest\">Active Core</div></div><svg class=\"absolute top-0 left-0 w-full h-full -z-10 overflow-visible\"><path id=\"line-reg-engine\" d=\"M 96,0 L 96,-100\" stroke=\"#40E0D0\" stroke-width=\"1\" fill=\"none\" opacity=\"0.3\" /><path id=\"line-geo-array\" d=\"M 192,96 L 292,96\" stroke=\"#40E0D0\" stroke-width=\"1\" fill=\"none\" opacity=\"0.3\" /><path id=\"line-mesh-net\" d=\"M 96,192 L 96,292\" stroke=\"#40E0D0\" stroke-width=\"1\" fill=\"none\" opacity=\"0.3\" /><path id=\"line-cult-logic\" d=\"M 0,96 L -100,96\" stroke=\"#40E0D0\" stroke-width=\"1\" fill=\"none\" opacity=\"0.3\" /></svg></div></div><div class=\"grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl mt-8 z-20\"> <div class=\"node-card p-6 border border-[#40E0D0]/20 bg-[#3D405B]/80 hover:border-[#E2725B] transition-all duration-500 cursor-pointer\" onmouseover=\"document.getElementById('line-reg-engine').style.opacity='1'; document.getElementById('line-reg-engine').style.stroke='#E2725B'\" onmouseout=\"document.getElementById('line-reg-engine').style.opacity='0.3'; document.getElementById('line-reg-engine').style.stroke='#40E0D0'\"><h3 class=\"text-[#40E0D0] font-semibold text-lg uppercase tracking-wider mb-2\">Regulatory Synthesis Core</h3><p class=\"text-[#F4F1DE]/80 text-sm leading-relaxed\">Real-time legal framework alignment across trans-continental corridors. Ensures continuous operational compliance.</p><div class=\"mt-4 text-[10px] text-[#40E0D0] font-bold tracking-widest uppercase\">Protocol Status: Optimized</div></div><div class=\"node-card p-6 border border-[#40E0D0]/20 bg-[#3D405B]/80 hover:border-[#2D5A27] transition-all duration-500 cursor-pointer\" onmouseover=\"document.getElementById('line-geo-array').style.opacity='1'; document.getElementById('line-geo-array').style.stroke='#2D5A27'\" onmouseout=\"document.getElementById('line-geo-array').style.opacity='0.3'; document.getElementById('line-geo-array').style.stroke='#40E0D0'\"><h3 class=\"text-[#40E0D0] font-semibold text-lg uppercase tracking-wider mb-2\">Terrain Intelligence Array</h3><p class=\"text-[#F4F1DE]/80 text-sm leading-relaxed\">99.8% spatial accuracy in informal and unmapped environments using multi-spectral lidar processing.</p><div class=\"mt-4 text-[10px] text-[#40E0D0] font-bold tracking-widest uppercase\">Precision Level: High-Fidelity</div></div><div class=\"node-card p-6 border border-[#40E0D0]/20 bg-[#3D405B]/80 hover:border-[#40E0D0] transition-all duration-500 cursor-pointer\" onmouseover=\"document.getElementById('line-mesh-net').style.opacity='1'; document.getElementById('line-mesh-net').style.stroke='#40E0D0'\" onmouseout=\"document.getElementById('line-mesh-net').style.opacity='0.3'\"><h3 class=\"text-[#40E0D0] font-semibold text-lg uppercase tracking-wider mb-2\">Resilient Mesh Protocol</h3><p class=\"text-[#F4F1DE]/80 text-sm leading-relaxed\">Fault-tolerant communication architecture for low-infrastructure sectors maintaining 4.8x higher connectivity.</p><div class=\"mt-4 text-[10px] text-[#40E0D0] font-bold tracking-widest uppercase\">Network Integrity: 100%</div></div><div class=\"node-card p-6 border border-[#40E0D0]/20 bg-[#3D405B]/80 hover:border-[#F4F1DE] transition-all duration-500 cursor-pointer\" onmouseover=\"document.getElementById('line-cult-logic').style.opacity='1'; document.getElementById('line-cult-logic').style.stroke='#F4F1DE'\" onmouseout=\"document.getElementById('line-cult-logic').style.opacity='0.3'; document.getElementById('line-cult-logic').style.stroke='#40E0D0'\"><h3 class=\"text-[#40E0D0] font-semibold text-lg uppercase tracking-wider mb-2\">Cultural Synergy Layer</h3><p class=\"text-[#F4F1DE]/80 text-sm leading-relaxed\">Cognitive behavioral interface bridging technical logic with linguistic and cultural nuances of local transit.</p><div class=\"mt-4 text-[10px] text-[#40E0D0] font-bold tracking-widest uppercase\">Adaptive Logic: Active</div></div></div><div class=\"absolute bottom-8 right-8 text-[10px] text-[#40E0D0]/40 font-mono tracking-tighter uppercase text-right\">Architecture Ref: BT-SPEC-2024<br>System Metric: Validated</div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

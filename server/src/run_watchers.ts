@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { StateCoordinator } from './utils/StateCoordinator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,11 @@ const runWatchers = async () => {
     });
 
     await Promise.all(promises);
+
+    // NEW: Seal the state if any changes were staged by the watchers
+    console.log("🛡️  Orchestrator: Sealing any staged improvements...");
+    await StateCoordinator.getInstance().sealState("Optimization Fleet: Automated Cycle");
+
     console.log(`💤 Fleet dormant. Waiting for next cycle...`);
 };
 

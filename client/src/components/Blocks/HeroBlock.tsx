@@ -7,7 +7,7 @@ interface HeroSchema {
     id: string;
     visual_asset: {
         source_id: string;
-        // ... we might use the attributes for debugging, but the source_id maps to the file
+        url?: string; // Versioned asset path
     };
     overlay_content: {
         headline: {
@@ -58,10 +58,7 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
         console.log('Navigating to:', config.overlay_content.cta.action_id);
     };
 
-    // Construct Video URL (assuming convention or using the uploaded file directly for cold start)
-    // Logic: For Cold Start, we know it's "veo_video_hero_challenger.mp4"
-    // Future: config.visual_asset.source_id -> mapped to URL
-    const videoSrc = '/assets/veo_video_hero_challenger.mp4';
+    const videoSrc = config.visual_asset?.url;
 
     return (
         <div

@@ -5,17 +5,21 @@ import { GoogleGenAI } from '@google/genai';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
+import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { SystemConfigService } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Configuration
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/offer_block_challenger.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/offer_block.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/offer_block_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/offer_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/offer_watcher_decision.json');
@@ -39,7 +43,7 @@ export class OfferWatcher {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            const url = `http://localhost:3000/?mode=landing_page`;
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
             await page.goto(url, { waitUntil: 'networkidle0' });
 
             await page.evaluate(() => {
@@ -149,6 +153,12 @@ export class OfferWatcher {
                 );
 
                 if (!postCheck.approved) return;
+
+                if (!currentOffer.content) {
+                    console.error("❌ OfferWatcher: Current offer block has no content section. Aborting.");
+                    return;
+                }
+
                 const newOffer = {
                     ...currentOffer,
                     variant_id: `offer_v${Date.now()}`,
@@ -168,9 +178,10 @@ export class OfferWatcher {
                     }
                 };
 
-                await fs.writeFile(CHALLENGER_FILE, JSON.stringify(newOffer, null, 4));
+                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
+                await fs.writeFile(STAGING_FILE, JSON.stringify(newOffer, null, 4));
                 await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
-                console.log("🚀 Optimization Applied! Offer Evolved.");
+                console.log("🚀 Optimization Staged! Offer Evolved in staging.");
             }
         } catch (error) {
             console.error("❌ OfferWatcher Error:", error);

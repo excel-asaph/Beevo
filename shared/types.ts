@@ -352,6 +352,7 @@ export interface Testimonial {
     company: string;
     quote: string;
     image_url: string; // Path to public asset
+    image_prompt?: string;
 }
 
 export interface SocialBlockConfig {
@@ -361,6 +362,7 @@ export interface SocialBlockConfig {
         strategy: string;
         tone: string;
         active_variant: string;
+        layout_strategy: LayoutStrategy;
     };
     content: {
         headline: string;
@@ -447,6 +449,8 @@ export interface SystemConfig {
         };
         pas: {
             target_dwell_ms: number;
+            target_scroll_depth: number;
+            min_views_data: number;
             min_dwell_events: number;
             watcher_confidence_min: number;
         };
@@ -496,6 +500,8 @@ export interface SystemConfig {
         social_directive: string;
         offer_directive: string;
     };
+    // 6. Current Page State (Sealed by Orchestrator)
+    current_state_hash?: string;
 }
 
 // ==========================================

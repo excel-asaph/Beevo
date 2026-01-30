@@ -43,6 +43,19 @@ export class NanoBananaService {
         this.client = new GoogleGenAI({ apiKey });
     }
 
+    private getOrchestrationGuardrails() {
+        return `
+            **DYNAMIC LEAD ORCHESTRATION**:
+            - All CTA buttons MUST trigger the global FormOrchestrator.
+            - Use the following JavaScript pattern in the 'onclick' attribute:
+              \`onclick="window.dispatchEvent(new CustomEvent('open-form', { detail: { type: 'CONTACT' | 'OFFER' | 'INTENT', context: { origin: 'SECTION_ID', goal: 'GOAL_TEXT' } } }))"\`
+            - For HERO buttons: Use type 'INTENT'.
+            - For OFFER buttons: Use type 'OFFER'.
+            - For general contact/info: Use type 'CONTACT'.
+            - Ensure the buttons look high-fidelity (vibrant, themed, smooth hover).
+        `;
+    }
+
     async generateProofVisual(context: NanoBananaContext): Promise<NanoBananaResult> {
         const prompt = `
             You are a 'Data Visualization Architect' specializing in high-fidelity "Nano Banana" style Trust Graphics.
@@ -235,8 +248,9 @@ export class NanoBananaService {
             ${JSON.stringify(current)}
 
             **TASK**:
-            1. Analyze the current layout and informational density.
-            2. Mutate the Grid Strategy (SPLIT | CLOUDS | TRIPTYCH) if needed.
+            1. **Analyze**: Look at the provided Snapshot image and the current JSON config.
+            2. **Forensic Audit**: Identify conversion killers (poor contrast, cluttered layout, weak hierarchy).
+            3. Mutate the Grid Strategy (SPLIT | CLOUDS | TRIPTYCH) if needed.
             3. Rewrite the 'visual_code' to be more immersive or intuitive.
             4. Ensure "${context.brandName}" storytelling remains central.
             5. **ALIGNMENT ALERT**: The Hero section above is strictly center-aligned. Ensure your layout feels balanced—avoid heavy left-side-only weights.
@@ -247,6 +261,11 @@ export class NanoBananaService {
             The user has explicitly ordered: "${userFeedback}"
             YOU MUST COMPLY WITH THIS ABOVE ALL OTHER STRATEGIC GOALS.
             ` : ''}
+
+            **SOCIAL SECTION SPECIFIC**:
+            - You MUST generate the **ENTIRE** section HTML in your \`visual_code\`, including the background, container, and all testimonial cards.
+            - Use the \`image_url\` property from each testimonial in the \`testimonials\` array for the \`src\` attribute of their respective headshot images.
+            - Ensure the layout matches the \`layout_strategy\` (MASONRY | GRID | STACK).
 
             **OUTPUT JSON**:
             {
@@ -434,9 +453,8 @@ export class NanoBananaService {
             3. **Headshot Prompts**: For EACH persona, write a detailed photography prompt for generating a "Human-like, professional, high-end business portrait" using an image AI. 
             4. **Layout Strategy**: Choose a grid pattern (MASONRY | GRID | STACK).
             5. **Visual Layout**: Write 'visual_code' string:
-               - Use the chosen layout strategy.
-               - **IMPORTANT**: Use placeholders for images: \`/assets/testimonial_1_challenger.png\` to \`/assets/testimonial_4_challenger.png\`.
-               - Ensure high contrast and professional executive look.
+               - You MUST generate the **ENTIRE** section HTML (background, container, and testimonial cards).
+               - **IMPORTANT**: Use the \`image_url\` values provided in the testimonials array for the headshot \`src\` attributes.
                - Center-align the section headline.
             
             **DESIGN GUARDRAILS**:

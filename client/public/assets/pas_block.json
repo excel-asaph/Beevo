@@ -1,0 +1,43 @@
+{
+    "id": "pas_section_v1",
+    "variant_id": "pas_v1769784160763",
+    "meta": {
+        "strategy": "The PAS strategy focuses on the stagnation of current African transit (Problem), the risk of being left behind by global green standards and economic isolation (Agitation), and the introduction of Bluetone’s adaptive, autonomous transit systems that reconcile high-tech with local regulatory realities (Solution).",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "Transforming African Transit from Gridlock to Growth",
+        "steps": [
+            {
+                "id": "step_1",
+                "phase": "PROBLEM",
+                "title": "The Gridlock Crisis",
+                "description": "Outdated infrastructure and total fossil-fuel reliance are choking our streets. Our current mobility systems are failing the needs of a rapidly evolving continent."
+            },
+            {
+                "id": "step_2",
+                "phase": "AGITATION",
+                "title": "Stagnation or Evolution?",
+                "description": "As the global north pivots to green autonomy, failing to adapt means more than just traffic—it means economic isolation, environmental decay, and a widening technological divide."
+            },
+            {
+                "id": "step_3",
+                "phase": "SOLUTION",
+                "title": "The Bluetone Ecosystem",
+                "description": "High-tech electric transit and law-abiding robots built for African roads. We bridge the gap between autonomous innovation and local culture to deliver a sustainable, future-proof ecosystem."
+            }
+        ],
+        "closing_statement": "The future of African mobility is autonomous, sustainable, and adaptive. Join the 2035 Mission."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#3D405B] py-24 px-6 font-['Exo_2']\"><div class=\"max-w-7xl mx-auto\"><div class=\"text-center mb-20\"><h2 class=\"text-5xl md:text-7xl font-black text-[#F4F1DE] tracking-tighter uppercase mb-4\">Revolutionizing<br/><span class=\"text-[#40E0D0]\">African Mobility</span></h2><div class=\"h-2 w-32 bg-[#E2725B] mx-auto\"></div></div><div class=\"grid grid-cols-12 gap-8 lg:gap-12\"><div class=\"col-span-12 lg:col-span-4 flex flex-col p-8 border-2 border-[#F4F1DE]/10 hover:border-[#E2725B] transition-colors\"><span class=\"text-[#E2725B] text-6xl font-black mb-6\">01</span><h3 class=\"text-3xl font-bold mb-4 text-[#F4F1DE]\">The Gridlock Crisis</h3><p class=\"text-lg text-[#F4F1DE]/80 leading-relaxed\">Outdated transit systems and total fossil-fuel reliance are choking our streets. The current mobility infrastructure is failing the modern African workforce.</p></div><div class=\"col-span-12 lg:col-span-4 flex flex-col p-8 border-2 border-[#F4F1DE]/10 hover:border-[#E2725B] transition-colors\"><span class=\"text-[#E2725B] text-6xl font-black mb-6\">02</span><h3 class=\"text-3xl font-bold mb-4 text-[#F4F1DE]\">Stagnation or Evolution?</h3><p class=\"text-lg text-[#F4F1DE]/80 leading-relaxed\">Failing to adapt means more than traffic—it means economic isolation and environmental decay. We cannot afford to be left behind by the global green shift.</p></div><div class=\"col-span-12 lg:col-span-4 flex flex-col p-8 bg-[#2D5A27] text-[#F4F1DE] shadow-2xl\"><span class=\"text-[#40E0D0] text-6xl font-black mb-6\">03</span><h3 class=\"text-3xl font-bold mb-4 uppercase tracking-tighter\">The Bluetone Ecosystem</h3><p class=\"text-lg leading-relaxed mb-8\">Autonomous, law-abiding robots and electric transit designed specifically for African regulatory landscapes. Culturally adaptive tech for a sustainable future.</p><div class=\"mt-auto\"><button class=\"bg-[#40E0D0] text-[#3D405B] font-black py-4 px-8 w-full uppercase tracking-widest text-sm hover:bg-[#F4F1DE] transition-colors\">Our Vision 2035</button></div></div></div><div class=\"mt-20 text-center\"><p class=\"text-[#40E0D0] font-bold tracking-[0.3em] uppercase italic\">Bluetone: Bridging the Gap Between Tech & Tradition</p></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

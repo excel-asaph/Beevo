@@ -5,7 +5,7 @@ import { GoogleGenAI } from '@google/genai';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
-import { WS_CONFIG } from '../../../shared/constants.js';
+import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { SystemConfigService } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
@@ -18,7 +18,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/spec_block_challenger.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/spec_block.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/spec_block_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/spec_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/spec_watcher_decision.json');
@@ -156,7 +157,11 @@ export class SpecWatcher {
                     result
                 );
 
-                if (!postCheck.approved) return;
+                if (!currentSpec.content) {
+                    console.error("❌ SpecWatcher: Current spec block has no content section. Aborting.");
+                    return;
+                }
+
                 const newSpec = {
                     ...currentSpec,
                     variant_id: `spec_v${Date.now()}`,
@@ -172,10 +177,11 @@ export class SpecWatcher {
                     }
                 };
 
-                await fs.writeFile(CHALLENGER_FILE, JSON.stringify(newSpec, null, 4));
+                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
+                await fs.writeFile(STAGING_FILE, JSON.stringify(newSpec, null, 4));
                 await fs.writeFile(DECISION_PATH, JSON.stringify(result, null, 4));
 
-                console.log("🚀 Applied Forensic Fix! Technical Blueprint Evolved.");
+                console.log("🚀 Staged forensic fix! Technical Blueprint Evolved in staging.");
                 console.log("\n🧠 WATCHER THOUGHTS:\n", result.thoughts);
             } else {
                 console.log("⚠️ Confidence too low. No changes made.");

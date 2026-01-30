@@ -51,10 +51,18 @@ export const ProofBlock: React.FC<ProofBlockProps> = ({ config }) => {
                 fontFamily: config.styles.fontFamily,
             }}
         >
-            <div
-                className={`w-full max-w-7xl mx-auto transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
-                dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code || '' }}
-            />
+            <div className={`w-full max-w-7xl mx-auto transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                {config.graphic_config.visual_code && (
+                    <>
+                        {/* If it looks like raw CSS (contains braces and no tags), wrap it in <style> */}
+                        {config.graphic_config.visual_code.includes('{') && !config.graphic_config.visual_code.includes('<') ? (
+                            <style dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
+                        ) : (
+                            <div dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
+                        )}
+                    </>
+                )}
+            </div>
         </div>
     );
 };

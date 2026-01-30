@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1769781232329",
+    "meta": {
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "NEXUS CORE: V1.0 DIAGNOSTIC",
+        "subhead": "Real-time synchronization of autonomous precision and sovereign regulatory frameworks.",
+        "nodes": [
+            {
+                "id": "node-1",
+                "label": "Spatial Intelligence Core",
+                "description": "High-fidelity mesh geometry designed for non-standard road environments with 99.9% obstacle recognition accuracy.",
+                "icon": "radar"
+            },
+            {
+                "id": "node-2",
+                "label": "Regulatory Harmony Engine",
+                "description": "Real-time compliance ledger that translates local transport statutes into autonomous operation protocols.",
+                "icon": "shield-check"
+            },
+            {
+                "id": "node-3",
+                "label": "Kinetic Energy Recovery",
+                "description": "Proprietary harvesting logic optimizing battery life by 34% across high-heat and varied terrain profiles.",
+                "icon": "battery-bolt"
+            },
+            {
+                "id": "node-4",
+                "label": "Decentralized Fleet Logic",
+                "description": "Peer-to-peer coordination system allowing vehicle swarms to operate with 0.05ms latency without central cloud reliance.",
+                "icon": "network"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class=\"w-full bg-[#0F111A] p-6 md:p-12 font-['JetBrains_Mono',monospace] text-[#E0E2EE] selection:bg-[#40E0D0]/30\"><div class=\"max-w-7xl mx-auto\"><div class=\"grid grid-cols-1 lg:grid-cols-12 gap-4 auto-rows-min\"><div data-tier-id=\"node-1\" class=\"lg:col-span-7 bg-[#161925] border border-[#40E0D0]/20 p-6 relative overflow-hidden group\"><div class=\"absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#40E0D0] to-transparent opacity-50\"></div><div class=\"flex justify-between items-start mb-8\"><div class=\"space-y-1\"><span class=\"text-[10px] text-[#40E0D0] tracking-[0.3em] uppercase\">Module: Spatial_Intelligence</span><h3 class=\"text-2xl font-bold text-white tracking-tight uppercase\">Topographic Cognition</h3></div><div class=\"text-right\"><div class=\"text-3xl font-light text-[#40E0D0]\">99.9%</div><div class=\"text-[10px] opacity-40 uppercase\">Recog_Accuracy</div></div></div><p class=\"text-sm leading-relaxed text-gray-400 max-w-md\">High-fidelity mesh geometry optimized for non-standard road environments and unmapped African terrain profiles.</p><div class=\"mt-8 flex gap-4 text-[10px] font-bold\"><span class=\"px-2 py-1 bg-[#40E0D0]/10 text-[#40E0D0] border border-[#40E0D0]/20\">LATENCY: 0.02ms</span><span class=\"px-2 py-1 bg-white/5 text-gray-500\">SENS_ARRAY_01</span></div><div class=\"absolute bottom-0 right-0 w-32 h-32 bg-[#40E0D0]/5 rounded-full blur-3xl -mr-16 -mb-16\"></div></div><div data-tier-id=\"node-2\" class=\"lg:col-span-5 bg-[#161925] border border-[#E2725B]/20 p-6 relative overflow-hidden\"><div class=\"flex flex-col h-full justify-between\"><div class=\"space-y-1\"><span class=\"text-[10px] text-[#E2725B] tracking-[0.3em] uppercase\">Module: Gov_Link</span><h3 class=\"text-2xl font-bold text-white tracking-tight uppercase\">Legislation Sync</h3></div><div class=\"py-6\"><div class=\"h-2 w-full bg-white/5 rounded-full overflow-hidden\"><div class=\"h-full bg-[#E2725B] w-full animate-pulse\"></div></div><div class=\"flex justify-between mt-2 text-[10px] text-[#E2725B]\"><span>COMPLIANCE STATUS</span><span>100% ALIGNED</span></div></div><p class=\"text-sm text-gray-400\">Translating diverse transport statutes into localized autonomous operation protocols in real-time.</p></div></div><div data-tier-id=\"node-3\" class=\"lg:col-span-5 bg-[#161925] border border-[#50C878]/20 p-6 relative overflow-hidden\"><div class=\"flex flex-col h-full justify-between\"><div class=\"space-y-1\"><span class=\"text-[10px] text-[#50C878] tracking-[0.3em] uppercase\">Module: PWR_MGT</span><h3 class=\"text-2xl font-bold text-white tracking-tight uppercase\">Kinetic Harvesting</h3></div><div class=\"mt-4 mb-4\"><span class=\"text-4xl font-bold text-[#50C878]\">+34.2%</span><span class=\"ml-2 text-xs text-gray-500\">EFFICIENCY GAIN</span></div><p class=\"text-sm text-gray-400\">Proprietary logic optimizing battery cycles across high-heat profiles and unpaved terrain variables.</p></div></div><div data-tier-id=\"node-4\" class=\"lg:col-span-7 bg-[#161925] border border-[#40E0D0]/20 p-6 relative\"><div class=\"flex justify-between items-start\"><div class=\"space-y-1\"><span class=\"text-[10px] text-[#40E0D0] tracking-[0.3em] uppercase\">Module: Net_Fabric</span><h3 class=\"text-2xl font-bold text-white tracking-tight uppercase\">Decentralized Path</h3></div><div class=\"flex flex-col items-end\"><span class=\"text-xs font-bold\">4,096</span><span class=\"text-[10px] text-gray-500\">NODES_SYNCED</span></div></div><div class=\"grid grid-cols-8 gap-1 mt-6\">"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

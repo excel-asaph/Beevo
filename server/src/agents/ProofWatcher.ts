@@ -6,7 +6,7 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
-import { WS_CONFIG } from '../../../shared/constants.js';
+import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { SystemConfigService } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
 
@@ -18,7 +18,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block_challenger.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/proof_block_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_decision.json');
@@ -129,12 +130,6 @@ export class ProofWatcher {
 
         // 3. Prepare Visuals
         const snapshotBuffer = await this.captureSnapshot();
-        const parts: any[] = [];
-        if (snapshotBuffer) {
-            parts.push({
-                inlineData: { data: snapshotBuffer.toString('base64'), mimeType: 'image/png' }
-            });
-        }
 
         // 4. Strategic Refinement (Service Call)
         console.log(`🧠 Proof Watcher: Requesting refined visual from NanoBananaService...`);
@@ -175,6 +170,12 @@ export class ProofWatcher {
                     console.log("🛑 User rejected deployment. Aborting.");
                     return;
                 }
+
+                if (!currentProof.content) {
+                    console.error("❌ ProofWatcher: Current proof block has no content section. Aborting.");
+                    return;
+                }
+
                 const newProof = {
                     ...currentProof,
                     variant_id: `proof_v${Date.now()}`,
@@ -196,9 +197,10 @@ export class ProofWatcher {
                     }
                 };
 
-                await fs.writeFile(CHALLENGER_FILE, JSON.stringify(newProof, null, 4));
+                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
+                await fs.writeFile(STAGING_FILE, JSON.stringify(newProof, null, 4));
                 await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
-                console.log("🚀 Optimization Applied! Section 2 Mutated.");
+                console.log("🚀 Optimization Staged! Proof Section Mutated in staging.");
             }
         } catch (error) {
             console.error("❌ Proof Watcher Failed:", error);

@@ -2,7 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type } from '@google/genai';
-import { MODELS } from '@shared/constants';
+import { MODELS } from '../../../shared/constants.js';
+import { MediaService } from '../services/MediaService.js';
 import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,7 +14,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.join(process.cwd(), 'client/public/assets/hero_block_challenger.json');
+const OUTPUT_PATH = path.join(process.cwd(), 'server/brain/staging/hero_block_staging.json');
 
 // Interfaces
 interface BrandResearch {
@@ -72,9 +73,13 @@ export class InitialHeroGenerator {
         console.log("DEBUG CONTEXT RATIONALE:", context.rationale);
 
         // === INITIALIZE VARIABLE (The Challenger) ===
+        // Define variant ID early for folder organization
+        const variantId = `hero_v${Date.now()}`;
+
         // 2. Meta Injection (Direct Copy)
         let challenger: any = {
             id: "hero_section_v1",
+            variant_id: variantId, // ADDED: Consistent variant ID
             meta: {
                 strategy: context.rationale,
                 tone: context.voice,
@@ -84,7 +89,7 @@ export class InitialHeroGenerator {
             overlay_content: {},
             layout_config: {}
         };
-        console.log("[Step 1] Meta Attributes Injected.");
+        console.log(`[Step 1] Meta Attributes Injected. Variant ID: ${variantId}`);
 
 
         // === STEP 2: VIDEO GENERATION (Real AI Call) ===
@@ -93,11 +98,13 @@ export class InitialHeroGenerator {
 
         // === STEP 2.5: GENERATE ACTUAL VIDEO FILE (Veo) ===
         console.log("[Step 2.5] Requesting Video from Veo AI...");
-        const videoSourceId = await this.generateVideoAsset(videoAttributes);
+        // Pass variantId to generateVideoAsset
+        const videoSourceId = await this.generateVideoAsset(videoAttributes, variantId);
 
         challenger.visual_asset = {
             type: "video",
-            source_id: videoSourceId,
+            url: videoSourceId,
+            source_id: "generated_veo_asset",
             prompt_signature: videoAttributes.prompt_signature,
             attributes: {
                 lighting: videoAttributes.lighting,
@@ -161,13 +168,14 @@ export class InitialHeroGenerator {
 
 
         // === OUTPUT ===
-        console.log("Saving Challenger v1...");
+        console.log("Saving Staged Hero Block...");
+        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
         await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
         console.log("Done.");
     }
 
 
-    private async generateVideoAsset(attributes: any) {
+    private async generateVideoAsset(attributes: any, variantId: string) {
         console.log("🎥 Connecting to Veo...");
 
         const veoPrompt = `
@@ -212,22 +220,26 @@ export class InitialHeroGenerator {
                 throw new Error("No videos returned in operation response.");
             }
 
-            const videoPath = path.join(process.cwd(), 'client/public/assets/veo_video_hero_challenger.mp4');
+            // 4. Archive using MediaService 
+            // Assuming import is added at top
+            const mediaService = MediaService.getInstance();
 
-            // @ts-ignore
-            await this.client.files.download({
-                file: videos[0].video!,
-                downloadPath: videoPath,
-            });
+            // Use specialized helper for direct Gemini download -> History
+            const relativePath = await mediaService.archiveGeminiFile(
+                this.client,
+                videos[0].video!.uri || "", // Pass empty string if undefined (should not happen if video exists)
+                "hero_video",
+                "mp4",
+                variantId // PASS VARIANT ID
+            );
 
-            console.log(`✅ Video Saved to: ${videoPath}`);
-            return "veo_hero_001_generated";
+            console.log(`✅ Video Archived via MediaService: ${relativePath}`);
+            return relativePath; // Returns /assets/history/[variant_id]/hero_video_timestamp.mp4
 
         } catch (error) {
             console.error("❌ Veo Generation Failed:", error);
-            // Fallback
             console.warn("Using placeholder video due to generation error.");
-            return "veo_hero_001_placeholder";
+            return "/assets/placeholders/hero_placeholder.mp4"; // Ensure fallback exists or use a robust default
         }
     }
 

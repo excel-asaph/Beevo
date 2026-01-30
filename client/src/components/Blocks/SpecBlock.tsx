@@ -38,6 +38,25 @@ export const SpecBlock: React.FC<{ config: SpecBlockConfig }> = ({ config }) => 
     const startTimeRef = useRef<number>(Date.now());
     const [hasLogged, setHasLogged] = useState(false);
 
+    // === Global Utilities for Injected HTML ===
+    useEffect(() => {
+        // Define 'highlight' in the window scope for AI-generated hover effects
+        (window as any).highlight = (el: HTMLElement) => {
+            if (!el) return;
+            el.style.transition = 'all 0.3s ease';
+            el.style.transform = 'translateY(-4px)';
+            el.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
+            el.onmouseleave = () => {
+                el.style.transform = 'translateY(0)';
+                el.style.boxShadow = 'none';
+            };
+        };
+
+        return () => {
+            delete (window as any).highlight;
+        };
+    }, []);
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
@@ -115,10 +134,18 @@ export const SpecBlock: React.FC<{ config: SpecBlockConfig }> = ({ config }) => 
                 </div>
 
                 {/* Generative AI Code Injection */}
-                <div
-                    className="rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-                    dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }}
-                />
+                <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                    {config.graphic_config.visual_code && (
+                        <>
+                            {/* If it looks like raw CSS (contains braces and no tags), wrap it in <style> */}
+                            {config.graphic_config.visual_code.includes('{') && !config.graphic_config.visual_code.includes('<') ? (
+                                <style dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
+                            ) : (
+                                <div dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </section>
     );

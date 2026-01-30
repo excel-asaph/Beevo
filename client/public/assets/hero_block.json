@@ -1,0 +1,62 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1769783909758",
+    "meta": {
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "type": "video",
+        "url": "/assets/history/hero_v1769783909758/hero_video_1769783989583.mp4",
+        "source_id": "generated_veo_asset",
+        "prompt_signature": "A sleek, aerodynamic autonomous electric shuttle gliding smoothly through a modern African metropolitan hub. The scene blends ultra-modern glass architecture with lush vertical gardens and solar-powered smart infrastructure. Pedestrians interact with digital kiosks while the vehicle maneuvers precisely through a dedicated green lane.",
+        "attributes": {
+            "lighting": "Cinematic natural lighting with soft, directional sun rays filtered through architectural solar lattices, complemented by cool technological glows from the shuttle's HUD.",
+            "camera_movement": "A dynamic low-angle tracking shot that follows the side of the vehicle, gradually panning upwards to reveal the high-tech skyline.",
+            "subject_focus": "The sleek, futuristic design of the Blutone autonomous transport unit and its seamless integration into the sustainable urban landscape.",
+            "color_grade": "#40E0D0"
+        }
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "Powering Africa's Future Mobility",
+            "styles": {
+                "color": "#3D405B",
+                "fontFamily": "Exo 2",
+                "fontSize": "5rem",
+                "fontWeight": "800",
+                "textShadow": "2px 4px 10px rgba(0,0,0,0.1)"
+            }
+        },
+        "subhead": {
+            "text": "Bridging autonomous technology and local regulations for a cleaner, more accessible transport ecosystem.",
+            "styles": {
+                "color": "#3D405B",
+                "fontFamily": "Exo 2",
+                "fontSize": "1.5rem",
+                "marginTop": "1rem"
+            }
+        },
+        "cta": {
+            "text": "Join the Revolution",
+            "action_id": "scroll_to_offer",
+            "styles": {
+                "backgroundColor": "#E2725B",
+                "color": "#F4F1DE",
+                "fontFamily": "Exo 2",
+                "padding": "12px 24px",
+                "borderRadius": "4px"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "alignItems": "center",
+            "textAlign": "center",
+            "padding": "40px"
+        },
+        "overlay_gradient": "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))"
+    }
+}

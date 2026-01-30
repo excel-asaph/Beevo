@@ -9,9 +9,9 @@ import { DynamicLandingPage } from './components/DynamicLandingPage';
 import { LogoStudioSidebar } from './components/LogoStudio/LogoStudioSidebar';
 import { HITLControlCenter } from './components/HITLControlCenter';
 import { Junction } from '@shared/types';
-import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon, Sliders } from 'lucide-react';
+import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon } from 'lucide-react';
 
-type ViewMode = 'dashboard' | 'agent' | 'landing_page' | 'control_center';
+type ViewMode = 'dashboard' | 'agent' | 'landing_page' | 'hitl';
 
 const SidebarItem: React.FC<{
     active: boolean;
@@ -65,8 +65,7 @@ const MainLayout: React.FC = () => {
         );
     }
 
-    // If in Control Center mode
-    if (viewMode === 'control_center') {
+    if (viewMode === 'hitl') {
         return (
             <div className="relative w-full h-full">
                 <button
@@ -107,16 +106,16 @@ const MainLayout: React.FC = () => {
                             accent
                         />
                         <SidebarItem
-                            active={false}
+                            active={viewMode === 'landing_page'}
                             onClick={() => setViewMode('landing_page')}
                             icon={<MonitorPlay size={20} />}
                             label="Live Landing Page"
                             accent
                         />
                         <SidebarItem
-                            active={viewMode === 'control_center'}
-                            onClick={() => setViewMode('control_center')}
-                            icon={<Sliders size={20} />}
+                            active={viewMode === 'hitl'}
+                            onClick={() => setViewMode('hitl')}
+                            icon={<Activity size={20} />}
                             label="HITL Control"
                             accent
                         />

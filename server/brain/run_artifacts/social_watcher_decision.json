@@ -1,59 +1,59 @@
 {
-    "thoughts": "The current dwell time is extremely low, suggesting users are skimming the high-level numbers and bouncing because the layout feels like a standard 'features' block. By shifting to a BLUEPRINT strategy, we transform the section from a list of cards into a cohesive technical 'system'. We will use a more sophisticated color palette (Deep Navy and Copper) to evoke executive authority. The 'Evidence Items' are now decoupled from the testimonials to allow for a dual-scanning path: logic-driven stats for the left brain and narrative quotes for the right brain. The centered headline maintains alignment with the hero section while the grid below uses a structured 1280px container with technical 'architectural' markers (border-accents and mono-spaced sub-labels) to force eye-fixation and increase dwell time.",
+    "thoughts": "The current layout, while functional, lacks a sense of dynamic momentum fitting for 'The Pulse of African Progress'. The static 4-column grid creates uniform heights that lead to visual fatigue and excessive whitespace. By transitioning to a MASONRY strategy, we create a more organic and rhythmic 'pulse' that mirrors the vibrant urban evolution Bluetone is driving. I have elevated the typography for higher authority, introduced deeper drop shadows for a modern 'glass-on-canvas' aesthetic, and optimized the card structures to prioritize the 'Bluetone' impact narrative. The color-coded accent borders remain but are refined to feel like premium identifiers rather than simple separators.",
     "changes": {
-        "layout_strategy": "BLUEPRINT",
-        "headline": "The Blueprint for Digital Dominance",
-        "subhead": "A systematic approach to infrastructure, ROI acceleration, and operational efficiency—validated by the Salesack partner network.",
-        "visual_code": "<section class='py-24 bg-[#F8F9FA]' style='font-family:\"Montserrat\", sans-serif;'><div class='max-w-7xl mx-auto px-6'><div class='text-center mb-20'><span class='text-xs font-black tracking-[0.3em] uppercase text-[#E29578] mb-4 block'>Systemic Validation</span><h2 class='text-5xl font-black text-[#1A3C40] tracking-tight mb-6'>The Blueprint of Impact</h2><p class='text-xl text-[#006D77] max-w-2xl mx-auto font-medium'>Precision-engineered frameworks designed to replace digital friction with scalable momentum.</p></div><div class='grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#83C5BE]/30 rounded-3xl overflow-hidden shadow-2xl'><div class='p-12 border-r border-[#83C5BE]/30 flex flex-col bg-white'><div class='mb-12'><span class='text-[10px] font-bold text-[#E29578] uppercase tracking-widest'>Module 01: Infrastructure</span><div class='mt-4 flex items-baseline gap-2'><span class='text-5xl font-black text-[#1A3C40]'>14</span><span class='text-xl font-bold text-[#006D77]'>Days</span></div><p class='text-xs font-mono uppercase text-[#83C5BE] mt-2'>Mean Global Deployment Time</p></div><div class='relative'><div class='absolute -left-4 top-0 w-1 h-full bg-[#E29578] opacity-50'></div><p class='text-lg leading-relaxed text-[#1A3C40] font-medium italic mb-8'>\"Salesack didn't just give us a website; they built the digital foundation that allowed our boutique to go global in weeks.\"</p></div><div class='mt-auto flex items-center gap-4'><img src='/assets/testimonial_1_challenger.png' class='w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all shadow-md'/><div class='text-left'><p class='text-sm font-bold text-[#1A3C40]'>Sarah Jenkins</p><p class='text-[10px] uppercase tracking-wider text-[#006D77]'>Founder, Bloom Retail</p></div></div></div><div class='p-12 border-r border-[#83C5BE]/30 flex flex-col bg-[#1A3C40] relative'><div class='absolute top-0 right-0 p-4'><div class='w-8 h-8 border-t border-r border-[#E29578] opacity-40'></div></div><div class='mb-12'><span class='text-[10px] font-bold text-[#83C5BE] uppercase tracking-widest'>Module 02: Acquisition</span><div class='mt-4 flex items-baseline gap-2'><span class='text-5xl font-black text-white'>3.2x</span><span class='text-xl font-bold text-[#E29578]'>ROI</span></div><p class='text-xs font-mono uppercase text-[#83C5BE] opacity-60 mt-2'>Predictable Growth Engine</p></div><div class='relative'><div class='absolute -left-4 top-0 w-1 h-full bg-[#E29578]'></div><p class='text-lg leading-relaxed text-white font-medium italic mb-8'>\"The lead generation platform is a game-changer. We finally have a predictable growth engine instead of guessing where the next client comes from.\"</p></div><div class='mt-auto flex items-center gap-4'><img src='/assets/testimonial_2_challenger.png' class='w-12 h-12 rounded-lg shadow-md border border-white/10'/><div class='text-left'><p class='text-sm font-bold text-white'>Marcus Thorne</p><p class='text-[10px] uppercase tracking-wider text-[#83C5BE]'>CEO, Thorne Logistics</p></div></div></div><div class='p-12 flex flex-col bg-white'><div class='mb-12'><span class='text-[10px] font-bold text-[#E29578] uppercase tracking-widest'>Module 03: Efficiency</span><div class='mt-4 flex items-baseline gap-2'><span class='text-5xl font-black text-[#1A3C40]'>40</span><span class='text-xl font-bold text-[#006D77]'>hr/m</span></div><p class='text-xs font-mono uppercase text-[#83C5BE] mt-2'>Operational Capacity Reclaimed</p></div><div class='relative'><div class='absolute -left-4 top-0 w-1 h-full bg-[#E29578] opacity-50'></div><p class='text-lg leading-relaxed text-[#1A3C40] font-medium italic mb-8'>\"Transitioning online felt impossible until Salesack stepped in. Their custom software simplified our entire workflow.\"</p></div><div class='mt-auto flex items-center gap-4'><img src='/assets/testimonial_3_challenger.png' class='w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all shadow-md'/><div class='text-left'><p class='text-sm font-bold text-[#1A3C40]'>Elena Rodriguez</p><p class='text-[10px] uppercase tracking-wider text-[#006D77]'>Director, Artistry Hub</p></div></div></div></div></div></section>",
+        "layout_strategy": "MASONRY",
+        "headline": "THE PULSE OF AFRICAN PROGRESS",
+        "subhead": "Partnering with visionary leaders to redefine mobility and sustainable infrastructure across the continent.",
+        "visual_code": "<section style=\"background-color: #F4F1DE; color: #3D405B; font-family: 'Exo 2', sans-serif; padding: 120px 24px;\"><div style=\"max-width: 1280px; margin: 0 auto;\"><div style=\"text-align: center; margin-bottom: 80px;\"><h2 style=\"font-size: 58px; font-weight: 900; color: #2D5A27; letter-spacing: -0.03em; margin-bottom: 24px; text-transform: uppercase;\">The Pulse of Progress</h2><p style=\"font-size: 24px; line-height: 1.5; color: #3D405B; max-width: 850px; margin: 0 auto; opacity: 0.9;\">Join the leaders transforming African mobility into a global gold standard for sustainability.</p></div><div style=\"column-count: 2; column-gap: 32px; max-width: 1100px; margin: 0 auto;\"><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #E2725B;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Bluetone's autonomous fleet has transformed our city's logistics, proving that smart tech can adapt to local streets seamlessly and safely.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #40E0D0; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">Amara Okafor</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">COO, Lagos Urban Transit Authority</p></div></div></div><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #40E0D0;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Integrating Bluetone vehicles wasn't just a tech upgrade; it was a commitment to a cleaner, faster future for our community's next generation.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #E2725B; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">Kwame Mensah</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">Director of Sustainability, Accra Green Energy</p></div></div></div><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #2D5A27;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Their law-abiding robots are a masterclass in navigating complex regulatory environments while maintaining peak operational efficiency.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #3D405B; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">Dr. Zanele Mbeki</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">Logistics Consultant, SADC Regional Council</p></div></div></div><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #3D405B;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Reliability meets innovation. Bluetone is the first partner to truly understand the infrastructure needs and cultural nuances of the continent.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #2D5A27; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">David Otieno</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">Founder, East Africa Mobility Group</p></div></div></div></div></div></section>",
         "evidence_items": [
             {
-                "id": "ev_1",
-                "label": "Deployment Velocity",
+                "id": "ev1",
+                "label": "Cities Enabled",
                 "value": "14",
-                "unit": "Days",
-                "visual_type": "technical_stat"
+                "icon": "globe",
+                "unit": "Metros"
             },
             {
-                "id": "ev_2",
-                "label": "Capital Efficiency",
-                "value": "3.2x",
-                "unit": "ROI",
-                "visual_type": "technical_stat"
+                "id": "ev2",
+                "label": "CO2 Reduction",
+                "value": "42",
+                "icon": "leaf",
+                "unit": "%"
             },
             {
-                "id": "ev_3",
-                "label": "Operational Surplus",
-                "value": "40",
-                "unit": "hrs/mo",
-                "visual_type": "technical_stat"
+                "id": "ev3",
+                "label": "Daily Trips",
+                "value": "850k",
+                "icon": "zap",
+                "unit": "Trips"
             }
         ],
         "testimonials": [
             {
                 "id": "t1",
-                "name": "Sarah Jenkins",
-                "title": "Founder",
-                "company": "Bloom Retail",
-                "quote": "Salesack didn't just give us a website; they built the digital foundation that allowed our boutique to go global in weeks.",
-                "image_prompt": "High-contrast professional portrait, architectural background"
+                "name": "Amara Okafor",
+                "title": "Chief Operations Officer",
+                "company": "Lagos Urban Transit Authority",
+                "quote": "Bluetone's autonomous fleet has transformed our city's logistics, proving that smart tech can adapt to local streets seamlessly and safely.",
+                "image_prompt": "A professional portrait of a West African woman in her late 40s, COO attire, soft bokeh city background, warm lighting, high-end photography style."
             },
             {
                 "id": "t2",
-                "name": "Marcus Thorne",
-                "title": "CEO",
-                "company": "Thorne Logistics",
-                "quote": "The lead generation platform is a game-changer. We finally have a predictable growth engine instead of guessing.",
-                "image_prompt": "Close-up executive headshot, corporate lighting"
+                "name": "Kwame Mensah",
+                "title": "Director of Sustainability",
+                "company": "Accra Green Energy",
+                "quote": "Integrating Bluetone vehicles wasn't just a tech upgrade; it was a commitment to a cleaner, faster future for our community's next generation.",
+                "image_prompt": "A sharp, professional headshot of a Ghanaian man in a modern blazer, smiling confidently, bright natural daylight."
             },
             {
                 "id": "t3",
-                "name": "Elena Rodriguez",
-                "title": "Director",
-                "company": "Artistry Hub",
-                "quote": "Transitioning online felt impossible until Salesack stepped in. Their software simplified our entire workflow.",
-                "image_prompt": "Professional woman, studio lighting, clean background"
+                "name": "Dr. Zanele Mbeki",
+                "title": "Logistics Consultant",
+                "company": "SADC Regional Council",
+                "quote": "Their law-abiding robots are a masterclass in navigating complex regulatory environments while maintaining peak operational efficiency.",
+                "image_prompt": "A sophisticated portrait of a South African woman, academic and professional aesthetic, wearing glasses, soft studio lighting."
             }
         ]
     },
-    "confidence": 95
+    "confidence": 98
 }

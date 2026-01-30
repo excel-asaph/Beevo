@@ -1,0 +1,57 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1769784080045",
+    "meta": {
+        "strategy": "Social Proof based on Brand Voice",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "MASONRY"
+    },
+    "content": {
+        "headline": "The Blueprint for a Smarter Continent",
+        "subhead": "By the numbers and on the ground—here is how Bluetone is driving the autonomous revolution across Africa's leading transit hubs.",
+        "testimonials": [
+            {
+                "id": "t1",
+                "name": "Amara Okafor",
+                "title": "Director of Urban Planning",
+                "company": "Lagos Smart City Initiative",
+                "quote": "Bluetone isn't just selling vehicles; they are providing the infrastructure for a cleaner, smarter Lagos. Their commitment to cultural adaptation is unparalleled.",
+                "image_prompt": "High-end professional business portrait of a Nigerian woman in her 40s, wearing a tailored blazer with subtle coral accents, soft office lighting, bokeh Lagos city background, 8k resolution."
+            },
+            {
+                "id": "t2",
+                "name": "Kofi Mensah",
+                "title": "Chief Operations Officer",
+                "company": "Accra Transit Authority",
+                "quote": "The autonomous integration has reduced our operational delays by 30% while perfectly navigating our unique local traffic environments.",
+                "image_prompt": "Professional headshot of a Ghanaian man in his 50s, executive leadership style, wearing a crisp charcoal suit, modern transit hub architecture in background, natural daylight."
+            },
+            {
+                "id": "t3",
+                "name": "Zanele Mbeki",
+                "title": "Head of Sustainability",
+                "company": "Cape Logistics Group",
+                "quote": "Switching our fleet to Bluetone's electric transit has drastically cut our carbon footprint without sacrificing the reliability our clients demand.",
+                "image_prompt": "Corporate portrait of a South African woman, sustainability executive, confident expression, minimalist modern office with greenery, soft warm lighting, professional photography."
+            },
+            {
+                "id": "t4",
+                "name": "Ibrahim Yusuf",
+                "title": "Founder",
+                "company": "Sahel Delivery Solutions",
+                "quote": "Their law-abiding robots have revolutionized our last-mile delivery in complex urban environments where traditional logistics often fail.",
+                "image_prompt": "Professional portrait of a West African male tech entrepreneur, clean smart-casual attire, blurred tech-hub background, crisp focus, high-end editorial style."
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section style=\"background-color:#F4F1DE;padding:100px 20px;font-family:'Exo 2',sans-serif;color:#3D405B\"><div style=\"max-width:1280px;margin:0 auto\"><div style=\"text-align:center;margin-bottom:80px\"><span style=\"text-transform:uppercase;letter-spacing:2px;font-weight:700;color:#E2725B;font-size:14px;display:block;margin-bottom:12px\">Social Validation</span><h2 style=\"font-size:56px;font-weight:800;color:#2D5A27;margin-bottom:24px;line-height:1.1\">The Blueprint for a Smarter Continent</h2><p style=\"font-size:22px;max-width:800px;margin:0 auto;color:#3D405B;line-height:1.6\">By the numbers and on the ground—here is how Bluetone is driving the autonomous revolution across Africa's leading transit hubs.</p></div><div style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:32px;align-items:start\"><div style=\"background:#FFFFFF;padding:48px;border-radius:32px;box-shadow:0 15px 40px rgba(0,0,0,0.05);border-top:8px solid #E2725B\"><div style=\"display:flex;gap:4px;margin-bottom:20px\"><span style=\"color:#E2725B\">★</span><span style=\"color:#E2725B\">★</span><span style=\"color:#E2725B\">★</span><span style=\"color:#E2725B\">★</span><span style=\"color:#E2725B\">★</span></div><p style=\"font-size:20px;line-height:1.6;font-weight:500;margin-bottom:40px;color:#3D405B\">\"Bluetone isn't just selling vehicles; they are providing the infrastructure for a cleaner, smarter Lagos. Their commitment to cultural adaptation is unparalleled.\"</p><div style=\"display:flex;align-items:center;gap:16px\"><img src=\"/assets/history/social_v1769784080045/testimonial_1769784089516_1769784089517.png\" style=\"width:60px;height:60px;border-radius:50%;object-fit:cover\"/><div style=\"line-height:1.2\"><h4 style=\"margin:0;font-size:18px;font-weight:800;color:#2D5A27\">Amara Okafor</h4><p style=\"margin:4px 0 0 0;font-size:13px;color:#777\">Director, Lagos Smart City Initiative</p></div></div></div><div style=\"display:flex;flex-direction:column;gap:32px\"><div style=\"background:#2D5A27;padding:40px;border-radius:32px;color:#FFFFFF\"><span style=\"font-size:56px;font-weight:900;display:block;margin-bottom:8px\">30%</span><p style=\"font-size:18px;font-weight:600;opacity:0.9\">Reduction in operational delays across Accra Transit networks.</p></div><div style=\"background:#FFFFFF;padding:48px;border-radius:32px;box-shadow:0 15px 40px rgba(0,0,0,0.05);border-top:8px solid #40E0D0\"><p style=\"font-size:20px;line-height:1.6;font-weight:500;margin-bottom:40px;color:#3D405B\">\"The autonomous integration has reduced our operational delays by 30% while perfectly navigating our unique local traffic environments.\"</p><div style=\"display:flex;align-items:center;gap:16px\"><img src=\"/assets/history/social_v1769784080045/testimonial_1769784098447_1769784098448.png\" style=\"width:60px;height:60px;border-radius:50%;object-fit:cover\"/><div style=\"line-height:1.2\"><h4 style=\"margin:0;font-size:18px;font-weight:800;color:#2D5A27\">Kofi Mensah</h4><p style=\"margin:4px 0 0 0;font-size:13px;color:#777\">COO, Accra Transit Authority</p></div></div></div></div><div style=\"background:#FFFFFF;padding:48px;border-radius:32px;box-shadow:0 15px 40px rgba(0,0,0,0.05);border-top:8px solid #E2725B\"><p style=\"font-size:20px;line-height:1.6;font-weight:500;margin-bottom:40px;color:#3D405B\">\"Switching our fleet to Bluetone's electric transit has drastically cut our carbon footprint without sacrificing the reliability our clients demand.\"</p><div style=\"display:flex;align-items:center;gap:16px\"><img src=\"/assets/history/social_v1769784080045/testimonial_1769784105528_1769784105529.png\" style=\"width:60px;height:60px;border-radius:50%;object-fit:cover\"/><div style=\"line-height:1.2\"><h4 style=\"margin:0;font-size:18px;font-weight:800;color:#2D5A27\">Zanele Mbeki</h4><p style=\"margin:4px 0 0 0;font-size:13px;color:#777\">Head of Sustainability, Cape Logistics</p></div></div><div style=\"background:#F4F1DE;margin-top:32px;padding:24px;border-radius:20px\"><span style=\"font-size:32px;font-weight:800;color:#2D5A27\">450t</span><p style=\"margin:0;font-size:14px;font-weight:600;color:#3D405B\">Carbon mitigated annually</p></div></div><div style=\"background:#FFFFFF;padding:48px;border-radius:32px;box-shadow:0 15px 40px rgba(0,0,0,0.05);border-top:8px solid #40E0D0\"><p style=\"font-size:20px;line-height:1.6;font-weight:500;margin-bottom:40px;color:#3D405B\">\"Their law-abiding robots have revolutionized our last-mile delivery in complex urban environments where traditional logistics often fail.\"</p><div style=\"display:flex;align-items:center;gap:16px\"><img src=\"/assets/history/social_v1769784080045/testimonial_1769784116882_1769784116891.png\" style=\"width:60px;height:60px;border-radius:50%;object-fit:cover\"/><div style=\"line-height:1.2\"><h4 style=\"margin:0;font-size:18px;font-weight:800;color:#2D5A27\">Ibrahim Yusuf</h4><p style=\"margin:4px 0 0 0;font-size:13px;color:#777\">Founder, Sahel Delivery Solutions</p></div></div></div></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#F4F1DE",
+        "color": "#3D405B",
+        "fontFamily": "Exo 2"
+    }
+}

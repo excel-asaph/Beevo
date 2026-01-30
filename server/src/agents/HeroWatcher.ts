@@ -7,6 +7,8 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
+import { SystemConfigService } from '../services/SystemConfigService.js';
+import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,7 +39,7 @@ export class HeroWatcher {
     }
 
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log("📸 Watcher: Capturing live snapshot...");
+        console.log("📸 Hero Watcher: Capturing live snapshot...");
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
@@ -79,8 +81,17 @@ export class HeroWatcher {
         const activeVariantId = currentHero.id || 'hero_section_v1';
         const data = metricsInfo[activeVariantId];
 
-        // 2. Validate Data
-        if (!data || (data.views || 0) < 10) {
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        // 0. Check Lock
+        if (config.locks.hero) {
+            console.log("🔒 Hero Section is LOCKED. Skipping optimization.");
+            return;
+        }
+
+        // 1. Data Analysis (Threshold Check)
+        if (!data || (data.views || 0) < config.sections.hero.min_views_data) {
             console.log(`🕵️ Watcher: Not enough data for ${activeVariantId}. Views: ${data?.views || 0}`);
             return;
         }
@@ -92,6 +103,25 @@ export class HeroWatcher {
         const retentionRate = (retention / views) * 100;
 
         console.log(`📊 PERF: CTR=${ctr.toFixed(1)}% | RET=${retentionRate.toFixed(1)}%`);
+
+        // 2.5 CHECK THRESHOLDS
+        if (ctr >= config.sections.hero.target_ctr && retentionRate >= config.sections.hero.target_retention) {
+            console.log("🏆 Hero is performing above targets. No action needed.");
+            return;
+        }
+
+        // 🟢 GATE 1: PRE-APPROVAL
+        console.log("🚦 Triggering Pre-Optimization Gate...");
+        const preCheck = await notificationClient.requestApproval(
+            'Hero Section',
+            'PRE_GENERATION',
+            `Hero metrics are low (CTR: ${ctr.toFixed(1)}% vs Target ${config.sections.hero.target_ctr}%). Attempt optimization?`
+        );
+
+        if (!preCheck.approved) {
+            console.log("🛑 User rejected optimization. Aborting.");
+            return;
+        }
 
         // 3. Prepare Visuals (Multi-Modal)
         const parts: any[] = [];
@@ -133,6 +163,12 @@ export class HeroWatcher {
                - If Contrast < 4.5:1: Use a lighter/darker color from palette OR add backdrop blur.
                - If Retention < 40%: Refine the video movement/subject.
             4. **Mutate**: Propose a Specific Fix.
+
+            ${(config.feedback.hero_directive || preCheck.feedback) ? `
+            **🛑 HIGH PRIORITY USER DIRECTIVE 🛑**:
+            The user has explicitly ordered: "${[config.feedback.hero_directive, preCheck.feedback].filter(Boolean).join('. ')}"
+            YOU MUST COMPLY WITH THIS ABOVE ALL OTHER STRATEGIC GOALS.
+            ` : ''}
             
             **OUTPUT JSON**:
             {
@@ -178,9 +214,25 @@ export class HeroWatcher {
             console.log("\n💡 PROPOSED FIX:", optimization.changes);
 
             // 6. Apply Decision
-            if (optimization.confidence > 70) {
+            if (optimization.confidence > config.sections.hero.watcher_confidence_min) {
+
+                // 🟢 GATE 2: POST-APPROVAL
+                console.log("🚦 Triggering Post-Optimization Gate...");
+                const postCheck = await notificationClient.requestApproval(
+                    'Hero Section',
+                    'POST_GENERATION',
+                    `New Hero Strategy Ready (Confidence: ${optimization.confidence}%). Deploy to Challenger & Bake Video?`,
+                    optimization
+                );
+
+                if (!postCheck.approved) {
+                    console.log("🛑 User rejected deployment. Aborting.");
+                    return;
+                }
+
                 const newHero = {
                     ...currentHero,
+                    // ... (rest of logic matches)
                     variant_id: `hero_v${Date.now()}`,
                     overlay_content: {
                         ...currentHero.overlay_content,

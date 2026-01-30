@@ -7,6 +7,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
+import { SystemConfigService } from '../services/SystemConfigService.js';
+import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,23 +84,39 @@ export class SocialWatcher {
         const variantId = currentSocial.id || 'social_section_v1';
         const data = metricsInfo[variantId];
 
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        if (config.locks.social) {
+            console.log("🔒 Social Section is LOCKED. Skipping.");
+            return;
+        }
+
         // 1. Data Threshold Check
-        if (!data || (data.dwell_count || 0) < 5) {
+        if (!data || (data.dwell_count || 0) < config.sections.social.min_dwell_events) {
             console.log(`🕵️ SocialWatcher: Not enough data. Dwell events: ${data?.dwell_count || 0}`);
             return;
         }
 
         const avgDwell = data.dwell_sum_ms / data.dwell_count;
-        const avgVelocity = data.velocity_sum ? (data.velocity_sum / data.dwell_count) : 0; // Added for social logic
+        const avgVelocity = data.velocity_sum ? (data.velocity_sum / data.dwell_count) : 0;
 
         console.log(`📊 PERF: Avg Dwell=${avgDwell.toFixed(0)}ms | Avg Velocity=${avgVelocity.toFixed(0)}px/s`);
 
         // 2. Trust Signal Logic
-        // High velocity (> 1500px/s) or Low dwell (< 1500ms) suggests users aren't buying it.
-        if (avgDwell > 2500 && avgVelocity < 1000) {
+        if (avgDwell > config.sections.social.target_dwell_ms && avgVelocity < config.sections.social.max_velocity_px_s) {
             console.log("🏆 STATUS: CHAMPION. Users are reading and pausing on testimonials.");
             return;
         }
+
+        // 🟢 GATE 1: PRE-APPROVAL
+        const preCheck = await notificationClient.requestApproval(
+            'Social Section',
+            'PRE_GENERATION',
+            `Social Trust low (Dwell: ${avgDwell.toFixed(0)}ms, Velocity: ${avgVelocity.toFixed(0)}px/s). Optimize?`
+        );
+
+        if (!preCheck.approved) return;
 
         console.log("📉 STATUS: LOW TRUST SIGNAL. Users are scrolling past. Initiating Persona & Imagery Mutation...");
 
@@ -117,11 +135,22 @@ export class SocialWatcher {
                 imagery: []
             };
 
-            const optimization = await this.nanoBanana.refineVisual(currentSocial, performance, nanoContext, snapshot || undefined);
+            const combinedFeedback = [config.feedback.social_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const optimization = await this.nanoBanana.refineVisual(currentSocial, performance, nanoContext, snapshot || undefined, combinedFeedback);
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 
-            if ((optimization as any).confidence > 70) {
+            if ((optimization as any).confidence > config.sections.social.watcher_confidence_min) {
+
+                // 🟢 GATE 2: POST-APPROVAL
+                const postCheck = await notificationClient.requestApproval(
+                    'Social Section',
+                    'POST_GENERATION',
+                    `New Social Strategy Ready (Confidence: ${(optimization as any).confidence}%). Deploy & Rebake?`,
+                    optimization
+                );
+
+                if (!postCheck.approved) return;
                 // In social case, if we mutate PERSONAS or PROMPTS, we need to rebake images.
                 const newSocial = {
                     ...currentSocial,

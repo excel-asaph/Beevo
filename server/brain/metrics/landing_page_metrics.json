@@ -1,36 +1,36 @@
 {
-    "spec_section_v1": {
-        "variant_id": "spec_section_v1",
-        "views": 30,
+    "offer_section_v1": {
+        "variant_id": "offer_section_v1",
+        "views": 1,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 43,
-        "dwell_sum_ms": 1411784,
+        "dwell_count": 1,
+        "dwell_sum_ms": 18165,
         "velocity_sum": 0,
-        "last_updated": "2026-01-29T00:28:44.791Z"
+        "last_updated": "2026-01-30T01:39:52.537Z"
     },
-    "hero_section_v1": {
-        "variant_id": "hero_section_v1",
-        "views": 54,
-        "clicks": 4,
-        "retention_count": 19,
-        "retention_sum_ms": 57000,
-        "dwell_count": 0,
-        "dwell_sum_ms": 0,
-        "velocity_sum": 0,
-        "last_updated": "2026-01-29T00:26:21.608Z"
-    },
-    "proof_section_v1": {
-        "variant_id": "proof_section_v1",
+    "social_section_v1": {
+        "variant_id": "social_section_v1",
         "views": 0,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 13,
-        "dwell_sum_ms": 51773,
+        "dwell_count": 1,
+        "dwell_sum_ms": 1131,
+        "velocity_sum": 1050.820953870211,
+        "last_updated": "2026-01-30T01:39:53.190Z"
+    },
+    "spec_section_v1": {
+        "variant_id": "spec_section_v1",
+        "views": 0,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 2,
+        "dwell_sum_ms": 1139585,
         "velocity_sum": 0,
-        "last_updated": "2026-01-29T00:32:12.755Z"
+        "last_updated": "2026-01-30T01:39:52.138Z"
     },
     "pas_section_v1": {
         "variant_id": "pas_section_v1",
@@ -38,31 +38,20 @@
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 15,
-        "dwell_sum_ms": 241060,
+        "dwell_count": 2,
+        "dwell_sum_ms": 1664,
         "velocity_sum": 0,
-        "last_updated": "2026-01-29T00:32:12.672Z"
+        "last_updated": "2026-01-30T01:39:51.551Z"
     },
-    "offer_section_v1": {
-        "variant_id": "offer_section_v1",
-        "views": 5,
+    "proof_section_v1": {
+        "variant_id": "proof_section_v1",
+        "views": 0,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 4,
-        "dwell_sum_ms": 85805,
+        "dwell_count": 2,
+        "dwell_sum_ms": 1408,
         "velocity_sum": 0,
-        "last_updated": "2026-01-29T00:28:42.031Z"
-    },
-    "social_section_v1": {
-        "variant_id": "social_section_v1",
-        "views": 5,
-        "clicks": 0,
-        "retention_count": 0,
-        "retention_sum_ms": 0,
-        "dwell_count": 4,
-        "dwell_sum_ms": 17107,
-        "velocity_sum": 3795.9863329541463,
-        "last_updated": "2026-01-29T00:28:43.726Z"
+        "last_updated": "2026-01-30T01:39:50.906Z"
     }
 }

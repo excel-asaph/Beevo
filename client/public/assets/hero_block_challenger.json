@@ -8,7 +8,7 @@
     "visual_asset": {
         "type": "video",
         "source_id": "veo_hero_001_generated",
-        "prompt_signature": "Fast-paced cinematic tracking shot. Start with a macro close-up of the glowing cultural patterns on the shuttle's chassis as sensors pulse, then whip-pan out to reveal a high-speed convoy gliding through a lush, vertical forest skyscraper district during a vibrant orange sunset. 4k, Unreal Engine 5 aesthetic.",
+        "prompt_signature": "Cinematic wide tracking shot. A sleek convoy of Bluetone autonomous pods glides through a sun-drenched vertical forest city at sunset. Lush greenery on skyscrapers, soft anamorphic lens flares, vibrant orange and teal color palette, 8k, Unreal Engine 5 style.",
         "attributes": {
             "lighting": "Cinematic golden hour balanced with cool cyan LED accents from the smart city infrastructure.",
             "camera_movement": "Dynamic low-angle tracking shot that smoothly transitions into a wide aerial sweep.",
@@ -18,7 +18,7 @@
     },
     "overlay_content": {
         "headline": {
-            "text": "Powering Africa’s Autonomous Future",
+            "text": "Africa’s New Urban Pulse.",
             "styles": {
                 "color": "#FFFFFF",
                 "fontFamily": "Exo 2",
@@ -28,16 +28,16 @@
             }
         },
         "subhead": {
-            "text": "The transport solution built for local landscapes and global tech standards.",
+            "text": "Autonomous high-speed transit designed for the world's most innovative vertical cities.",
             "styles": {
-                "color": "#F3F3F3",
+                "color": "#F0F0F0",
                 "fontFamily": "Exo 2",
                 "fontSize": "1.5rem",
                 "marginTop": "1rem"
             }
         },
         "cta": {
-            "text": "See the Future",
+            "text": "Experience the Fleet",
             "action_id": "scroll_to_offer",
             "styles": {
                 "backgroundColor": "#E2725B",
@@ -54,9 +54,9 @@
             "alignItems": "center",
             "textAlign": "center",
             "padding": "40px",
-            "backdropFilter": "none"
+            "backdropFilter": "blur(5px)"
         },
-        "overlay_gradient": "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%)"
+        "overlay_gradient": "linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)"
     },
-    "variant_id": "hero_v1769599719130"
+    "variant_id": "hero_v1769688049931"
 }

@@ -1,18 +1,18 @@
 {
-    "thoughts": "The current CTR is significantly below target (7.8% vs 25%) primarily due to a failure in text legibility. The dark blue headline and green subheadline completely disappear into the complex, multi-colored background of the futuristic city and vehicle. The contrast ratio is well below the 4.5:1 standard. Retention is close to target, but the video movement feels a bit static and architectural rather than kinetic. To fix this, we need to switch to high-contrast white typography with a grounding overlay and inject more dynamic camera movement into the video prompt to hook users instantly.",
+    "thoughts": "The CTR is significantly below the 25% target (7.3%), primarily due to poor text legibility. The white headline and thin subhead are completely washed out by the high-key anamorphic lens flares and sunset lighting in the background video. Retention (34.5%) is also underperforming, likely because the video starts on an abstract, dark pattern (chassis) that doesn't immediately communicate the 'skyline' or 'transit' value proposition, causing users to bounce before the reveal.",
     "fix_type": "VISUAL",
-    "contrast_audit": "Fail - The #3B456C headline and #2E7D32 subheadline lack sufficient luminance against the sunset sky and metallic vehicle textures, making the value proposition unreadable at a glance.",
+    "contrast_audit": "Fail - The contrast ratio for the subhead and the word 'Reimagined' falls below the 4.5:1 threshold against the sun-drenched background elements.",
     "changes": {
-        "headline": "Powering Africa’s Autonomous Future",
-        "subhead": "The transport solution built for local landscapes and global tech standards.",
-        "cta_text": "See the Future",
-        "video_prompt": "Fast-paced cinematic tracking shot. Start with a macro close-up of the glowing cultural patterns on the shuttle's chassis as sensors pulse, then whip-pan out to reveal a high-speed convoy gliding through a lush, vertical forest skyscraper district during a vibrant orange sunset. 4k, Unreal Engine 5 aesthetic.",
+        "headline": "Africa’s New Urban Pulse.",
+        "subhead": "Autonomous high-speed transit designed for the world's most innovative vertical cities.",
+        "cta_text": "Experience the Fleet",
+        "video_prompt": "Cinematic wide tracking shot. A sleek convoy of Bluetone autonomous pods glides through a sun-drenched vertical forest city at sunset. Lush greenery on skyscrapers, soft anamorphic lens flares, vibrant orange and teal color palette, 8k, Unreal Engine 5 style.",
         "visual_fixes": {
             "headline_color": "#FFFFFF",
-            "subhead_color": "#F3F3F3",
-            "container_blur": "none",
-            "overlay_gradient": "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%)"
+            "subhead_color": "#F0F0F0",
+            "container_blur": "blur(5px)",
+            "overlay_gradient": "linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)"
         }
     },
-    "confidence": 95
+    "confidence": 92
 }

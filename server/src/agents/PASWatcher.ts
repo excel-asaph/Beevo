@@ -7,6 +7,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { WS_CONFIG } from '../../../shared/constants.js';
+import { SystemConfigService } from '../services/SystemConfigService.js';
+import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -84,18 +86,35 @@ export class PASWatcher {
         const variantId = currentPAS.id || 'pas_section_v1';
         const data = metricsInfo[variantId];
 
-        if (!data || (data.dwell_count || 0) < 5) {
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        if (config.locks.pas) {
+            console.log("🔒 PAS Section is LOCKED.");
+            return;
+        }
+
+        if (!data || (data.dwell_count || 0) < config.sections.pas.min_dwell_events) {
             console.log(`🕵️ PAS Watcher: Not enough data for ${variantId}. Dwell events: ${data?.dwell_count || 0}`);
             return;
         }
 
         const avgDwell = data.dwell_sum_ms / data.dwell_count;
-        console.log(`📊 PERF: Avg Dwell Time = ${avgDwell.toFixed(0)}ms (Target: 3000ms+ for RichText)`);
+        console.log(`📊 PERF: Avg Dwell Time = ${avgDwell.toFixed(0)}ms (Target: ${config.sections.pas.target_dwell_ms}ms+ for RichText)`);
 
-        if (avgDwell > 3000) {
+        if (avgDwell > config.sections.pas.target_dwell_ms) {
             console.log("🏆 STATUS: CHAMPION. Narrative is engaging. No action.");
             return;
         }
+
+        // 🟢 GATE 1: PRE-APPROVAL
+        const preCheck = await notificationClient.requestApproval(
+            'PAS Section',
+            'PRE_GENERATION',
+            `PAS Engagement Low (${avgDwell.toFixed(0)}ms vs Target ${config.sections.pas.target_dwell_ms}ms). Strengthen narrative?`
+        );
+
+        if (!preCheck.approved) return;
 
         console.log("📉 STATUS: DWELL TIME LOW (User skipping the story). Initiating Semantic Mutation...");
 
@@ -115,11 +134,22 @@ export class PASWatcher {
             const performance = { avgDwell };
             // Note: Reuse refineVisual but with PAS-specific prompts if we had a dedicated refinePAS method.
             // For now, NanoBanana handles refinement through its instructions.
-            const optimization = await this.nanoBanana.refineVisual(currentPAS, performance, nanoContext, snapshotBuffer || undefined);
+            const combinedFeedback = [config.feedback.pas_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const optimization = await this.nanoBanana.refineVisual(currentPAS, performance, nanoContext, snapshotBuffer || undefined, combinedFeedback);
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 
-            if ((optimization as any).confidence > 70) {
+            if ((optimization as any).confidence > config.sections.pas.watcher_confidence_min) {
+
+                // 🟢 GATE 2: POST-APPROVAL
+                const postCheck = await notificationClient.requestApproval(
+                    'PAS Section',
+                    'POST_GENERATION',
+                    `New PAS Narrative Ready (Confidence: ${(optimization as any).confidence}%). Commit text?`,
+                    optimization
+                );
+
+                if (!postCheck.approved) return;
                 const newPAS = {
                     ...currentPAS,
                     variant_id: `pas_v${Date.now()}`,

@@ -7,6 +7,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { WS_CONFIG } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
+import { SystemConfigService } from '../services/SystemConfigService.js';
+import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -86,7 +88,36 @@ export class SpecWatcher {
         const specMetrics = metricsInfo[currentSpec.id] || { dwell_count: 0, interactions: [] };
         const interactionWeight = (specMetrics.interactions?.length || 0);
 
-        console.log(`📊 PERF: Interaction Depth=${interactionWeight} | Dwell Count=${specMetrics.dwell_count}`);
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        if (config.locks.spec) {
+            console.log("🔒 Spec Section is LOCKED.");
+            return;
+        }
+
+        // VALIDATION
+        if (specMetrics.dwell_count < config.sections.spec.min_data_points) {
+            console.log(`🕵️ SpecWatcher: Low Data (${specMetrics.dwell_count}). Waiting.`);
+            return;
+        }
+
+        const interactionRate = ((interactionWeight / (specMetrics.dwell_count || 1)) * 100);
+        console.log(`📊 PERF: Interaction Rate=${interactionRate.toFixed(1)}% | Dwell Count=${specMetrics.dwell_count}`);
+
+        if (interactionRate > config.sections.spec.target_interaction_rate) {
+            console.log("🏆 Spec Section is engaging. No action.");
+            return;
+        }
+
+        // 🟢 GATE 1: PRE-APPROVAL
+        const preCheck = await notificationClient.requestApproval(
+            'Spec Section',
+            'PRE_GENERATION',
+            `Spec Interaction Rate Low (${interactionRate.toFixed(1)}% vs Target ${config.sections.spec.target_interaction_rate}%). Optimize schematic?`
+        );
+
+        if (!preCheck.approved) return;
 
         // 2. Prepare Context
         const selectedPalettes = researchCtx.colorPalettes.palettes.filter((p: any) => p.isSelected);
@@ -111,10 +142,21 @@ export class SpecWatcher {
                 interactions: specMetrics.interactions || []
             };
 
-            const result = await this.nanoBanana.refineVisual(currentSpec, performance, context, snapshot || undefined);
+            const combinedFeedback = [config.feedback.spec_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const result = await this.nanoBanana.refineVisual(currentSpec, performance, context, snapshot || undefined, combinedFeedback);
 
             // 4. Apply Fix
-            if (result.confidence > 70) {
+            if (result.confidence > config.sections.spec.watcher_confidence_min) {
+
+                // 🟢 GATE 2: POST-APPROVAL
+                const postCheck = await notificationClient.requestApproval(
+                    'Spec Section',
+                    'POST_GENERATION',
+                    `New Schematic Ready (Confidence: ${result.confidence}%). Deploy?`,
+                    result
+                );
+
+                if (!postCheck.approved) return;
                 const newSpec = {
                     ...currentSpec,
                     variant_id: `spec_v${Date.now()}`,

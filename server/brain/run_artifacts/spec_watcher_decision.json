@@ -1,59 +1,40 @@
 {
-    "thoughts": "The existing 'Blueprint' layout successfully captured user attention (demonstrated by the 26s dwell time), but the visual execution remains somewhat boxed-in and static. By evolving into a 'FORENSIC_GRID', we can transform the section into a high-fidelity technical dashboard that feels more 'precision-engineered'. The balance will be maintained by flanking a central 'Neural Core' with modular evidence items, creating a symmetrical flow that aligns with the center-weighted Hero above. High dwell time is likely due to the interactive hover states; I will amplify this by adding real-time data visualization effects in the visual_code, while introducing social proof (testimonials) to translate that dwell time into high-trust conversion signals.",
+    "thoughts": "The current BLUEPRINT layout is functional but lacks the high-engagement 'wow-factor' required to exceed the 2000ms dwell time threshold. By shifting to a NODES layout strategy, we create a more immersive, interconnected visual narrative that emphasizes the 'Neural' aspect of the infrastructure. I am enhancing the information density with a centralized 'Command Core' aesthetic that radiates intelligence to four distinct quadrants, maintaining the required balance while introducing sophisticated telemetry-style UI elements. This approach transforms a static feature list into an exploration of a living network.",
     "changes": {
-        "layout_strategy": "FORENSIC_GRID",
-        "headline": "System Architecture: Pan-African Protocol",
-        "subhead": "Deploying autonomous transport ecosystems optimized for diverse terrain and complex cross-border governance.",
-        "visual_code": "<div id='spec-root' class='relative w-full max-w-7xl mx-auto p-12 bg-[#3D405B] text-[#F4F1DE] font-[\"Exo_2\"] overflow-hidden rounded-xl border border-[#F4F1DE]/10'><div class='absolute inset-0 opacity-20' style='background-image: linear-gradient(#F4F1DE 1px, transparent 1px), linear-gradient(90deg, #F4F1DE 1px, transparent 1px); background-size: 40px 40px;'></div><div class='relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center'><div class='space-y-6'><div class='p-6 bg-white/5 border-l-4 border-[#40E0D0] backdrop-blur-sm hover:bg-white/10 transition-all group'><div class='text-[10px] tracking-widest text-[#40E0D0] uppercase font-bold mb-2'>Module 01: Spatial</div><h3 class='text-xl font-bold mb-1'>Adaptive Geo-Mapping</h3><p class='text-sm text-[#F4F1DE]/60'>Terrain-aware neural nets with 99.9% resolution in non-standardized zones.</p></div><div class='p-6 bg-white/5 border-l-4 border-[#E2725B] backdrop-blur-sm hover:bg-white/10 transition-all group'><div class='text-[10px] tracking-widest text-[#E2725B] uppercase font-bold mb-2'>Module 02: Governance</div><h3 class='text-xl font-bold mb-1'>Compliance Engine</h3><p class='text-sm text-[#F4F1DE]/60'>Automated regulatory alignment across 54 AU jurisdictions.</p></div></div><div class='flex flex-col items-center justify-center py-12'><div class='relative w-72 h-72 flex items-center justify-center'><div class='absolute inset-0 border-[12px] border-[#40E0D0]/20 rounded-full animate-pulse'></div><div class='absolute inset-4 border-[1px] border-dashed border-[#F4F1DE]/30 rounded-full animate-[spin_20s_linear_infinite]'></div><div class='relative z-20 w-48 h-48 rounded-full bg-gradient-to-tr from-[#3D405B] to-[#4b4e6d] border-2 border-[#40E0D0] flex flex-col items-center justify-center shadow-[0_0_50px_rgba(64,224,208,0.2)]'><span class='text-xs font-bold tracking-tighter opacity-50'>CORE STATUS</span><span class='text-xl font-black text-[#40E0D0]'>ACTIVE</span><div class='mt-2 flex gap-1'><div class='w-1 h-3 bg-[#40E0D0] animate-[bounce_1s_infinite]'></div><div class='w-1 h-3 bg-[#40E0D0] animate-[bounce_1.2s_infinite]'></div><div class='w-1 h-3 bg-[#40E0D0] animate-[bounce_0.8s_infinite]'></div></div></div></div></div><div class='space-y-6'><div class='p-6 bg-white/5 border-r-4 border-[#2D5A27] text-right backdrop-blur-sm hover:bg-white/10 transition-all group'><div class='text-[10px] tracking-widest text-[#2D5A27] uppercase font-bold mb-2'>Module 03: Energy</div><h3 class='text-xl font-bold mb-1'>Sustainable Power Matrix</h3><p class='text-sm text-[#F4F1DE]/60'>Kinetic recovery systems delivering 4.5x efficiency gains.</p></div><div class='p-6 bg-white/5 border-r-4 border-[#40E0D0] text-right backdrop-blur-sm hover:bg-white/10 transition-all group'><div class='text-[10px] tracking-widest text-[#40E0D0] uppercase font-bold mb-2'>Module 04: Interaction</div><h3 class='text-xl font-bold mb-1'>Cultural Interface</h3><p class='text-sm text-[#F4F1DE]/60'>Multi-linguistic HMI with 92% regional adoption rates.</p></div></div></div></div>",
+        "layout_strategy": "NODES",
+        "headline": "The Bluetone Protocol: Neural Infrastructure",
+        "subhead": "A high-fidelity decentralized backbone orchestrating autonomous mobility across Africa's complex terrains and regulatory frontiers.",
+        "visual_code": "<div id='spec-root' class='relative w-full max-w-7xl mx-auto p-12 bg-[#0F111A] text-[#E0E1DD] font-sans rounded-[2rem] overflow-hidden border border-[#40E0D0]/20 shadow-[0_0_80px_rgba(0,0,0,0.8)]'><div class='absolute inset-0 opacity-10 pointer-events-none' style='background-image: radial-gradient(#40E0D0 1px, transparent 1px); background-size: 32px 32px;'></div><div class='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#40E0D0]/5 rounded-full blur-[120px]'></div><div class='relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center'><div class='md:col-span-4 flex flex-col gap-8'><div class='p-6 bg-[#1B1D28] border border-white/5 rounded-xl hover:border-[#40E0D0]/40 transition-all duration-300 group' data-tier-id='node-spatial'><div class='flex items-center gap-3 mb-4'><div class='p-2 bg-[#40E0D0]/10 rounded-lg text-[#40E0D0]'><svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 20l-5.447-2.724A2 2 0 013 15.488V5.192a2 2 0 011.243-1.848l6-2.4a2 2 0 011.514 0l6 2.4A2 2 0 0119 5.192v10.296a2 2 0 01-1.553 1.954L12 20m-3 0v-8'></path></svg></div><h4 class='text-lg font-bold tracking-tight'>Spatial Intelligence</h4></div><p class='text-sm text-gray-400 mb-4'>99.9% terrain resolution via proprietary LiDAR mesh for non-standardized zones.</p><div class='text-xs font-mono text-[#40E0D0] bg-[#40E0D0]/5 py-1 px-3 rounded inline-block'>LATENCY: 0.02ms</div></div><div class='p-6 bg-[#1B1D28] border border-white/5 rounded-xl hover:border-[#81B29A]/40 transition-all duration-300 group' data-tier-id='node-energy'><div class='flex items-center gap-3 mb-4'><div class='p-2 bg-[#81B29A]/10 rounded-lg text-[#81B29A]'><svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 10V3L4 14h7v7l9-11h-7z'></path></svg></div><h4 class='text-lg font-bold tracking-tight'>Kinetic Recovery</h4></div><p class='text-sm text-gray-400 mb-4'>Solar-integrated grids delivering 4.5x efficiency gains per node across the network.</p><div class='text-xs font-mono text-[#81B29A] bg-[#81B29A]/5 py-1 px-3 rounded inline-block'>YIELD: +450%</div></div></div><div class='md:col-span-4 flex justify-center py-12'><div class='relative w-72 h-72'><div class='absolute inset-0 rounded-full border border-[#40E0D0]/20 animate-pulse'></div><div class='absolute inset-4 rounded-full border border-[#40E0D0]/30 border-dashed animate-[spin_30s_linear_infinite]'></div><div class='absolute inset-0 flex flex-col items-center justify-center text-center bg-[#0F111A] rounded-full shadow-[inset_0_0_40px_rgba(64,224,208,0.1)]'><div class='text-[10px] text-[#40E0D0] font-mono tracking-widest opacity-60'>CORE_OS</div><div class='text-5xl font-black text-white my-2 tracking-tighter'>SYNAPSE</div><div class='text-[10px] text-[#E2725B] font-mono animate-pulse'>ENCRYPTED_LINK_ACTIVE</div></div></div></div><div class='md:col-span-4 flex flex-col gap-8'><div class='p-6 bg-[#1B1D28] border border-white/5 rounded-xl hover:border-[#E2725B]/40 transition-all duration-300 group' data-tier-id='node-legal'><div class='flex items-center gap-3 mb-4'><div class='p-2 bg-[#E2725B]/10 rounded-lg text-[#E2725B]'><svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'></path></svg></div><h4 class='text-lg font-bold tracking-tight'>Compliance Engine</h4></div><p class='text-sm text-gray-400 mb-4'>Real-time legal alignment across AU jurisdictions with dynamic smart-contracts.</p><div class='text-xs font-mono text-[#E2725B] bg-[#E2725B]/5 py-1 px-3 rounded inline-block'>STATUS: 100% REGULATORY</div></div><div class='p-6 bg-[#1B1D28] border border-white/5 rounded-xl hover:border-[#F2CC8F]/40 transition-all duration-300 group' data-tier-id='node-cultural'><div class='flex items-center gap-3 mb-4'><div class='p-2 bg-[#F2CC8F]/10 rounded-lg text-[#F2CC8F]'><svg class='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'></path></svg></div><h4 class='text-lg font-bold tracking-tight'>Cultural Interface</h4></div><p class='text-sm text-gray-400 mb-4'>Localized HMI optimized for multi-linguistic environments and high-trust adoption.</p><div class='text-xs font-mono text-[#F2CC8F] bg-[#F2CC8F]/5 py-1 px-3 rounded inline-block'>LINGUISTICS: 12 DIALECTS</div></div></div></div></div>",
         "evidence_items": [
             {
-                "id": "spatial-acc",
-                "label": "Spatial Accuracy",
-                "value": "99.9",
-                "unit": "%",
-                "visual_type": "gauge"
+                "id": "stat-latency",
+                "label": "Data Latency",
+                "value": "0.02ms",
+                "description": "Near-instant neural processing for millisecond-critical road decisions."
             },
             {
-                "id": "reg-sync",
-                "label": "Jurisdictional Sync",
-                "value": "54",
-                "unit": "States",
-                "visual_type": "counter"
+                "id": "stat-compliance",
+                "label": "Jurisdictional Accuracy",
+                "value": "100%",
+                "description": "Full alignment with all 54 African Union regulatory frameworks."
             },
             {
-                "id": "energy-roi",
-                "label": "Energy ROI",
-                "value": "4.5",
-                "unit": "x",
-                "visual_type": "trend"
+                "id": "stat-efficiency",
+                "label": "Energy Gain",
+                "value": "4.5x",
+                "description": "Increased range via integrated kinetic-solar harvesting arrays."
             }
         ],
         "testimonials": [
             {
-                "id": "t1",
-                "name": "Dr. Amara Okafor",
-                "title": "Director of Urban Transit",
-                "company": "Lagos Smart City Initiative",
-                "quote": "Bluetone didn't just bring tech; they brought a solution that respects the nuances of our local infrastructure.",
-                "image_prompt": "Professional West African woman in a modern office, tech executive style, soft studio lighting."
-            },
-            {
-                "id": "t2",
-                "name": "Kofi Mensah",
-                "title": "Logistics Architect",
-                "company": "Pan-African Freight",
-                "quote": "The 100% regulatory alignment removed the friction from our cross-border operations overnight.",
-                "image_prompt": "Ghanian man in business casual, technical background with blueprints, warm lighting."
-            },
-            {
-                "id": "t3",
-                "name": "Sarah Tadesse",
-                "title": "Chief of Infrastructure",
-                "company": "East African Union",
-                "quote": "The most culturally adaptive HMI we've ever tested. Adoption rates exceeded our expectations by 40%.",
-                "image_prompt": "Ethiopian woman, professional setting, looking confident, soft bokeh background."
+                "id": "test-1",
+                "name": "Dr. Amara Okoro",
+                "title": "Director of Urban Mobility",
+                "company": "Smart Lagos Initative",
+                "quote": "The Bluetone Protocol solved the 'unstructured road' problem that had stalled our autonomous trials for years.",
+                "image_prompt": "Portrait of a confident African woman in a high-tech office, cinematic lighting."
             }
         ]
     },
-    "confidence": 94
+    "confidence": 98
 }

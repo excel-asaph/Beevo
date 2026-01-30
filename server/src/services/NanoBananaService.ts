@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from '@google/genai';
-import { MODELS } from '@shared/constants';
+import { MODELS } from '../../../shared/constants.js';
 
 export interface NanoBananaContext {
     brandName: string;
@@ -38,7 +38,6 @@ export interface NanoBananaResult {
 export class NanoBananaService {
     private client: GoogleGenAI;
     private textModel = MODELS.ARCHITECT_TEXT;
-    private imageModel = MODELS.FORGE_IMAGE;
 
     constructor(apiKey: string) {
         this.client = new GoogleGenAI({ apiKey });
@@ -213,7 +212,7 @@ export class NanoBananaService {
         return JSON.parse(text);
     }
 
-    async refineVisual(current: any, performance: any, context: NanoBananaContext, snapshotBuffer?: Buffer): Promise<any> {
+    async refineVisual(current: any, performance: any, context: NanoBananaContext, snapshotBuffer?: Buffer, userFeedback?: string): Promise<any> {
         const parts: any[] = [];
 
         if (snapshotBuffer) {
@@ -243,6 +242,12 @@ export class NanoBananaService {
             5. **ALIGNMENT ALERT**: The Hero section above is strictly center-aligned. Ensure your layout feels balanced—avoid heavy left-side-only weights.
             6. **BOUNDARY CONTRACT**: Your code operates within a 1280px (max-w-7xl) limit.
 
+            ${userFeedback ? `
+            **🛑 HIGH PRIORITY USER DIRECTIVE 🛑**:
+            The user has explicitly ordered: "${userFeedback}"
+            YOU MUST COMPLY WITH THIS ABOVE ALL OTHER STRATEGIC GOALS.
+            ` : ''}
+
             **OUTPUT JSON**:
             {
                 "thoughts": "Detailed forensic diagnosis of layout effectiveness",
@@ -262,7 +267,7 @@ export class NanoBananaService {
         parts.push({ text: prompt });
 
         const response = await this.client.models.generateContent({
-            model: this.imageModel,
+            model: this.textModel,
             contents: [{ role: 'user', parts }],
             config: {
                 responseMimeType: 'application/json',

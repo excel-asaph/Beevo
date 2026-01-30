@@ -6,6 +6,8 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
+import { SystemConfigService } from '../services/SystemConfigService.js';
+import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,8 +81,16 @@ export class OfferWatcher {
         const variantId = currentOffer.id || 'offer_section_v1';
         const data = metricsInfo[variantId];
 
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        if (config.locks.offer) {
+            console.log("🔒 Offer Section is LOCKED.");
+            return;
+        }
+
         // 1. Data Threshold Check
-        if (!data || (data.views || 0) < 5) {
+        if (!data || (data.views || 0) < config.sections.offer.min_views_data) {
             console.log(`🕵️ OfferWatcher: Not enough data. Views: ${data?.views || 0}`);
             return;
         }
@@ -91,10 +101,19 @@ export class OfferWatcher {
         console.log(`📊 PERF: CR=${conversionRate.toFixed(1)}% | Avg Dwell=${avgDwell.toFixed(0)}ms`);
 
         // 2. Forensic Decision
-        if (conversionRate > 5) {
+        if (conversionRate > config.sections.offer.target_conversion_rate) {
             console.log("🏆 STATUS: CHAMPION. Conversion rate is healthy.");
             return;
         }
+
+        // 🟢 GATE 1: PRE-APPROVAL
+        const preCheck = await notificationClient.requestApproval(
+            'Offer Section',
+            'PRE_GENERATION',
+            `Offer Conversion Low (${conversionRate.toFixed(1)}% vs Target ${config.sections.offer.target_conversion_rate}%). Optimize deal structure?`
+        );
+
+        if (!preCheck.approved) return;
 
         console.log("📉 STATUS: LOW CONVERSION. Initiating Offer Mutation...");
 
@@ -114,11 +133,22 @@ export class OfferWatcher {
                 brandDNA: researchCtx.brandDNA
             };
 
-            const optimization = await this.nanoBanana.refineVisual(currentOffer, performance, nanoContext, snapshot || undefined);
+            const combinedFeedback = [config.feedback.offer_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const optimization = await this.nanoBanana.refineVisual(currentOffer, performance, nanoContext, snapshot || undefined, combinedFeedback);
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 
-            if ((optimization as any).confidence > 70) {
+            if ((optimization as any).confidence > config.sections.offer.watcher_confidence_min) {
+
+                // 🟢 GATE 2: POST-APPROVAL
+                const postCheck = await notificationClient.requestApproval(
+                    'Offer Section',
+                    'POST_GENERATION',
+                    `New Offer Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
+                    optimization
+                );
+
+                if (!postCheck.approved) return;
                 const newOffer = {
                     ...currentOffer,
                     variant_id: `offer_v${Date.now()}`,

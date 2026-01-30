@@ -7,10 +7,11 @@ import { Guardian } from './components/Guardian';
 import { AgentCanvas } from './components/Agent';
 import { DynamicLandingPage } from './components/DynamicLandingPage';
 import { LogoStudioSidebar } from './components/LogoStudio/LogoStudioSidebar';
+import { HITLControlCenter } from './components/HITLControlCenter';
 import { Junction } from '@shared/types';
-import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon } from 'lucide-react';
+import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon, Sliders } from 'lucide-react';
 
-type ViewMode = 'dashboard' | 'agent' | 'landing_page';
+type ViewMode = 'dashboard' | 'agent' | 'landing_page' | 'control_center';
 
 const SidebarItem: React.FC<{
     active: boolean;
@@ -64,6 +65,21 @@ const MainLayout: React.FC = () => {
         );
     }
 
+    // If in Control Center mode
+    if (viewMode === 'control_center') {
+        return (
+            <div className="relative w-full h-full">
+                <button
+                    onClick={() => setViewMode('dashboard')}
+                    className="absolute top-4 right-4 z-50 px-4 py-2 bg-black/50 text-white hover:bg-black rounded-lg backdrop-blur-sm transition-colors border border-white/10"
+                >
+                    Exit Control Center
+                </button>
+                <HITLControlCenter />
+            </div>
+        );
+    }
+
     return (
         <div className="flex h-screen bg-slate-950 overflow-hidden text-slate-200">
             {/* Sidebar */}
@@ -95,6 +111,13 @@ const MainLayout: React.FC = () => {
                             onClick={() => setViewMode('landing_page')}
                             icon={<MonitorPlay size={20} />}
                             label="Live Landing Page"
+                            accent
+                        />
+                        <SidebarItem
+                            active={viewMode === 'control_center'}
+                            onClick={() => setViewMode('control_center')}
+                            icon={<Sliders size={20} />}
+                            label="HITL Control"
                             accent
                         />
                     </div>

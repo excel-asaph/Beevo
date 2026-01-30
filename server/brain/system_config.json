@@ -1,0 +1,63 @@
+{
+    "sections": {
+        "hero": {
+            "target_ctr": 25,
+            "target_retention": 40,
+            "min_views_data": 10,
+            "watcher_confidence_min": 70
+        },
+        "proof": {
+            "target_dwell_ms": 2000,
+            "min_views_data": 10,
+            "watcher_confidence_min": 70
+        },
+        "social": {
+            "target_dwell_ms": 2500,
+            "max_velocity_px_s": 1000,
+            "min_dwell_events": 5,
+            "watcher_confidence_min": 70
+        },
+        "pas": {
+            "target_dwell_ms": 3000,
+            "min_dwell_events": 5,
+            "watcher_confidence_min": 70
+        },
+        "spec": {
+            "target_interaction_rate": 15,
+            "min_data_points": 0,
+            "watcher_confidence_min": 70
+        },
+        "offer": {
+            "target_conversion_rate": 5,
+            "min_views_data": 5,
+            "watcher_confidence_min": 70
+        }
+    },
+    "client_tracking": {
+        "common_dwell_threshold_ms": 1000,
+        "retention_milestone_seconds": 3,
+        "intersection_threshold": 0.1
+    },
+    "hitl": {
+        "enabled": true,
+        "require_approval_pre": true,
+        "require_approval_post": true,
+        "auto_proceed_delay_m": 2
+    },
+    "locks": {
+        "hero": false,
+        "proof": false,
+        "pas": false,
+        "spec": false,
+        "social": false,
+        "offer": false
+    },
+    "feedback": {
+        "hero_directive": "",
+        "proof_directive": "",
+        "pas_directive": "",
+        "spec_directive": "",
+        "social_directive": "",
+        "offer_directive": ""
+    }
+}

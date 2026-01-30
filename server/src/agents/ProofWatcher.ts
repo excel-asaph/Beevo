@@ -7,6 +7,8 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { WS_CONFIG } from '../../../shared/constants.js';
+import { SystemConfigService } from '../services/SystemConfigService.js';
+import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -87,17 +89,39 @@ export class ProofWatcher {
         const variantId = currentProof.id || 'proof_section_v1';
         const data = metricsInfo[variantId];
 
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        // 0. Check Lock
+        if (config.locks.proof) {
+            console.log("🔒 Proof Section is LOCKED. Skipping optimization.");
+            return;
+        }
+
         // 2. Validate Data
-        if (!data || (data.views || 0) < 10) {
+        if (!data || (data.views || 0) < config.sections.proof.min_views_data) {
             console.log(`🕵️ Proof Watcher: Not enough data for ${variantId}. Views: ${data?.views || 0}`);
             return;
         }
 
         const avgDwell = data.dwell_sum_ms / data.dwell_count;
-        console.log(`📊 PERF: Avg Dwell Time = ${avgDwell.toFixed(0)}ms (Target: 2000ms+)`);
+        console.log(`📊 PERF: Avg Dwell Time = ${avgDwell.toFixed(0)}ms (Target: ${config.sections.proof.target_dwell_ms}ms+)`);
 
-        if (avgDwell > 2000) {
+        if (avgDwell > config.sections.proof.target_dwell_ms) {
             console.log("🏆 STATUS: CHAMPION. Dwell time is optimal. No action.");
+            return;
+        }
+
+        // 🟢 GATE 1: PRE-APPROVAL
+        console.log("🚦 Triggering Pre-Optimization Gate...");
+        const preCheck = await notificationClient.requestApproval(
+            'Proof Section',
+            'PRE_GENERATION',
+            `Proof Dwell Time is low (${avgDwell.toFixed(0)}ms vs Target ${config.sections.proof.target_dwell_ms}ms). Optimize?`
+        );
+
+        if (!preCheck.approved) {
+            console.log("🛑 User rejected optimization. Aborting.");
             return;
         }
 
@@ -132,11 +156,25 @@ export class ProofWatcher {
             };
 
             const performance = { avgDwell };
-            const optimization = await this.nanoBanana.refineVisual(currentProof, performance, nanoContext, snapshotBuffer || undefined);
+            const combinedFeedback = [config.feedback.proof_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const optimization = await this.nanoBanana.refineVisual(currentProof, performance, nanoContext, snapshotBuffer || undefined, combinedFeedback);
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 
-            if ((optimization as any).confidence > 70) {
+            if ((optimization as any).confidence > config.sections.proof.watcher_confidence_min) {
+
+                // 🟢 GATE 2: POST-APPROVAL
+                const postCheck = await notificationClient.requestApproval(
+                    'Proof Section',
+                    'POST_GENERATION',
+                    `New Proof Strategy Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
+                    optimization
+                );
+
+                if (!postCheck.approved) {
+                    console.log("🛑 User rejected deployment. Aborting.");
+                    return;
+                }
                 const newProof = {
                     ...currentProof,
                     variant_id: `proof_v${Date.now()}`,

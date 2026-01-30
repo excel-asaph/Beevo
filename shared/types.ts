@@ -420,3 +420,97 @@ export interface OfferBlockConfig {
         visual_code: string; // The injected price cards / bundle HTML
     };
 }
+
+// ==========================================
+// HUMAN-IN-THE-LOOP (HITL) CONFIG TYPE
+// ==========================================
+
+export interface SystemConfig {
+    // 1. Watcher Optimization Thresholds (Server-Side Decision Logic)
+    sections: {
+        hero: {
+            target_ctr: number;
+            target_retention: number;
+            min_views_data: number;
+            watcher_confidence_min: number;
+        };
+        proof: {
+            target_dwell_ms: number;
+            min_views_data: number;
+            watcher_confidence_min: number;
+        };
+        social: {
+            target_dwell_ms: number;
+            max_velocity_px_s: number;
+            min_dwell_events: number;
+            watcher_confidence_min: number;
+        };
+        pas: {
+            target_dwell_ms: number;
+            min_dwell_events: number;
+            watcher_confidence_min: number;
+        };
+        spec: {
+            target_interaction_rate: number;
+            min_data_points: number;
+            watcher_confidence_min: number;
+        };
+        offer: {
+            target_conversion_rate: number;
+            min_views_data: number;
+            watcher_confidence_min: number;
+        };
+    };
+
+    // 2. Client-Side Tracking Triggers
+    client_tracking: {
+        common_dwell_threshold_ms: number;
+        retention_milestone_seconds: number;
+        intersection_threshold: number;
+    };
+
+    // 3. Global HITL Settings
+    hitl: {
+        enabled: boolean;
+        require_approval_pre: boolean;
+        require_approval_post: boolean;
+        auto_proceed_delay_m: number;
+    };
+
+    // 4. Section Locking
+    locks: {
+        hero: boolean;
+        proof: boolean;
+        pas: boolean;
+        spec: boolean;
+        social: boolean;
+        offer: boolean;
+    };
+
+    // 5. Directive Feedback
+    feedback: {
+        hero_directive: string;
+        proof_directive: string;
+        pas_directive: string;
+        spec_directive: string;
+        social_directive: string;
+        offer_directive: string;
+    };
+}
+
+// ==========================================
+// NOTIFICATION & INTERVENTION TYPES
+// ==========================================
+
+export type InterventionStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface InterventionRequest {
+    id: string;
+    section: string;
+    type: 'PRE_GENERATION' | 'POST_GENERATION';
+    message: string;
+    proposal?: any; // JSON of the new strategy if POST
+    status: InterventionStatus;
+    feedback?: string;
+    timestamp: number;
+}

@@ -103,7 +103,7 @@ export class InitialHeroGenerator {
 
         challenger.visual_asset = {
             type: "video",
-            url: videoSourceId,
+            source_url: videoSourceId,
             source_id: "generated_veo_asset",
             prompt_signature: videoAttributes.prompt_signature,
             attributes: {
@@ -116,40 +116,51 @@ export class InitialHeroGenerator {
 
 
         // === STEP 3: OVERLAY CONTENT (Real AI Call) ===
-        console.log("[Step 3] Drafting Overlay Content...");
-        const overlayData = await this.generateOverlayContent(context);
+        console.log("[Step 3] Drafting Overlay Content, Navigation, and Forms...");
+        const contentData = await this.generateOverlayAndForms(context);
 
         challenger.overlay_content = {
             headline: {
-                text: overlayData.headline.text,
+                text: contentData.headline.text,
                 styles: {
-                    color: overlayData.headline.color,
-                    fontFamily: overlayData.headline.font,
-                    fontSize: overlayData.headline.size,
-                    fontWeight: overlayData.headline.weight,
-                    textShadow: overlayData.headline.shadow
+                    color: contentData.headline.color,
+                    fontFamily: contentData.headline.font,
+                    fontSize: contentData.headline.size,
+                    fontWeight: contentData.headline.weight,
+                    textShadow: contentData.headline.shadow
                 }
             },
             subhead: {
-                text: overlayData.subhead.text,
+                text: contentData.subhead.text,
                 styles: {
-                    color: overlayData.subhead.color,
-                    fontFamily: overlayData.subhead.font,
-                    fontSize: overlayData.subhead.size,
-                    marginTop: "1rem"
+                    color: contentData.subhead.color,
+                    fontFamily: contentData.subhead.font,
+                    fontSize: contentData.subhead.size,
+                    marginTop: "1.5rem"
                 }
             },
             cta: {
-                text: overlayData.cta.text,
-                action_id: "scroll_to_offer",
+                text: contentData.cta.text,
+                action_id: contentData.cta.action_id,
                 styles: {
-                    backgroundColor: overlayData.cta.bgColor,
-                    color: overlayData.cta.color,
-                    fontFamily: overlayData.cta.font,
-                    padding: "12px 24px",
-                    borderRadius: "4px"
+                    backgroundColor: contentData.cta.bgColor,
+                    color: contentData.cta.color,
+                    fontFamily: contentData.cta.font,
+                    padding: "14px 28px",
+                    borderRadius: "4px",
+                    fontWeight: "600"
                 }
             }
+        };
+
+        challenger.navigation = {
+            links: contentData.navigation.links,
+            styles: contentData.navigation.styles
+        };
+
+        challenger.forms = {
+            contact: contentData.forms.contact,
+            intent: contentData.forms.intent
         };
 
 
@@ -293,20 +304,41 @@ export class InitialHeroGenerator {
         return JSON.parse(text);
     }
 
-    private async generateOverlayContent(context: any) {
+    private async generateOverlayAndForms(context: any) {
         const prompt = `
-        You are an expert UI Copywriter and Designer.
+        You are an expert UI/UX Copywriter and Lead Generation Strategist.
         BRAND CONTEXT:
+        - Brand: ${context.brandName || context.name || 'Brand'}
         - Tagline: ${context.tagline}
         - Mission: ${context.mission}
-        - Rationale: ${context.rationale}
+        - Strategy: ${context.rationale}
         - Valid Colors: ${JSON.stringify(context.colors)}
         - Valid Fonts: ${JSON.stringify(context.fonts)}
 
-        TASK: Generate copy and select styles from the valid lists.
-        1. Headline: 3-5 word robust headline. Pick Font & Color (High Contrast).
-        2. Subhead: Supporting sentence. Pick Font & Color.
-        3. CTA: Action button text. Pick Background Color & Text Color.
+        TASK: Generate the overlay content, navigation links, and lead-gen form configurations.
+        
+        1. **Overlay Content**:
+           - Headline: 3-5 word high-impact headline.
+           - Subhead: Supporting sentence that builds on the strategy.
+           - CTA: Action button text (linked to the "Intent" form).
+
+        2. **Navigation**:
+           - **Three Links** (In this exact order):
+             1. "Offer" (triggers offer form).
+             2. "Partnership" (triggers intent form).
+             3. "Contact" (triggers contact form).
+           - **Action IDs**: 
+             - "Offer" -> open_offer_form
+             - "Partnership" -> open_intent_form
+             - "Contact" -> open_contact_form
+           - **Styles**: Font and color for the fixed navigation bar.
+
+        3. **Form Configurations**:
+           - Generate 2 forms: 'contact' and 'intent'.
+           - 'intent' form: This is the high-value lead form triggered by the Hero CTA. Ask for deep value info (e.g., "Industry Scaling Goal", "Current Infrastructure").
+           - 'contact' form: Standard inquiry form.
+           - Each form needs a title, subtitle, submit button text, and 3-5 fields.
+           - Field types: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'checkbox'.
 
         Return JSON.
         `;
@@ -315,7 +347,9 @@ export class InitialHeroGenerator {
             model: this.modelName,
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             config: {
+                // @ts-ignore
                 responseMimeType: 'application/json',
+                // @ts-ignore
                 responseSchema: {
                     type: Type.OBJECT,
                     properties: {
@@ -345,20 +379,106 @@ export class InitialHeroGenerator {
                             type: Type.OBJECT,
                             properties: {
                                 text: { type: Type.STRING },
+                                action_id: { type: Type.STRING, enum: ["open_intent_form"] },
                                 font: { type: Type.STRING },
                                 bgColor: { type: Type.STRING },
                                 color: { type: Type.STRING }
                             },
-                            required: ["text", "font", "bgColor", "color"]
+                            required: ["text", "action_id", "font", "bgColor", "color"]
+                        },
+                        navigation: {
+                            type: Type.OBJECT,
+                            properties: {
+                                links: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            label: { type: Type.STRING },
+                                            action_id: { type: Type.STRING, enum: ["open_intent_form", "open_contact_form", "open_offer_form"] }
+                                        },
+                                        required: ["label", "action_id"]
+                                    }
+                                },
+                                styles: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        color: { type: Type.STRING, description: "High contrast hex from brand palette" },
+                                        fontFamily: { type: Type.STRING },
+                                        fontSize: { type: Type.STRING, description: "e.g. '0.75rem'" },
+                                        fontWeight: { type: Type.STRING, description: "e.g. '700'" },
+                                        letterSpacing: { type: Type.STRING, description: "e.g. '0.2em'" },
+                                        textTransform: { type: Type.STRING, enum: ["uppercase", "none"] }
+                                    },
+                                    required: ["color", "fontFamily", "fontSize", "fontWeight", "letterSpacing", "textTransform"]
+                                }
+                            },
+                            required: ["links", "styles"]
+                        },
+                        forms: {
+                            type: Type.OBJECT,
+                            properties: {
+                                contact: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        id: { type: Type.STRING },
+                                        title: { type: Type.STRING },
+                                        subtitle: { type: Type.STRING },
+                                        submit_text: { type: Type.STRING },
+                                        fields: {
+                                            type: Type.ARRAY,
+                                            items: {
+                                                type: Type.OBJECT,
+                                                properties: {
+                                                    id: { type: Type.STRING },
+                                                    label: { type: Type.STRING },
+                                                    type: { type: Type.STRING, enum: ["text", "email", "tel", "textarea", "select", "checkbox"] },
+                                                    placeholder: { type: Type.STRING },
+                                                    required: { type: Type.BOOLEAN },
+                                                    options: { type: Type.ARRAY, items: { type: Type.STRING } }
+                                                },
+                                                required: ["id", "label", "type", "required"]
+                                            }
+                                        }
+                                    },
+                                    required: ["id", "title", "submit_text", "fields"]
+                                },
+                                intent: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        id: { type: Type.STRING },
+                                        title: { type: Type.STRING },
+                                        subtitle: { type: Type.STRING },
+                                        submit_text: { type: Type.STRING },
+                                        fields: {
+                                            type: Type.ARRAY,
+                                            items: {
+                                                type: Type.OBJECT,
+                                                properties: {
+                                                    id: { type: Type.STRING },
+                                                    label: { type: Type.STRING },
+                                                    type: { type: Type.STRING, enum: ["text", "email", "tel", "textarea", "select", "checkbox"] },
+                                                    placeholder: { type: Type.STRING },
+                                                    required: { type: Type.BOOLEAN },
+                                                    options: { type: Type.ARRAY, items: { type: Type.STRING } }
+                                                },
+                                                required: ["id", "label", "type", "required"]
+                                            }
+                                        }
+                                    },
+                                    required: ["id", "title", "submit_text", "fields"]
+                                }
+                            },
+                            required: ["contact", "intent"]
                         }
                     },
-                    required: ["headline", "subhead", "cta"]
+                    required: ["headline", "subhead", "cta", "navigation", "forms"]
                 }
             }
         });
 
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!text) throw new Error("Failed to generate overlay content");
+        if (!text) throw new Error("Failed to generate overlay and forms content");
         return JSON.parse(text);
     }
 }

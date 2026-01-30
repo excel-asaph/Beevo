@@ -153,12 +153,6 @@ export class OfferWatcher {
                 );
 
                 if (!postCheck.approved) return;
-
-                if (!currentOffer.content) {
-                    console.error("❌ OfferWatcher: Current offer block has no content section. Aborting.");
-                    return;
-                }
-
                 const newOffer = {
                     ...currentOffer,
                     variant_id: `offer_v${Date.now()}`,

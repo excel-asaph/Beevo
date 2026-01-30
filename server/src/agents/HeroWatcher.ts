@@ -191,6 +191,10 @@ export class HeroWatcher {
                     "subhead": "New Subhead",
                     "cta_text": "New CTA",
                     "video_prompt": "Refined Video Prompt",
+                    "nav_styles": {
+                        "color": "#Hex picked for contrast",
+                        "fontFamily": "Font Name"
+                    },
                     "visual_fixes": {
                         "headline_color": "#Hex picked from palette for contrast",
                         "subhead_color": "#Hex picked from palette for contrast",
@@ -238,46 +242,41 @@ export class HeroWatcher {
                     return;
                 }
 
-                // Use currentHero as currentSpec and optimization as result for consistency with the diff's intent
-                const currentSpec = currentHero;
-                const resultChanges = optimization.changes;
-
-                if (!currentSpec.overlay_content) {
-                    console.error("❌ HeroWatcher: Current hero block has no overlay_content. Aborting.");
-                    return;
-                }
-
                 const newHero = {
-                    ...currentSpec,
+                    ...currentHero,
                     variant_id: `hero_v${Date.now()}`,
-                    visual_asset: {
-                        ...currentSpec.visual_asset,
-                        url: resultChanges.visual_asset?.source_url || currentSpec.visual_asset?.url,
-                        prompt_signature: resultChanges.video_prompt || currentSpec.visual_asset?.prompt_signature
-                    },
                     overlay_content: {
-                        ...currentSpec.overlay_content,
+                        ...currentHero.overlay_content,
                         headline: {
-                            ...currentSpec.overlay_content.headline,
-                            text: resultChanges.headline || currentSpec.overlay_content.headline.text,
+                            ...currentHero.overlay_content.headline,
+                            text: optimization.changes.headline,
                             styles: {
-                                ...currentSpec.overlay_content.headline.styles,
-                                color: resultChanges.visual_fixes?.headline_color || currentSpec.overlay_content.headline.styles.color
+                                ...currentHero.overlay_content.headline.styles,
+                                color: optimization.changes.visual_fixes?.headline_color || currentHero.overlay_content.headline.styles.color
                             }
                         },
                         subhead: {
-                            ...currentSpec.overlay_content.subhead,
-                            text: resultChanges.subhead || currentSpec.overlay_content.subhead.text,
+                            ...currentHero.overlay_content.subhead,
+                            text: optimization.changes.subhead,
                             styles: {
-                                ...currentSpec.overlay_content.subhead.styles,
-                                color: resultChanges.visual_fixes?.subhead_color || currentSpec.overlay_content.subhead.styles.color
+                                ...currentHero.overlay_content.subhead.styles,
+                                color: optimization.changes.visual_fixes?.subhead_color || currentHero.overlay_content.subhead.styles.color
                             }
                         },
                         cta: {
-                            ...currentSpec.overlay_content.cta,
-                            text: resultChanges.cta_text || currentSpec.overlay_content.cta.text
+                            ...currentHero.overlay_content.cta,
+                            text: optimization.changes.cta_text
                         }
                     },
+                    navigation: {
+                        ...currentHero.navigation,
+                        styles: optimization.changes.nav_styles ? {
+                            ...currentHero.navigation.styles,
+                            color: optimization.changes.nav_styles.color || currentHero.navigation.styles?.color,
+                            fontFamily: optimization.changes.nav_styles.fontFamily || currentHero.navigation.styles?.fontFamily
+                        } : currentHero.navigation.styles
+                    },
+                    forms: currentHero.forms,
                     layout_config: {
                         ...currentHero.layout_config,
                         overlay_gradient: optimization.changes.visual_fixes?.overlay_gradient || currentHero.layout_config.overlay_gradient,
@@ -285,6 +284,10 @@ export class HeroWatcher {
                             ...currentHero.layout_config.container_styles,
                             backdropFilter: optimization.changes.visual_fixes?.container_blur || currentHero.layout_config.container_styles.backdropFilter
                         }
+                    },
+                    visual_asset: {
+                        ...currentHero.visual_asset,
+                        prompt_signature: optimization.changes.video_prompt
                     }
                 };
 

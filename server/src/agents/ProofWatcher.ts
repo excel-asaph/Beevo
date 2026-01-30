@@ -18,8 +18,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/proof_block_staging.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block_challenger.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/proof_challenger_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_decision.json');
@@ -170,12 +170,6 @@ export class ProofWatcher {
                     console.log("🛑 User rejected deployment. Aborting.");
                     return;
                 }
-
-                if (!currentProof.content) {
-                    console.error("❌ ProofWatcher: Current proof block has no content section. Aborting.");
-                    return;
-                }
-
                 const newProof = {
                     ...currentProof,
                     variant_id: `proof_v${Date.now()}`,

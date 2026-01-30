@@ -226,6 +226,67 @@ export interface ResearchPhaseObject {
 
 export type LayoutStrategy = 'SPLIT' | 'CLOUDS' | 'TRIPTYCH' | 'FORENSIC_GRID';
 
+export interface FormField {
+    id: string;
+    label: string;
+    type: 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'checkbox';
+    placeholder?: string;
+    required: boolean;
+    options?: string[]; // for select
+}
+
+export interface FormConfig {
+    id: string;
+    title: string;
+    subtitle?: string;
+    submit_text: string;
+    fields: FormField[];
+}
+
+export interface HeroBlockConfig {
+    id: string;
+    variant_id: string;
+    meta: {
+        strategy: string;
+        tone: string;
+        active_variant: string;
+    };
+    visual_asset: {
+        type: 'video' | 'image';
+        source_url: string;
+        source_id: string;
+        prompt_signature?: string;
+        attributes?: any;
+    };
+    overlay_content: {
+        headline: { text: string; styles: any };
+        subhead: { text: string; styles: any };
+        cta: { text: string; action_id: string; styles: any };
+    };
+    navigation: {
+        links: Array<{
+            label: string;
+            action_id: 'open_intent_form' | 'open_contact_form' | 'open_offer_form';
+        }>;
+        styles?: {
+            color?: string;
+            fontFamily?: string;
+            fontSize?: string;
+            fontWeight?: string;
+            letterSpacing?: string;
+            textTransform?: 'uppercase' | 'none';
+        }
+    };
+    forms: {
+        contact: FormConfig;
+        intent: FormConfig;
+    };
+    layout_config: {
+        container_styles: any;
+        overlay_gradient: string;
+    };
+}
+
 export interface EvidenceItem {
     id: string;
     label: string;
@@ -352,7 +413,6 @@ export interface Testimonial {
     company: string;
     quote: string;
     image_url: string; // Path to public asset
-    image_prompt?: string;
 }
 
 export interface SocialBlockConfig {
@@ -362,7 +422,6 @@ export interface SocialBlockConfig {
         strategy: string;
         tone: string;
         active_variant: string;
-        layout_strategy: LayoutStrategy;
     };
     content: {
         headline: string;

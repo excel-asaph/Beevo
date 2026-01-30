@@ -18,25 +18,6 @@ export const OfferBlock: React.FC<OfferBlockProps> = ({ config }) => {
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
-    // === Global Utilities for Injected HTML ===
-    useEffect(() => {
-        // Define 'highlight' in the window scope for AI-generated hover effects
-        (window as any).highlight = (el: HTMLElement) => {
-            if (!el) return;
-            el.style.transition = 'all 0.3s ease';
-            el.style.transform = 'translateY(-4px)';
-            el.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
-            el.onmouseleave = () => {
-                el.style.transform = 'translateY(0)';
-                el.style.boxShadow = 'none';
-            };
-        };
-
-        return () => {
-            delete (window as any).highlight;
-        };
-    }, []);
-
     // === Exposure & Dwell Tracking ===
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -85,6 +66,11 @@ export const OfferBlock: React.FC<OfferBlockProps> = ({ config }) => {
                     text: ctaElement.textContent?.trim()
                 });
                 console.log(`🎯 Global Offer Tracker: Captured ${ctaId} in tier ${tierId}`);
+
+                // Dispatch Global Form Event
+                window.dispatchEvent(new CustomEvent('open-form', {
+                    detail: { type: 'OFFER', context: { tierId, tierName: ctaElement.getAttribute('data-tier-name') } }
+                }));
             }
         };
 
@@ -128,18 +114,10 @@ export const OfferBlock: React.FC<OfferBlockProps> = ({ config }) => {
                     </p>
                 </div>
 
-                <div className="w-full">
-                    {config.graphic_config.visual_code && (
-                        <>
-                            {/* If it looks like raw CSS (contains braces and no tags), wrap it in <style> */}
-                            {config.graphic_config.visual_code.includes('{') && !config.graphic_config.visual_code.includes('<') ? (
-                                <style dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
-                            ) : (
-                                <div dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
-                            )}
-                        </>
-                    )}
-                </div>
+                <div
+                    className="w-full"
+                    dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code || '' }}
+                />
 
                 {config.content.guarantee_text && (
                     <div className="mt-16 text-center opacity-50 text-sm uppercase tracking-widest font-bold">

@@ -1,37 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { useBrand } from '../../context/BrandContext';
-
-// Types matching our Schema
-interface HeroSchema {
-    id: string;
-    visual_asset: {
-        source_id: string;
-        url?: string; // Versioned asset path
-    };
-    overlay_content: {
-        headline: {
-            text: string;
-            styles: React.CSSProperties;
-        };
-        subhead: {
-            text: string;
-            styles: React.CSSProperties;
-        };
-        cta: {
-            text: string;
-            action_id: string;
-            styles: React.CSSProperties;
-        };
-    };
-    layout_config: {
-        container_styles: React.CSSProperties;
-        overlay_gradient: string;
-    };
-}
+import { HeroBlockConfig } from '../../../../shared/types';
 
 interface HeroBlockProps {
-    config: HeroSchema;
+    config: HeroBlockConfig;
 }
 
 export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
@@ -51,14 +24,22 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
         }
     };
 
-    // === CTA Click Tracking ===
+    // === CTA Click Tracking & Form Trigger ===
     const handleCtaClick = () => {
-        track('cta_click', { action: config.overlay_content.cta.action_id });
-        // In a real app, handle the scroll/navigation here
-        console.log('Navigating to:', config.overlay_content.cta.action_id);
+        const action = config.overlay_content.cta.action_id;
+        track('cta_click', { action });
+
+        if (action === 'open_intent_form') {
+            window.dispatchEvent(new CustomEvent('open-form', {
+                detail: { type: 'INTENT', context: { form: config.forms?.intent } }
+            }));
+        }
     };
 
-    const videoSrc = config.visual_asset?.url;
+    // Construct Video URL (assuming convention or using the uploaded file directly for cold start)
+    // Logic: For Cold Start, we know it's "veo_video_hero_challenger.mp4"
+    // Future: config.visual_asset.source_id -> mapped to URL
+    const videoSrc = config.visual_asset?.source_url || '/assets/veo_video_hero_challenger.mp4';
 
     return (
         <div

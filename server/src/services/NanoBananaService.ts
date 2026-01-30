@@ -262,11 +262,6 @@ export class NanoBananaService {
             YOU MUST COMPLY WITH THIS ABOVE ALL OTHER STRATEGIC GOALS.
             ` : ''}
 
-            **SOCIAL SECTION SPECIFIC**:
-            - You MUST generate the **ENTIRE** section HTML in your \`visual_code\`, including the background, container, and all testimonial cards.
-            - Use the \`image_url\` property from each testimonial in the \`testimonials\` array for the \`src\` attribute of their respective headshot images.
-            - Ensure the layout matches the \`layout_strategy\` (MASONRY | GRID | STACK).
-
             **OUTPUT JSON**:
             {
                 "thoughts": "Detailed forensic diagnosis of layout effectiveness",
@@ -453,8 +448,9 @@ export class NanoBananaService {
             3. **Headshot Prompts**: For EACH persona, write a detailed photography prompt for generating a "Human-like, professional, high-end business portrait" using an image AI. 
             4. **Layout Strategy**: Choose a grid pattern (MASONRY | GRID | STACK).
             5. **Visual Layout**: Write 'visual_code' string:
-               - You MUST generate the **ENTIRE** section HTML (background, container, and testimonial cards).
-               - **IMPORTANT**: Use the \`image_url\` values provided in the testimonials array for the headshot \`src\` attributes.
+               - Use the chosen layout strategy.
+               - **IMPORTANT**: Use the \`image_url\` property from each testimonial object for the \`src\` attribute of images in your \`visual_code\`.
+               - Ensure high contrast and professional executive look.
                - Center-align the section headline.
             
             **DESIGN GUARDRAILS**:

@@ -53,8 +53,8 @@ export class InitialSocialGenerator {
             imagery: research.brandDNA.imagerySuggestions?.items?.filter((i: any) => i.isSelected) || []
         };
 
-        // 3. Request Social from NanoBanana (Stage 1: Metadata)
-        console.log("[Step 1] Requesting Testimonial Metadata from NanoBananaService...");
+        // 3. Request Social from NanoBanana
+        console.log("[Step 1] Requesting Social Visualization from NanoBananaService...");
         const generatedData = await this.nanoBanana.generateSocialVisual(context);
 
         // 4. Generate Images for Testimonials
@@ -69,24 +69,12 @@ export class InitialSocialGenerator {
             const imagePath = path.join(ASSETS_DIR, imageName);
 
             console.log(`...Baking Headshot for ${t.name} (${t.title})`);
+            // generateImage now returns the relative path from MediaService
             const archivedPath = await this.generateImage(t.image_prompt, imagePath, variantId);
             t.image_url = archivedPath;
         }
 
-        // 5. Request Final visual_code (Stage 2: Linked HTML)
-        console.log("[Step 3] Requesting Final Linked HTML (visual_code) from NanoBananaService...");
-        // We use refineVisual as a way to "re-render" the block with the now-baked image URLs
-        const refinement = await this.nanoBanana.refineVisual(
-            generatedData,
-            { avgDwell: 0, avgVelocity: 0 },
-            context,
-            undefined,
-            "Regenerate the 'visual_code' to be the COMPLETE section HTML. You MUST use the actual 'image_url' values provided in the testimonials array for the <img> src attributes."
-        );
-
-        const finalData = refinement.changes;
-
-        // 6. Transform into SocialBlockConfig
+        // 5. Transform into SocialBlockConfig
         const challenger: SocialBlockConfig = {
             id: "social_section_v1",
             variant_id: variantId,
@@ -94,16 +82,16 @@ export class InitialSocialGenerator {
                 strategy: "Social Proof based on Brand Voice",
                 tone: context.voice,
                 active_variant: "challenger",
-                layout_strategy: finalData.layout_strategy || generatedData.layout_strategy
+                layout_strategy: generatedData.layout_strategy
             } as any,
             content: {
-                headline: finalData.headline || generatedData.headline,
-                subhead: finalData.subhead || generatedData.subhead,
-                testimonials: finalData.testimonials || testimonials
+                headline: generatedData.headline,
+                subhead: generatedData.subhead,
+                testimonials: testimonials
             },
             graphic_config: {
                 type: 'generative',
-                visual_code: finalData.visual_code || generatedData.visual_code
+                visual_code: generatedData.visual_code
             },
             styles: {
                 backgroundColor: generatedData.backgroundColor,
@@ -112,8 +100,8 @@ export class InitialSocialGenerator {
             }
         };
 
-        // 7. Save
-        console.log(`Saving Staged Social Block to: ${OUTPUT_PATH}`);
+        // 6. Save
+        console.log("Saving Staged Social Block...");
         await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
         await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
         console.log("✅ Done.");

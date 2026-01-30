@@ -12,25 +12,6 @@ export const PASBlock: React.FC<PASBlockProps> = ({ config }) => {
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
-    // === Global Utilities for Injected HTML ===
-    useEffect(() => {
-        // Define 'highlight' in the window scope for AI-generated hover effects
-        (window as any).highlight = (el: HTMLElement) => {
-            if (!el) return;
-            el.style.transition = 'all 0.3s ease';
-            el.style.transform = 'translateY(-4px)';
-            el.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
-            el.onmouseleave = () => {
-                el.style.transform = 'translateY(0)';
-                el.style.boxShadow = 'none';
-            };
-        };
-
-        return () => {
-            delete (window as any).highlight;
-        };
-    }, []);
-
     // === Dwell Time Tracking ===
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -67,18 +48,10 @@ export const PASBlock: React.FC<PASBlockProps> = ({ config }) => {
                 fontFamily: config.styles.fontFamily,
             }}
         >
-            <div className={`w-full max-w-7xl mx-auto transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                {config.graphic_config.visual_code && (
-                    <>
-                        {/* If it looks like raw CSS (contains braces and no tags), wrap it in <style> */}
-                        {config.graphic_config.visual_code.includes('{') && !config.graphic_config.visual_code.includes('<') ? (
-                            <style dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
-                        ) : (
-                            <div dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code }} />
-                        )}
-                    </>
-                )}
-            </div>
+            <div
+                className={`w-full max-w-7xl mx-auto transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+                dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code || '' }}
+            />
         </div>
     );
 };

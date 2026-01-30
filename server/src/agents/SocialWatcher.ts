@@ -19,8 +19,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/social_block.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/social_block_staging.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/social_block_challenger.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/social_challenger_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/social_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/social_watcher_decision.json');
@@ -154,11 +154,6 @@ export class SocialWatcher {
 
                 if (!postCheck.approved) return;
 
-                if (!currentSocial.content) {
-                    console.error("❌ SocialWatcher: Current social block has no content section. Aborting.");
-                    return;
-                }
-
                 const newSocial = {
                     ...currentSocial,
                     variant_id: `social_v${Date.now()}`,
@@ -188,7 +183,7 @@ export class SocialWatcher {
 
                 if (changed) {
                     console.log("🔥 Testimonials mutated. Rebaking headshots and updating staging...");
-                    await this.rebakeHeadshots(newSocial, nanoContext);
+                    await this.rebakeHeadshots(newSocial);
                 }
 
                 console.log("🚀 Optimization Applied! Social Staging Evolved.");
@@ -198,7 +193,7 @@ export class SocialWatcher {
         }
     }
 
-    private async rebakeHeadshots(config: any, context: any) {
+    private async rebakeHeadshots(config: any) {
         const testimonials = config.content.testimonials;
         const mediaService = MediaService.getInstance();
 
@@ -243,26 +238,7 @@ export class SocialWatcher {
             }
         }
 
-        // AFTER rebaking all headshots, we MUST regenerate the visual_code so the HTML <img> tags point to the NEW urls.
-        console.log("🔄 Regenerating visual_code with NEW rebaked image URLs...");
-        try {
-            const finalRefinement = await this.nanoBanana.refineVisual(
-                config,
-                { avgDwell: 0, avgVelocity: 0 },
-                context,
-                undefined,
-                "Regenerate the 'visual_code' to be the COMPLETE section HTML. You MUST use the actual 'image_url' values provided in the testimonials array for the <img> src attributes."
-            );
-
-            if (finalRefinement.changes.visual_code) {
-                config.graphic_config.visual_code = finalRefinement.changes.visual_code;
-                console.log("✅ visual_code updated with new rebaked URLs.");
-            }
-        } catch (e) {
-            console.error("❌ Failed to regenerate visual_code during rebake:", e);
-        }
-
-        // Finalize state in staging after all headshots are baked and visual_code is refreshed
+        // Finalize state in staging after all headshots are baked
         await fs.writeFile(STAGING_FILE, JSON.stringify(config, null, 4));
     }
 }

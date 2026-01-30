@@ -18,8 +18,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/spec_block.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/spec_block_staging.json');
+const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/spec_block_challenger.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/spec_challenger_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/spec_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/spec_watcher_decision.json');
@@ -157,11 +157,7 @@ export class SpecWatcher {
                     result
                 );
 
-                if (!currentSpec.content) {
-                    console.error("❌ SpecWatcher: Current spec block has no content section. Aborting.");
-                    return;
-                }
-
+                if (!postCheck.approved) return;
                 const newSpec = {
                     ...currentSpec,
                     variant_id: `spec_v${Date.now()}`,

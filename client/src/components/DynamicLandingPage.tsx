@@ -5,44 +5,58 @@ import { PASBlock } from './Blocks/PASBlock';
 import { SpecBlock } from './Blocks/SpecBlock';
 import { SocialBlock } from './Blocks/SocialBlock';
 import { OfferBlock } from './Blocks/OfferBlock';
+import { NavigationBar } from './Navigation/NavigationBar';
+import { FormOrchestrator } from './Forms/FormOrchestrator';
 
 export const DynamicLandingPage: React.FC = () => {
     const [configs, setConfigs] = useState<{ hero: any, proof: any, pas: any, spec: any, social: any, offer: any }>({
         hero: null, proof: null, pas: null, spec: null, social: null, offer: null
     });
     const [loading, setLoading] = useState(true);
-
-    // === Global Utilities for Injected HTML ===
-    useEffect(() => {
-        // Define 'highlight' in the window scope for AI-generated hover effects
-        (window as any).highlight = (el: HTMLElement) => {
-            if (!el) return;
-            el.style.transition = 'all 0.3s ease';
-            el.style.transform = 'translateY(-4px)';
-            el.style.boxShadow = '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)';
-            el.onmouseleave = () => {
-                el.style.transform = 'translateY(0)';
-                el.style.boxShadow = 'none';
-            };
-        };
-
-        return () => {
-            delete (window as any).highlight;
-        };
-    }, []);
     const [error, setError] = useState<string | null>(null);
-    // const [activeForm, setActiveForm] = useState<{ type: 'CONTACT' | 'INTENT' | 'OFFER', context?: any } | null>(null);
+    const [activeForm, setActiveForm] = useState<{ type: 'CONTACT' | 'INTENT' | 'OFFER', context?: any } | null>(null);
 
     useEffect(() => {
         // Global listener for dynamic form triggers from "visual_code" or CTAs
-        /*
         const handleOpenForm = (e: any) => {
-            if (e.detail) setActiveForm(e.detail);
+            if (e.detail) {
+                const detail = { ...e.detail };
+                const type = detail.type;
+                let formConfig = null;
+
+                // Determine base form config
+                if (type === 'CONTACT') {
+                    formConfig = configs.hero?.forms?.contact;
+                } else {
+                    // Both INTENT and OFFER use the intent form as base
+                    formConfig = configs.hero?.forms?.intent;
+                }
+
+                // Inject Config & Tiers
+                const isOffer = type === 'OFFER';
+                detail.context = {
+                    ...detail.context,
+                    form: {
+                        ...(detail.context?.form || formConfig),
+                        ...(isOffer ? {
+                            title: "Select Access Plan",
+                            subtitle: configs.offer?.content?.guarantee_text || "Secure your position in the pilot.",
+                            submit_text: "Get a Quote",
+                            fields: [
+                                { id: "offer_name", label: "Full Name", type: "text", required: true },
+                                { id: "offer_email", label: "Email Address", type: "email", required: true }
+                            ]
+                        } : {}),
+                        // Only inject tiers if it's an OFFER type
+                        tiers: (isOffer && configs.offer?.content?.tiers) ? configs.offer.content.tiers : undefined
+                    }
+                };
+                setActiveForm(detail);
+            }
         };
         window.addEventListener('open-form', handleOpenForm);
         return () => window.removeEventListener('open-form', handleOpenForm);
-        */
-    }, []);
+    }, [configs]);
 
     useEffect(() => {
         const fetchConfigs = async () => {
@@ -82,6 +96,7 @@ export const DynamicLandingPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-black text-white selection:bg-blue-500 selection:text-white">
+            {configs.hero && <NavigationBar config={configs.hero.navigation} brandId={configs.hero.id} />}
 
             {/* Block 1: The Hook (Hero) */}
             <div id="hero-block">
@@ -112,6 +127,15 @@ export const DynamicLandingPage: React.FC = () => {
             <div id="offer-block">
                 {configs.offer && <OfferBlock config={configs.offer} />}
             </div>
+
+            {/* Modal Layer */}
+            {activeForm && (
+                <FormOrchestrator
+                    type={activeForm.type}
+                    context={activeForm.context}
+                    onClose={() => setActiveForm(null)}
+                />
+            )}
         </div>
     );
 };

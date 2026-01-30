@@ -6,8 +6,8 @@ import { Forge } from './components/Forge';
 import { Guardian } from './components/Guardian';
 import { AgentCanvas } from './components/Agent';
 import { DynamicLandingPage } from './components/DynamicLandingPage';
-import { LogoStudioSidebar } from './components/LogoStudio/LogoStudioSidebar';
 import { HITLControlCenter } from './components/HITLControlCenter';
+import { LogoStudioSidebar } from './components/LogoStudio/LogoStudioSidebar';
 import { Junction } from '@shared/types';
 import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon } from 'lucide-react';
 
@@ -65,6 +65,7 @@ const MainLayout: React.FC = () => {
         );
     }
 
+    // If in HITL mode, render the Control Center
     if (viewMode === 'hitl') {
         return (
             <div className="relative w-full h-full">
@@ -106,17 +107,17 @@ const MainLayout: React.FC = () => {
                             accent
                         />
                         <SidebarItem
-                            active={viewMode === 'landing_page'}
+                            active={false}
                             onClick={() => setViewMode('landing_page')}
                             icon={<MonitorPlay size={20} />}
                             label="Live Landing Page"
                             accent
                         />
                         <SidebarItem
-                            active={viewMode === 'hitl'}
+                            active={false}
                             onClick={() => setViewMode('hitl')}
                             icon={<Activity size={20} />}
-                            label="HITL Control"
+                            label="Control Center"
                             accent
                         />
                     </div>

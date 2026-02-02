@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { StateCoordinator } from './utils/StateCoordinator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +49,15 @@ const runWatchers = async () => {
     });
 
     await Promise.all(promises);
+
+    // NEW: Coordinator Step (Atomic Deployment)
+    console.log("📝 Coordinator: Checking for staged changes...");
+    try {
+        await StateCoordinator.getInstance().sealState("Scheduled Watcher Cycle");
+    } catch (e) {
+        console.error("❌ Coordinator Seal Failed:", e);
+    }
+
     console.log(`💤 Fleet dormant. Waiting for next cycle...`);
 };
 

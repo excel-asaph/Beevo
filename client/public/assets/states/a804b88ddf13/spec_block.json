@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1770000520064",
+    "meta": {
+        "strategy": "Bluetone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "Autonomous Logistics Architecture",
+        "subhead": "The Technical Specification for High-Precision Trans-Continental Infrastructure",
+        "nodes": [
+            {
+                "id": "matrix-01",
+                "label": "Cultural Navigation Matrix",
+                "description": "Adaptive path-finding algorithms processing unstructured terrain data with 98.7% accuracy.",
+                "icon": "navigation"
+            },
+            {
+                "id": "layer-02",
+                "label": "Regulatory Compliance Layer",
+                "description": "Real-time jurisdictional policy syncing ensuring 100% adherence to cross-border mandates.",
+                "icon": "shield-check"
+            },
+            {
+                "id": "core-03",
+                "label": "Sustainable Energy Backbone",
+                "description": "Integrated solar-kinetic harvesting modules reducing carbon footprint by 40%.",
+                "icon": "battery-charging"
+            },
+            {
+                "id": "mesh-04",
+                "label": "Decentralized Mesh Network",
+                "description": "Ultra-low latency connectivity maintained across low-bandwidth environments (50ms average).",
+                "icon": "cpu"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div id='blueprint-container' class='relative w-full min-h-[600px] bg-[#3D405B] p-4 md:p-12 overflow-hidden flex flex-col items-center justify-center font-[\"Exo_2\"] text-[#F4F1DE]'><style>@import url(\"https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&display=swap\");</style><div class='absolute inset-0' style='background-image: radial-gradient(#F4F1DE22 1px, transparent 0); background-size: 40px 40px;'></div><div class='absolute inset-0 opacity-10 border-[1px] border-[#F4F1DE33] m-8'></div><div class='relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl'><div id='spec-node-1' onmouseenter='highlightPath(\"path1\", \"#E2725B\")' onmouseleave='resetPath(\"path1\")' class='group relative bg-[#3D405B]/80 border-l-4 border-[#E2725B] p-6 backdrop-blur-sm transition-all duration-300 hover:bg-[#E2725B22] cursor-crosshair'><div class='text-xs uppercase tracking-widest text-[#E2725B] mb-2'>Technical Protocol 01</div><h3 class='text-xl font-bold mb-2'>Cultural Navigation Matrix</h3><p class='text-sm text-[#F4F1DE]/80 leading-relaxed'>Adaptive path-finding algorithms processing unstructured terrain data with 98.7% accuracy.</p><div class='mt-4 text-2xl font-bold text-[#E2725B]'>98.7% ACCURACY</div></div><div id='spec-node-2' onmouseenter='highlightPath(\"path2\", \"#40E0D0\")' onmouseleave='resetPath(\"path2\")' class='group relative bg-[#3D405B]/80 border-l-4 border-[#40E0D0] p-6 backdrop-blur-sm transition-all duration-300 hover:bg-[#40E0D022] cursor-crosshair'><div class='text-xs uppercase tracking-widest text-[#40E0D0] mb-2'>Technical Protocol 02</div><h3 class='text-xl font-bold mb-2'>Regulatory Compliance Layer</h3><p class='text-sm text-[#F4F1DE]/80 leading-relaxed'>Real-time jurisdictional policy syncing ensuring 100% adherence to cross-border mandates.</p><div class='mt-4 text-2xl font-bold text-[#40E0D0]'>100% SYNC</div></div><div id='spec-node-3' onmouseenter='highlightPath(\"path3\", \"#2D5A27\")' onmouseleave='resetPath(\"path3\")' class='group relative bg-[#3D405B]/80 border-l-4 border-[#2D5A27] p-6 backdrop-blur-sm transition-all duration-300 hover:bg-[#2D5A2722] cursor-crosshair'><div class='text-xs uppercase tracking-widest text-[#2D5A27] mb-2'>Technical Protocol 03</div><h3 class='text-xl font-bold mb-2'>Sustainable Energy Backbone</h3><p class='text-sm text-[#F4F1DE]/80 leading-relaxed'>Integrated solar-kinetic harvesting modules reducing carbon footprint by 40%.</p><div class='mt-4 text-2xl font-bold text-[#2D5A27]'>40% REDUCTION</div></div><div id='spec-node-4' onmouseenter='highlightPath(\"path4\", \"#F4F1DE\")' onmouseleave='resetPath(\"path4\")' class='group relative bg-[#3D405B]/80 border-l-4 border-[#F4F1DE] p-6 backdrop-blur-sm transition-all duration-300 hover:bg-[#F4F1DE22] cursor-crosshair'><div class='text-xs uppercase tracking-widest text-[#F4F1DE] mb-2'>Technical Protocol 04</div><h3 class='text-xl font-bold mb-2'>Decentralized Mesh Network</h3><p class='text-sm text-[#F4F1DE]/80 leading-relaxed'>Ultra-low latency connectivity maintained across low-bandwidth environments.</p><div class='mt-4 text-2xl font-bold text-[#F4F1DE]'>50MS LATENCY</div></div></div><svg class='absolute inset-0 pointer-events-none' style='width:100%; height:100%;'><path id='path1' d='M 10 10 L 100 100' stroke='#F4F1DE11' stroke-width='1' fill='none' class='transition-all duration-500'/><path id='path2' d='M 1000 10 L 900 100' stroke='#F4F1DE11' stroke-width='1' fill='none' class='transition-all duration-500'/><path id='path3' d='M 10 1000 L 100 900' stroke='#F4F1DE11' stroke-width='1' fill='none' class='transition-all duration-500'/><path id='path4' d='M 1000 1000 L 900 900' stroke='#F4F1DE11' stroke-width='1' fill='none' class='transition-all duration-500'/></svg><script>function highlightPath(id, color){ const p = document.getElementById(id); p.setAttribute('stroke', color); p.setAttribute('stroke-width', '4'); p.style.opacity = '1'; } function resetPath(id){ const p = document.getElementById(id); p.setAttribute('stroke', '#F4F1DE11'); p.setAttribute('stroke-width', '1'); }</script></div>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

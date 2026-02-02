@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useTracking } from '../../hooks/useTracking';
-import { useBrand } from '../../context/BrandContext';
 import { HeroBlockConfig } from '../../../../shared/types';
 
 interface HeroBlockProps {
@@ -8,18 +7,39 @@ interface HeroBlockProps {
 }
 
 export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
-    const { dna } = useBrand();
-    const { track } = useTracking(config.id);
+    const { track, isReady } = useTracking(config.id);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [hasTrackedRetention, setHasTrackedRetention] = useState(false);
+    const hasTrackedRetention = useRef(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const hasTrackedView = useRef(false);
+
+    // === Impression Tracking (Intersection Observer) ===
+    React.useEffect(() => {
+        if (!isReady || hasTrackedView.current) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && !hasTrackedView.current) {
+                    console.log("👁️ Hero Section Visible: Tracking View...");
+                    track('view_component');
+                    hasTrackedView.current = true;
+                    observer.disconnect(); // One-shot trigger
+                }
+            },
+            { threshold: 0.1 } // Fire when 10% visible
+        );
+
+        if (containerRef.current) observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, [track, isReady]);
 
     // === Retention Tracking ===
     const handleTimeUpdate = () => {
-        if (videoRef.current && !hasTrackedRetention) {
+        if (videoRef.current && !hasTrackedRetention.current) {
             if (videoRef.current.currentTime > 3) {
                 console.log("💎 Milestone Reached: 3s Retention (Hero)");
                 track('view_3s');
-                setHasTrackedRetention(true);
+                hasTrackedRetention.current = true;
             }
         }
     };
@@ -43,6 +63,7 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
 
     return (
         <div
+            ref={containerRef}
             data-component="hero-block"
             className="relative w-full h-screen overflow-hidden"
             style={config.layout_config.container_styles} // Flexbox alignment from Schema
@@ -70,16 +91,7 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
                 className="relative z-20 w-full h-full px-6 lg:px-8 flex flex-col items-center justify-center"
                 style={config.layout_config.container_styles}
             >
-                {/* Dynamic Logo Injection */}
-                {dna?.logoUrl?.value && (
-                    <div className="absolute top-8 left-8 md:top-12 md:left-12 z-50 animate-in fade-in slide-in-from-top-4 duration-1000">
-                        <img
-                            src={dna.logoUrl.value}
-                            alt="Brand Logo"
-                            className="h-12 md:h-16 w-auto object-contain drop-shadow-xl filter brightness-0 invert"
-                        />
-                    </div>
-                )}
+                {/* Logo removed to prevent duplication with NavigationBar */}
 
                 <div className="max-w-7xl w-full mx-auto flex flex-col items-center text-center">
                     <div className="max-w-4xl flex flex-col items-center">

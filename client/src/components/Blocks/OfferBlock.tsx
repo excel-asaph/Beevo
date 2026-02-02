@@ -18,6 +18,8 @@ export const OfferBlock: React.FC<OfferBlockProps> = ({ config }) => {
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
+    const hasViewedRef = useRef(false);
+
     // === Exposure & Dwell Tracking ===
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -26,7 +28,11 @@ export const OfferBlock: React.FC<OfferBlockProps> = ({ config }) => {
                     console.log(`👁️ Offer Section observed: Starting Dwell Timer...`);
                     dwellStartTime.current = Date.now();
                     setIsVisible(true);
-                    track('view_component');
+
+                    if (!hasViewedRef.current) {
+                        track('view_component');
+                        hasViewedRef.current = true;
+                    }
                 } else {
                     if (dwellStartTime.current) {
                         const dwellTime = Date.now() - dwellStartTime.current;

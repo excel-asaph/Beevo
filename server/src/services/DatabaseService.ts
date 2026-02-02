@@ -59,11 +59,32 @@ export class DatabaseService {
              VALUES (?, ?, ?, ?)`,
             [id, type, JSON.stringify(formData), pageStateHash]
         );
+
+        // Increment Lead count in page state metrics
+        const state = await this.getState(pageStateHash) as any;
+        if (state) {
+            const metrics = state.metrics ? JSON.parse(state.metrics) : { views: 0, clicks: 0, leads: 0, component_breakdown: {} };
+            metrics.leads = (metrics.leads || 0) + 1;
+            await this.updatePageStateMetrics(pageStateHash, metrics);
+        }
+    }
+
+    public async updatePageStateMetrics(stateHash: string, metrics: any) {
+        if (!this.db) await this.initialize();
+        await this.db?.run(
+            'UPDATE page_states SET metrics = ? WHERE state_hash = ?',
+            [JSON.stringify(metrics), stateHash]
+        );
     }
 
     public async getState(stateHash: string) {
         if (!this.db) await this.initialize();
-        return await this.db?.get('SELECT * FROM page_states WHERE state_hash = ?', [stateHash]);
+        return await this.get('SELECT * FROM page_states WHERE state_hash = ?', [stateHash]);
+    }
+
+    public async get(sql: string, params: any[] = []) {
+        if (!this.db) await this.initialize();
+        return await this.db?.get(sql, params);
     }
 
     public async getAllStates() {
@@ -74,5 +95,10 @@ export class DatabaseService {
     public async getAllLeads() {
         if (!this.db) await this.initialize();
         return await this.db?.all('SELECT * FROM lead_submissions ORDER BY timestamp DESC');
+    }
+
+    public async getLeadsForState(stateHash: string) {
+        if (!this.db) await this.initialize();
+        return await this.db?.all('SELECT * FROM lead_submissions WHERE page_state_hash = ?', [stateHash]);
     }
 }

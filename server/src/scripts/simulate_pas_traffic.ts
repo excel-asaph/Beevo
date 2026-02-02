@@ -1,59 +1,63 @@
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
+import { v4 as uuidv4 } from 'uuid';
+import { getLiveState, sendSyntheticEvent } from './simulation_utils';
 
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
+const SIMULATION_COUNT = 30;
 
-async function simulateTraffic() {
-    console.log("🚀 Simulating TRAFFIC for PAS Section...");
+// Scenarios for PAS (Problem-Agitation-Solution)
+const SCENARIOS = [
+    { type: 'SCROLLER', weight: 0.4, min: 1000, max: 2500 }, // Reads problem, leaves
+    { type: 'AGITATED', weight: 0.4, min: 3000, max: 5000 }, // Reads agitation
+    { type: 'SOLVED', weight: 0.2, min: 6000, max: 10000 }  // Reads full solution
+];
 
-    const rawData = await fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}');
-    const metrics = JSON.parse(rawData);
-
-    // PAS Section ID
-    const sectionId = "pas_section_v1";
-    if (!metrics[sectionId]) {
-        metrics[sectionId] = {
-            variant_id: sectionId,
-            views: 0,
-            clicks: 0,
-            retention_count: 0,
-            retention_sum_ms: 0,
-            dwell_count: 0,
-            dwell_sum_ms: 0,
-            last_updated: new Date().toISOString()
-        };
+function pickScenario() {
+    const random = Math.random();
+    let sum = 0;
+    for (const s of SCENARIOS) {
+        sum += s.weight;
+        if (random < sum) return s;
     }
-
-    const data = metrics[sectionId];
-
-    // Simulate 5-15 new views
-    const newViews = Math.floor(Math.random() * 10) + 5;
-    data.views += newViews;
-
-    // Simulate Dwell Time (Dwell emphasis for PAS)
-    for (let i = 0; i < newViews; i++) {
-        data.dwell_count++;
-        // High variation in dwell time (1s to 8s)
-        const dwell = Math.floor(Math.random() * 7000) + 1000;
-        data.dwell_sum_ms += dwell;
-
-        // If they stay long enough (>3s), count as retention
-        if (dwell > 3000) {
-            data.retention_count++;
-            data.retention_sum_ms += dwell;
-        }
-    }
-
-    data.last_updated = new Date().toISOString();
-
-    await fs.writeFile(METRICS_FILE, JSON.stringify(metrics, null, 4));
-    console.log(`✅ PAS Traffic Simulated: +${newViews} views. Avg Dwell: ${(data.dwell_sum_ms / data.dwell_count).toFixed(0)}ms`);
+    return SCENARIOS[0];
 }
 
-simulateTraffic().catch(console.error);
+async function simulateUser(index: number, state: { hash: string, variantId: string }) {
+    const sessionId = uuidv4();
+    const scenario = pickScenario();
+    const dwellMs = Math.floor(Math.random() * (scenario.max - scenario.min + 1)) + scenario.min;
+
+    if (index % 10 === 0) console.log(`[User ${index + 1}/${SIMULATION_COUNT}] ${scenario.type} | Dwell: ${dwellMs}ms`);
+
+    // 0. Page View (Strict Separation)
+    await sendSyntheticEvent(sessionId, state.hash, 'page_root', 'view_page');
+
+    // 1. Initial View
+    await sendSyntheticEvent(sessionId, state.hash, state.variantId, 'view_component');
+
+    // 2. Retention (If dwelled > 3s)
+    // 2. Retention (SKIPPED: PASBlock does not track retention/view_3s)
+    // if (dwellMs > 3000) { ... }
+
+    // 3. Dwell Summary
+    await new Promise(r => setTimeout(r, 50));
+    await sendSyntheticEvent(sessionId, state.hash, state.variantId, 'pas_dwell_summary', { meta: { dwell_ms: dwellMs } });
+}
+
+async function main() {
+    console.log("🚀 Starting SMART Traffic Simulation for PAS Block...");
+
+    // Dynamically resolve the LIVE PAS Block ID
+    const state = await getLiveState('pas');
+
+    console.log(`🎯 Target: State=[${state.hash}] Variant=[${state.variantId}]`);
+    console.log(`🤖 Count: ${SIMULATION_COUNT} (Synthetic Users)`);
+
+    for (let i = 0; i < SIMULATION_COUNT; i++) {
+        await simulateUser(i, state);
+        await new Promise(r => setTimeout(r, 20));
+    }
+
+    console.log("✅ Simulation Complete. Metrics sent to synthetic log.");
+}
+
+main().catch(console.error);

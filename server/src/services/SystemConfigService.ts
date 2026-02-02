@@ -21,7 +21,8 @@ export class SystemConfigService {
     }
 
     async getConfig(): Promise<SystemConfig> {
-        if (this.cache) return this.cache;
+        // PERMANENT FIX: Always read from disk to sync with external "cli" updates (Atomic Deployment)
+        // if (this.cache) return this.cache; 
 
         try {
             const raw = await fs.readFile(CONFIG_PATH, 'utf-8');

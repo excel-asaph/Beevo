@@ -1,86 +1,59 @@
 
-import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import { getLiveState, sendSyntheticEvent, pickScenario } from './simulation_utils';
 
-// Configuration
-const SERVER_URL = 'http://127.0.0.1:3001/api/tracking/event';
-const SIMULATION_COUNT = 50; // Number of "users" to simulate
-const VARIANT_ID = 'hero_section_v1'; // The ID in hero_block_challenger.json
+const SIMULATION_COUNT = 50;
 
-// Scenarios (Weighted Probability)
-// We want to simulate a "Mediocre" performance to trigger the optimizer.
-// 60% Bounce (View only)
-// 30% Engaged (View + Retention)
-// 10% Converted (View + Retention + Click)
+// Scenarios
 const SCENARIOS = [
     { type: 'BOUNCE', weight: 0.6 },
     { type: 'ENGAGED', weight: 0.3 },
     { type: 'CONVERTED', weight: 0.1 }
 ];
 
-async function sendEvent(sessionId: string, eventName: string, payload: any = {}) {
-    try {
-        await axios.post(SERVER_URL, {
-            sessionId,
-            timestamp: Date.now(),
-            eventType: eventName,
-            componentId: VARIANT_ID,
-            ...payload
-        });
-        // console.log(`[${sessionId.slice(0, 4)}] Sent ${eventName}`);
-    } catch (error: any) {
-        console.error(`Error sending ${eventName}:`, error.message);
-    }
-}
-
-async function simulateUser(index: number) {
+async function simulateUser(index: number, state: { hash: string, variantId: string }) {
     const sessionId = uuidv4();
-    const scenario = pickScenario();
+    const scenario = pickScenario(SCENARIOS);
 
-    console.log(`[User ${index + 1}/${SIMULATION_COUNT}] Scenario: ${scenario}`);
+    if (index % 10 === 0) console.log(`[User ${index + 1}/${SIMULATION_COUNT}] Scenario: ${scenario}`);
 
-    // 1. Always View
-    await sendEvent(sessionId, 'view_component');
+    // 0. Page View (Always happens first)
+    // Note: We send this to 'page_root' component ID ideally, but for now we focus on the component testing.
+    // If the system expects page_root events to be separate, we might need a separate call.
+    await sendSyntheticEvent(sessionId, state.hash, 'page_root', 'view_page');
 
-    if (scenario === 'BOUNCE') {
-        return; // User left immediately
-    }
+    // 1. Component View
+    await sendSyntheticEvent(sessionId, state.hash, state.variantId, 'view_component');
 
-    // 2. Retention (Simulate watching the video for 3s)
-    await new Promise(r => setTimeout(r, 100)); // Tiny delay for order
-    await sendEvent(sessionId, 'retention_trigger', { duration: 3000 });
+    if (scenario === 'BOUNCE') return;
 
-    if (scenario === 'ENGAGED') {
-        return; // User watched but didn't click
-    }
+    // 2. Retention (view_3s)
+    await new Promise(r => setTimeout(r, 50));
+    // Use view_3s to match Frontend HeroBlock behavior
+    await sendSyntheticEvent(sessionId, state.hash, state.variantId, 'view_3s', { duration: 3000 });
 
-    // 3. Click (Conversion)
-    await new Promise(r => setTimeout(r, 100));
-    await sendEvent(sessionId, 'click_cta', { target: 'scroll_to_offer' });
-}
+    if (scenario === 'ENGAGED') return;
 
-function pickScenario() {
-    const random = Math.random();
-    let sum = 0;
-    for (const s of SCENARIOS) {
-        sum += s.weight;
-        if (random < sum) return s.type;
-    }
-    return 'BOUNCE';
+    // 3. Click
+    await new Promise(r => setTimeout(r, 50));
+    await sendSyntheticEvent(sessionId, state.hash, state.variantId, 'cta_click', { target: 'scroll_to_offer' });
 }
 
 async function main() {
-    console.log("🚀 Starting Traffic Simulation for Hero Block...");
-    console.log(`Target Variant: ${VARIANT_ID}`);
-    console.log(`Users: ${SIMULATION_COUNT}`);
+    console.log("🚀 Starting SMART Traffic Simulation for Hero Block...");
+
+    // Dynamically resolve the LIVE Hero Block ID
+    const state = await getLiveState('hero');
+
+    console.log(`🎯 Target: State=[${state.hash}] Variant=[${state.variantId}]`);
+    console.log(`🤖 Count: ${SIMULATION_COUNT} (Synthetic Users)`);
 
     for (let i = 0; i < SIMULATION_COUNT; i++) {
-        await simulateUser(i);
-        // Small delay between users to look somewhat natural in logs
-        await new Promise(r => setTimeout(r, 50));
+        await simulateUser(i, state);
+        await new Promise(r => setTimeout(r, 20));
     }
 
-    console.log("✅ Simulation Complete.");
+    console.log("✅ Simulation Complete. Metrics sent to synthetic log.");
 }
 
 main().catch(console.error);

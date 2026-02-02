@@ -1,50 +1,50 @@
 {
     "sections": {
         "hero": {
-            "target_ctr": 25,
-            "target_retention": 40,
-            "min_views_data": 10,
-            "watcher_confidence_min": 70
+            "target_ctr": 0.7,
+            "target_retention": 0.4,
+            "min_views_data": 50,
+            "watcher_confidence_min": 0.7
         },
         "proof": {
-            "target_dwell_ms": 2000,
-            "min_views_data": 10,
-            "watcher_confidence_min": 70
+            "target_dwell_ms": 2997,
+            "min_views_data": 0,
+            "watcher_confidence_min": 0.7
         },
         "social": {
-            "target_dwell_ms": 2500,
+            "target_dwell_ms": 4000,
             "max_velocity_px_s": 1000,
-            "min_dwell_events": 5,
-            "watcher_confidence_min": 70
+            "min_dwell_events": 20,
+            "watcher_confidence_min": 0.7
         },
         "pas": {
-            "target_dwell_ms": 3000,
-            "target_scroll_depth": 60,
-            "min_views_data": 5,
-            "min_dwell_events": 5,
-            "watcher_confidence_min": 70
+            "target_dwell_ms": 5000,
+            "target_scroll_depth": 0.6,
+            "min_views_data": 30,
+            "min_dwell_events": 20,
+            "watcher_confidence_min": 0.7
         },
         "spec": {
-            "target_interaction_rate": 15,
-            "min_data_points": 0,
-            "watcher_confidence_min": 70
+            "target_interaction_rate": 0.2,
+            "min_data_points": 30,
+            "watcher_confidence_min": 0.7
         },
         "offer": {
-            "target_conversion_rate": 5,
-            "min_views_data": 5,
-            "watcher_confidence_min": 70
+            "target_conversion_rate": 0.02,
+            "min_views_data": 100,
+            "watcher_confidence_min": 0.7
         }
     },
     "client_tracking": {
-        "common_dwell_threshold_ms": 1000,
-        "retention_milestone_seconds": 3,
-        "intersection_threshold": 0.1
+        "common_dwell_threshold_ms": 3000,
+        "retention_milestone_seconds": 10,
+        "intersection_threshold": 0.5
     },
     "hitl": {
         "enabled": true,
-        "require_approval_pre": true,
+        "require_approval_pre": false,
         "require_approval_post": true,
-        "auto_proceed_delay_m": 2
+        "auto_proceed_delay_m": 60
     },
     "locks": {
         "hero": false,
@@ -62,5 +62,6 @@
         "social_directive": "",
         "offer_directive": ""
     },
-    "current_state_hash": "4507af8d2bdf"
+    "current_state_hash": "1b3dd6598803",
+    "active_assets_path": "states/1b3dd6598803"
 }

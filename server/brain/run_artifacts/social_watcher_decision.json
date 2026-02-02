@@ -1,59 +1,62 @@
 {
-    "thoughts": "The current layout, while functional, lacks a sense of dynamic momentum fitting for 'The Pulse of African Progress'. The static 4-column grid creates uniform heights that lead to visual fatigue and excessive whitespace. By transitioning to a MASONRY strategy, we create a more organic and rhythmic 'pulse' that mirrors the vibrant urban evolution Bluetone is driving. I have elevated the typography for higher authority, introduced deeper drop shadows for a modern 'glass-on-canvas' aesthetic, and optimized the card structures to prioritize the 'Bluetone' impact narrative. The color-coded accent borders remain but are refined to feel like premium identifiers rather than simple separators.",
+    "thoughts": "The current 2x2 grid is suffering from 'social proof fatigue'—it looks like a standard template, leading to the abysmal 104ms dwell time. To fix this, I am shifting to a MASONRY layout that intersperses hard data (Evidence Items) with emotional narratives (Testimonials). This 'hybrid' approach forces the eye to scan horizontally and vertically, creating 'visual friction' that slows the user down and increases engagement. I'm also introducing a 'Blueprint' technical overlay to the background to reinforce the brand's 'Innovative' and 'Legally-conscious' tone, making the section feel more like a strategic map and less like a static list. The headline is sharpened to focus on the 'Pulse' of progress, aligning with the visionary tone of Bluetone.",
     "changes": {
         "layout_strategy": "MASONRY",
-        "headline": "THE PULSE OF AFRICAN PROGRESS",
-        "subhead": "Partnering with visionary leaders to redefine mobility and sustainable infrastructure across the continent.",
-        "visual_code": "<section style=\"background-color: #F4F1DE; color: #3D405B; font-family: 'Exo 2', sans-serif; padding: 120px 24px;\"><div style=\"max-width: 1280px; margin: 0 auto;\"><div style=\"text-align: center; margin-bottom: 80px;\"><h2 style=\"font-size: 58px; font-weight: 900; color: #2D5A27; letter-spacing: -0.03em; margin-bottom: 24px; text-transform: uppercase;\">The Pulse of Progress</h2><p style=\"font-size: 24px; line-height: 1.5; color: #3D405B; max-width: 850px; margin: 0 auto; opacity: 0.9;\">Join the leaders transforming African mobility into a global gold standard for sustainability.</p></div><div style=\"column-count: 2; column-gap: 32px; max-width: 1100px; margin: 0 auto;\"><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #E2725B;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Bluetone's autonomous fleet has transformed our city's logistics, proving that smart tech can adapt to local streets seamlessly and safely.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #40E0D0; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">Amara Okafor</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">COO, Lagos Urban Transit Authority</p></div></div></div><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #40E0D0;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Integrating Bluetone vehicles wasn't just a tech upgrade; it was a commitment to a cleaner, faster future for our community's next generation.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #E2725B; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">Kwame Mensah</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">Director of Sustainability, Accra Green Energy</p></div></div></div><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #2D5A27;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Their law-abiding robots are a masterclass in navigating complex regulatory environments while maintaining peak operational efficiency.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #3D405B; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">Dr. Zanele Mbeki</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">Logistics Consultant, SADC Regional Council</p></div></div></div><div style=\"break-inside: avoid; margin-bottom: 32px; background: #FFFFFF; padding: 48px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(45,90,39,0.1); border-top: 8px solid #3D405B;\"><p style=\"font-size: 21px; line-height: 1.6; margin-bottom: 32px; font-weight: 500; color: #1A1A1A; font-style: italic;\">\"Reliability meets innovation. Bluetone is the first partner to truly understand the infrastructure needs and cultural nuances of the continent.\"</p><div style=\"display: flex; align-items: center;\"><div style=\"width: 64px; height: 64px; border-radius: 50%; background: #2D5A27; margin-right: 20px;\"></div><div><h4 style=\"margin: 0; font-size: 19px; font-weight: 800; color: #2D5A27;\">David Otieno</h4><p style=\"margin: 0; font-size: 14px; color: #3D405B; opacity: 0.7; font-weight: 600;\">Founder, East Africa Mobility Group</p></div></div></div></div></div></section>",
+        "headline": "The Pulse of African Urban Progress",
+        "subhead": "From Lagos to Nairobi, industry leaders are leveraging Bluetone’s adaptive tech to navigate the continent's most complex transit challenges.",
+        "visual_code": "<section class=\"bg-[#F4F1DE] py-24 font-['Exo_2'] text-[#3D405B] relative overflow-hidden\"><div class=\"absolute inset-0 opacity-[0.03] pointer-events-none\" style=\"background-image: radial-gradient(#2D5A27 1px, transparent 1px); background-size: 30px 30px;\"></div><div class=\"max-w-7xl mx-auto px-6 relative z-10\"><div class=\"text-center mb-20\"><span class=\"uppercase tracking-[0.3em] text-sm font-bold text-[#E2725B] mb-4 block\">Network Validation</span><h2 class=\"text-5xl md:text-6xl font-black mb-6 tracking-tight text-[#2D5A27]\">Revolutionizing the Streetscape</h2><p class=\"text-xl max-w-3xl mx-auto text-[#3D405B]/80 leading-relaxed\">Proven results in the world's fastest-growing cities. We don't just move people; we move the future.</p></div><div class=\"columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8\"><div class=\"break-inside-avoid bg-white p-8 rounded-3xl shadow-sm border border-[#2D5A27]/10 hover:shadow-2xl transition-all duration-500 group\"><div class=\"flex justify-between items-start mb-6\"><div class=\"w-12 h-12 bg-[#40E0D0]/20 rounded-xl flex items-center justify-center\"><svg class=\"w-6 h-6 text-[#2D5A27]\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13 10V3L4 14h7v7l9-11h-7z\"/></svg></div><span class=\"text-4xl font-black text-[#2D5A27]/10 group-hover:text-[#40E0D0]/30 transition-colors\">01</span></div><p class=\"text-lg italic leading-relaxed mb-8\">\"Bluetone didn't just provide vehicles; they offered a seamless integration into our city's complex grid, making green transit a functional reality today.\"</p><div class=\"flex items-center gap-4\"><img src=\"https://i.pravatar.cc/150?u=testimonial-1\" class=\"w-14 h-14 rounded-full border-2 border-[#40E0D0]\" alt=\"Amara Okafor\"/><div><h4 class=\"font-bold\">Amara Okafor</h4><p class=\"text-xs uppercase tracking-wider opacity-60\">COO, Lagos Smart Transit</p></div></div></div><div class=\"break-inside-avoid bg-[#2D5A27] p-8 rounded-3xl text-white shadow-xl transform hover:-translate-y-2 transition-transform duration-300\"><div class=\"text-5xl font-black mb-2\">40%</div><div class=\"text-sm uppercase tracking-[0.2em] font-bold opacity-70 mb-4\">Efficiency Surge</div><p class=\"text-white/80\">Average increase in delivery throughput observed in Nairobi Logistics Hub within the first 90 days of deployment.</p></div><div class=\"break-inside-avoid bg-white p-8 rounded-3xl shadow-sm border border-[#2D5A27]/10 hover:shadow-2xl transition-all duration-500\"><p class=\"text-lg italic leading-relaxed mb-8\">\"The level of cultural adaptation in their autonomous systems is unparalleled, ensuring safety across every district we manage.\"</p><div class=\"flex items-center gap-4\"><img src=\"https://i.pravatar.cc/150?u=testimonial-2\" class=\"w-14 h-14 rounded-full border-2 border-[#E2725B]\" alt=\"David Mensah\"/><div><h4 class=\"font-bold\">David Mensah</h4><p class=\"text-xs uppercase tracking-wider opacity-60\">Director, Accra Urban Auth.</p></div></div></div><div class=\"break-inside-avoid bg-[#E2725B] p-8 rounded-3xl text-white shadow-xl\"><div class=\"text-5xl font-black mb-2\">100%</div><div class=\"text-sm uppercase tracking-[0.2em] font-bold opacity-70 mb-4\">Legal Compliance</div><p class=\"text-white/80\">Zero regulatory citations across 4 major African jurisdictions since launch. Adaptive AI built for local laws.</p></div><div class=\"break-inside-avoid bg-white p-8 rounded-3xl shadow-sm border border-[#2D5A27]/10 hover:shadow-2xl transition-all duration-500\"><p class=\"text-lg italic leading-relaxed mb-8\">\"Their law-abiding robots have revolutionized our last-mile delivery, navigating busy streets with precision and deep respect for local regulations.\"</p><div class=\"flex items-center gap-4\"><img src=\"https://i.pravatar.cc/150?u=testimonial-4\" class=\"w-14 h-14 rounded-full border-2 border-[#2D5A27]\" alt=\"Thabo Molefe\"/><div><h4 class=\"font-bold\">Thabo Molefe</h4><p class=\"text-xs uppercase tracking-wider opacity-60\">CEO, Southern Cross Freight</p></div></div></div><div class=\"break-inside-avoid bg-white p-8 rounded-3xl shadow-sm border border-[#2D5A27]/10 hover:shadow-2xl transition-all duration-500\"><p class=\"text-lg italic leading-relaxed mb-8\">\"Switching to Bluetone's electric fleet has slashed our carbon footprint while increasing our delivery efficiency in record time.\"</p><div class=\"flex items-center gap-4\"><img src=\"https://i.pravatar.cc/150?u=testimonial-3\" class=\"w-14 h-14 rounded-full border-2 border-[#40E0D0]\" alt=\"Sarah Kibaki\"/><div><h4 class=\"font-bold\">Sarah Kibaki</h4><p class=\"text-xs uppercase tracking-wider opacity-60\">Sustainability, Nairobi Hub</p></div></div></div></div></div></section>",
         "evidence_items": [
             {
-                "id": "ev1",
-                "label": "Cities Enabled",
-                "value": "14",
-                "icon": "globe",
-                "unit": "Metros"
+                "id": "stat-1",
+                "label": "Efficiency Increase",
+                "value": "40%",
+                "description": "Improvement in urban delivery throughput for our logistics partners.",
+                "icon": "lightning",
+                "visual_type": "percentage"
             },
             {
-                "id": "ev2",
-                "label": "CO2 Reduction",
-                "value": "42",
+                "id": "stat-2",
+                "label": "Carbon Reduction",
+                "value": "65%",
+                "description": "Reduction in fleet CO2 emissions compared to standard diesel transit.",
                 "icon": "leaf",
-                "unit": "%"
+                "visual_type": "percentage"
             },
             {
-                "id": "ev3",
-                "label": "Daily Trips",
-                "value": "850k",
-                "icon": "zap",
-                "unit": "Trips"
+                "id": "stat-3",
+                "label": "Regulatory Uptime",
+                "value": "100%",
+                "description": "Compliance rate with local traffic and autonomous vehicle laws.",
+                "icon": "shield",
+                "visual_type": "status"
             }
         ],
         "testimonials": [
             {
-                "id": "t1",
+                "id": "testimonial-1",
                 "name": "Amara Okafor",
                 "title": "Chief Operations Officer",
-                "company": "Lagos Urban Transit Authority",
-                "quote": "Bluetone's autonomous fleet has transformed our city's logistics, proving that smart tech can adapt to local streets seamlessly and safely.",
-                "image_prompt": "A professional portrait of a West African woman in her late 40s, COO attire, soft bokeh city background, warm lighting, high-end photography style."
+                "company": "Lagos Smart Transit",
+                "quote": "Bluetone didn't just provide vehicles; they offered a seamless integration into our city's complex grid, making green transit a functional reality today.",
+                "image_prompt": "Portrait of a Nigerian executive woman in a bright modern office."
             },
             {
-                "id": "t2",
-                "name": "Kwame Mensah",
-                "title": "Director of Sustainability",
-                "company": "Accra Green Energy",
-                "quote": "Integrating Bluetone vehicles wasn't just a tech upgrade; it was a commitment to a cleaner, faster future for our community's next generation.",
-                "image_prompt": "A sharp, professional headshot of a Ghanaian man in a modern blazer, smiling confidently, bright natural daylight."
+                "id": "testimonial-2",
+                "name": "David Mensah",
+                "title": "Director of Urban Planning",
+                "company": "Accra Development Authority",
+                "quote": "The level of cultural adaptation in their autonomous systems is unparalleled, ensuring safety and compliance across every district we manage.",
+                "image_prompt": "Portrait of a Ghanaian male executive, professional workspace."
             },
             {
-                "id": "t3",
-                "name": "Dr. Zanele Mbeki",
-                "title": "Logistics Consultant",
-                "company": "SADC Regional Council",
-                "quote": "Their law-abiding robots are a masterclass in navigating complex regulatory environments while maintaining peak operational efficiency.",
-                "image_prompt": "A sophisticated portrait of a South African woman, academic and professional aesthetic, wearing glasses, soft studio lighting."
+                "id": "testimonial-3",
+                "name": "Sarah Kibaki",
+                "title": "Sustainability Lead",
+                "company": "Nairobi Logistics Hub",
+                "quote": "Switching to Bluetone's electric fleet has slashed our carbon footprint while increasing our delivery efficiency by forty percent in record time.",
+                "image_prompt": "Kenyan female sustainability expert, bright natural lighting."
             }
         ]
     },
-    "confidence": 98
+    "confidence": 95
 }

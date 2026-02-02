@@ -20,7 +20,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
 const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/social_block_challenger.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/social_challenger_staging.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/social_block_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/social_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/social_watcher_decision.json');
@@ -73,21 +73,30 @@ export class SocialWatcher {
     async analyzeAndOptimize() {
         console.log("🕵️ SocialWatcher Agent: Waking up...");
 
-        const [metricsRaw, challengerRaw, researchRaw] = await Promise.all([
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        // 0. Resolve Live State Path (Atomic Deployment)
+        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
+        const activePath = config.active_assets_path || ''; // e.g., 'states/HASH'
+        // Fallback to challenger if state not found, OR prefer state if exists. 
+        // Logic: Watcher should optimize the LIVE version.
+        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'social_block.json');
+
+        console.log(`📂 SocialWatcher: Loading Live State from ${activePath}`);
+
+        const [metricsRaw, liveRaw, researchRaw] = await Promise.all([
             fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(CHALLENGER_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
             fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
-        const currentSocial = JSON.parse(challengerRaw);
+        const currentSocial = JSON.parse(liveRaw);
         const researchCtx = JSON.parse(researchRaw);
 
         const variantId = currentSocial.id || 'social_section_v1';
         const data = metricsInfo[variantId];
-
-        const config = await SystemConfigService.getInstance().getConfig();
-        const notificationClient = NotificationClient.getInstance();
 
         if (config.locks.social) {
             console.log("🔒 Social Section is LOCKED. Skipping.");
@@ -174,7 +183,9 @@ export class SocialWatcher {
                 };
 
                 // Check if testimonials changed (implying prompt changes)
-                const changed = JSON.stringify(newSocial.content.testimonials) !== JSON.stringify(currentSocial.content.testimonials);
+                const newTestimonials = newSocial.content?.testimonials || [];
+                const oldTestimonials = currentSocial.content?.testimonials || [];
+                const changed = JSON.stringify(newTestimonials) !== JSON.stringify(oldTestimonials);
 
                 // Write to STAGING instead of live
                 await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
@@ -226,7 +237,8 @@ export class SocialWatcher {
                     const browserPath = await mediaService.archiveAsset(
                         `testimonial_${i + 1}`,
                         'png',
-                        Buffer.from(data, 'base64')
+                        Buffer.from(data, 'base64'),
+                        config.variant_id // Organize by variant
                     );
 
                     // Update the reference in the config passed to this function

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useBrand } from '../context/BrandContext';
 import { HeroBlock } from './Blocks/HeroBlock';
 import { ProofBlock } from './Blocks/ProofBlock';
 import { PASBlock } from './Blocks/PASBlock';
@@ -8,31 +9,33 @@ import { OfferBlock } from './Blocks/OfferBlock';
 import { NavigationBar } from './Navigation/NavigationBar';
 import { FormOrchestrator } from './Forms/FormOrchestrator';
 
+import { useConfig } from '../hooks/useConfig';
+
 export const DynamicLandingPage: React.FC = () => {
+    const { setDna } = useBrand();
+    const { config } = useConfig();
     const [configs, setConfigs] = useState<{ hero: any, proof: any, pas: any, spec: any, social: any, offer: any }>({
         hero: null, proof: null, pas: null, spec: null, social: null, offer: null
     });
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeForm, setActiveForm] = useState<{ type: 'CONTACT' | 'INTENT' | 'OFFER', context?: any } | null>(null);
 
+    // Global listener for dynamic form triggers
     useEffect(() => {
-        // Global listener for dynamic form triggers from "visual_code" or CTAs
         const handleOpenForm = (e: any) => {
             if (e.detail) {
                 const detail = { ...e.detail };
                 const type = detail.type;
                 let formConfig = null;
 
-                // Determine base form config
                 if (type === 'CONTACT') {
                     formConfig = configs.hero?.forms?.contact;
                 } else {
-                    // Both INTENT and OFFER use the intent form as base
                     formConfig = configs.hero?.forms?.intent;
                 }
 
-                // Inject Config & Tiers
                 const isOffer = type === 'OFFER';
                 detail.context = {
                     ...detail.context,
@@ -47,7 +50,6 @@ export const DynamicLandingPage: React.FC = () => {
                                 { id: "offer_email", label: "Email Address", type: "email", required: true }
                             ]
                         } : {}),
-                        // Only inject tiers if it's an OFFER type
                         tiers: (isOffer && configs.offer?.content?.tiers) ? configs.offer.content.tiers : undefined
                     }
                 };
@@ -59,27 +61,51 @@ export const DynamicLandingPage: React.FC = () => {
     }, [configs]);
 
     useEffect(() => {
+        // Wait for System Config to know WHERE to fetch assets from
+        if (!config) return;
+
         const fetchConfigs = async () => {
             try {
-                const [heroRes, proofRes, pasRes, specRes, socialRes, offerRes] = await Promise.all([
-                    fetch('/assets/hero_block.json'),
-                    fetch('/assets/proof_block.json'),
-                    fetch('/assets/pas_block.json'),
-                    fetch('/assets/spec_block.json'),
-                    fetch('/assets/social_block.json'),
-                    fetch('/assets/offer_block.json')
-                ]);
+                // Determine base path (e.g., "states/v_123456" or default to root if missing)
+                const basePath = config.active_assets_path ? `/${config.active_assets_path}` : '';
+                const assetRoot = `/assets${basePath}`;
 
-                const [heroData, proofData, pasData, specData, socialData, offerData] = await Promise.all([
-                    heroRes.ok ? heroRes.json() : null,
-                    proofRes.ok ? proofRes.json() : null,
-                    pasRes.ok ? pasRes.json() : null,
-                    specRes.ok ? specRes.json() : null,
-                    socialRes.ok ? socialRes.json() : null,
-                    offerRes.ok ? offerRes.json() : null
+                console.log(`[Loader] Fetching page assets from: ${assetRoot}`);
+
+                const fetchJson = async (url: string, label: string) => {
+                    const res = await fetch(url);
+                    const type = res.headers.get('content-type');
+                    if (!res.ok || (type && type.includes('text/html'))) {
+                        console.error(`❌ [${label}] Failed: ${url}`, { status: res.status, type });
+                        throw new Error(`Invalid JSON response for ${label}`);
+                    }
+                    console.log(`✅ [${label}] Loaded: ${url}`);
+                    return res.json();
+                };
+
+                const [heroData, proofData, pasData, specData, socialData, offerData, logoData] = await Promise.all([
+                    fetchJson(`${assetRoot}/hero_block.json`, 'Hero'),
+                    fetchJson(`${assetRoot}/proof_block.json`, 'Proof'),
+                    fetchJson(`${assetRoot}/pas_block.json`, 'PAS'),
+                    fetchJson(`${assetRoot}/spec_block.json`, 'Spec'),
+                    fetchJson(`${assetRoot}/social_block.json`, 'Social'),
+                    fetchJson(`${assetRoot}/offer_block.json`, 'Offer'),
+                    fetchJson(`/assets/logo_kit_challenger.json`, 'Logo')
                 ]);
 
                 setConfigs({ hero: heroData, proof: proofData, pas: pasData, spec: specData, social: socialData, offer: offerData });
+
+                // Hydrate Brand Context with Logo
+                if (logoData && logoData.brandDNA) {
+                    setDna({
+                        ...logoData.brandDNA,
+                        logoUrl: { value: logoData.kit.primary, isSelected: true },
+                        logoInvertedUrl: {
+                            value: logoData.kit.wordmark_inverted || logoData.kit.inverted,
+                            isSelected: true
+                        }
+                    });
+                }
             } catch (err) {
                 console.error("Failed to load Landing Page Configs:", err);
                 setError("Failed to load page content.");
@@ -89,7 +115,32 @@ export const DynamicLandingPage: React.FC = () => {
         };
 
         fetchConfigs();
-    }, []);
+    }, [config, setDna]); // Re-run when config changes (Atomic Switch Support!)
+
+    const hasTrackedPage = useState(false); // Using state ref pattern or just ref to guard
+
+    useEffect(() => {
+        // Guard: Only track if we have a config, a hash, and haven't tracked yet
+        if (!loading && configs.hero && config?.current_state_hash && !hasTrackedPage[0]) {
+            setTimeout(() => {
+                const stateHash = config.current_state_hash || 'unknown';
+                fetch('http://localhost:3001/api/tracking/event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: 'manual_session',
+                        componentId: 'page_root',
+                        eventType: 'view_page',
+                        timestamp: Date.now(),
+                        stateHash
+                    })
+                }).then(() => {
+                    console.log(`%c 🎯 PAGE VIEW TRACKED [${stateHash}]`, 'color: cyan');
+                    hasTrackedPage[1](true); // Mark as tracked
+                }).catch(console.error);
+            }, 500);
+        }
+    }, [loading, configs, config, hasTrackedPage]);
 
     if (loading) return <div className="h-screen flex items-center justify-center bg-black text-white">Loading Optimization Engine...</div>;
     if (error) return <div className="h-screen flex items-center justify-center bg-red-900 text-white">{error}</div>;

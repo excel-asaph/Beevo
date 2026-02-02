@@ -66,13 +66,22 @@ export class HeroWatcher {
     }
 
     async analyzeAndOptimize() {
-        console.log("🕵️ Watcher Agent: Waking up...");
+        console.log("🕵️ Hero Watcher Agent: Waking up...");
 
         // 1. Load Data
+        // 0. Resolve Live State Path (Atomic Deployment)
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
         const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
+        const activePath = config.active_assets_path || '';
+        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'hero_block.json');
+
+        console.log(`📂 HeroWatcher: Loading Live State from ${activePath}`);
+
         const [metricsRaw, challengerRaw, researchRaw] = await Promise.all([
             fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(CHALLENGER_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
             fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
         ]);
 
@@ -83,7 +92,9 @@ export class HeroWatcher {
         // Load current video for context
         let videoBuffer = null;
         if (currentHero.visual_asset?.source_url) {
-            const videoPath = path.join(ASSETS_DIR, path.basename(currentHero.visual_asset.source_url));
+            // Note: Visual assets might be in history or root, we use the URL as reference
+            // But we need absolute path. If it starts with /assets, we prepend client/public
+            const videoPath = path.resolve(__dirname, '../../../client/public', currentHero.visual_asset.source_url.startsWith('/') ? currentHero.visual_asset.source_url.substring(1) : currentHero.visual_asset.source_url);
             videoBuffer = await fs.readFile(videoPath).catch(() => null);
             if (videoBuffer) console.log("📺 HeroWatcher: Contextual Video Loaded.");
         }
@@ -91,8 +102,7 @@ export class HeroWatcher {
         const activeVariantId = currentHero.id || 'hero_section_v1';
         const data = metricsInfo[activeVariantId];
 
-        const config = await SystemConfigService.getInstance().getConfig();
-        const notificationClient = NotificationClient.getInstance();
+
 
         // 0. Check Lock
         if (config.locks.hero) {
@@ -102,17 +112,17 @@ export class HeroWatcher {
 
         // 1. Data Analysis (Threshold Check)
         if (!data || (data.views || 0) < config.sections.hero.min_views_data) {
-            console.log(`🕵️ Watcher: Not enough data for ${activeVariantId}. Views: ${data?.views || 0}`);
+            console.log(`🕵️ Hero Watcher: Not enough data for ${activeVariantId}. Views: ${data?.views || 0}`);
             return;
         }
 
         const views = data.views;
         const clicks = data.clicks || 0;
         const retention = data.retention_count || 0;
-        const ctr = (clicks / views) * 100;
-        const retentionRate = (retention / views) * 100;
+        const ctr = (clicks / views);
+        const retentionRate = (retention / views);
 
-        console.log(`📊 PERF: CTR=${ctr.toFixed(1)}% | RET=${retentionRate.toFixed(1)}%`);
+        console.log(`📊 PERF: CTR=${(ctr * 100).toFixed(1)}% | RET=${(retentionRate * 100).toFixed(1)}%`);
 
         // 2.5 CHECK THRESHOLDS
         if (ctr >= config.sections.hero.target_ctr && retentionRate >= config.sections.hero.target_retention) {
@@ -191,10 +201,6 @@ export class HeroWatcher {
                     "subhead": "New Subhead",
                     "cta_text": "New CTA",
                     "video_prompt": "Refined Video Prompt",
-                    "nav_styles": {
-                        "color": "#Hex picked for contrast",
-                        "fontFamily": "Font Name"
-                    },
                     "visual_fixes": {
                         "headline_color": "#Hex picked from palette for contrast",
                         "subhead_color": "#Hex picked from palette for contrast",
@@ -248,19 +254,19 @@ export class HeroWatcher {
                     overlay_content: {
                         ...currentHero.overlay_content,
                         headline: {
-                            ...currentHero.overlay_content.headline,
+                            ...(currentHero.overlay_content?.headline || {}),
                             text: optimization.changes.headline,
                             styles: {
-                                ...currentHero.overlay_content.headline.styles,
-                                color: optimization.changes.visual_fixes?.headline_color || currentHero.overlay_content.headline.styles.color
+                                ...(currentHero.overlay_content?.headline?.styles || {}),
+                                color: optimization.changes.visual_fixes?.headline_color || currentHero.overlay_content?.headline?.styles?.color || '#ffffff'
                             }
                         },
                         subhead: {
-                            ...currentHero.overlay_content.subhead,
+                            ...(currentHero.overlay_content?.subhead || {}),
                             text: optimization.changes.subhead,
                             styles: {
-                                ...currentHero.overlay_content.subhead.styles,
-                                color: optimization.changes.visual_fixes?.subhead_color || currentHero.overlay_content.subhead.styles.color
+                                ...(currentHero.overlay_content?.subhead?.styles || {}),
+                                color: optimization.changes.visual_fixes?.subhead_color || currentHero.overlay_content?.subhead?.styles?.color || '#ffffff'
                             }
                         },
                         cta: {
@@ -268,15 +274,6 @@ export class HeroWatcher {
                             text: optimization.changes.cta_text
                         }
                     },
-                    navigation: {
-                        ...currentHero.navigation,
-                        styles: optimization.changes.nav_styles ? {
-                            ...currentHero.navigation.styles,
-                            color: optimization.changes.nav_styles.color || currentHero.navigation.styles?.color,
-                            fontFamily: optimization.changes.nav_styles.fontFamily || currentHero.navigation.styles?.fontFamily
-                        } : currentHero.navigation.styles
-                    },
-                    forms: currentHero.forms,
                     layout_config: {
                         ...currentHero.layout_config,
                         overlay_gradient: optimization.changes.visual_fixes?.overlay_gradient || currentHero.layout_config.overlay_gradient,

@@ -49,11 +49,14 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ config, brandId })
         >
             {/* Logo Section */}
             <div className="flex items-center">
-                {dna?.logoUrl?.value ? (
+                {(dna?.logoUrl?.value || dna?.logoInvertedUrl?.value) ? (
                     <img
-                        src={dna.logoUrl.value}
+                        // Logic: On Dark Glass (Scrolled) or Dark Hero (Top), use Inverted (White) Logo if available.
+                        // Default fallback to Primary if Inverted is missing.
+                        src={dna?.logoInvertedUrl?.value || dna?.logoUrl?.value}
                         alt="Logo"
-                        className="h-8 md:h-10 w-auto object-contain brightness-0 invert opacity-90"
+                        className="h-14 md:h-19 w-auto object-contain opacity-90 hover:scale-105 transition-transform duration-300"
+
                     />
                 ) : (
                     <span className="text-white font-black tracking-tighter text-xl uppercase italic">

@@ -19,7 +19,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 // Constants
 const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
 const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block_challenger.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/proof_challenger_staging.json');
+const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/proof_block_staging.json');
 const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_snapshot.png');
 const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_decision.json');
@@ -77,21 +77,29 @@ export class ProofWatcher {
         console.log("🕵️ Proof Watcher: Waking up...");
 
         // 1. Load Data
-        const [metricsRaw, challengerRaw, researchRaw] = await Promise.all([
+        // 1. Data Analysis (Get Config First)
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        // 0. Resolve Live State Path
+        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
+        const activePath = config.active_assets_path || '';
+        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'proof_block.json');
+
+        console.log(`📂 ProofWatcher: Loading Live State from ${activePath}`);
+
+        const [metricsRaw, liveRaw, researchRaw] = await Promise.all([
             fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(CHALLENGER_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
             fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
-        const currentProof = JSON.parse(challengerRaw);
+        const currentProof = JSON.parse(liveRaw);
         const researchCtx = JSON.parse(researchRaw);
 
         const variantId = currentProof.id || 'proof_section_v1';
         const data = metricsInfo[variantId];
-
-        const config = await SystemConfigService.getInstance().getConfig();
-        const notificationClient = NotificationClient.getInstance();
 
         // 0. Check Lock
         if (config.locks.proof) {

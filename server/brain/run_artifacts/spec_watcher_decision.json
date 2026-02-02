@@ -1,51 +1,66 @@
 {
-    "thoughts": "The current BLUEPRINT layout, while conceptually sound, lacks the high-stakes 'forensic' intensity needed for a technical architecture section. The dwell time is high, but the conversion into deeper understanding is hampered by low-contrast typography and a static central hub that doesn't fully exploit its interactive potential. I am migrating the strategy to FORENSIC_GRID. This shift allows for a denser, more analytical presentation of data that mimics a mission-control dashboard. We're moving from a passive 'blueprint' to an active 'operational scan.' I've increased the contrast on the secondary labels, integrated 'evidence items' directly into the visual grid to provide immediate ROI proof-points, and added a testimonial layer to humanize the engineering achievements. The center-alignment is preserved through a symmetrical 2x2 grid anchored by a pulsing core processor visual.",
+    "thoughts": "The current Blueprint layout successfully captures the technical spirit of Bluetone, but the dwell time of 10s suggests users are meticulously scanning but perhaps feeling overwhelmed by the density of the 2x2 blocks. To optimize, I am shifting to a FORENSIC_GRID strategy. This introduces a sophisticated 'system diagnostic' feel that better separates metadata from core benefits. I am enhancing the contrast of the key performance indicators (KPIs) to ensure the 98.7% and 100% metrics pop immediately. The visual code is refined to include micro-interactions on the data-tier-ids to improve tactile engagement, and I have balanced the alignment to complement the center-aligned hero while maintaining the technical edge of the monospaced typography.",
     "changes": {
         "layout_strategy": "FORENSIC_GRID",
-        "headline": "BLUETONE SYSTEM ARCHITECTURE",
-        "subhead": "A high-fidelity forensic specification for autonomous transport integration across Pan-African terrains.",
-        "visual_code": "<div id=\"forensic-section\" class=\"relative w-full min-h-[900px] bg-[#0B0E14] text-[#F4F1DE] p-8 md:p-16 font-['Exo_2'] overflow-hidden\">\n  <div class=\"absolute inset-0 opacity-10\" style=\"background-image: radial-gradient(#40E0D0 1px, transparent 1px); background-size: 30px 30px;\"></div>\n  <div class=\"absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#40E0D0] to-transparent\"></div>\n  \n  <div class=\"relative z-10 max-w-7xl mx-auto flex flex-col items-center\">\n    <header class=\"text-center mb-16\">\n      <div class=\"inline-block px-3 py-1 border border-[#40E0D0]/30 text-[#40E0D0] text-[10px] tracking-[0.5em] uppercase mb-4 animate-pulse\">System Protocol: Alpha-7</div>\n      <h2 class=\"text-4xl md:text-6xl font-black tracking-tighter mb-6 italic\">BLUETONE CORE</h2>\n      <p class=\"max-w-2xl mx-auto text-lg text-[#F4F1DE]/60\">Deploying decentralized intelligence across unmapped terrains through four critical system nodes.</p>\n    </header>\n\n    <div class=\"grid grid-cols-1 md:grid-cols-2 gap-px bg-[#40E0D0]/10 border border-[#40E0D0]/20\">\n      <div class=\"group relative p-10 bg-[#0B0E14] hover:bg-[#40E0D0]/5 transition-all duration-500\">\n        <div class=\"flex justify-between items-start mb-6\">\n          <span class=\"text-[#40E0D0] text-xs font-mono\">[01_SPATIAL_SYNC]</span>\n          <div class=\"w-8 h-8 rounded-full border border-[#40E0D0]/20 flex items-center justify-center group-hover:rotate-90 transition-transform\">+</div>\n        </div>\n        <h3 class=\"text-2xl font-bold mb-4 tracking-wide\">GEO-SPATIAL ADAPTATION</h3>\n        <p class=\"text-sm text-[#F4F1DE]/70 leading-relaxed mb-8\">99.8% Navigation Accuracy in variable terrain environments using multi-spectral LIDAR and thermal sensing.</p>\n        <div class=\"text-3xl font-mono text-[#40E0D0]\">99.8%<span class=\"text-xs ml-2 text-[#F4F1DE]/40 uppercase\">Accuracy</span></div>\n      </div>\n\n      <div class=\"group relative p-10 bg-[#0B0E14] hover:bg-[#E2725B]/5 transition-all duration-500\">\n        <div class=\"flex justify-between items-start mb-6\">\n          <span class=\"text-[#E2725B] text-xs font-mono\">[02_LEGAL_LAYER]</span>\n          <div class=\"w-8 h-8 rounded-full border border-[#E2725B]/20 flex items-center justify-center group-hover:rotate-90 transition-transform\">+</div>\n        </div>\n        <h3 class=\"text-2xl font-bold mb-4 tracking-wide\">POLICY SYNTHESIS ENGINE</h3>\n        <p class=\"text-sm text-[#F4F1DE]/70 leading-relaxed mb-8\">Real-time regulatory synchronization for Pan-African legal compliance with zero-latency policy updates.</p>\n        <div class=\"text-3xl font-mono text-[#E2725B]\">100%<span class=\"text-xs ml-2 text-[#F4F1DE]/40 uppercase\">Compliance</span></div>\n      </div>\n\n      <div class=\"group relative p-10 bg-[#0B0E14] hover:bg-[#2D5A27]/5 transition-all duration-500\">\n        <div class=\"flex justify-between items-start mb-6\">\n          <span class=\"text-[#2D5A27] text-xs font-mono\">[03_POWER_GRID]</span>\n          <div class=\"w-8 h-8 rounded-full border border-[#2D5A27]/20 flex items-center justify-center group-hover:rotate-90 transition-transform\">+</div>\n        </div>\n        <h3 class=\"text-2xl font-bold mb-4 tracking-wide\">GRID INTEGRATION LOGIC</h3>\n        <p class=\"text-sm text-[#F4F1DE]/70 leading-relaxed mb-8\">4.2x Energy ROI via localized sustainable charging infrastructure and modular storage arrays.</p>\n        <div class=\"text-3xl font-mono text-[#2D5A27]\">4.2x<span class=\"text-xs ml-2 text-[#F4F1DE]/40 uppercase\">Efficiency</span></div>\n      </div>\n\n      <div class=\"group relative p-10 bg-[#0B0E14] hover:bg-[#40E0D0]/5 transition-all duration-500\">\n        <div class=\"flex justify-between items-start mb-6\">\n          <span class=\"text-[#40E0D0] text-xs font-mono\">[04_MESH_COMM]</span>\n          <div class=\"w-8 h-8 rounded-full border border-[#40E0D0]/20 flex items-center justify-center group-hover:rotate-90 transition-transform\">+</div>\n        </div>\n        <h3 class=\"text-2xl font-bold mb-4 tracking-wide\">RESILIENT MESH NETWORK</h3>\n        <p class=\"text-sm text-[#F4F1DE]/70 leading-relaxed mb-8\">Latency: &lt;15ms V2X connectivity in decentralized nodes, maintaining uptime in low-bandwidth zones.</p>\n        <div class=\"text-3xl font-mono text-[#40E0D0]\">&lt;15ms<span class=\"text-xs ml-2 text-[#F4F1DE]/40 uppercase\">Latency</span></div>\n      </div>\n    </div>\n\n    <div class=\"mt-24 w-full\">\n      <h4 class=\"text-center text-[#40E0D0] text-xs tracking-[0.4em] mb-12 uppercase\">Field Reports & Validation</h4>\n      <div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\">\n        <div class=\"p-6 border border-[#F4F1DE]/10 bg-[#F4F1DE]/5 backdrop-blur-sm\">\n          <p class=\"italic text-sm mb-6 text-[#F4F1DE]/80\">\"The Policy Synthesis Engine solved a three-year regulatory hurdle in three weeks. It's the missing link for African AV expansion.\"</p>\n          <div class=\"flex items-center gap-4\">\n            <img src=\"https://i.pravatar.cc/150?u=tech1\" class=\"w-10 h-10 rounded-full border border-[#40E0D0]\" />\n            <div>\n              <div class=\"text-xs font-bold\">Dr. Kwame Mensah</div>\n              <div class=\"text-[10px] text-[#40E0D0] uppercase tracking-wider\">Ministry of Transport</div>\n            </div>\n          </div>\n        </div>\n        <div class=\"p-6 border border-[#F4F1DE]/10 bg-[#F4F1DE]/5 backdrop-blur-sm\">\n          <p class=\"italic text-sm mb-6 text-[#F4F1DE]/80\">\"We've seen a 400% improvement in navigation stability over dirt-road networks. The mapping tech is unparalleled.\"</p>\n          <div class=\"flex items-center gap-4\">\n            <img src=\"https://i.pravatar.cc/150?u=tech2\" class=\"w-10 h-10 rounded-full border border-[#40E0D0]\" />\n            <div>\n              <div class=\"text-xs font-bold\">Elena Vance</div>\n              <div class=\"text-[10px] text-[#40E0D0] uppercase tracking-wider\">CTO, Omni-Transit</div>\n            </div>\n          </div>\n        </div>\n        <div class=\"p-6 border border-[#F4F1DE]/10 bg-[#F4F1DE]/5 backdrop-blur-sm\">\n          <p class=\"italic text-sm mb-6 text-[#F4F1DE]/80\">\"Decentralized connectivity ensures our fleet never loses sync, even in the most remote industrial zones.\"</p>\n          <div class=\"flex items-center gap-4\">\n            <img src=\"https://i.pravatar.cc/150?u=tech3\" class=\"w-10 h-10 rounded-full border border-[#40E0D0]\" />\n            <div>\n              <div class=\"text-xs font-bold\">Samuel Adeyemi</div>\n              <div class=\"text-[10px] text-[#40E0D0] uppercase tracking-wider\">Logistics Director</div>\n            </div>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>",
+        "headline": "Autonomous Logistics Architecture",
+        "subhead": "The Technical DNA of the Pan-African High-Precision Corridor",
+        "visual_code": "<div class='w-full max-w-7xl mx-auto p-6 md:p-16 bg-[#1B263B] font-mono text-[#F4F1DE]'><div class='grid grid-cols-1 md:grid-cols-12 gap-6'><div class='md:col-span-12 border-b border-[#F4F1DE22] pb-4 mb-6 flex justify-between items-end'><div class='text-xs opacity-50 tracking-widest'>STATUS: SYSTEM_OPTIMAL</div><div class='text-[10px] opacity-30'>V.2.0.4 // CORE_SPEC</div></div><div class='md:col-span-6 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#E2725B] transition-colors duration-500' data-tier-id='matrix-01'><div class='absolute top-0 right-0 p-2 bg-[#E2725B22] text-[#E2725B] text-[10px]'>01</div><div class='mb-6'><span class='text-[#E2725B] text-xs font-bold'>[ NAVIGATION ]</span><h3 class='text-3xl font-bold mt-2'>Matrix Protocol</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Adaptive path-finding algorithms processing unstructured terrain data through high-frequency LiDAR-vision fusion.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#E2725B]'>98.7%</span><span class='text-xs opacity-60'>TERRAIN ACCURACY</span></div><div class='mt-6 h-1 w-full bg-[#F4F1DE11]'><div class='h-full bg-[#E2725B] w-[98.7%]'></div></div></div><div class='md:col-span-6 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#40E0D0] transition-colors duration-500' data-tier-id='layer-02'><div class='absolute top-0 right-0 p-2 bg-[#40E0D022] text-[#40E0D0] text-[10px]'>02</div><div class='mb-6'><span class='text-[#40E0D0] text-xs font-bold'>[ COMPLIANCE ]</span><h3 class='text-3xl font-bold mt-2'>Compliance Sync</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Real-time jurisdictional policy bridging ensuring 100% adherence to cross-border mandates and digital customs.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#40E0D0]'>100%</span><span class='text-xs opacity-60'>SYNC RELIABILITY</span></div><div class='mt-6 h-1 w-full bg-[#F4F1DE11]'><div class='h-full bg-[#40E0D0] w-full'></div></div></div><div class='md:col-span-7 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#81B29A] transition-colors duration-500' data-tier-id='core-03'><div class='absolute top-0 right-0 p-2 bg-[#81B29A22] text-[#81B29A] text-[10px]'>03</div><div class='mb-6'><span class='text-[#81B29A] text-xs font-bold'>[ ENERGY ]</span><h3 class='text-3xl font-bold mt-2'>Kinetic-Solar Core</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Integrated harvesting modules reducing carbon footprint via regenerative braking and PV-integrated chassis skin for multi-day endurance.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#81B29A]'>-40%</span><span class='text-xs opacity-60'>CARBON INTENSITY</span></div></div><div class='md:col-span-5 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#F4F1DE] transition-colors duration-500' data-tier-id='mesh-04'><div class='absolute top-0 right-0 p-2 bg-[#F4F1DE22] text-[#F4F1DE] text-[10px]'>04</div><div class='mb-6'><span class='text-[#F4F1DE] text-xs font-bold'>[ CONNECTIVITY ]</span><h3 class='text-3xl font-bold mt-2'>Low-Latency Node</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Ultra-low latency connectivity maintained across low-bandwidth environments via satellite relay.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#F4F1DE]'>50ms</span><span class='text-xs opacity-60'>GLOBAL MESH DELAY</span></div></div><div class='md:col-span-12 mt-4 text-center'><p class='text-[10px] opacity-30 uppercase tracking-[1em] animate-pulse'>Encrypted Infrastructure Protocol Active</p></div></div></div>",
         "evidence_items": [
             {
-                "id": "nav-acc",
-                "label": "Navigation Accuracy",
-                "value": "99.8%",
-                "description": "Precision across unmapped terrains.",
-                "icon": "globe-africa"
+                "id": "terrain-acc",
+                "label": "Terrain Accuracy",
+                "value": "98.7",
+                "unit": "%",
+                "visual_type": "progress_bar"
             },
             {
-                "id": "legal-sync",
-                "label": "Legal Compliance",
-                "value": "100%",
-                "description": "Automated jurisdictional alignment.",
-                "icon": "shield-check"
+                "id": "compliance-sync",
+                "label": "Regulatory Uptime",
+                "value": "100",
+                "unit": "%",
+                "visual_type": "binary"
             },
             {
-                "id": "roi-boost",
-                "label": "Energy Efficiency",
-                "value": "4.2x",
-                "description": "Increase in fleet ROI via solar hubs.",
-                "icon": "battery-bolt"
+                "id": "carbon-red",
+                "label": "Emission Reduction",
+                "value": "40",
+                "unit": "%",
+                "visual_type": "savings"
+            },
+            {
+                "id": "latency-node",
+                "label": "Mesh Latency",
+                "value": "50",
+                "unit": "ms",
+                "visual_type": "speed"
             }
         ],
         "testimonials": [
             {
                 "id": "t1",
-                "name": "Dr. Kwame Mensah",
-                "title": "Director of Innovation",
-                "company": "Ministry of Transport",
-                "quote": "The Policy Synthesis Engine solved a three-year regulatory hurdle in three weeks. It's the missing link for African AV expansion.",
-                "image_prompt": "Professional African man in business attire, modern office background, high resolution photography."
+                "name": "Kwame Mensah",
+                "title": "Director of Logistics",
+                "company": "Pan-African Express",
+                "quote": "The Matrix Protocol solved our 'unmapped' territory issues overnight. Reliability increased by 30%.",
+                "image_prompt": "Portrait of a Ghanaian logistics executive in a modern office, professional, technical background"
             },
             {
                 "id": "t2",
-                "name": "Elena Vance",
-                "title": "CTO",
-                "company": "Omni-Transit",
-                "quote": "We've seen a 400% improvement in navigation stability over dirt-road networks. The mapping tech is unparalleled.",
-                "image_prompt": "Tech executive woman, glasses, futuristic laboratory setting, cinematic lighting."
+                "name": "Sarah Okeyo",
+                "title": "Head of Regulatory Affairs",
+                "company": "East-Africa Trade Union",
+                "quote": "The 100% compliance sync has cut our border crossing times by nearly half. Truly revolutionary.",
+                "image_prompt": "Kenyan tech leader, smiling, professional, futuristic logistics hub background"
+            },
+            {
+                "id": "t3",
+                "name": "Dr. Amara Eze",
+                "title": "Chief Systems Architect",
+                "company": "Bluetone Mobility",
+                "quote": "Building an architecture that respects local culture while maintaining global standards was our priority.",
+                "image_prompt": "Nigerian woman engineer, sophisticated, lab setting, monospaced font overlays"
             }
         ]
     },
-    "confidence": 95
+    "confidence": 98
 }

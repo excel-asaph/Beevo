@@ -64,6 +64,11 @@ app.post('/api/hitl/request', async (req, res) => {
     }
 });
 
+app.get('/api/hitl/pending', (req, res) => {
+    const requests = notificationService.getPendingRequests();
+    res.json(requests);
+});
+
 app.get('/api/hitl/status/:id', (req, res) => {
     const status = notificationService.getRequestStatus(req.params.id);
     if (!status) return res.status(404).json({ error: 'Request not found' });
@@ -153,9 +158,8 @@ app.post('/api/broadcast/refresh', (req, res) => {
 app.get('/api/analytics/states', async (req, res) => {
     try {
         const db = DatabaseService.getInstance();
-        const states = await db.getAllStates();
-        // For each state, we could also fetch lead counts
-        const leads = await db.getAllLeads();
+        const states = await db.getAllStates() || [];
+        const leads = await db.getAllLeads() || [];
 
         const stateAnalytics = states.map((state: any) => ({
             ...state,
@@ -165,6 +169,104 @@ app.get('/api/analytics/states', async (req, res) => {
         res.json(stateAnalytics);
     } catch (error) {
         res.status(500).json({ error: 'Failed to load analytics' });
+    }
+});
+
+app.get('/api/analytics/current', async (req, res) => {
+    try {
+        const config = await SystemConfigService.getInstance().getConfig();
+        const currentStateHash = config.current_state_hash || '';
+
+        // Source of Truth: Database (State-Isolated Metrics)
+        const db = DatabaseService.getInstance();
+
+        // 1. Get State Metrics (Views, Clicks)
+        const state = await db.getState(currentStateHash) as any;
+        const stateMetrics = state?.metrics ? JSON.parse(state.metrics) : { views: 0 };
+        const breakdown = stateMetrics.component_breakdown || {};
+
+        // 2. Get Leads/Sales (Business Outcomes)
+        const leads = await db.getLeadsForState(currentStateHash) || [];
+        const salesCount = leads.filter((l: any) => l.type === 'OFFER').length;
+        const leadsCount = leads.filter((l: any) => l.type === 'CONTACT' || l.type === 'INTENT').length;
+
+        // 3. Calculate CR (Sales / State Views)
+        const totalViews = stateMetrics.views || 0;
+        const cr = totalViews > 0 ? ((salesCount / totalViews) * 100).toFixed(1) : "0.0";
+
+        // 4. Map Component IDs to Human Readable Labels (Best Effort)
+        // We look for any key in the breakdown that *looks* like a hero/proof/offer ID
+        const getComponentMetric = (pattern: string) => {
+            const key = Object.keys(breakdown).find(k => k.includes(pattern));
+            return key ? (breakdown[key].views || 0) : 0;
+        };
+
+        res.json({
+            stateHash: currentStateHash,
+            metrics: {
+                views: totalViews,
+                clicks: stateMetrics.clicks || 0,
+                // Drilldown from DB Context
+                hero_views: getComponentMetric('hero'),
+                proof_views: getComponentMetric('proof'),
+                offer_views: getComponentMetric('offer'),
+            },
+            business: {
+                leads: leadsCount,
+                sales: salesCount,
+                cr: cr
+            }
+        });
+
+    } catch (error) {
+        console.error('Current Analytics Error:', error);
+        res.status(500).json({ error: 'Failed to load current analytics' });
+    }
+});
+
+app.get('/api/analytics/leaderboard', async (req, res) => {
+    try {
+        const db = DatabaseService.getInstance();
+        const leads = await db.getAllLeads() || [];
+        const states = await db.getAllStates() || [];
+
+        const leaderboard = states.map((state: any) => {
+            const metrics = state.metrics ? JSON.parse(state.metrics) : { views: 0, clicks: 0, leads: 0 };
+            const snapshot = JSON.parse(state.snapshot);
+
+            // Calculate precise metrics from raw leads table for this state
+            const stateLeads = leads.filter((l: any) => l.page_state_hash === state.state_hash);
+            const salesCount = stateLeads.filter((l: any) => l.type === 'OFFER').length;
+            const leadsCount = stateLeads.filter((l: any) => l.type === 'CONTACT' || l.type === 'INTENT').length;
+
+            // Extract variant IDs for display
+            const variants = Object.entries(snapshot.active_blocks || {}).map(([key, block]: [string, any]) => ({
+                block: key,
+                variant: block.variant_id
+            }));
+
+            // CR is strictly Sales / Views (High intent conversion)
+            const cr = metrics.views > 0 ? ((salesCount / metrics.views) * 100).toFixed(1) : "0.0";
+
+            return {
+                stateHash: state.state_hash,
+                timestamp: state.timestamp,
+                views: metrics.views || 0,
+                clicks: metrics.clicks || 0,
+                leads: leadsCount, // Intent + Contact
+                sales: salesCount, // Offer
+                cr,
+                variants
+            };
+        });
+
+        // Sort by Sales desc, then Leads desc
+        leaderboard.sort((a: any, b: any) => (b.sales - a.sales) || (b.leads - a.leads));
+
+        res.json(leaderboard);
+    } catch (error) {
+        console.error('Leaderboard Error:', error);
+        res.status(500).json({ error: 'Failed to load leaderboard' });
     }
 });
 

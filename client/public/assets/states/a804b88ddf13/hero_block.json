@@ -1,0 +1,176 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1770000231009",
+    "meta": {
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "type": "video",
+        "source_url": "/assets/history/hero_v1770000231009/hero_video_1770000355726.mp4",
+        "source_id": "generated_veo_asset",
+        "prompt_signature": "A sleek, autonomous electric shuttle gliding smoothly through a vibrant, tech-infused African urban landscape featuring vertical gardens and solar-integrated glass towers. The vehicle has glowing blue sensors and reflects the golden hour sky as it navigates a modern transit hub.",
+        "attributes": {
+            "lighting": "Cinematic golden hour sunlight with soft lens flares and high-tech blue ambient glows from the vehicle's sensors.",
+            "camera_movement": "A dynamic low-angle tracking shot that maintains pace with the shuttle, showcasing its fluid movement and the surrounding architectural detail.",
+            "subject_focus": "The aerodynamically designed autonomous shuttle, highlighting its advanced sensor array and smooth exterior finish.",
+            "color_grade": "#40E0D0"
+        }
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "Autonomous Mobility for Africa",
+            "styles": {
+                "color": "#40E0D0",
+                "fontFamily": "Exo 2",
+                "fontSize": "4rem",
+                "fontWeight": "700",
+                "textShadow": "2px 2px 8px rgba(0,0,0,0.4)"
+            }
+        },
+        "subhead": {
+            "text": "Bridging cutting-edge technology with local regulation to build a sustainable, future-proof transport ecosystem.",
+            "styles": {
+                "color": "#F4F1DE",
+                "fontFamily": "Exo 2",
+                "fontSize": "1.25rem",
+                "marginTop": "1.5rem"
+            }
+        },
+        "cta": {
+            "text": "Join the Future",
+            "action_id": "open_intent_form",
+            "styles": {
+                "backgroundColor": "#E2725B",
+                "color": "#F4F1DE",
+                "fontFamily": "Exo 2",
+                "padding": "14px 28px",
+                "borderRadius": "4px",
+                "fontWeight": "600"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "alignItems": "center",
+            "textAlign": "center",
+            "padding": "40px"
+        },
+        "overlay_gradient": "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))"
+    },
+    "navigation": {
+        "links": [
+            {
+                "label": "Offer",
+                "action_id": "open_offer_form"
+            },
+            {
+                "label": "Partnership",
+                "action_id": "open_intent_form"
+            },
+            {
+                "label": "Contact",
+                "action_id": "open_contact_form"
+            }
+        ],
+        "styles": {
+            "color": "#F4F1DE",
+            "fontFamily": "Exo 2",
+            "fontSize": "0.75rem",
+            "fontWeight": "700",
+            "letterSpacing": "0.2em",
+            "textTransform": "uppercase"
+        }
+    },
+    "forms": {
+        "contact": {
+            "id": "contact_form_001",
+            "title": "Contact Our Team",
+            "submit_text": "Send Message",
+            "fields": [
+                {
+                    "id": "name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Enter your name"
+                },
+                {
+                    "id": "email",
+                    "label": "Email Address",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "email@example.com"
+                },
+                {
+                    "id": "subject",
+                    "label": "Inquiry Type",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "General Inquiry",
+                        "Media Relations",
+                        "Technical Support"
+                    ]
+                },
+                {
+                    "id": "message",
+                    "label": "How can we help?",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "Tell us more about your inquiry..."
+                }
+            ],
+            "subtitle": "Reach out to discuss the future of African transit."
+        },
+        "intent": {
+            "id": "intent_form_001",
+            "title": "Strategic Partnership Application",
+            "submit_text": "Initiate Partnership",
+            "fields": [
+                {
+                    "id": "partner_name",
+                    "label": "Organization Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Company or Agency Name"
+                },
+                {
+                    "id": "partner_email",
+                    "label": "Work Email",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "name@organization.com"
+                },
+                {
+                    "id": "scaling_goal",
+                    "label": "Industry Scaling Goal",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Autonomous Logistics",
+                        "Urban Passenger Transit",
+                        "Smart City Infrastructure",
+                        "Regulatory Framework Development"
+                    ]
+                },
+                {
+                    "id": "current_infrastructure",
+                    "label": "Current Infrastructure Status",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "Describe your existing mobility assets or regulatory environment"
+                },
+                {
+                    "id": "agreement",
+                    "label": "I agree to mobility data sharing for research",
+                    "type": "checkbox",
+                    "required": true
+                }
+            ],
+            "subtitle": "Join our mission to achieve 50% accessibility across Africa by 2035."
+        }
+    }
+}

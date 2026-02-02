@@ -1,0 +1,73 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_v1770000552827",
+    "meta": {
+        "strategy": "B2G and B2B Strategic Deployment Model for Autonomous Transit Infrastructure",
+        "offer_type": "custom",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "industry": "Electric and Autonomous Transportation"
+    },
+    "content": {
+        "headline": "Command the Future of African Transit",
+        "subhead": "From regulatory sandboxes to full-scale autonomous networks, Bluetone provides the digital and physical architecture for sustainable urban mobility.",
+        "tiers": [
+            {
+                "id": "pilot",
+                "name": "Pilot Launch",
+                "price": "Custom Quote",
+                "description": "Ideal for single-route proof of concepts in controlled environments.",
+                "features": [
+                    "Regulatory Sandbox Support",
+                    "Single Route Logistics",
+                    "Fleet Telemetry Dashboard",
+                    "Local Operator Training"
+                ],
+                "cta_text": "Schedule Feasibility Audit",
+                "badge": "Entry Point",
+                "is_highlighted": false
+            },
+            {
+                "id": "fleet",
+                "name": "Regional Expansion",
+                "price": "Inquire for Pricing",
+                "description": "Optimized for scaling autonomous fleet operations across municipal districts.",
+                "features": [
+                    "Multi-City Deployment",
+                    "Autonomous Route Optimization",
+                    "Carbon Credit Integration",
+                    "24/7 Remote Monitoring"
+                ],
+                "cta_text": "Request Fleet Roadmap",
+                "badge": "Recommended",
+                "is_highlighted": true
+            },
+            {
+                "id": "network",
+                "name": "Sovereign Network",
+                "price": "Strategic Partnership",
+                "description": "National-level infrastructure integration for government and enterprise consortia.",
+                "features": [
+                    "National Infrastructure Integration",
+                    "Full Regulatory Liaison",
+                    "Custom Hardware Provisioning",
+                    "Dedicated Logistics Layer"
+                ],
+                "cta_text": "Connect with a Strategist",
+                "badge": "Enterprise",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "Zero-emission certification and full regulatory compliance guaranteed in all deployment jurisdictions."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class=\"max-w-7xl mx-auto px-4 py-16 font-sans text-[#F4F1DE]\"><div class=\"text-center mb-16\"><h2 class=\"text-5xl font-bold mb-4 tracking-tight uppercase\">Command the Future of African Transit</h2><p class=\"text-xl opacity-80 max-w-2xl mx-auto font-light\">From regulatory sandboxes to full-scale autonomous networks, Bluetone provides the architecture for sustainable mobility.</p></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8\"><div data-tier-id=\"pilot\" class=\"bg-[#3D405B] border border-[#F4F1DE]/10 p-8 rounded-xl shadow-2xl flex flex-col hover:border-[#40E0D0] transition-colors\"><span class=\"text-[#40E0D0] text-sm font-bold tracking-widest uppercase mb-4\">Entry Point</span><h3 class=\"text-3xl font-bold mb-2 uppercase\">Pilot Launch</h3><div class=\"text-2xl font-light mb-6 opacity-90\">Custom Quote</div><ul class=\"space-y-4 mb-10 flex-grow text-[#F4F1DE]/80\"><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#40E0D0] mr-2\"></span>Regulatory Sandbox Support</li><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#40E0D0] mr-2\"></span>Single Route Logistics</li><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#40E0D0] mr-2\"></span>Fleet Telemetry Dashboard</li></ul><button data-cta-id=\"audit-cta\" class=\"w-full py-4 bg-[#40E0D0] text-[#3D405B] font-bold rounded-sm hover:brightness-110 transition-all uppercase tracking-wider text-sm\">Schedule Feasibility Audit</button></div><div data-tier-id=\"fleet\" class=\"bg-[#3D405B] border-2 border-[#E2725B] p-8 rounded-xl shadow-2xl flex flex-col transform md:-translate-y-4 relative overflow-hidden\"><div class=\"absolute top-0 right-0 bg-[#E2725B] text-[#F4F1DE] text-[10px] font-bold px-3 py-1 uppercase tracking-tighter\">Recommended</div><span class=\"text-[#E2725B] text-sm font-bold tracking-widest uppercase mb-4\">Scaling Up</span><h3 class=\"text-3xl font-bold mb-2 uppercase\">Regional Expansion</h3><div class=\"text-2xl font-light mb-6 opacity-90\">Inquire for Pricing</div><ul class=\"space-y-4 mb-10 flex-grow text-[#F4F1DE]/80\"><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#E2725B] mr-2\"></span>Multi-City Deployment</li><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#E2725B] mr-2\"></span>Autonomous Route Optimization</li><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#E2725B] mr-2\"></span>Carbon Credit Integration</li></ul><button data-cta-id=\"roadmap-cta\" class=\"w-full py-4 bg-[#E2725B] text-[#F4F1DE] font-bold rounded-sm hover:brightness-110 transition-all uppercase tracking-wider text-sm\">Request Fleet Roadmap</button></div><div data-tier-id=\"network\" class=\"bg-[#3D405B] border border-[#F4F1DE]/10 p-8 rounded-xl shadow-2xl flex flex-col hover:border-[#2D5A27] transition-colors\"><span class=\"text-[#2D5A27] text-sm font-bold tracking-widest uppercase mb-4\">Infrastructure</span><h3 class=\"text-3xl font-bold mb-2 uppercase\">Sovereign Network</h3><div class=\"text-2xl font-light mb-6 opacity-90\">Strategic Partnership</div><ul class=\"space-y-4 mb-10 flex-grow text-[#F4F1DE]/80\"><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#2D5A27] mr-2\"></span>National Infrastructure Integration</li><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#2D5A27] mr-2\"></span>Full Regulatory Liaison</li><li class=\"flex items-center\"><span class=\"w-1.5 h-1.5 rounded-full bg-[#2D5A27] mr-2\"></span>Custom Hardware Provisioning</li></ul><button data-cta-id=\"strategist-cta\" class=\"w-full py-4 border-2 border-[#2D5A27] text-[#2D5A27] font-bold rounded-sm hover:bg-[#2D5A27] hover:text-[#F4F1DE] transition-all uppercase tracking-wider text-sm\">Connect with a Strategist</button></div></div><div class=\"mt-12 text-center text-sm text-[#F4F1DE]/60 italic font-light\">All deployments include Bluetone’s proprietary \"Cultural Adaptive Safety\" layer for non-standardized environments.</div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2",
+        "accentColor": "#40E0D0"
+    }
+}

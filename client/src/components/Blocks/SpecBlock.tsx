@@ -43,6 +43,7 @@ export const SpecBlock: React.FC<{ config: SpecBlockConfig }> = ({ config }) => 
             ([entry]) => {
                 if (entry.isIntersecting && !hasLogged) {
                     console.log("👁️ Spec Section observed");
+                    track('view_component'); // Added for Funnel Accuracy
                     setHasLogged(true);
                 }
 

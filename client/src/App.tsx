@@ -56,7 +56,7 @@ const MainLayout: React.FC = () => {
             <div className="relative w-full h-full">
                 <button
                     onClick={() => setViewMode('dashboard')}
-                    className="absolute top-4 right-4 z-50 px-4 py-2 bg-black/50 text-white hover:bg-black rounded-lg backdrop-blur-sm transition-colors border border-white/10"
+                    className="absolute top-4 right-4 z-[99999] px-4 py-2 bg-black/50 text-white hover:bg-black rounded-lg backdrop-blur-sm transition-colors border border-white/10"
                 >
                     Exit Preview
                 </button>

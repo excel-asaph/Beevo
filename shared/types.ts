@@ -29,7 +29,9 @@ export interface BrandDNA {
     mood: SelectableArray;
     keywords?: SelectableArray;
     logoUrl?: SelectableString;
+    logoInvertedUrl?: SelectableString;
     logoVariants?: any; // 8-file kit
+
     industry?: SelectableString;
     rationale?: string;
 
@@ -561,6 +563,7 @@ export interface SystemConfig {
     };
     // 6. Current Page State (Sealed by Orchestrator)
     current_state_hash?: string;
+    active_assets_path?: string; // e.g. "states/v_123456"
 }
 
 // ==========================================

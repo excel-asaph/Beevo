@@ -12,12 +12,20 @@ export const ProofBlock: React.FC<ProofBlockProps> = ({ config }) => {
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
+    const hasViewedRef = useRef(false);
+
     // === Dwell Time Tracking ===
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
                     console.log(`👁️ Proof Section observed: Starting Dwell Timer...`);
+
+                    if (!hasViewedRef.current) {
+                        track('view_component');
+                        hasViewedRef.current = true;
+                    }
+
                     dwellStartTime.current = Date.now();
                     setIsVisible(true);
                 } else {

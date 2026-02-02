@@ -1,0 +1,79 @@
+{
+    "page_root": {
+        "variant_id": "page_root",
+        "views": 204,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T06:28:07.292Z"
+    },
+    "social_v1770000443735": {
+        "variant_id": "social_v1770000443735",
+        "views": 29,
+        "clicks": 0,
+        "retention_count": 17,
+        "retention_sum_ms": 51000,
+        "dwell_count": 30,
+        "dwell_sum_ms": 144411,
+        "velocity_sum": 33929,
+        "last_updated": "2026-02-02T06:28:01.697Z"
+    },
+    "hero_v1770000231009": {
+        "variant_id": "hero_v1770000231009",
+        "views": 50,
+        "clicks": 4,
+        "retention_count": 19,
+        "retention_sum_ms": 57000,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T06:27:59.222Z"
+    },
+    "proof_v1770000380313": {
+        "variant_id": "proof_v1770000380313",
+        "views": 39,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 40,
+        "dwell_sum_ms": 68313,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T06:28:01.324Z"
+    },
+    "pas_v1770000496337": {
+        "variant_id": "pas_v1770000496337",
+        "views": 30,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 30,
+        "dwell_sum_ms": 98273,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T06:27:55.693Z"
+    },
+    "offer_v1770000552827": {
+        "variant_id": "offer_v1770000552827",
+        "views": 24,
+        "clicks": 9,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 25,
+        "dwell_sum_ms": 87475,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T06:27:57.128Z"
+    },
+    "spec_v1770000520064": {
+        "variant_id": "spec_v1770000520064",
+        "views": 30,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 30,
+        "dwell_sum_ms": 87629,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T06:28:07.480Z"
+    }
+}

@@ -132,8 +132,11 @@ export class InitialLogoGenerator {
         const variationMap = [
             { key: 'inverted', prompt: "Create a Dark Mode / Inverted version of this logo. White/Light on dark background. Keep shape identical." },
             { key: 'icon', prompt: "Create an App Icon / Favicon based on this logo. Isolate the symbol/mark. High legibility. No text." },
+            { key: 'icon_inverted', prompt: "Create a Dark Mode / Inverted App Icon. White symbol on dark background. No text." },
             { key: 'wordmark', prompt: "Create a Wordmark / Logotype version. Focus on the brand name typography. Clean, modern." },
-            { key: 'social', prompt: "Create a Social Media Profile Picture. Center the logo on a brand color background." }
+            { key: 'wordmark_inverted', prompt: "Create a Dark Mode / Inverted Wordmark. White typography on dark background." },
+            { key: 'social', prompt: "Create a Social Media Profile Picture. Center the logo on a brand color background." },
+            { key: 'social_inverted', prompt: "Create a Dark Mode Social Profile Picture. Center the white logo on a dark background." }
         ];
 
         console.log(`🎨 Step 2: Generating ${variationMap.length} Variations...`);
@@ -181,8 +184,11 @@ export class InitialLogoGenerator {
             primary: generatedPaths.primary,
             inverted: generatedPaths.inverted,
             icon: generatedPaths.icon,
+            icon_inverted: generatedPaths.icon_inverted,
             wordmark: generatedPaths.wordmark,
-            social: generatedPaths.social
+            wordmark_inverted: generatedPaths.wordmark_inverted,
+            social: generatedPaths.social,
+            social_inverted: generatedPaths.social_inverted
         };
 
         const finalOutput = {

@@ -12,6 +12,8 @@ export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
+    const hasViewedRef = useRef(false);
+
     // === Trust Signal Tracking (Dwell + Velocity + Milestone) ===
     useEffect(() => {
         let milestoneTimer: NodeJS.Timeout;
@@ -20,6 +22,12 @@ export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
             ([entry]) => {
                 if (entry.isIntersecting) {
                     console.log(`👁️ Social Section observed: Starting Dwell Timer...`);
+
+                    if (!hasViewedRef.current) {
+                        track('view_component'); // Unique View
+                        hasViewedRef.current = true;
+                    }
+
                     dwellStartTime.current = Date.now();
                     setIsVisible(true);
 
@@ -82,7 +90,23 @@ export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
 
                 <div
                     className="w-full"
-                    dangerouslySetInnerHTML={{ __html: config.graphic_config.visual_code || '' }}
+                    dangerouslySetInnerHTML={{
+                        __html: (() => {
+                            let html = config.graphic_config.visual_code || '';
+                            // Hydrate images
+                            if (config.content.testimonials) {
+                                config.content.testimonials.forEach(t => {
+                                    // Replace placeholders 'image_url_ID' with actual URL
+                                    // The generator seems to output 'image_url_t1' etc.
+                                    html = html.replace(`image_url_${t.id}`, t.image_url);
+                                    // Also try replacing just the ID if the generator format varies, purely defensive
+                                    html = html.replace(`'${t.id}'`, `'${t.image_url}'`);
+                                    html = html.replace(`"${t.id}"`, `"${t.image_url}"`);
+                                });
+                            }
+                            return html;
+                        })()
+                    }}
                 />
             </div>
         </div>

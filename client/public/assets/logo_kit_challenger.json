@@ -1,0 +1,17 @@
+{
+    "kit": {
+        "primary": "/assets/transparent_logos/logo_variant_primary_transparent.png?v=1769998972270",
+        "inverted": "/assets/transparent_logos/logo_variant_inverted_transparent.png?v=1769998972270",
+        "icon": "/assets/transparent_logos/logo_variant_icon_transparent.png?v=1769998972270",
+        "icon_inverted": "/assets/transparent_logos/logo_variant_icon_inverted_transparent.png?v=1769998972270",
+        "wordmark": "/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1769998972270",
+        "wordmark_inverted": "/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png?v=1769998972270",
+        "social": "/assets/transparent_logos/logo_variant_social_transparent.png?v=1769998972270",
+        "social_inverted": "/assets/transparent_logos/logo_variant_social_inverted_transparent.png?v=1769998972270"
+    },
+    "brandDNA": {
+        "logoUrl": {
+            "value": "/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1769998972270"
+        }
+    }
+}

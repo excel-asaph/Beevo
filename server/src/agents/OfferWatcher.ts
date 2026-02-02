@@ -72,9 +72,19 @@ export class OfferWatcher {
     async analyzeAndOptimize() {
         console.log("🕵️ OfferWatcher Agent: Waking up...");
 
+        const config = await SystemConfigService.getInstance().getConfig();
+        const notificationClient = NotificationClient.getInstance();
+
+        // 0. Resolve Live State Path
+        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
+        const activePath = config.active_assets_path || '';
+        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'offer_block.json');
+
+        console.log(`📂 OfferWatcher: Loading Live State from ${activePath}`);
+
         const [metricsRaw, challengerRaw, researchRaw] = await Promise.all([
             fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(CHALLENGER_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
             fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
         ]);
 
@@ -85,8 +95,7 @@ export class OfferWatcher {
         const variantId = currentOffer.id || 'offer_section_v1';
         const data = metricsInfo[variantId];
 
-        const config = await SystemConfigService.getInstance().getConfig();
-        const notificationClient = NotificationClient.getInstance();
+
 
         if (config.locks.offer) {
             console.log("🔒 Offer Section is LOCKED.");
@@ -99,10 +108,10 @@ export class OfferWatcher {
             return;
         }
 
-        const conversionRate = (data.clicks / data.views) * 100;
+        const conversionRate = (data.clicks / data.views);
         const avgDwell = data.dwell_count ? (data.dwell_sum_ms / data.dwell_count) : 0;
 
-        console.log(`📊 PERF: CR=${conversionRate.toFixed(1)}% | Avg Dwell=${avgDwell.toFixed(0)}ms`);
+        console.log(`📊 PERF: CR=${(conversionRate * 100).toFixed(1)}% | Avg Dwell=${avgDwell.toFixed(0)}ms`);
 
         // 2. Forensic Decision
         if (conversionRate > config.sections.offer.target_conversion_rate) {

@@ -10,7 +10,12 @@ export const useConfig = () => {
             const res = await fetch('http://localhost:3001/api/config');
             if (res.ok) {
                 const data = await res.json();
-                setConfig(data);
+
+                // Deep Compare to prevent re-renders (Phantom Event Fix)
+                setConfig(prev => {
+                    if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+                    return data;
+                });
             }
         } catch (error) {
             console.error("Failed to fetch config:", error);

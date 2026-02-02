@@ -1,30 +1,37 @@
 import { useCallback } from 'react';
+import { useConfig } from './useConfig';
 
 export type TrackingEvent = {
     blockId: string;
-    eventType: 'view_3s' | 'cta_click' | 'scroll_depth' | 'proof_dwell_summary' | 'pas_dwell_summary' | 'spec_dwell_summary' | 'spec_interaction' | 'social_dwell_summary' | 'social_scroll_velocity' | 'view_component' | 'offer_dwell_summary' | 'offer_cta_click';
+    eventType: 'view_3s' | 'cta_click' | 'scroll_depth' | 'proof_dwell_summary' | 'pas_dwell_summary' | 'spec_dwell_summary' | 'spec_interaction' | 'social_dwell_summary' | 'social_scroll_velocity' | 'view_component' | 'offer_dwell_summary' | 'offer_cta_click' | 'view_page';
     meta?: any;
     timestamp: number;
+    stateHash?: string;
 };
 
 export const useTracking = (blockId: string) => {
+    const { config, loading } = useConfig();
+
     const track = useCallback((eventType: TrackingEvent['eventType'], meta?: any) => {
+        const stateHash = config?.current_state_hash || 'unknown';
         const event: TrackingEvent = {
             blockId,
             eventType,
             meta,
             timestamp: Date.now(),
+            stateHash
         };
 
         // Send to backend
-        console.log(`%c 🎯 METRIC SENT: ${eventType} `, 'background: #222; color: #bada55; padding: 2px 5px; border-radius: 3px;', { blockId, ...meta });
+        console.log(`%c 🎯 METRIC SENT: ${eventType} [${stateHash}] `, 'background: #222; color: #bada55; padding: 2px 5px; border-radius: 3px;', { blockId, ...meta });
         try {
-            fetch('/api/tracking/event', {
+            fetch('http://localhost:3001/api/tracking/event', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sessionId: 'manual_session', // Simple session for manual testing
                     componentId: blockId,
+                    stateHash,
                     ...event
                 })
             }).catch(err => console.error('Tracking Error:', err));
@@ -34,7 +41,7 @@ export const useTracking = (blockId: string) => {
 
         // For now, allow dispatching to window for the "Watcher Agent" to potentially pick up if we use a browser extension or local script
         window.dispatchEvent(new CustomEvent('beevo_track', { detail: event }));
-    }, [blockId]);
+    }, [blockId, config]);
 
-    return { track };
+    return { track, isReady: !loading && !!config };
 };

@@ -12,11 +12,20 @@ export const PASBlock: React.FC<PASBlockProps> = ({ config }) => {
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
+    const hasViewedRef = useRef(false);
+
     // === Dwell Time Tracking ===
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
+                    console.log(`👁️ PAS Section observed`);
+
+                    if (!hasViewedRef.current) {
+                        track('view_component');
+                        hasViewedRef.current = true;
+                    }
+
                     dwellStartTime.current = Date.now();
                     setIsVisible(true);
                 } else {

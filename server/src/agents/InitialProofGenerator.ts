@@ -12,9 +12,8 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
-const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-// CHANGED: Output to Staging
-const STAGING_PATH = path.join(process.cwd(), 'server/brain/staging/proof_block_staging.json');
+const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
+const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/proof_block_staging.json');
 
 // Interfaces
 interface BrandResearch {
@@ -128,9 +127,9 @@ export class InitialProofGenerator {
         // === OUTPUT ===
         console.log("Saving Staged Proof Block...");
         // Ensure staging dir exists
-        await fs.mkdir(path.dirname(STAGING_PATH), { recursive: true });
-        await fs.writeFile(STAGING_PATH, JSON.stringify(challenger, null, 4));
-        console.log(`✅ Staged Proof Block Saved: ${STAGING_PATH}`);
+        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
+        await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
+        console.log(`✅ Staged Proof Block Saved: ${OUTPUT_PATH}`);
     }
 }
 

@@ -193,7 +193,7 @@ async function processImage(page: any, relativePath: string): Promise<string | n
     return null;
 }
 
-async function main() {
+export async function bakeTransparency() {
     console.log("🧼 Starting Transparency Production Line (V3 - Global Key)...");
 
     // Ensure output dir exists
@@ -207,7 +207,10 @@ async function main() {
         console.warn("⚠️ Logo Kit JSON not found. Regenerating from source images...");
     }
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
 
     // Process logos
@@ -247,6 +250,9 @@ async function main() {
 
     await fs.writeFile(KIT_PATH, JSON.stringify(kit, null, 4));
     console.log("✨ Kit updated. Transparent logos saved to public/transparent_logos.");
+    return kit;
 }
 
-main().catch(console.error);
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    bakeTransparency().catch(console.error);
+}

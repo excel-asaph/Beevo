@@ -1,81 +1,80 @@
 {
     "hero_section_v1": {
         "variant_id": "hero_section_v1",
-        "views": 141,
-        "clicks": 2,
-        "retention_count": 12,
-        "retention_sum_ms": 36000,
-        "dwell_count": 100,
-        "dwell_sum_ms": 150000,
+        "views": 10,
+        "clicks": 1,
+        "retention_count": 6,
+        "retention_sum_ms": 18000,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T11:22:17.746Z"
+        "last_updated": "2026-02-02T16:26:46.671Z"
     },
     "page_root": {
         "variant_id": "page_root",
-        "views": 141,
-        "clicks": 5,
+        "views": 10,
+        "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
         "dwell_count": 0,
         "dwell_sum_ms": 0,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T11:22:17.331Z"
+        "last_updated": "2026-02-02T16:26:43.490Z"
     },
     "proof_section_v1": {
         "variant_id": "proof_section_v1",
-        "views": 124,
+        "views": 5,
         "clicks": 0,
-        "retention_count": 20,
-        "retention_sum_ms": 60000,
-        "dwell_count": 105,
-        "dwell_sum_ms": 58752,
-        "velocity_sum": 12000,
-        "last_updated": "2026-02-02T11:22:22.312Z"
-    },
-    "social_section_v1": {
-        "variant_id": "social_section_v1",
-        "views": 122,
-        "clicks": 15,
-        "retention_count": 93,
-        "retention_sum_ms": 409000,
-        "dwell_count": 106,
-        "dwell_sum_ms": 629570,
-        "velocity_sum": 54117.7236780002,
-        "last_updated": "2026-02-02T11:10:24.744Z"
-    },
-    "offer_section_v1": {
-        "variant_id": "offer_section_v1",
-        "views": 162,
-        "clicks": 4,
-        "retention_count": 50,
-        "retention_sum_ms": 200000,
-        "dwell_count": 103,
-        "dwell_sum_ms": 564285,
-        "velocity_sum": 45000,
-        "last_updated": "2026-02-02T11:10:21.718Z"
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 34,
+        "dwell_sum_ms": 106158,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T15:12:22.994Z"
     },
     "pas_section_v1": {
         "variant_id": "pas_section_v1",
-        "views": 154,
+        "views": 5,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 104,
-        "dwell_sum_ms": 17350,
-        "scroll_depth_avg": 0.1,
-        "velocity_sum": 42000,
-        "last_updated": "2026-02-02T11:22:22.100Z"
+        "dwell_count": 36,
+        "dwell_sum_ms": 60726,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T15:12:22.573Z"
     },
     "spec_section_v1": {
         "variant_id": "spec_section_v1",
-        "views": 124,
+        "views": 8,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 104,
-        "dwell_sum_ms": 1116940,
-        "velocity_sum": 38000,
-        "last_updated": "2026-02-02T11:22:31.253Z"
+        "dwell_count": 35,
+        "dwell_sum_ms": 6354068,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T16:26:48.128Z"
+    },
+    "social_section_v1": {
+        "variant_id": "social_section_v1",
+        "views": 7,
+        "clicks": 0,
+        "retention_count": 7,
+        "retention_sum_ms": 21000,
+        "dwell_count": 34,
+        "dwell_sum_ms": 222698,
+        "velocity_sum": 32369.65772611335,
+        "last_updated": "2026-02-02T15:12:21.079Z"
+    },
+    "offer_section_v1": {
+        "variant_id": "offer_section_v1",
+        "views": 5,
+        "clicks": 4,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 18,
+        "dwell_sum_ms": 344517,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-02T15:09:44.872Z"
     },
     "hero_section_v1_nav": {
         "variant_id": "hero_section_v1_nav",
@@ -86,6 +85,6 @@
         "dwell_count": 0,
         "dwell_sum_ms": 0,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T11:07:11.185Z"
+        "last_updated": "2026-02-02T14:49:25.163Z"
     }
 }

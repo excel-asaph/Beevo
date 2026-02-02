@@ -34,7 +34,7 @@ async function checkDB() {
         }
 
         console.log("\n📊 --- LATEST LEADS ---");
-        const leads = await db.all('SELECT * FROM lead_submissions ORDER BY timestamp DESC LIMIT 3');
+        const leads = await db.all('SELECT * FROM lead_submissions ORDER BY timestamp DESC LIMIT 10');
         if (leads.length === 0) {
             console.log("No leads found.");
         } else {

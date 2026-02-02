@@ -1,0 +1,76 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_v1770049196814",
+    "meta": {
+        "strategy": "Strategic Regional Deployment Pilot Program focusing on bridging regulatory gaps with high-tech autonomous transit solutions.",
+        "offer_type": "lead-gen",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "industry": "Electric and Autonomous Transportation"
+    },
+    "content": {
+        "headline": "Command the Future of African Transit",
+        "subhead": "Deploy sustainable, autonomous transportation systems tailored to regional complexities and global standards.",
+        "tiers": [
+            {
+                "id": "feasibility",
+                "name": "Regional Assessment",
+                "price": "Market Entry",
+                "description": "Comprehensive audit of regulatory landscapes and technical feasibility for autonomous integration.",
+                "features": [
+                    "Policy Alignment Audit",
+                    "Terrain & Connectivity Mapping",
+                    "Sustainability Impact Report",
+                    "Local Stakeholder Mapping"
+                ],
+                "cta_text": "Book Assessment",
+                "badge": "Phase 1",
+                "interval": "one-time",
+                "is_highlighted": false
+            },
+            {
+                "id": "pilot",
+                "name": "Fleet Pilot",
+                "price": "Custom Scope",
+                "description": "Active deployment of autonomous EV fleets with localized command center oversight.",
+                "features": [
+                    "10-Vehicle Autonomous Fleet",
+                    "Remote Command Center Setup",
+                    "Maintenance & Safety Training",
+                    "Live Operational Analytics"
+                ],
+                "cta_text": "Launch Pilot",
+                "badge": "Most Popular",
+                "interval": "per-deployment",
+                "is_highlighted": true
+            },
+            {
+                "id": "enterprise",
+                "name": "Infrastructure Scale",
+                "price": "Ecosystem Partner",
+                "description": "Full-scale regional transit overhaul including charging grids and autonomous corridors.",
+                "features": [
+                    "City-Wide Transit Integration",
+                    "Smart Charging Grid Tech",
+                    "Regulatory Compliance Shield",
+                    "24/7 Priority Engineering"
+                ],
+                "cta_text": "Inquire Now",
+                "badge": "Enterprise",
+                "interval": "annual",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "All deployments include a 12-month technical support and regulatory compliance guarantee."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"py-20 px-6 bg-[#F4F1DE] font-sans text-[#3D405B]\"><div class=\"max-w-7xl mx-auto\"><div class=\"text-center mb-16\"><h2 class=\"text-4xl md:text-5xl font-extrabold tracking-tight mb-4\">Command the Future of African Transit</h2><p class=\"text-xl text-[#3D405B]/80 max-w-2xl mx-auto\">Deploy sustainable, autonomous transportation systems tailored to regional complexities and global standards.</p></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch\"><div data-tier-id=\"feasibility\" class=\"flex flex-col bg-white/50 border border-[#3D405B]/10 rounded-2xl p-8 shadow-sm\"><div class=\"mb-6\"><span class=\"bg-[#3D405B]/10 text-[#3D405B] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest\">Phase 1</span><h3 class=\"text-2xl font-bold mt-4\">Regional Assessment</h3><p class=\"text-3xl font-black mt-2\">Market Entry</p></div><p class=\"mb-8 text-[#3D405B]/70\">Comprehensive audit of regulatory landscapes and technical feasibility.</p><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Policy Alignment Audit</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Terrain & Connectivity Mapping</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Sustainability Impact Report</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Local Stakeholder Mapping</li></ul><button data-cta-id=\"assess-cta\" class=\"w-full py-4 px-6 rounded-xl font-bold bg-[#3D405B] text-white transition-transform hover:scale-105 active:scale-95\">Book Assessment</button></div><div data-tier-id=\"pilot\" class=\"flex flex-col bg-white border-4 border-[#40E0D0] rounded-2xl p-8 shadow-2xl scale-105 relative z-10\"><div class=\"mb-6\"><span class=\"bg-[#E2725B] text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest\">Most Popular</span><h3 class=\"text-2xl font-bold mt-4\">Fleet Pilot</h3><p class=\"text-3xl font-black mt-2 text-[#2D5A27]\">Custom Scope</p></div><p class=\"mb-8 text-[#3D405B]/70\">Active deployment of autonomous EV fleets with localized command center oversight.</p><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> 10-Vehicle Autonomous Fleet</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Remote Command Center Setup</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Maintenance & Safety Training</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Live Operational Analytics</li></ul><button data-cta-id=\"pilot-cta\" class=\"w-full py-4 px-6 rounded-xl font-bold bg-[#40E0D0] text-[#3D405B] transition-transform hover:scale-105 active:scale-95 shadow-lg\">Launch Pilot</button></div><div data-tier-id=\"enterprise\" class=\"flex flex-col bg-white/50 border border-[#3D405B]/10 rounded-2xl p-8 shadow-sm\"><div class=\"mb-6\"><span class=\"bg-[#3D405B]/10 text-[#3D405B] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest\">Enterprise</span><h3 class=\"text-2xl font-bold mt-4\">Infrastructure Scale</h3><p class=\"text-3xl font-black mt-2\">Ecosystem Partner</p></div><p class=\"mb-8 text-[#3D405B]/70\">Full-scale regional transit overhaul including charging grids and corridors.</p><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> City-Wide Transit Integration</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Smart Charging Grid Tech</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> Regulatory Compliance Shield</li><li class=\"flex items-center gap-3 font-medium\"><span class=\"text-[#2D5A27]\">✔</span> 24/7 Priority Engineering</li></ul><button data-cta-id=\"inquire-cta\" class=\"w-full py-4 px-6 rounded-xl font-bold bg-transparent border-2 border-[#3D405B] text-[#3D405B] transition-colors hover:bg-[#3D405B] hover:text-white\">Inquire Now</button></div></div><div class=\"mt-16 text-center\"><p class=\"text-sm font-semibold tracking-wide text-[#3D405B]/60 uppercase flex items-center justify-center gap-2\"><svg class=\"w-5 h-5 text-[#2D5A27]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z\" clip-rule=\"evenodd\"></path></svg> All deployments include a 12-month technical support and regulatory compliance guarantee.</p></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#F4F1DE",
+        "color": "#3D405B",
+        "fontFamily": "Exo 2",
+        "accentColor": "#40E0D0"
+    }
+}

@@ -1,51 +1,77 @@
 import React, { useState, useEffect } from 'react';
 import { Junction } from '@shared/types';
 import { useBrand } from '../../context/BrandContext';
-import { generateLogoKit } from '../../services/gemini';
-import { Button } from '../ui/Button';
-import { Download, Hexagon, Layers, Palette, Image as ImageIcon } from 'lucide-react';
+import { Download, Hexagon } from 'lucide-react';
+import { PipelineControl } from './PipelineControl';
 
 export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
-    const { dna, setDna, addAsset, addThought } = useBrand();
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [refinementPrompt, setRefinementPrompt] = useState('Modern, Minimalist, Tech-Forward');
+    const { dna, setDna, addThought } = useBrand();
     const [logoKit, setLogoKit] = useState<null | {
         primary: string;
         inverted: string;
         icon: string;
+        icon_inverted: string;
         wordmark: string;
+        wordmark_inverted: string;
         social: string;
+        social_inverted: string;
     }>(null);
-    const [palette, setPalette] = useState<{ colors: string[]; name: string } | null>(null);
+
+    const fetchBakedKit = async () => {
+        try {
+            const response = await fetch('/assets/logo_kit_challenger.json?t=' + Date.now()); // bust cache
+            if (response.ok) {
+                const data = await response.json();
+                console.log("🚀 Baked Logo Kit Found:", data);
+                if (data.kit) setLogoKit(data.kit); // Ensure kit exists
+                if (data.brandDNA && !dna) {
+                    setDna(data.brandDNA);
+                    addThought("Logo Studio: Hydrated Brand Context from baked asset.", Junction.LOGO_STUDIO);
+                }
+            }
+        } catch (error) {
+            console.warn("Logo Kit not baked yet. Waiting for generation.");
+        }
+    };
 
     // Auto-fetch baked logo kit on mount
     useEffect(() => {
-        const fetchBakedKit = async () => {
-            try {
-                const response = await fetch('/assets/logo_kit_challenger.json');
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log("🚀 Baked Logo Kit Found:", data);
-                    setLogoKit(data.kit);
-                    if (data.palette) setPalette(data.palette);
-                    if (data.brandDNA && !dna) {
-                        setDna(data.brandDNA);
-                        addThought("Logo Studio: Hydrated Brand Context from baked asset.", Junction.LOGO_STUDIO);
-                    }
-                }
-            } catch (error) {
-                console.warn("Logo Kit not baked yet. Waiting for generation.");
-            }
-        };
-
         fetchBakedKit();
     }, [dna, setDna, addThought]);
 
     if (!isOpen) return null;
 
-    const handleGenerateKit = async () => {
-        // Placeholder implementation for manual generation if needed later
-        // Currently relying on baked assets
+    const handleGenerate = async (context: string) => {
+        try {
+            console.log("Generatng with context:", context);
+            const res = await fetch('http://localhost:3000/api/logos/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ context })
+            });
+            if (!res.ok) throw new Error('Generation failed');
+
+            // Re-fetch to see non-transparent results (we might want to change this flow to read generated_logos dir directly, 
+            // but for now relying on baking being the "view" step or just waiting for finalize)
+            // Actually, generateLogoKit usually updates logo_kit_challenger.json at the end, so we can re-fetch.
+            await fetchBakedKit();
+        } catch (e) {
+            console.error("Generation Error:", e);
+        }
+    };
+
+    const handleFinalize = async () => {
+        try {
+            const res = await fetch('http://localhost:3000/api/logos/finalize', { method: 'POST' });
+            if (!res.ok) throw new Error('Finalization failed');
+            const data = await res.json();
+            console.log("Finalized Kit:", data);
+
+            // Force refresh to see transparent logos
+            await fetchBakedKit();
+        } catch (e) {
+            console.error("Finalization Error:", e);
+        }
     };
 
     return (
@@ -58,42 +84,12 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
             </div>
 
             <div className="p-6 space-y-8 flex-1">
-                {/* Brand Context */}
-                <div className="space-y-4">
-                    <h3 className="text-xs uppercase tracking-wider text-slate-500 font-semibold flex items-center">
-                        <Layers className="mr-1 w-3 h-3" /> Brand Context
-                    </h3>
-                    {dna ? (
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="bg-slate-800 p-2 rounded">
-                                <span className="text-slate-400 block mb-1">Name</span>
-                                <span className="text-white font-medium truncate">{dna.name.value}</span>
-                            </div>
-                            <div className="bg-slate-800 p-2 rounded">
-                                <span className="text-slate-400 block mb-1">Voice</span>
-                                <span className="text-white font-medium truncate">{dna.voice.value}</span>
-                            </div>
-                            <div className="bg-slate-800 p-2 rounded col-span-2">
-                                <span className="text-slate-400 block mb-1 flex items-center"><Palette className="w-3 h-3 mr-1" /> Palette</span>
-                                <div className="flex space-x-1">
-                                    {palette?.colors.map(c => (
-                                        <div key={c} className="w-4 h-4 rounded-full border border-white/20" style={{ background: c }} />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-red-400 text-sm">Brand DNA not found. Run Architect first.</div>
-                    )}
-                </div>
+                <PipelineControl onGenerate={handleGenerate} onFinalize={handleFinalize} />
+
 
                 {/* Results Grid */}
                 {logoKit && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h3 className="text-xs uppercase tracking-wider text-green-400 font-semibold flex items-center">
-                            <ImageIcon className="mr-1 w-3 h-3" /> Generated Assets
-                        </h3>
-
                         {/* Primary & Inverted */}
                         <div className="space-y-2">
                             <span className="text-xs text-slate-400">Primary Marks</span>
@@ -103,28 +99,30 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
                             </div>
                         </div>
 
-                        {/* Icon & Social */}
+                        {/* Icon & Icon Inverted */}
                         <div className="space-y-2">
-                            <span className="text-xs text-slate-400">Digital Assets</span>
+                            <span className="text-xs text-slate-400">Icon / Symbol</span>
                             <div className="grid grid-cols-2 gap-2">
-                                <AssetCard title="App Icon" url={logoKit.icon} dark={false} />
-                                <AssetCard title="Social Profile" url={logoKit.social} dark={false} />
+                                <AssetCard title="Icon" url={logoKit.icon} dark={false} />
+                                <AssetCard title="Icon (Dark)" url={logoKit.icon_inverted} dark={true} />
                             </div>
                         </div>
 
-                        {/* Wordmark */}
+                        {/* Wordmark & Wordmark Inverted */}
                         <div className="space-y-2">
-                            <span className="text-xs text-slate-400">Typography</span>
-                            <div className="w-full">
-                                <div className={`relative group rounded-lg overflow-hidden border bg-white border-slate-200 aspect-video flex items-center justify-center p-4`}>
-                                    <img src={logoKit.wordmark} alt="Wordmark" className="max-w-full max-h-full object-contain" />
-                                    <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 text-center translate-y-full group-hover:translate-y-0 transition-transform">
-                                        <span className="text-[10px] text-white font-medium block truncate">Wordmark</span>
-                                    </div>
-                                    <a href={logoKit.wordmark} download className="absolute top-1 right-1 bg-black/50 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-orange-500">
-                                        <Download size={10} />
-                                    </a>
-                                </div>
+                            <span className="text-xs text-slate-400">Wordmark</span>
+                            <div className="grid grid-cols-2 gap-2">
+                                <AssetCard title="Wordmark" url={logoKit.wordmark} dark={false} />
+                                <AssetCard title="Wordmark (Dark)" url={logoKit.wordmark_inverted} dark={true} />
+                            </div>
+                        </div>
+
+                        {/* Social & Social Inverted */}
+                        <div className="space-y-2">
+                            <span className="text-xs text-slate-400">Digital / Social</span>
+                            <div className="grid grid-cols-2 gap-2">
+                                <AssetCard title="Social" url={logoKit.social} dark={false} />
+                                <AssetCard title="Social (Dark)" url={logoKit.social_inverted} dark={true} />
                             </div>
                         </div>
                     </div>

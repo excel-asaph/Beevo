@@ -1,0 +1,67 @@
+{
+    "id": "proof_section_v1",
+    "variant_id": "proof_v1770048953753",
+    "meta": {
+        "strategy": "The 'Nano Banana' strategy for Bluetone emphasizes a forensic analysis of passenger comfort and system reliability. By utilizing a high-contrast palette and precise data markers, we elevate the perception of autonomous transit from speculative to a grounded, reliable executive standard for the African continent.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "Human-Centric Autonomy",
+        "layout_strategy": "SPLIT"
+    },
+    "content": {
+        "headline": "The New Blueprint for African Mobility",
+        "subhead": "Bridging the gap between cutting-edge autonomous technology and sustainable, culturally adaptive transit ecosystems.",
+        "graphic_caption": "Forensic Analysis: Cabin Environment & Network Integration Metrics v2035",
+        "evidence_items": [
+            {
+                "id": "reach_2035",
+                "label": "Continental Accessibility",
+                "value": "50%",
+                "description": "Targeted service coverage across major African metropolitan hubs by 2035.",
+                "icon": "globe",
+                "unit": "percent",
+                "visual_type": "progress_ring"
+            },
+            {
+                "id": "carbon_footprint",
+                "label": "Emission Standards",
+                "value": "Net Zero",
+                "description": "Full fleet compliance with 100% renewable energy sourcing.",
+                "icon": "leaf",
+                "unit": "rating",
+                "visual_type": "status_indicator"
+            },
+            {
+                "id": "safety_logic",
+                "label": "Regulatory Alignment",
+                "value": "100%",
+                "description": "Adaptive AI logic synchronized with local traffic laws and cultural road etiquette.",
+                "icon": "shield",
+                "unit": "compliance",
+                "visual_type": "bar_chart"
+            },
+            {
+                "id": "interior_comfort",
+                "label": "Passenger Satisfaction",
+                "value": "4.9/5",
+                "description": "Average rating based on climate control, smart-fabric ergonomics, and connectivity.",
+                "icon": "star",
+                "unit": "score",
+                "visual_type": "rating_star"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "Interactive Executive Dashboard",
+        "primary_color": "#E2725B",
+        "accent_color": "#40E0D0",
+        "show_labels": true,
+        "animation_duration": 1.5,
+        "visual_code": "<div class=\"w-full bg-[#3D405B] text-[#F4F1DE] p-6 lg:p-12 rounded-3xl overflow-hidden shadow-2xl\" style=\"font-family: 'Exo 2', sans-serif;\"><div class=\"grid grid-cols-1 lg:grid-cols-12 gap-12 items-center\"><div class=\"lg:col-span-5 flex flex-col space-y-8\"><div class=\"border-l-4 border-[#40E0D0] pl-6\"><h2 class=\"text-4xl font-black uppercase tracking-tighter leading-none mb-2\">Autonomy<br/><span class=\"text-[#E2725B]\">Refined</span></h2><p class=\"text-lg text-[#F4F1DE]/80 max-w-sm\">A data-driven approach to mobility that prioritizes the human experience over technical complexity.</p></div><div class=\"space-y-6\"> <div class=\"group\"><div class=\"flex justify-between items-end mb-1\"><span class=\"uppercase text-xs font-bold tracking-widest text-[#40E0D0]\">Continental Coverage</span><span class=\"text-2xl font-black\">50%</span></div><div class=\"h-1 w-full bg-[#F4F1DE]/10 overflow-hidden\"><div class=\"h-full bg-[#E2725B] w-1/2 animate-pulse\"></div></div></div><div class=\"group\"><div class=\"flex justify-between items-end mb-1\"><span class=\"uppercase text-xs font-bold tracking-widest text-[#40E0D0]\">Compliance Logic</span><span class=\"text-2xl font-black\">100%</span></div><div class=\"h-1 w-full bg-[#F4F1DE]/10 overflow-hidden\"><div class=\"h-full bg-[#40E0D0] w-full\"></div></div></div><div class=\"group\"><div class=\"flex justify-between items-end mb-1\"><span class=\"uppercase text-xs font-bold tracking-widest text-[#40E0D0]\">Satisfaction Index</span><span class=\"text-2xl font-black\">4.9</span></div><div class=\"h-1 w-full bg-[#F4F1DE]/10 overflow-hidden\"><div class=\"h-full bg-[#F4F1DE] w-[98%]\"></div></div></div></div><button class=\"bg-[#E2725B] text-[#3D405B] font-bold py-4 px-8 rounded-full hover:scale-105 transition-transform w-fit uppercase text-sm tracking-widest\">View Expansion Roadmap</button></div><div class=\"lg:col-span-7\"><div class=\"relative bg-[#2D5A27]/20 border border-[#F4F1DE]/10 rounded-2xl p-8 backdrop-blur-sm\"><div class=\"absolute top-4 right-4 flex space-x-2\"><div class=\"w-2 h-2 rounded-full bg-[#E2725B] animate-ping\"></div><div class=\"w-2 h-2 rounded-full bg-[#40E0D0]\"></div></div><div class=\"grid grid-cols-2 gap-4 mb-8\"><div class=\"border border-[#F4F1DE]/10 p-4 rounded-lg bg-[#3D405B]\"><div class=\"text-[#40E0D0] text-[10px] uppercase mb-1 tracking-tighter\">Air Quality Index</div><div class=\"text-xl font-bold\">Optimal</div><div class=\"text-[10px] text-[#F4F1DE]/40\">HEPA-V Filter Active</div></div><div class=\"border border-[#F4F1DE]/10 p-4 rounded-lg bg-[#3D405B]\"><div class=\"text-[#40E0D0] text-[10px] uppercase mb-1 tracking-tighter\">Network Latency</div><div class=\"text-xl font-bold\">0.4ms</div><div class=\"text-[10px] text-[#F4F1DE]/40\">Satellite-Link Established</div></div></div><div class=\"aspect-video bg-gradient-to-br from-[#3D405B] to-[#2D5A27] rounded-xl flex items-center justify-center relative overflow-hidden\"><div class=\"absolute inset-0 opacity-20 pointer-events-none\" style=\"background-image: radial-gradient(#F4F1DE 1px, transparent 1px); background-size: 20px 20px;\"></div><div class=\"text-center z-10\"><div class=\"text-[10px] uppercase tracking-[0.4em] mb-4 text-[#40E0D0]\">Active Visualization</div><div class=\"relative inline-block\"><svg class=\"w-32 h-32 text-[#E2725B]\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1\" d=\"M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2\"></path></svg><div class=\"absolute inset-0 flex items-center justify-center\"><div class=\"w-24 h-24 border border-[#40E0D0] rounded-full animate-spin-slow opacity-30\"></div></div></div><div class=\"mt-4 text-xs font-mono uppercase tracking-widest\">Human Presence Detected</div></div></div><div class=\"mt-6 flex justify-between items-center text-[10px] font-mono text-[#F4F1DE]/40 uppercase\"><div class=\"flex items-center space-x-2\"><div class=\"w-1 h-1 bg-[#40E0D0]\"></div><span>Active Node: Lagos_District_01</span></div><div>Timestamp: 2035.04.12.14.33</div></div></div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#3D405B",
+        "color": "#F4F1DE",
+        "fontFamily": "Exo 2"
+    }
+}

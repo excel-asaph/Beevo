@@ -10,6 +10,13 @@ import { MetricsService } from './services/MetricsService';
 import { NotificationService } from './services/NotificationService';
 import { SystemConfigService } from './services/SystemConfigService.js';
 import { DatabaseService } from './services/DatabaseService.js';
+import { InitialLogoGenerator } from './agents/InitialLogoGenerator';
+import { bakeTransparency } from './scripts/transparency_baker';
+import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from root .env.local
 dotenv.config({ path: '../.env.local' });
@@ -96,6 +103,18 @@ app.get('/api/config', async (req, res) => {
     }
 });
 
+// Debug/Bypass Endpoint: Fetch latest research for hydration
+app.get('/api/debug/research', async (req, res) => {
+    try {
+        const researchPath = path.resolve(__dirname, '../brain/research_artifacts/complete_research_latest.json');
+        const data = await fs.readFile(researchPath, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (error) {
+        console.error('Failed to load research artifact:', error);
+        res.status(404).json({ error: 'Research artifact not found' });
+    }
+});
+
 app.post('/api/config/lock', async (req, res) => {
     try {
         const { section, isLocked } = req.body;
@@ -141,6 +160,33 @@ app.post('/api/config/update_section', async (req, res) => {
 });
 
 // Broadcast Refresh Endpoint (For Agents)
+app.post('/api/logos/generate', async (req, res) => {
+    try {
+        const { context } = req.body;
+        console.log(`🎨 LOGO REQUEST: Context="${context || 'None'}"`);
+
+        const generator = new InitialLogoGenerator();
+        await generator.generate(context);
+
+        res.json({ status: 'ok', message: 'Logo generation complete' });
+    } catch (error) {
+        console.error('Logo Generation Error:', error);
+        res.status(500).json({ error: 'Failed to generate logos' });
+    }
+});
+
+app.post('/api/logos/finalize', async (req, res) => {
+    try {
+        console.log(`🧼 LOGO FINALIZE REQUEST: Baking transparency...`);
+
+        const result = await bakeTransparency();
+
+        res.json({ status: 'ok', kit: result });
+    } catch (error) {
+        console.error('Logo Finalization Error:', error);
+        res.status(500).json({ error: 'Failed to bake transparency' });
+    }
+});
 app.post('/api/broadcast/refresh', (req, res) => {
     console.log('📢 BROADCAST: Triggering client refresh for optimization sync...');
     const message = JSON.stringify({ type: 'FULL_STATE_UPDATE', force_refresh: true });
@@ -268,6 +314,80 @@ app.get('/api/analytics/leaderboard', async (req, res) => {
         console.error('Leaderboard Error:', error);
         res.status(500).json({ error: 'Failed to load leaderboard' });
     }
+});
+
+// Watcher Configuration Endpoints
+app.get('/api/config/watcher', async (req, res) => {
+    try {
+        const configPath = path.resolve(__dirname, '../brain/watcher_config.json');
+        const data = await fs.readFile(configPath, 'utf-8');
+        res.json(JSON.parse(data));
+    } catch (e) {
+        res.json({ bufferMinutes: 5, intervalMinutes: 5 }); // Default
+    }
+});
+
+app.post('/api/config/watcher', async (req, res) => {
+    try {
+        const { bufferMinutes, intervalMinutes } = req.body;
+        const configPath = path.resolve(__dirname, '../brain/watcher_config.json');
+
+        // Enforce Minimum 5 Minutes
+        const safeConfig = {
+            bufferMinutes: Math.max(5, Number(bufferMinutes) || 5),
+            intervalMinutes: Math.max(5, Number(intervalMinutes) || 5)
+        };
+
+        await fs.writeFile(configPath, JSON.stringify(safeConfig, null, 4));
+        console.log(`⚙️ Watcher Config Updated:`, safeConfig);
+        res.json({ status: 'ok', config: safeConfig });
+    } catch (e) {
+        console.error("Config Save Error:", e);
+        res.status(500).json({ error: 'Failed to save config' });
+    }
+});
+
+// Status Check: Are logos ready?
+app.get('/api/status/logos', async (req, res) => {
+    try {
+        const generatedDir = path.resolve(__dirname, '../../client/public/assets/generated_logos');
+        const transparentDir = path.resolve(__dirname, '../../client/public/assets/transparent_logos');
+
+        let hasGenerated = false;
+        let hasTransparent = false;
+
+        try {
+            const genFiles = await fs.readdir(generatedDir);
+            hasGenerated = genFiles.length > 0;
+        } catch (e) { }
+
+        try {
+            const transFiles = await fs.readdir(transparentDir);
+            hasTransparent = transFiles.length > 0;
+        } catch (e) { }
+
+        res.json({ hasGenerated, hasTransparent, ready: hasGenerated || hasTransparent });
+    } catch (e) {
+        res.json({ ready: false });
+    }
+});
+
+// Action: Run Initializer Flow (Init -> Watcher)
+app.post('/api/action/run-initializers', (req, res) => {
+    console.log("🚀 TRIGGER: Starting Full System Initialization...");
+
+    const orchestratorPath = path.resolve(__dirname, 'run_watchers.ts');
+
+    // Spawn detached process so it keeps running
+    const child = spawn('npx', ['tsx', `"${orchestratorPath}"`, '--init'], {
+        detached: true,
+        stdio: 'ignore',
+        shell: true
+    });
+
+    child.unref(); // Allow parent to not wait
+
+    res.json({ status: 'ok', message: 'Initialization background process started' });
 });
 
 app.post('/api/config/revert', async (req, res) => {

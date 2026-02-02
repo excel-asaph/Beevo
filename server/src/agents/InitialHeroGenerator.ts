@@ -13,8 +13,9 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
-const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.join(process.cwd(), 'server/brain/staging/hero_block_staging.json');
+// Paths
+const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
+const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/hero_block_staging.json');
 
 // Interfaces
 interface BrandResearch {

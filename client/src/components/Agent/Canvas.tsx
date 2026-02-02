@@ -13,7 +13,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Wifi, WifiOff } from 'lucide-react';
+import { ArrowLeft, Sparkles, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
 
 // Custom nodes
 import { StickyNode } from './nodes/StickyNode';
@@ -31,6 +31,7 @@ import { ImageryNode } from './nodes/ImageryNode';
 import { ThinkingPanel, ThinkingPhase, ThinkingStep } from './ThinkingPanel';
 import { ResearchScreen } from './ResearchScreen';
 import { DropZone } from './DropZone';
+import { WatcherSettings } from '../Architect/WatcherSettings';
 
 // Hooks & Store
 import { useWebSocket } from '../../hooks/useWebSocket';
@@ -1096,6 +1097,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 </Panel>
 
                 <Panel position="top-right" className="flex items-center space-x-3">
+                    <WatcherSettings />
                     <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${ws.status === 'connected' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
                         }`}>
                         {ws.status === 'connected' ? <Wifi size={12} /> : <WifiOff size={12} />}
@@ -1119,6 +1121,37 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                             />
                         )}
                     </AnimatePresence>
+                </Panel>
+
+                {/* Audio Control - Bottom Center */}
+                <Panel position="bottom-center" className="mb-6 pointer-events-auto">
+                    {ws.status === 'connected' && (
+                        <div className="flex items-center gap-4">
+                            {/* Mute Toggle */}
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => audio.toggleMute()}
+                                className={`
+                                    flex items-center justify-center p-4 rounded-full shadow-2xl backdrop-blur-xl border border-white/10 transition-all
+                                    ${audio.isMuted
+                                        ? 'bg-red-500 text-white hover:bg-red-600'
+                                        : 'bg-slate-900 text-green-400 hover:bg-slate-800 hover:text-green-300'
+                                    }
+                                `}
+                            >
+                                {audio.isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+                            </motion.button>
+
+                            {/* Status Indicator */}
+                            <div className={`
+                                px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md border border-white/5 shadow-lg
+                                ${audio.isMuted ? 'bg-red-900/80 text-white' : 'bg-slate-900/80 text-slate-300'}
+                            `}>
+                                {audio.isMuted ? 'Mic Muted' : (audio.isSpeaking ? 'Speaking...' : 'Listening...')}
+                            </div>
+                        </div>
+                    )}
                 </Panel>
             </ReactFlow>
         </div>

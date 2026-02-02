@@ -7,9 +7,8 @@ import { Guardian } from './components/Guardian';
 import { AgentCanvas } from './components/Agent';
 import { DynamicLandingPage } from './components/DynamicLandingPage';
 import { HITLControlCenter } from './components/HITLControlCenter';
-import { LogoStudioSidebar } from './components/LogoStudio/LogoStudioSidebar';
 import { Junction } from '@shared/types';
-import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay, Hexagon } from 'lucide-react';
+import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay } from 'lucide-react';
 
 type ViewMode = 'dashboard' | 'agent' | 'landing_page' | 'hitl';
 
@@ -41,9 +40,9 @@ const MainLayout: React.FC = () => {
     const { currentJunction, setJunction } = useBrand();
 
     // Check URL for mode (for headless testing/snapshots)
-    const initialMode = (new URLSearchParams(window.location.search).get('mode') as ViewMode) || 'dashboard';
+    // Default changed to 'agent' as per user request to skip discovery
+    const initialMode = (new URLSearchParams(window.location.search).get('mode') as ViewMode) || 'agent';
     const [viewMode, setViewMode] = useState<ViewMode>(initialMode);
-    const [isLogoStudioOpen, setIsLogoStudioOpen] = useState(false);
 
     // If in Agent mode, render the full-screen Agent Canvas
     if (viewMode === 'agent') {
@@ -124,13 +123,6 @@ const MainLayout: React.FC = () => {
 
                     {/* Original navigation items */}
                     <SidebarItem
-                        active={isLogoStudioOpen}
-                        onClick={() => setIsLogoStudioOpen(true)}
-                        icon={<Hexagon size={20} />}
-                        label="Logo Studio"
-                        accent
-                    />
-                    <SidebarItem
                         active={currentJunction === Junction.STRATEGIST}
                         onClick={() => setJunction(Junction.STRATEGIST)}
                         icon={<Search size={20} />}
@@ -183,7 +175,6 @@ const MainLayout: React.FC = () => {
                     {currentJunction === Junction.GUARDIAN && <Guardian />}
                 </div>
             </main>
-            <LogoStudioSidebar isOpen={isLogoStudioOpen} onClose={() => setIsLogoStudioOpen(false)} />
         </div>
     );
 }

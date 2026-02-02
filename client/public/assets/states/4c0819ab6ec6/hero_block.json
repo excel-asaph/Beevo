@@ -1,0 +1,182 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1770048825164",
+    "meta": {
+        "strategy": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "type": "video",
+        "source_url": "/assets/history/hero_v1770048825164/hero_video_1770048905795.mp4",
+        "source_id": "generated_veo_asset",
+        "prompt_signature": "A sleek, metallic-blue autonomous shuttle gliding silently through a futuristic Lagos street lined with vertical gardens and solar-powered smart-poles. Pedestrians interact with holographic transit interfaces as the vehicle navigates a clean, integrated urban landscape.",
+        "attributes": {
+            "lighting": "Golden hour glow mixed with soft neon cyan accents from the vehicle's integrated lidar sensors.",
+            "camera_movement": "A smooth low-angle tracking shot following the shuttle's side profile, transitioning into a slight crane up to reveal the sustainable skyline.",
+            "subject_focus": "The glowing high-tech sensor array and the aerodynamic, windowless exterior of the Blutone autonomous pod.",
+            "color_grade": "#40E0D0"
+        }
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "Revolutionizing African Autonomous Mobility",
+            "styles": {
+                "color": "#F4F1DE",
+                "fontFamily": "Exo 2",
+                "fontSize": "4rem",
+                "fontWeight": "800",
+                "textShadow": "0px 4px 15px rgba(61, 64, 91, 0.6)"
+            }
+        },
+        "subhead": {
+            "text": "Bridging the gap between cutting-edge electric vehicle technology and local regulatory landscapes to drive the continent into a sustainable future.",
+            "styles": {
+                "color": "#40E0D0",
+                "fontFamily": "Exo 2",
+                "fontSize": "1.5rem",
+                "marginTop": "1.5rem"
+            }
+        },
+        "cta": {
+            "text": "Deploy the Future",
+            "action_id": "open_intent_form",
+            "styles": {
+                "backgroundColor": "#E2725B",
+                "color": "#F4F1DE",
+                "fontFamily": "Exo 2",
+                "padding": "14px 28px",
+                "borderRadius": "4px",
+                "fontWeight": "600"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "alignItems": "center",
+            "textAlign": "center",
+            "padding": "40px"
+        },
+        "overlay_gradient": "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))"
+    },
+    "navigation": {
+        "links": [
+            {
+                "label": "Offer",
+                "action_id": "open_offer_form"
+            },
+            {
+                "label": "Partnership",
+                "action_id": "open_intent_form"
+            },
+            {
+                "label": "Contact",
+                "action_id": "open_contact_form"
+            }
+        ],
+        "styles": {
+            "color": "#F4F1DE",
+            "fontFamily": "Exo 2",
+            "fontSize": "0.75rem",
+            "fontWeight": "700",
+            "letterSpacing": "0.2em",
+            "textTransform": "uppercase"
+        }
+    },
+    "forms": {
+        "contact": {
+            "id": "contact_form_01",
+            "title": "Contact Our Strategy Team",
+            "submit_text": "Send Message",
+            "fields": [
+                {
+                    "id": "contact_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Enter your name"
+                },
+                {
+                    "id": "contact_email",
+                    "label": "Work Email",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "email@organization.com"
+                },
+                {
+                    "id": "contact_subject",
+                    "label": "Inquiry Subject",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Vehicle Fleet Acquisition",
+                        "Regulatory Advisory",
+                        "Technical Support",
+                        "General Inquiry"
+                    ]
+                },
+                {
+                    "id": "contact_message",
+                    "label": "Message",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "How can we assist your mobility goals?"
+                }
+            ],
+            "subtitle": "Reach out to discuss regulatory adaptation or technical specifications."
+        },
+        "intent": {
+            "id": "partnership_form_01",
+            "title": "Partner with Blutone",
+            "submit_text": "Initiate Partnership",
+            "fields": [
+                {
+                    "id": "intent_name",
+                    "label": "Organization Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Enter your organization"
+                },
+                {
+                    "id": "intent_industry",
+                    "label": "Industry Scaling Goal",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Urban Transit Expansion",
+                        "Last-Mile Logistics",
+                        "Public Safety & Law Enforcement",
+                        "Autonomous Agricultural Transit"
+                    ]
+                },
+                {
+                    "id": "intent_infrastructure",
+                    "label": "Current Infrastructure Status",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Non-existent",
+                        "Initial Planning Phase",
+                        "Partially Developed",
+                        "Fully Integrated"
+                    ]
+                },
+                {
+                    "id": "intent_email",
+                    "label": "Direct Contact Email",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "leader@organization.com"
+                },
+                {
+                    "id": "intent_newsletter",
+                    "label": "Receive regulatory updates",
+                    "type": "checkbox",
+                    "required": false
+                }
+            ],
+            "subtitle": "Provide your operational context to help us bridge the technological gap in your region."
+        }
+    }
+}

@@ -1,64 +1,52 @@
 {
-    "thoughts": "The current Blueprint layout successfully captures the technical spirit of Bluetone, but the dwell time of 10s suggests users are meticulously scanning but perhaps feeling overwhelmed by the density of the 2x2 blocks. To optimize, I am shifting to a FORENSIC_GRID strategy. This introduces a sophisticated 'system diagnostic' feel that better separates metadata from core benefits. I am enhancing the contrast of the key performance indicators (KPIs) to ensure the 98.7% and 100% metrics pop immediately. The visual code is refined to include micro-interactions on the data-tier-ids to improve tactile engagement, and I have balanced the alignment to complement the center-aligned hero while maintaining the technical edge of the monospaced typography.",
+    "thoughts": "The current layout, while technically impressive, suffers from 'hidden value syndrome' where the most potent selling points (legal compliance across 54 jurisdictions, 4.2x efficiency) are gated behind an interaction. To fix this, I am shifting the layout from a circular BLUEPRINT to a balanced NODES architecture. This maintains the 'connected system' story while ensuring that technical metrics are visible at a glance. I have improved the visual contrast by deepening the background and using glow-effects to guide the eye toward the center 'Bluetone Core'. The alignment is adjusted to a centered layout to harmonize with the hero section above, utilizing a 1280px constraint with balanced weights on the left and right quadrants.",
     "changes": {
-        "layout_strategy": "FORENSIC_GRID",
-        "headline": "Autonomous Logistics Architecture",
-        "subhead": "The Technical DNA of the Pan-African High-Precision Corridor",
-        "visual_code": "<div class='w-full max-w-7xl mx-auto p-6 md:p-16 bg-[#1B263B] font-mono text-[#F4F1DE]'><div class='grid grid-cols-1 md:grid-cols-12 gap-6'><div class='md:col-span-12 border-b border-[#F4F1DE22] pb-4 mb-6 flex justify-between items-end'><div class='text-xs opacity-50 tracking-widest'>STATUS: SYSTEM_OPTIMAL</div><div class='text-[10px] opacity-30'>V.2.0.4 // CORE_SPEC</div></div><div class='md:col-span-6 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#E2725B] transition-colors duration-500' data-tier-id='matrix-01'><div class='absolute top-0 right-0 p-2 bg-[#E2725B22] text-[#E2725B] text-[10px]'>01</div><div class='mb-6'><span class='text-[#E2725B] text-xs font-bold'>[ NAVIGATION ]</span><h3 class='text-3xl font-bold mt-2'>Matrix Protocol</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Adaptive path-finding algorithms processing unstructured terrain data through high-frequency LiDAR-vision fusion.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#E2725B]'>98.7%</span><span class='text-xs opacity-60'>TERRAIN ACCURACY</span></div><div class='mt-6 h-1 w-full bg-[#F4F1DE11]'><div class='h-full bg-[#E2725B] w-[98.7%]'></div></div></div><div class='md:col-span-6 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#40E0D0] transition-colors duration-500' data-tier-id='layer-02'><div class='absolute top-0 right-0 p-2 bg-[#40E0D022] text-[#40E0D0] text-[10px]'>02</div><div class='mb-6'><span class='text-[#40E0D0] text-xs font-bold'>[ COMPLIANCE ]</span><h3 class='text-3xl font-bold mt-2'>Compliance Sync</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Real-time jurisdictional policy bridging ensuring 100% adherence to cross-border mandates and digital customs.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#40E0D0]'>100%</span><span class='text-xs opacity-60'>SYNC RELIABILITY</span></div><div class='mt-6 h-1 w-full bg-[#F4F1DE11]'><div class='h-full bg-[#40E0D0] w-full'></div></div></div><div class='md:col-span-7 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#81B29A] transition-colors duration-500' data-tier-id='core-03'><div class='absolute top-0 right-0 p-2 bg-[#81B29A22] text-[#81B29A] text-[10px]'>03</div><div class='mb-6'><span class='text-[#81B29A] text-xs font-bold'>[ ENERGY ]</span><h3 class='text-3xl font-bold mt-2'>Kinetic-Solar Core</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Integrated harvesting modules reducing carbon footprint via regenerative braking and PV-integrated chassis skin for multi-day endurance.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#81B29A]'>-40%</span><span class='text-xs opacity-60'>CARBON INTENSITY</span></div></div><div class='md:col-span-5 border border-[#F4F1DE22] p-8 relative overflow-hidden group hover:border-[#F4F1DE] transition-colors duration-500' data-tier-id='mesh-04'><div class='absolute top-0 right-0 p-2 bg-[#F4F1DE22] text-[#F4F1DE] text-[10px]'>04</div><div class='mb-6'><span class='text-[#F4F1DE] text-xs font-bold'>[ CONNECTIVITY ]</span><h3 class='text-3xl font-bold mt-2'>Low-Latency Node</h3></div><p class='text-[#F4F1DE]/80 text-sm leading-relaxed mb-8'>Ultra-low latency connectivity maintained across low-bandwidth environments via satellite relay.</p><div class='flex items-baseline gap-2'><span class='text-5xl font-black text-[#F4F1DE]'>50ms</span><span class='text-xs opacity-60'>GLOBAL MESH DELAY</span></div></div><div class='md:col-span-12 mt-4 text-center'><p class='text-[10px] opacity-30 uppercase tracking-[1em] animate-pulse'>Encrypted Infrastructure Protocol Active</p></div></div></div>",
+        "layout_strategy": "NODES",
+        "headline": "Bluetone Core Architecture",
+        "subhead": "The technical backbone of autonomous resilience and pan-African regional integration.",
+        "visual_code": "<div class=\"relative w-full max-w-7xl mx-auto min-h-[700px] bg-[#222436] text-[#F4F1DE] p-12 overflow-hidden font-['Exo_2'] selection:bg-[#40E0D0]/30\"><style>@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');.tech-grid{background-image:radial-gradient(#4f5370 0.5px,transparent 0.5px);background-size:30px 30px}.glow-orb{filter:blur(80px);background:radial-gradient(circle,#40E0D0 0%,transparent 70%)}.spec-card{background:rgba(255,255,255,0.03);backdrop-filter:blur(10px);border:1px solid rgba(64,224,208,0.2);transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275)}.spec-card:hover{border-color:#40E0D0;transform:translateY(-5px);background:rgba(64,224,208,0.05)}</style><div class=\"absolute inset-0 tech-grid opacity-10\"></div><div class=\"absolute -top-40 -left-40 w-96 h-96 glow-orb opacity-10\"></div><div class=\"absolute -bottom-40 -right-40 w-96 h-96 glow-orb opacity-10\"></div><div class=\"relative z-10 text-center mb-16\"><div class=\"inline-block px-4 py-1 border border-[#40E0D0]/40 rounded-full text-[10px] tracking-[0.3em] text-[#40E0D0] uppercase mb-4\">System Specification v2.1</div><h2 class=\"text-5xl font-bold tracking-tight mb-4 uppercase\">Infrastructure Blueprint</h2><p class=\"text-xl text-[#F4F1DE]/60 max-w-2xl mx-auto\">Four foundational nodes engineered for the African landscape.</p></div><div class=\"relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto\"><div class=\"spec-card p-8 rounded-xl\" data-tier-id=\"reg-mesh\"><div class=\"flex justify-between items-start mb-6\"><div class=\"w-12 h-12 rounded-lg bg-[#40E0D0]/10 flex items-center justify-center\"><svg class=\"w-6 h-6 text-[#40E0D0]\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z\"/></svg></div><span class=\"font-mono text-[#40E0D0] text-sm font-bold\">SPEC_01</span></div><h3 class=\"text-2xl font-bold mb-3 uppercase tracking-wide\">Regulatory Mesh</h3><p class=\"text-[#F4F1DE]/70 leading-relaxed mb-6\">A real-time compliance engine ensuring 100% legal alignment across 54 sovereign jurisdictions.</p><div class=\"text-3xl font-black text-[#40E0D0]\">99.9% <span class=\"text-xs font-normal text-[#F4F1DE]/40 uppercase tracking-tighter\">Uptime Guarantee</span></div></div><div class=\"spec-card p-8 rounded-xl\" data-tier-id=\"kinetic-intel\"><div class=\"flex justify-between items-start mb-6\"><div class=\"w-12 h-12 rounded-lg bg-[#40E0D0]/10 flex items-center justify-center\"><svg class=\"w-6 h-6 text-[#40E0D0]\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M13 10V3L4 14h7v7l9-11h-7z\"/></svg></div><span class=\"font-mono text-[#40E0D0] text-sm font-bold\">SPEC_02</span></div><h3 class=\"text-2xl font-bold mb-3 uppercase tracking-wide\">Kinetic Intelligence</h3><p class=\"text-[#F4F1DE]/70 leading-relaxed mb-6\">Adaptive neural pathfinding designed for high-variability road topographies and unstructured zones.</p><div class=\"text-3xl font-black text-[#40E0D0]\">4.8x <span class=\"text-xs font-normal text-[#F4F1DE]/40 uppercase tracking-tighter\">Efficiency ROI</span></div></div><div class=\"spec-card p-8 rounded-xl\" data-tier-id=\"solar-sync\"><div class=\"flex justify-between items-start mb-6\"><div class=\"w-12 h-12 rounded-lg bg-[#40E0D0]/10 flex items-center justify-center\"><svg class=\"w-6 h-6 text-[#40E0D0]\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707\"/></svg></div><span class=\"font-mono text-[#40E0D0] text-sm font-bold\">SPEC_03</span></div><h3 class=\"text-2xl font-bold mb-3 uppercase tracking-wide\">Solar Sync</h3><p class=\"text-[#F4F1DE]/70 leading-relaxed mb-6\">Autonomous energy harvesting protocols delivering massive gains over traditional battery arrays.</p><div class=\"text-3xl font-black text-[#40E0D0]\">0.0 <span class=\"text-xs font-normal text-[#F4F1DE]/40 uppercase tracking-tighter\">Carbon Footprint</span></div></div><div class=\"spec-card p-8 rounded-xl\" data-tier-id=\"edge-matrix\"><div class=\"flex justify-between items-start mb-6\"><div class=\"w-12 h-12 rounded-lg bg-[#40E0D0]/10 flex items-center justify-center\"><svg class=\"w-6 h-6 text-[#40E0D0]\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7\"/></svg></div><span class=\"font-mono text-[#40E0D0] text-sm font-bold\">SPEC_04</span></div><h3 class=\"text-2xl font-bold mb-3 uppercase tracking-wide\">Edge Localization</h3><p class=\"text-[#F4F1DE]/70 leading-relaxed mb-6\">Spatial computing matrix providing sub-centimeter accuracy in GPS-denied transit corridors.</p><div class=\"text-3xl font-black text-[#40E0D0]\">0.02ms <span class=\"text-xs font-normal text-[#F4F1DE]/40 uppercase tracking-tighter\">Network Latency</span></div></div></div><div class=\"mt-16 text-center\"><button data-cta-id=\"spec-full-download\" class=\"bg-[#40E0D0] text-[#222436] font-bold px-8 py-4 rounded-sm uppercase tracking-widest hover:bg-white transition-colors duration-300\">Request Full Schematic</button></div></div>",
         "evidence_items": [
             {
-                "id": "terrain-acc",
-                "label": "Terrain Accuracy",
-                "value": "98.7",
-                "unit": "%",
-                "visual_type": "progress_bar"
+                "id": "compliance_stat",
+                "label": "Legal Alignment",
+                "value": "100%",
+                "description": "Cross-jurisdiction coverage in Africa",
+                "unit": "pct",
+                "visual_type": "gauge"
             },
             {
-                "id": "compliance-sync",
-                "label": "Regulatory Uptime",
-                "value": "100",
-                "unit": "%",
-                "visual_type": "binary"
+                "id": "efficiency_stat",
+                "label": "Energy Efficiency",
+                "value": "4.2x",
+                "description": "Compared to legacy lead-acid systems",
+                "unit": "multiplier",
+                "visual_type": "bar"
             },
             {
-                "id": "carbon-red",
-                "label": "Emission Reduction",
-                "value": "40",
-                "unit": "%",
-                "visual_type": "savings"
-            },
-            {
-                "id": "latency-node",
-                "label": "Mesh Latency",
-                "value": "50",
+                "id": "latency_stat",
+                "label": "Compute Latency",
+                "value": "0.02",
+                "description": "Ultra-low edge response time",
                 "unit": "ms",
-                "visual_type": "speed"
+                "visual_type": "sparkline"
             }
         ],
         "testimonials": [
             {
-                "id": "t1",
-                "name": "Kwame Mensah",
-                "title": "Director of Logistics",
-                "company": "Pan-African Express",
-                "quote": "The Matrix Protocol solved our 'unmapped' territory issues overnight. Reliability increased by 30%.",
-                "image_prompt": "Portrait of a Ghanaian logistics executive in a modern office, professional, technical background"
+                "id": "test_01",
+                "name": "Kofi Mensah",
+                "title": "Director of Infrastructure",
+                "company": "West African Transit Authority",
+                "quote": "Bluetone's Regulatory Mesh transformed a 3-year permit backlog into a 3-month automated rollout. Their tech understands the local legal landscape better than most human consultants.",
+                "image_prompt": "Portrait of a distinguished African man in professional attire, high-tech office background with blurred maps."
             },
             {
-                "id": "t2",
-                "name": "Sarah Okeyo",
-                "title": "Head of Regulatory Affairs",
-                "company": "East-Africa Trade Union",
-                "quote": "The 100% compliance sync has cut our border crossing times by nearly half. Truly revolutionary.",
-                "image_prompt": "Kenyan tech leader, smiling, professional, futuristic logistics hub background"
-            },
-            {
-                "id": "t3",
-                "name": "Dr. Amara Eze",
-                "title": "Chief Systems Architect",
-                "company": "Bluetone Mobility",
-                "quote": "Building an architecture that respects local culture while maintaining global standards was our priority.",
-                "image_prompt": "Nigerian woman engineer, sophisticated, lab setting, monospaced font overlays"
+                "id": "test_02",
+                "name": "Sarah El-Amin",
+                "title": "CTO",
+                "company": "Nile Logistics Core",
+                "quote": "The Kinetic Intelligence node is the only system we've found that doesn't panic when it encounters unstructured desert roads. It's built for the actual reality of our terrain.",
+                "image_prompt": "Professional woman in tech environment, sleek aesthetic, confident expression."
             }
         ]
     },

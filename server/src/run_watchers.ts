@@ -1,10 +1,13 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs/promises';
 import { StateCoordinator } from './utils/StateCoordinator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const CONFIG_PATH = path.resolve(__dirname, '../brain/watcher_config.json');
 
 const WATCHERS = [
     'HeroWatcher.ts',
@@ -15,54 +18,94 @@ const WATCHERS = [
     'SpecWatcher.ts'
 ];
 
-// Configuration: Frequency of Watcher Runs
-const RUN_INTERVAL_MS = 180 * 1000; // 3 Minute
-
-console.log(`⏰ Watcher Orchestrator started. Running every ${RUN_INTERVAL_MS / 1000}s`);
-
-const runWatchers = async () => {
-    console.log(`\n🚀 [${new Date().toLocaleTimeString()}] Triggering Watcher Fleet...`);
-
-    const promises = WATCHERS.map(watcher => {
-        return new Promise<void>((resolve) => {
-            const watcherPath = path.resolve(__dirname, 'agents', watcher);
-
-            // Use ts-node or node depending on setup. Assuming ts-node via npx or similar for dev.
-            // For production, these should be compiled JS. 
-            // We use 'npx tsx' to run typescript files directly.
-            // Quote the path to handle spaces in directory names
-            const child = spawn('npx', ['tsx', `"${watcherPath}"`], {
-                stdio: 'inherit',
-                shell: true
-            });
-
-            child.on('close', (code) => {
-                console.log(`✅ ${watcher} finished (Exit Code: ${code})`);
-                resolve();
-            });
-
-            child.on('error', (err) => {
-                console.error(`❌ ${watcher} failed:`, err);
-                resolve();
-            });
-        });
-    });
-
-    await Promise.all(promises);
-
-    // NEW: Coordinator Step (Atomic Deployment)
-    console.log("📝 Coordinator: Checking for staged changes...");
+// Helper to load dynamic config
+async function loadConfig() {
     try {
-        await StateCoordinator.getInstance().sealState("Scheduled Watcher Cycle");
+        const data = await fs.readFile(CONFIG_PATH, 'utf-8');
+        return JSON.parse(data);
     } catch (e) {
-        console.error("❌ Coordinator Seal Failed:", e);
+        console.warn("⚠️ Could not load watcher config, using defaults.");
+        return { bufferMinutes: 5, intervalMinutes: 5 };
+    }
+}
+
+// Helper to run a script
+async function runScript(scriptPath: string) {
+    return new Promise<void>((resolve, reject) => {
+        const child = spawn('npx', ['tsx', `"${scriptPath}"`], {
+            stdio: 'inherit',
+            shell: true
+        });
+        child.on('close', (code) => {
+            if (code === 0) resolve();
+            else reject(new Error(`Exit code ${code}`));
+        });
+        child.on('error', reject);
+    });
+}
+
+const orchestratedLoop = async () => {
+    // 1. Check for Initialization Flag --init
+    if (process.argv.includes('--init')) {
+        console.log("🚀 [Orchestrator] Initialization Mode Detected.");
+        const initPath = path.resolve(__dirname, 'run_initializers.ts');
+        try {
+            await runScript(initPath);
+            console.log("✅ [Orchestrator] Initialization Complete.");
+        } catch (e) {
+            console.error("❌ [Orchestrator] Initialization Failed:", e);
+            return; // Stop if init fails
+        }
     }
 
-    console.log(`💤 Fleet dormant. Waiting for next cycle...`);
+    // 2. Initial Startup Buffer
+    const config = await loadConfig();
+    const bufferMs = Math.max(5, config.bufferMinutes) * 60 * 1000;
+
+    console.log(`⏳ [Orchestrator] Waiting ${bufferMs / 60000} minutes before first Watcher Run (Startup Buffer)...`);
+    await new Promise(resolve => setTimeout(resolve, bufferMs));
+
+    // 3. Watcher Loop
+    const executeCycle = async () => {
+        const currentConfig = await loadConfig();
+        const intervalMs = Math.max(5, currentConfig.intervalMinutes) * 60 * 1000;
+
+        console.log(`\n🚀 [${new Date().toLocaleTimeString()}] Triggering Watcher Fleet...`);
+
+        const promises = WATCHERS.map(watcher => {
+            return new Promise<void>((resolve) => {
+                const watcherPath = path.resolve(__dirname, 'agents', watcher);
+                const child = spawn('npx', ['tsx', `"${watcherPath}"`], {
+                    stdio: 'inherit',
+                    shell: true
+                });
+
+                child.on('close', (code) => {
+                    console.log(`   ✅ ${watcher} finished`);
+                    resolve();
+                });
+            });
+        });
+
+        await Promise.all(promises);
+
+        // Coordinator Seal -> Staged to Live
+        console.log("📝 Coordinator: Checking for staged changes...");
+        try {
+            await StateCoordinator.getInstance().sealState("Scheduled Watcher Cycle");
+        } catch (e) {
+            console.error("❌ Coordinator Seal Failed:", e);
+        }
+
+        console.log(`💤 Fleet dormant. Next run in ${intervalMs / 60000} minutes...`);
+
+        // Schedule next run
+        setTimeout(executeCycle, intervalMs);
+    };
+
+    // Start the first cycle
+    executeCycle();
 };
 
-// Initial Run
-runWatchers();
-
-// Scheduled Loop
-setInterval(runWatchers, RUN_INTERVAL_MS);
+// Start the Orchestrator
+orchestratedLoop();

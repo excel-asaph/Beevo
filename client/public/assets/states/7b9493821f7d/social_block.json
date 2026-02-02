@@ -1,0 +1,61 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1770049040442",
+    "meta": {
+        "strategy": "Social Proof based on Brand Voice",
+        "tone": "Innovative, adaptive, visionary, and legally-conscious",
+        "active_variant": "challenger",
+        "layout_strategy": "GRID"
+    },
+    "content": {
+        "headline": "Pioneering the Future of African Transit",
+        "subhead": "See how industry leaders are leveraging Bluetone technology to redefine mobility and accessibility in their regions.",
+        "testimonials": [
+            {
+                "id": "t1",
+                "name": "Amara Okafor",
+                "title": "Chief Operations Officer",
+                "company": "Lagos Urban Transit Authority",
+                "quote": "Bluetone's autonomous fleet navigated our complex urban grid with precision, making safe, sustainable transit a reality for millions of commuters.",
+                "image_prompt": "Professional studio headshot of a Nigerian woman in her 40s, COO of a transit company, wearing a modern blazer, soft cinematic lighting, neutral office background, high resolution, 8k.",
+                "image_url": "/assets/history/social_v1770049040442/testimonial_1770049049565_1770049049566.png"
+            },
+            {
+                "id": "t2",
+                "name": "David Mensah",
+                "title": "Director of Sustainability",
+                "company": "EcoMove Ghana",
+                "quote": "The cultural adaptability of these electric vehicles is unmatched, allowing us to hit our green targets without sacrificing operational reliability.",
+                "image_prompt": "High-end business portrait of a Ghanaian man in his 50s, wearing a tailored charcoal suit, slight smile, professional library setting, depth of field, sharp focus, 8k.",
+                "image_url": "/assets/history/social_v1770049040442/testimonial_1770049056503_1770049056511.png"
+            },
+            {
+                "id": "t3",
+                "name": "Sarah Kibaki",
+                "title": "Founder",
+                "company": "Nairobi Logistics Hub",
+                "quote": "Integrating Bluetone's law-abiding robots into our last-mile delivery has reduced operational friction and set a new standard for compliance.",
+                "image_prompt": "Corporate portrait of an East African woman entrepreneur in her 30s, creative office environment, wearing stylish business casual, warm lighting, professional photography, 8k.",
+                "image_url": "/assets/history/social_v1770049040442/testimonial_1770049063581_1770049063582.png"
+            },
+            {
+                "id": "t4",
+                "name": "Dr. Elias Mbeki",
+                "title": "Minister of Innovation",
+                "company": "Southern Development Group",
+                "quote": "Bluetone isn't just selling vehicles; they are building the critical infrastructure required for Africa's future-proof transport ecosystem.",
+                "image_prompt": "Dignified portrait of a South African man in his 60s, executive setting, wearing a high-quality navy suit, confident expression, soft natural light from a window, 8k.",
+                "image_url": "/assets/history/social_v1770049040442/testimonial_1770049070863_1770049070871.png"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section style='background-color:#F4F1DE; color:#3D405B; padding:80px 20px; font-family:\"Exo 2\", sans-serif;'><div style='max-width:1200px; margin:0 auto;'><div style='text-align:center; margin-bottom:60px;'><h2 style='font-size:3rem; font-weight:800; color:#2D5A27; margin-bottom:15px;'>Pioneering the Future of African Transit</h2><p style='font-size:1.2rem; max-width:700px; margin:0 auto; opacity:0.9;'>See how industry leaders are leveraging Bluetone technology to redefine mobility and accessibility in their regions.</p></div><div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:30px;'><div style='background:white; padding:40px; border-radius:12px; border-left:6px solid #E2725B; box-shadow:0 10px 30px rgba(61,64,91,0.1);'><p style='font-style:italic; font-size:1.1rem; margin-bottom:25px;'>\"Bluetone's autonomous fleet navigated our complex urban grid with precision, making safe, sustainable transit a reality for millions of commuters.\"</p><div style='display:flex; align-items:center; gap:15px;'><div style='width:60px; height:60px; border-radius:50%; background:#40E0D0;'></div><div><h4 style='margin:0; font-weight:700;'>Amara Okafor</h4><p style='margin:0; font-size:0.85rem; color:#E2725B; text-transform:uppercase; letter-spacing:1px;'>COO, Lagos Urban Transit</p></div></div></div><div style='background:white; padding:40px; border-radius:12px; border-left:6px solid #2D5A27; box-shadow:0 10px 30px rgba(61,64,91,0.1);'><p style='font-style:italic; font-size:1.1rem; margin-bottom:25px;'>\"The cultural adaptability of these electric vehicles is unmatched, allowing us to hit our green targets without sacrificing operational reliability.\"</p><div style='display:flex; align-items:center; gap:15px;'><div style='width:60px; height:60px; border-radius:50%; background:#40E0D0;'></div><div><h4 style='margin:0; font-weight:700;'>David Mensah</h4><p style='margin:0; font-size:0.85rem; color:#2D5A27; text-transform:uppercase; letter-spacing:1px;'>Dir. Sustainability, EcoMove</p></div></div></div><div style='background:white; padding:40px; border-radius:12px; border-left:6px solid #40E0D0; box-shadow:0 10px 30px rgba(61,64,91,0.1);'><p style='font-style:italic; font-size:1.1rem; margin-bottom:25px;'>\"Integrating Bluetone's law-abiding robots into our last-mile delivery has reduced operational friction and set a new standard for compliance.\"</p><div style='display:flex; align-items:center; gap:15px;'><div style='width:60px; height:60px; border-radius:50%; background:#E2725B;'></div><div><h4 style='margin:0; font-weight:700;'>Sarah Kibaki</h4><p style='margin:0; font-size:0.85rem; color:#40E0D0; text-transform:uppercase; letter-spacing:1px;'>Founder, Nairobi Logistics</p></div></div></div><div style='background:white; padding:40px; border-radius:12px; border-left:6px solid #3D405B; box-shadow:0 10px 30px rgba(61,64,91,0.1);'><p style='font-style:italic; font-size:1.1rem; margin-bottom:25px;'>\"Bluetone isn't just selling vehicles; they are building the critical infrastructure required for Africa's future-proof transport ecosystem.\"</p><div style='display:flex; align-items:center; gap:15px;'><div style='width:60px; height:60px; border-radius:50%; background:#2D5A27;'></div><div><h4 style='margin:0; font-weight:700;'>Dr. Elias Mbeki</h4><p style='margin:0; font-size:0.85rem; color:#3D405B; text-transform:uppercase; letter-spacing:1px;'>Minister, Southern Dev Group</p></div></div></div></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#F4F1DE",
+        "color": "#3D405B",
+        "fontFamily": "Exo 2"
+    }
+}

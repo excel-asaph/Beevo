@@ -12,10 +12,11 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
-const RESEARCH_PATH = path.join(process.cwd(), 'server/brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.join(process.cwd(), 'client/public/assets/logo_kit_challenger.json');
-const INSPIRATION_DIR = path.join(process.cwd(), 'client/public/assets/logo_inspiration');
-const GENERATED_DIR = path.join(process.cwd(), 'client/public/assets/generated_logos');
+// Paths - Resolved relative to this file (server/src/agents)
+const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
+const OUTPUT_PATH = path.resolve(__dirname, '../../../client/public/assets/logo_kit_challenger.json');
+const INSPIRATION_DIR = path.resolve(__dirname, '../../../client/public/assets/logo_inspiration');
+const GENERATED_DIR = path.resolve(__dirname, '../../../client/public/assets/generated_logos');
 
 export class InitialLogoGenerator {
     private client: GoogleGenAI;
@@ -27,7 +28,7 @@ export class InitialLogoGenerator {
         this.client = new GoogleGenAI({ apiKey });
     }
 
-    async generate() {
+    async generate(additionalContext?: string) {
         console.log("🚀 Starting Logo Generator...");
         const rawData = await fs.readFile(RESEARCH_PATH, 'utf-8');
         const research = JSON.parse(rawData);
@@ -91,9 +92,13 @@ export class InitialLogoGenerator {
         let primaryBase64 = "";
 
         try {
-            const primaryPrompt = `Create the PRIMARY Official Logo. High fidelity, professional, vector-style. 
+            let primaryPrompt = `Create the PRIMARY Official Logo. High fidelity, professional, vector-style. 
             Synthesize all the following brand inputs into a cohesive, market-leading design.
             ${baseContext}`;
+
+            if (additionalContext) {
+                primaryPrompt += `\n\nUSER OVERRIDE / ADDITIONAL CONTEXT:\n"${additionalContext}"\nPlease prioritize this instruction.`;
+            }
 
             const primaryResponse = await this.client.models.generateContent({
                 model: this.modelName,
@@ -114,7 +119,7 @@ export class InitialLogoGenerator {
             const imagePart = parts.find((p: any) => p.inlineData);
 
             if (imagePart && imagePart.inlineData) {
-                primaryBase64 = imagePart.inlineData.data;
+                primaryBase64 = imagePart.inlineData.data || '';
                 const buffer = Buffer.from(primaryBase64, 'base64');
                 const filename = `logo_variant_primary.png`;
                 await fs.writeFile(path.join(GENERATED_DIR, filename), buffer);
@@ -170,11 +175,11 @@ export class InitialLogoGenerator {
                     generatedPaths[variant.key] = `/assets/generated_logos/${filename}`;
                 } else {
                     console.warn(`     ⚠️ No image returned for ${variant.key}`);
-                    generatedPaths[variant.key] = generatedPaths['primary']; // Fallback
+                    generatedPaths[variant.key] = generatedPaths['primary'] || ''; // Fallback
                 }
             } catch (e) {
                 console.error(`     ❌ Error generating ${variant.key}:`, e);
-                generatedPaths[variant.key] = generatedPaths['primary'];
+                generatedPaths[variant.key] = generatedPaths['primary'] || '';
             }
         }
 

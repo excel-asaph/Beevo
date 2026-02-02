@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 
 const ASSETS_DIR = path.resolve(__dirname, '../../client/public/assets');
 const HISTORY_DIR = path.resolve(__dirname, '../../client/public/assets/history');
+const STATES_DIR = path.resolve(__dirname, '../../client/public/assets/states');
 const DB_PATH = path.resolve(__dirname, '../brain/beevo_history.db');
 
 const GENERATORS = [
@@ -38,19 +39,28 @@ async function runGenerator(name: string) {
 async function cleanSlate() {
     console.log("🧹 CLEANING SLATE: Deleting History and Database...");
 
-    // 1. Delete DB
+    // 1. Truncate DB Tables (Fixes Windows File Lock Issue)
+    console.log("   - Truncating Database Tables...");
     try {
-        await fs.unlink(DB_PATH);
-    } catch (e) { }
-
-    // Re-init DB (creates tables)
-    const db = DatabaseService.getInstance();
-    await db.initialize();
+        const db = DatabaseService.getInstance();
+        await db.initialize(); // Ensure connection
+        await db.get('DELETE FROM page_states');
+        await db.get('DELETE FROM lead_submissions');
+        console.log("   - Tables Cleared.");
+    } catch (e) {
+        console.error("   - Failed to clear tables:", e);
+    }
 
     // 2. Clear History Assets (preserving directory)
     try {
         await fs.rm(HISTORY_DIR, { recursive: true, force: true });
         await fs.mkdir(HISTORY_DIR, { recursive: true });
+    } catch (e) { }
+
+    // 3. Clear States Directory
+    try {
+        await fs.rm(STATES_DIR, { recursive: true, force: true });
+        await fs.mkdir(STATES_DIR, { recursive: true });
     } catch (e) { }
 
     console.log("✨ Slate Cleaned.");

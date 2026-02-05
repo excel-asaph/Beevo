@@ -1,0 +1,14 @@
+{
+    "sections": {},
+    "client_tracking": {},
+    "hitl": {
+        "enabled": true,
+        "require_approval_pre": false,
+        "require_approval_post": false,
+        "auto_proceed_delay_m": 0
+    },
+    "locks": {},
+    "feedback": {},
+    "active_assets_path": "states/e3b0c44298fc",
+    "current_state_hash": "e3b0c44298fc"
+}

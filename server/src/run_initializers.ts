@@ -37,7 +37,7 @@ async function runGenerator(name: string) {
         // Use npx tsx to execute the typescript generators
         const agentPath = path.resolve(__dirname, `agents/${name}`);
         // Pass workspace arg
-        const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${agentPath}"`, `--workspace=${WORKSPACE_ID}`], {
+        const child = spawn('node', ['--import', 'tsx', agentPath, `--workspace=${WORKSPACE_ID}`], {
             stdio: 'inherit',
             windowsHide: true
         });

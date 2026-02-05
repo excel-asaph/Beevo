@@ -40,7 +40,7 @@ async function loadConfig() {
 async function runScript(scriptPath: string) {
     return new Promise<void>((resolve, reject) => {
         // Pass workspace arg
-        const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${scriptPath}"`, `--workspace=${WORKSPACE_ID}`], {
+        const child = spawn('node', ['--import', 'tsx', scriptPath, `--workspace=${WORKSPACE_ID}`], {
             stdio: 'inherit',
             windowsHide: true
         });
@@ -86,7 +86,7 @@ const orchestratedLoop = async () => {
             return new Promise<void>((resolve) => {
                 const watcherPath = path.resolve(__dirname, 'agents', watcher);
                 // Pass workspace arg
-                const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${watcherPath}"`, `--workspace=${WORKSPACE_ID}`], {
+                const child = spawn('node', ['--import', 'tsx', watcherPath, `--workspace=${WORKSPACE_ID}`], {
                     stdio: 'inherit',
                     windowsHide: true
                 });

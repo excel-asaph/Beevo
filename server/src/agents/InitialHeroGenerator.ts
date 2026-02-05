@@ -12,11 +12,6 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Paths
-// Paths
-const this.researchPath = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/hero_block_staging.json');
-
 // Interfaces
 interface BrandResearch {
     brandDNA: {
@@ -49,8 +44,31 @@ export class InitialHeroGenerator {
     constructor(workspaceId: string) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) throw new Error("GEMINI_API_KEY not required for Vertex but used for GenAI");
+        if (!apiKey) throw new Error("GEMINI_API_KEY is required");
         this.client = new GoogleGenAI({ apiKey });
+
+        // Initialize paths
+        const baseBrain = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClient = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.researchPath = path.join(baseBrain, 'research_artifacts/complete_research_latest.json');
+        this.stagingPath = path.join(baseBrain, 'staging');
+        this.activePath = path.join(baseClient, 'assets');
+        this.archiveDir = path.join(baseBrain, 'history');
+        this.videosDir = path.join(baseClient, 'assets/videos');
+    }
+
+    async generate() {
+        console.log(`🚀 ${this.workspaceId} Initial Hero Generator: Starting...`);
+
+        // 1. Load Research Data
+        console.log("[Step 1] Loading Brand Research...");
+        const researchData = await fs.readFile(this.researchPath, 'utf-8');
+        const research: BrandResearch = JSON.parse(researchData);
+
+        const selectedPalettes = research.colorPalettes.palettes.filter(p => p.isSelected);
+        const selectedFonts = research.typographyPairings.fonts.filter(f => f.isSelected);
+
         if (selectedPalettes.length === 0) throw new Error("No Color Palette Selected");
 
         // Robust Rationale Extraction
@@ -179,6 +197,7 @@ export class InitialHeroGenerator {
 
         // === OUTPUT ===
         console.log("Saving Staged Hero Block...");
+        const OUTPUT_PATH = path.join(this.stagingPath, 'hero_block_staging.json');
         await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
         await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
         console.log("Done.");
@@ -484,6 +503,12 @@ export class InitialHeroGenerator {
 
 // Auto-run if executed directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    const generator = new InitialHeroGenerator();
+    // Extract workspaceId from args
+    const getWorkspaceId = () => {
+        const arg = process.argv.find(a => a.startsWith('--workspace='));
+        return arg ? arg.split('=')[1] : 'default';
+    };
+    const workspaceId = getWorkspaceId();
+    const generator = new InitialHeroGenerator(workspaceId);
     generator.generate().catch(console.error);
 }

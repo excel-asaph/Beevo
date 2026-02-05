@@ -463,25 +463,28 @@ app.post('/api/action/run-initializers', (req, res) => {
 
     const orchestratorPath = path.resolve(__dirname, 'run_watchers.ts');
 
-    // Fix: Open log file for detached process output
-    const logPath = path.resolve(__dirname, '../initialization.log');
-    const out = fsSync.openSync(logPath, 'a');
-    const err = fsSync.openSync(logPath, 'a');
-
-    // Spawn detached process so it keeps running
-    // PASS WORKSPACE ID
-    // WINDOWS FIX: Use cmd /c to properly handle npx.cmd and prevent parent termination signals
-    const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${orchestratorPath}"`, '--init', `--workspace=${workspaceId}`], {
-        detached: true,
-        stdio: ['ignore', out, err], // Redirect to log file instead of ignore
-        windowsHide: true // Prevent popping up a new window
+    // DEBUGGING MODE: Non-detached so output appears in console
+    // WINDOWS FIX: Use node with tsx/register instead of npx
+    // Remove quotes from path - Windows handles them differently
+    const child = spawn('node', [
+        '--import', 'tsx',
+        orchestratorPath,
+        '--init',
+        `--workspace=${workspaceId}`
+    ], {
+        detached: false, // TEMP: Make it attached for debugging
+        stdio: 'inherit', // Output shows in server console
+        cwd: path.resolve(__dirname, '..')
     });
 
-    child.unref(); // Allow parent to not wait
+    child.on('error', (error) => {
+        console.error(`❌ Spawn Error:`, error);
+    });
 
-    child.unref(); // Allow parent to not wait
+    // Don't unref() when not detached
+    // child.unref(); // Allow parent to not wait
 
-    res.json({ status: 'ok', message: 'Initialization background process started' });
+    res.json({ status: 'ok', message: 'Initialization process started (attached for debugging)' });
 });
 
 app.post('/api/config/revert', async (req, res) => {

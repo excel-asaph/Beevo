@@ -7,8 +7,6 @@ import { StateCoordinator } from './utils/StateCoordinator.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CONFIG_PATH = path.resolve(__dirname, '../brain/watcher_config.json');
-
 const WATCHERS = [
     'HeroWatcher.ts',
     'ProofWatcher.ts',
@@ -18,13 +16,22 @@ const WATCHERS = [
     'SpecWatcher.ts'
 ];
 
+// Helper to extract workspaceId
+const getWorkspaceId = () => {
+    const arg = process.argv.find(a => a.startsWith('--workspace='));
+    return arg ? arg.split('=')[1] : 'default';
+};
+
+const WORKSPACE_ID = getWorkspaceId();
+const CONFIG_PATH = path.resolve(__dirname, `../brain/workspaces/${WORKSPACE_ID}/watcher_config.json`);
+
 // Helper to load dynamic config
 async function loadConfig() {
     try {
         const data = await fs.readFile(CONFIG_PATH, 'utf-8');
         return JSON.parse(data);
     } catch (e) {
-        console.warn("⚠️ Could not load watcher config, using defaults.");
+        console.warn(`⚠️ [${WORKSPACE_ID}] Could not load watcher config, using defaults.`);
         return { bufferMinutes: 5, intervalMinutes: 5 };
     }
 }
@@ -32,9 +39,10 @@ async function loadConfig() {
 // Helper to run a script
 async function runScript(scriptPath: string) {
     return new Promise<void>((resolve, reject) => {
-        const child = spawn('npx', ['tsx', `"${scriptPath}"`], {
+        // Pass workspace arg
+        const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${scriptPath}"`, `--workspace=${WORKSPACE_ID}`], {
             stdio: 'inherit',
-            shell: true
+            windowsHide: true
         });
         child.on('close', (code) => {
             if (code === 0) resolve();
@@ -45,6 +53,8 @@ async function runScript(scriptPath: string) {
 }
 
 const orchestratedLoop = async () => {
+    console.log(`🌐 [Orchestrator] Starting for Workspace: ${WORKSPACE_ID}`);
+
     // 1. Check for Initialization Flag --init
     if (process.argv.includes('--init')) {
         console.log("🚀 [Orchestrator] Initialization Mode Detected.");
@@ -70,14 +80,15 @@ const orchestratedLoop = async () => {
         const currentConfig = await loadConfig();
         const intervalMs = Math.max(5, currentConfig.intervalMinutes) * 60 * 1000;
 
-        console.log(`\n🚀 [${new Date().toLocaleTimeString()}] Triggering Watcher Fleet...`);
+        console.log(`\n🚀 [${new Date().toLocaleTimeString()}] Triggering Watcher Fleet [${WORKSPACE_ID}]...`);
 
         const promises = WATCHERS.map(watcher => {
             return new Promise<void>((resolve) => {
                 const watcherPath = path.resolve(__dirname, 'agents', watcher);
-                const child = spawn('npx', ['tsx', `"${watcherPath}"`], {
+                // Pass workspace arg
+                const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${watcherPath}"`, `--workspace=${WORKSPACE_ID}`], {
                     stdio: 'inherit',
-                    shell: true
+                    windowsHide: true
                 });
 
                 child.on('close', (code) => {
@@ -92,7 +103,7 @@ const orchestratedLoop = async () => {
         // Coordinator Seal -> Staged to Live
         console.log("📝 Coordinator: Checking for staged changes...");
         try {
-            await StateCoordinator.getInstance().sealState("Scheduled Watcher Cycle");
+            await StateCoordinator.getInstance(WORKSPACE_ID).sealState("Scheduled Watcher Cycle");
         } catch (e) {
             console.error("❌ Coordinator Seal Failed:", e);
         }

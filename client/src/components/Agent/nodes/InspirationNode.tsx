@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Image as ImageIcon, Check, RefreshCw, Lock, ExternalLink } from 'lucide-react';
+import { Image as ImageIcon, Check, RefreshCw } from 'lucide-react';
+import { useWorkspace } from '../../../context/WorkspaceContext';
 import { LogoInspiration } from '../../../../../shared/types';
 
 export interface InspirationNodeData {
@@ -13,7 +14,8 @@ export interface InspirationNodeData {
     onRegenerate?: () => void;
 }
 
-export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
+export const InspirationNode: React.FC<NodeProps> = ({ data }) => {
+    const { resolveAssetUrl } = useWorkspace();
     const nodeData = data as unknown as InspirationNodeData;
     const [hoveredLogo, setHoveredLogo] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
                     >
                         <div className="aspect-square w-full relative overflow-hidden bg-slate-50">
                             <img
-                                src={logo.url}
+                                src={resolveAssetUrl(logo.url)}
                                 alt={logo.displayName || 'Logo inspiration'}
                                 className="w-full h-full object-cover"
                             />
@@ -107,7 +109,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
             <div className="grid grid-cols-2 gap-2">
                 {nodeData.saved?.map((logo, i) => (
                     <div key={i} className="rounded-2xl overflow-hidden border border-emerald-200 shadow-sm relative aspect-square">
-                        <img src={logo.url} className="w-full h-full object-cover" />
+                        <img src={resolveAssetUrl(logo.url)} className="w-full h-full object-cover" />
                     </div>
                 ))}
             </div>

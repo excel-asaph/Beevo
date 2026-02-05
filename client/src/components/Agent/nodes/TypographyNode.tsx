@@ -84,7 +84,7 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
             <p className="text-xs text-slate-400 mb-3">Select up to 3 fonts:</p>
             {nodeData.options?.map((font, index) => (
                 <motion.button
-                    key={font.id}
+                    key={font.id || index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.08 }}
@@ -173,7 +173,7 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
 
             {nodeData.selectedFonts?.map((font, i) => (
                 <motion.div
-                    key={font.id}
+                    key={font.id || i}
                     initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: i * 0.1 }}

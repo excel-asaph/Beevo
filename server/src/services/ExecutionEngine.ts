@@ -10,7 +10,7 @@ import {
     TypographyPairings,
     ResearchPhaseObject
 } from '../../../shared/types';
-import { stateManager } from './StateManager';
+import { WorkspaceManager } from './StateManager';
 
 // ==========================================
 // CALLBACK TYPE FOR STREAMING THOUGHTS
@@ -38,13 +38,15 @@ export class ExecutionEngine {
     private genAI: GoogleGenAI;
     private researchAgent: ResearchAgent;
     private artifactsDir: string;
+    private workspaceId: string;
 
-    constructor() {
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
         this.researchAgent = new ResearchAgent();
 
         // Ensure artifacts directory exists
-        this.artifactsDir = path.join(process.cwd(), 'brain', 'research_artifacts');
+        this.artifactsDir = path.join(process.cwd(), 'brain', 'workspaces', workspaceId, 'research_artifacts');
         if (!fs.existsSync(this.artifactsDir)) {
             fs.mkdirSync(this.artifactsDir, { recursive: true });
         }
@@ -625,9 +627,10 @@ export class ExecutionEngine {
         };
 
         // Use StateManager for persistence with version history
+        const stateManager = WorkspaceManager.getStateManager(this.workspaceId);
         await stateManager.saveFullState(finalObject);
 
-        console.log(`✅ Research saved with StateManager`);
+        console.log(`✅ [${this.workspaceId}] Research saved with StateManager`);
 
         return finalObject;
     }

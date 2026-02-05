@@ -1,3 +1,4 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,21 +9,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Paths
-const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/offer_block_staging.json');
-
 export class InitialOfferGenerator {
-    async generate() {
-        console.log("🚀 InitialOfferGenerator: Basking in the Brand DNA...");
+    private nanoBanana: NanoBananaService;
+    private workspaceId: string;
 
+    private researchPath: string;
+    private outputPath: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
+        this.nanoBanana = new NanoBananaService(apiKey);
 
-        const researchRaw = await fs.readFile(RESEARCH_PATH, 'utf-8');
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        this.researchPath = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.outputPath = path.join(baseBrainPath, 'staging/offer_block_staging.json');
+    }
+
+    async generate() {
+        console.log(`🚀 [${this.workspaceId}] InitialOfferGenerator: Basking in the Brand DNA...`);
+
+        const researchRaw = await fs.readFile(this.researchPath, 'utf-8');
         const researchCtx = JSON.parse(researchRaw);
-
-        const nanoBanana = new NanoBananaService(apiKey);
 
         const context = {
             brandName: researchCtx.brandDNA?.name?.value || "Our Brand",
@@ -36,7 +46,7 @@ export class InitialOfferGenerator {
         };
 
         console.log("🧠 Generating High-Conversion Offer Section...");
-        const result = await nanoBanana.generateOfferVisual(context);
+        const result = await this.nanoBanana.generateOfferVisual(context);
 
         const variantId = `offer_v${Date.now()}`;
         const config = {
@@ -68,13 +78,16 @@ export class InitialOfferGenerator {
         };
 
         console.log("Saving Staged Offer Block...");
-        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
-        await fs.writeFile(OUTPUT_PATH, JSON.stringify(config, null, 4));
+        await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
+        await fs.writeFile(this.outputPath, JSON.stringify(config, null, 4));
 
-        console.log(`✅ Staged Offer Block Saved: ${OUTPUT_PATH}`);
+        console.log(`✅ Staged Offer Block Saved: ${this.outputPath}`);
     }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    new InitialOfferGenerator().generate().catch(console.error);
+    // Default workspace for manual CLI run
+    const workspaceId = process.argv.find(a => a.startsWith('--workspace='))?.split('=')[1] || 'default';
+    new InitialOfferGenerator(workspaceId).generate().catch(console.error);
 }
+

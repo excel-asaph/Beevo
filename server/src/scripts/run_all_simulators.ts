@@ -14,24 +14,27 @@ const SCRIPTS = [
     'simulate_offer_traffic.ts'
 ];
 
-async function runScript(scriptName: string) {
+async function runScript(scriptName: string, workspaceId: string) {
     return new Promise<void>((resolve, reject) => {
         const scriptPath = path.join(__dirname, scriptName);
-        console.log(`🚀 Launching: ${scriptName}`);
+        console.log(`🚀 [${workspaceId}] Launching: ${scriptName}`);
+
+        // Construct arguments
+        const args = ['tsx', `"${scriptPath}"`, `--workspace=${workspaceId}`];
 
         // Use 'npx tsx' to execute the script
         // Quote path to handle spaces in 'Github Projects'
-        const child = spawn('npx', ['tsx', `"${scriptPath}"`], {
+        const child = spawn('npx', args, {
             stdio: 'inherit',
             shell: true
         });
 
         child.on('close', (code) => {
             if (code === 0) {
-                console.log(`✅ Finished: ${scriptName}`);
+                console.log(`✅ [${workspaceId}] Finished: ${scriptName}`);
                 resolve();
             } else {
-                console.error(`❌ Failed: ${scriptName} (Code: ${code})`);
+                console.error(`❌ [${workspaceId}] Failed: ${scriptName} (Code: ${code})`);
                 reject(new Error(`Script ${scriptName} failed`));
             }
         });
@@ -39,11 +42,15 @@ async function runScript(scriptName: string) {
 }
 
 async function main() {
-    console.log("🌪️ Starting ALL Traffic Simulators...");
+    const args = process.argv.slice(2);
+    const workspaceArg = args.find(a => a.startsWith('--workspace='));
+    const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
+
+    console.log(`🌪️ Starting ALL Traffic Simulators for Workspace: ${workspaceId}...`);
 
     // Run them in parallel using Promise.all
     try {
-        await Promise.all(SCRIPTS.map(runScript));
+        await Promise.all(SCRIPTS.map(script => runScript(script, workspaceId)));
         console.log("\n✨ ALL SIMULATIONS COMPLETE ✨");
     } catch (e) {
         console.error("\n💥 A simulator crashed:", e);
@@ -51,3 +58,4 @@ async function main() {
 }
 
 main();
+

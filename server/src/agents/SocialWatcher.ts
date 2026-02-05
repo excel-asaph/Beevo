@@ -7,7 +7,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
-import { SystemConfigService } from '../services/SystemConfigService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
 import { MediaService } from '../services/MediaService.js';
 
@@ -17,34 +17,47 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/social_block_challenger.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/social_block_staging.json');
-const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/social_watcher_snapshot.png');
-const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/social_watcher_decision.json');
-
 puppeteer.use(StealthPlugin());
 
 export class SocialWatcher {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
+    private workspaceId: string;
 
-    constructor() {
+    // Dynamic Paths
+    private metricsFile: string;
+    private stagingFile: string;
+    private researchFile: string;
+    private snapshotPath: string;
+    private decisionPath: string;
+    private assetsDir: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY || '';
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.metricsFile = path.join(baseBrainPath, 'metrics/landing_page_metrics.json');
+        this.stagingFile = path.join(baseBrainPath, 'staging/social_block_staging.json');
+        this.researchFile = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.snapshotPath = path.join(baseBrainPath, 'run_artifacts/social_watcher_snapshot.png');
+        this.decisionPath = path.join(baseBrainPath, 'run_artifacts/social_watcher_decision.json');
+        this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log("📸 SocialWatcher: Capturing testimonials snapshot...");
+        console.log(`📸 [${this.workspaceId}] SocialWatcher: Capturing testimonials snapshot...`);
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0' });
 
             await page.evaluate(() => {
@@ -58,8 +71,8 @@ export class SocialWatcher {
             if (!element) throw new Error("Social block not found");
 
             const screenshot = await element.screenshot({ encoding: 'binary' });
-            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
-            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+            await fs.mkdir(path.dirname(this.snapshotPath), { recursive: true });
+            await fs.writeFile(this.snapshotPath, screenshot);
 
             return Buffer.from(screenshot);
         } catch (e) {
@@ -71,24 +84,21 @@ export class SocialWatcher {
     }
 
     async analyzeAndOptimize() {
-        console.log("🕵️ SocialWatcher Agent: Waking up...");
+        console.log(`🕵️ [${this.workspaceId}] SocialWatcher Agent: Waking up...`);
 
-        const config = await SystemConfigService.getInstance().getConfig();
+        const config = await SystemConfigFactory.getInstance(this.workspaceId).getConfig();
         const notificationClient = NotificationClient.getInstance();
 
         // 0. Resolve Live State Path (Atomic Deployment)
-        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
         const activePath = config.active_assets_path || ''; // e.g., 'states/HASH'
-        // Fallback to challenger if state not found, OR prefer state if exists. 
-        // Logic: Watcher should optimize the LIVE version.
-        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'social_block.json');
+        const LIVE_FILE = path.join(this.assetsDir, activePath, 'social_block.json');
 
         console.log(`📂 SocialWatcher: Loading Live State from ${activePath}`);
 
         const [metricsRaw, liveRaw, researchRaw] = await Promise.all([
-            fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(this.metricsFile, 'utf-8').catch(() => '{}'),
             fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
+            fs.readFile(this.researchFile, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
@@ -124,7 +134,9 @@ export class SocialWatcher {
         const preCheck = await notificationClient.requestApproval(
             'Social Section',
             'PRE_GENERATION',
-            `Social Trust low (Dwell: ${avgDwell.toFixed(0)}ms, Velocity: ${avgVelocity.toFixed(0)}px/s). Optimize?`
+            `Social Trust low (Dwell: ${avgDwell.toFixed(0)}ms, Velocity: ${avgVelocity.toFixed(0)}px/s). Optimize?`,
+            undefined,
+            this.workspaceId
         );
 
         if (!preCheck.approved) return;
@@ -158,7 +170,8 @@ export class SocialWatcher {
                     'Social Section',
                     'POST_GENERATION',
                     `New Social Strategy Ready (Confidence: ${(optimization as any).confidence}%). Deploy & Rebake?`,
-                    optimization
+                    optimization,
+                    this.workspaceId
                 );
 
                 if (!postCheck.approved) return;
@@ -188,9 +201,9 @@ export class SocialWatcher {
                 const changed = JSON.stringify(newTestimonials) !== JSON.stringify(oldTestimonials);
 
                 // Write to STAGING instead of live
-                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
-                await fs.writeFile(STAGING_FILE, JSON.stringify(newSocial, null, 4));
-                await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
+                await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
+                await fs.writeFile(this.stagingFile, JSON.stringify(newSocial, null, 4));
+                await fs.writeFile(this.decisionPath, JSON.stringify(optimization, null, 4));
 
                 if (changed) {
                     console.log("🔥 Testimonials mutated. Rebaking headshots and updating staging...");
@@ -206,7 +219,7 @@ export class SocialWatcher {
 
     private async rebakeHeadshots(config: any) {
         const testimonials = config.content.testimonials;
-        const mediaService = MediaService.getInstance();
+        const mediaService = MediaService.getInstance(this.workspaceId);
 
         for (let i = 0; i < testimonials.length; i++) {
             const t = testimonials[i];
@@ -251,10 +264,15 @@ export class SocialWatcher {
         }
 
         // Finalize state in staging after all headshots are baked
-        await fs.writeFile(STAGING_FILE, JSON.stringify(config, null, 4));
+        await fs.writeFile(this.stagingFile, JSON.stringify(config, null, 4));
     }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    new SocialWatcher().analyzeAndOptimize().catch(console.error);
+    const args = process.argv.slice(2);
+    const workspaceArg = args.find(a => a.startsWith('--workspace='));
+    const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
+
+    new SocialWatcher(workspaceId).analyzeAndOptimize().catch(console.error);
 }
+

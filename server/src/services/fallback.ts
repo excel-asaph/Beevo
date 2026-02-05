@@ -10,7 +10,7 @@ import {
     TypographyPairings,
     ResearchPhaseObject
 } from '../../../shared/types';
-import { stateManager } from './StateManager';
+import { WorkspaceManager } from './StateManager';
 
 // ==========================================
 // CALLBACK TYPE FOR STREAMING THOUGHTS
@@ -38,13 +38,17 @@ export class ExecutionEngine {
     private genAI: GoogleGenAI;
     private researchAgent: ResearchAgent;
     private artifactsDir: string;
+    private workspaceId: string;
 
-    constructor() {
+    constructor(workspaceId: string = 'default') {
+        this.workspaceId = workspaceId;
         this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
         this.researchAgent = new ResearchAgent();
 
         // Ensure artifacts directory exists
-        this.artifactsDir = path.join(process.cwd(), 'brain', 'research_artifacts');
+        // Use workspace-specific path
+        this.artifactsDir = path.join(process.cwd(), 'brain', 'workspaces', workspaceId, 'research_artifacts');
+        
         if (!fs.existsSync(this.artifactsDir)) {
             fs.mkdirSync(this.artifactsDir, { recursive: true });
         }
@@ -54,7 +58,7 @@ export class ExecutionEngine {
     // PHASE 1: EXTRACT BRAND DNA
     // ==========================================
     async extractBrandDNA(conversationHistory: string): Promise<BrandDNA> {
-        console.log('🔹 Phase 1: Extracting Brand DNA...');
+        console.log(`🔹 [${this.workspaceId}] Phase 1: Extracting Brand DNA...`);
 
         const prompt = `
         Analyze this conversation history and extract the Brand DNA.
@@ -115,8 +119,6 @@ export class ExecutionEngine {
             designGoals: '',
             logoType: '',
             imagery: ''
-            // Removed: logoInspiration, logoUsageContexts, competitorInsights, researchInsights, logoAssets
-            // to ensure strict adherence to file schema.
         };
 
         return dna;
@@ -129,7 +131,7 @@ export class ExecutionEngine {
         const industry = dna.industry?.value || 'General';
         const context = `${dna.name.value} - ${dna.mission.value}`;
 
-        console.log(`🔹 Phase 2: Researching competitors for ${dna.name.value} in ${industry}...`);
+        console.log(`🔹 [${this.workspaceId}] Phase 2: Researching competitors for ${dna.name.value} in ${industry}...`);
 
         // Use the existing ResearchAgent logic
         const agentResult = await this.researchAgent.researchCompetitors(
@@ -148,16 +150,13 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 3: GENERATE COLORS
     // ==========================================
-    // ==========================================
-    // PHASE 3: GENERATE COLORS
-    // ==========================================
     async generateColorPalettes(
         dna: BrandDNA,
         competitors?: CompetitorResearch,
         count: number = 3,
         mood?: string
     ): Promise<ColorPalettes> {
-        console.log(`🔹 Phase 3: Generating ${count} color palettes...`);
+        console.log(`🔹 [${this.workspaceId}] Phase 3: Generating ${count} color palettes...`);
 
         const differentiationContext = competitors
             ? `Differentiation Opportunity: ${competitors.differentiationOpportunity}
@@ -208,7 +207,7 @@ export class ExecutionEngine {
         count: number = 3,
         style?: string
     ): Promise<TypographyPairings> {
-        console.log(`🔹 Phase 4: Generating ${count} typography pairings...`);
+        console.log(`🔹 [${this.workspaceId}] Phase 4: Generating ${count} typography pairings...`);
 
         const prompt = `
         Recommend ${count} distinct Google Font pairings for this brand.
@@ -259,7 +258,7 @@ export class ExecutionEngine {
         palettes: ColorPalettes,
         fonts: TypographyPairings
     ): Promise<ResearchPhaseObject> {
-        console.log('🔹 Phase 5: Finalizing research...');
+        console.log(`🔹 [${this.workspaceId}] Phase 5: Finalizing research...`);
 
         // GENERATE VERBOSE SUMMARY
         const summaryPrompt = `
@@ -296,9 +295,9 @@ export class ExecutionEngine {
         };
 
         // Use StateManager for persistence with version history
-        await stateManager.saveFullState(finalObject);
+        await WorkspaceManager.getStateManager(this.workspaceId).saveFullState(finalObject);
 
-        console.log(`✅ Research saved with StateManager`);
+        console.log(`✅ [${this.workspaceId}] Research saved with StateManager`);
 
         return finalObject;
     }

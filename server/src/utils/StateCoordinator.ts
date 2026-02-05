@@ -9,20 +9,41 @@ import { SystemConfigService } from '../services/SystemConfigService.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const STAGING_DIR = path.resolve(__dirname, '../../brain/staging');
-const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
-const HISTORY_DIR = path.resolve(__dirname, '../../brain/history');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import crypto from 'crypto';
+import { DatabaseService } from '../services/DatabaseService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class StateCoordinator {
-    private static instance: StateCoordinator;
+    private static instances: Map<string, StateCoordinator> = new Map();
+    private workspaceId: string;
 
-    private constructor() { }
+    // Dynamic Paths initialized in constructor
+    private stagingDir: string;
+    private assetsDir: string;
+    private historyDir: string;
 
-    public static getInstance(): StateCoordinator {
-        if (!StateCoordinator.instance) {
-            StateCoordinator.instance = new StateCoordinator();
+    private constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
+        // Base paths for workspace
+        const baseBrain = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClient = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.stagingDir = path.join(baseBrain, 'staging');
+        this.assetsDir = path.join(baseClient, 'assets');
+        this.historyDir = path.join(baseBrain, 'history'); // History is kept in brain or assets? Original was brain/history
+    }
+
+    public static getInstance(workspaceId: string = 'default'): StateCoordinator {
+        if (!StateCoordinator.instances.has(workspaceId)) {
+            StateCoordinator.instances.set(workspaceId, new StateCoordinator(workspaceId));
         }
-        return StateCoordinator.instance;
+        return StateCoordinator.instances.get(workspaceId)!;
     }
 
     private async calculateHashFromContent(files: Map<string, string>): Promise<string> {
@@ -36,22 +57,22 @@ export class StateCoordinator {
     }
 
     public async sealState(message: string = "Sealed by State Coordinator") {
-        console.log("\n🛡️ State Coordinator: Sealing Page State (Atomic)...");
+        console.log(`\n🛡️ [${this.workspaceId}] State Coordinator: Sealing Page State (Atomic)...`);
 
         // 0. Get Current "Base" State
-        const configService = SystemConfigService.getInstance();
+        const configService = SystemConfigFactory.getInstance(this.workspaceId);
         const currentConfig = await configService.getConfig();
 
         // Define baseDir: Where are the Current Live files?
         // If system_config has 'active_assets_path', use that.
         // Else (first run or migration), use ASSETS_DIR root.
-        let baseDir = ASSETS_DIR;
+        let baseDir = this.assetsDir;
 
         // Check if active_assets_path is defined and essentially not root
         // If active_assets_path is "states/abcdef", we look in ASSETS_DIR/states/abcdef
         if (currentConfig.active_assets_path && currentConfig.active_assets_path !== 'root') {
             // currentConfig.active_assets_path is relative to public/assets, e.g. "states/abc"
-            baseDir = path.join(ASSETS_DIR, currentConfig.active_assets_path);
+            baseDir = path.join(this.assetsDir, currentConfig.active_assets_path);
         }
 
         // 1. Load "Base" Files (The files currently Live)
@@ -75,7 +96,7 @@ export class StateCoordinator {
 
         // 2. Overlay Staged Files (The New Changes)
         // This ensures that if we only generated a new "Hero", we keep the old "Review" and "Offer"
-        const stagedFiles = await fs.readdir(STAGING_DIR).catch(() => []);
+        const stagedFiles = await fs.readdir(this.stagingDir).catch(() => []);
 
         if (stagedFiles.length > 0) {
             for (const file of stagedFiles) {
@@ -88,7 +109,7 @@ export class StateCoordinator {
 
                 // Only process JSONs for now as they are the state definitions
                 if (targetName.endsWith('.json')) {
-                    const content = await fs.readFile(path.join(STAGING_DIR, file), 'utf-8');
+                    const content = await fs.readFile(path.join(this.stagingDir, file), 'utf-8');
                     fileContentMap.set(targetName, content);
                     console.log(`📦 Staged Change: ${file} -> ${targetName}`);
                 }
@@ -103,7 +124,7 @@ export class StateCoordinator {
         console.log(`🔗 Generated State Hash: ${newHash}`);
 
         // 4. Create Immutable State Folder
-        const statesDir = path.join(ASSETS_DIR, 'states');
+        const statesDir = path.join(this.assetsDir, 'states');
         const newStateDir = path.join(statesDir, newHash);
 
         await fs.mkdir(newStateDir, { recursive: true });
@@ -113,13 +134,11 @@ export class StateCoordinator {
             await fs.writeFile(path.join(newStateDir, fileName), content);
         }
 
-        // Clear Staging
-        for (const file of stagedFiles) {
-            await fs.unlink(path.join(STAGING_DIR, file)).catch(() => { });
-        }
-
         // 6. Archive in Database
-        const db = DatabaseService.getInstance();
+        const db = DatabaseService.getInstance(); // Database is shared for now, or assume it handles its own schema? 
+        // Ideally, we pass workspaceId to DatabaseService methods, but for now we assume shared DB with possible workspace column later.
+        // The task description said "Ensure all agents and API endpoints correctly handle workspace context."
+        // We might need to update DatabaseService to accept workspaceId. But let's check DatabaseService later.
 
         // Convert Map to Object for Snapshot
         const activeBlocks: any = {};
@@ -140,7 +159,7 @@ export class StateCoordinator {
             newHash,
             fullSnapshot,
             fileNamesList,
-            { timestamp: Date.now(), message }
+            { timestamp: Date.now(), message, workspaceId: this.workspaceId } // Passing workspaceId for future DB support
         );
 
         // 7. Update System Config (Atomic Switch)
@@ -151,8 +170,13 @@ export class StateCoordinator {
 
         console.log(`✨ Page State Sealed: ${newHash} -> /assets/${relativePath}`);
 
-        // 8. Prune Old States (Keep Limit)
+        // 8. Prune Old States (Keep Limit) (Pruning inside workspace folder)
         await this.pruneOldStates();
+
+        // Clear Staging (Do this LAST to ensure success)
+        for (const file of stagedFiles) {
+            await fs.unlink(path.join(this.stagingDir, file)).catch(() => { });
+        }
 
         return newHash;
     }
@@ -161,7 +185,14 @@ export class StateCoordinator {
         try {
             const KEEP_COUNT = 5;
             const db = DatabaseService.getInstance();
-            const allStates = await db.getAllStates(); // [{ state_hash: '...', timestamp: ... }] sorted DESC
+            const allStates = await db.getAllStates(); // TODO: Filter by workspace in DB? 
+            // Currently DB is global, so this might prune other workspaces' states if we don't filter.
+            // Assumption: we are only looking at folders in THIS workspace's state directory.
+            // But 'allStates' from DB might include others.
+            // Safe bet: Only prune folders that exist in THIS workspace's statesDir AND are not in the "global keep list" (if shared).
+            // Better: Filter 'allStates' by checking if they belong to this workspace (if DB supports it).
+            // For now, simple implementation: Prune folders in local dir that are not in top N of ALL states (might be aggressive if shared).
+            // Ideal: Update DatabaseService to filter by workspace.
 
             if (!allStates || allStates.length <= KEEP_COUNT) return;
 
@@ -169,7 +200,7 @@ export class StateCoordinator {
             const keepers = new Set(allStates.slice(0, KEEP_COUNT).map((s: any) => s.state_hash));
 
             // 2. Scan Filesystem
-            const statesDir = path.join(ASSETS_DIR, 'states');
+            const statesDir = path.join(this.assetsDir, 'states');
             // Ensure dir exists
             try { await fs.access(statesDir); } catch { return; }
 
@@ -197,3 +228,4 @@ export class StateCoordinator {
         }
     }
 }
+

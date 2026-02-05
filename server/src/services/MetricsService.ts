@@ -6,9 +6,6 @@ import { DatabaseService } from './DatabaseService';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const SYNTHETIC_METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics_synthetic.json');
-
 interface CampaignMetrics {
     variant_id: string;
     views: number;
@@ -22,27 +19,45 @@ interface CampaignMetrics {
 }
 
 export class MetricsService {
-    private static lock = false;
-    private static queue: (() => Promise<void>)[] = [];
+    private static instances: Map<string, MetricsService> = new Map();
+    private lock = false;
+    private queue: (() => Promise<void>)[] = [];
+    private workspaceId: string;
+    private metricsFile: string;
+    private syntheticMetricsFile: string;
+
+    private constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
+        const baseMetricsPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/metrics`);
+        this.metricsFile = path.join(baseMetricsPath, 'landing_page_metrics.json');
+        this.syntheticMetricsFile = path.join(baseMetricsPath, 'landing_page_metrics_synthetic.json');
+    }
+
+    public static getInstance(workspaceId: string = 'default'): MetricsService {
+        if (!MetricsService.instances.has(workspaceId)) {
+            MetricsService.instances.set(workspaceId, new MetricsService(workspaceId));
+        }
+        return MetricsService.instances.get(workspaceId)!;
+    }
 
     private async acquireLock() {
-        if (MetricsService.lock) {
+        if (this.lock) {
             return new Promise<void>(resolve => {
-                MetricsService.queue.push(async () => {
+                this.queue.push(async () => {
                     resolve();
                 });
             });
         }
-        MetricsService.lock = true;
+        this.lock = true;
     }
 
     private releaseLock() {
-        if (MetricsService.queue.length > 0) {
-            const next = MetricsService.queue.shift();
+        if (this.queue.length > 0) {
+            const next = this.queue.shift();
             // Don't release lock, pass it to next
             if (next) next();
         } else {
-            MetricsService.lock = false;
+            this.lock = false;
         }
     }
 
@@ -61,12 +76,12 @@ export class MetricsService {
 
         try {
             const isSynthetic = event.sessionType === 'synthetic';
-            const targetFile = isSynthetic ? SYNTHETIC_METRICS_FILE : METRICS_FILE;
+            const targetFile = isSynthetic ? this.syntheticMetricsFile : this.metricsFile;
 
             await this.ensureFile(targetFile);
 
             // Debug Log
-            console.log(`[Metrics] Received ${isSynthetic ? '🤖 SYNTHETIC' : '👤 ORGANIC'} Event: ${event.eventType}`, {
+            console.log(`[Metrics ${this.workspaceId}] Received ${isSynthetic ? '🤖 SYNTHETIC' : '👤 ORGANIC'} Event: ${event.eventType}`, {
                 variant: event.componentId || event.blockId,
                 state: event.stateHash
             });
@@ -134,8 +149,6 @@ export class MetricsService {
 
             metrics.last_updated = new Date().toISOString();
 
-            metrics.last_updated = new Date().toISOString();
-
             // Atomic Write Strategy: Write to .tmp -> Rename
             // This guarantees no partial writes or corruption.
             const tempFile = `${targetFile}.tmp`;
@@ -151,7 +164,7 @@ export class MetricsService {
             // 2. Update SQLite Page State Metrics (ORGANIC ONLY)
             // We prevent synthetic data from polluting the business leaderboard
             if (!isSynthetic && stateHash !== 'unknown' && stateHash !== 'undefined') {
-                const dbService = DatabaseService.getInstance();
+                const dbService = DatabaseService.getInstance(this.workspaceId);
                 try {
                     const state = await dbService.getState(stateHash) as any;
 
@@ -194,9 +207,9 @@ export class MetricsService {
                         if (event.eventType.includes('dwell')) comp.dwells++;
 
                         await dbService.updatePageStateMetrics(stateHash, stateMetrics);
-                        console.log(`[Metrics] DB Updated for State=${stateHash}`);
+                        console.log(`[Metrics ${this.workspaceId}] DB Updated for State=${stateHash}`);
                     } else {
-                        console.warn(`[Metrics] State not found in DB: ${stateHash}`);
+                        console.warn(`[Metrics ${this.workspaceId}] State not found in DB: ${stateHash}`);
                     }
                 } catch (dbErr) {
                     console.error("[Metrics] SQLite Update Failed:", dbErr);
@@ -210,3 +223,4 @@ export class MetricsService {
         }
     }
 }
+

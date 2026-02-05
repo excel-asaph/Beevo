@@ -10,11 +10,11 @@ export default defineConfig(({ mode }) => {
             host: '0.0.0.0',
             proxy: {
                 '/ws': {
-                    target: 'ws://localhost:3001',
+                    target: 'ws://127.0.0.1:3001',
                     ws: true,
                 },
                 '/api': {
-                    target: 'http://localhost:3001',
+                    target: 'http://127.0.0.1:3001',
                     changeOrigin: true,
                     secure: false,
                 }

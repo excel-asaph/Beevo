@@ -7,7 +7,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
-import { SystemConfigService } from '../services/SystemConfigService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,33 +16,46 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/spec_block_challenger.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/spec_block_staging.json');
-const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/spec_watcher_snapshot.png');
-const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/spec_watcher_decision.json');
-
 puppeteer.use(StealthPlugin());
 
 export class SpecWatcher {
     private nanoBanana: NanoBananaService;
+    private workspaceId: string;
 
-    constructor() {
+    // Dynamic Paths
+    private metricsFile: string;
+    private stagingFile: string;
+    private researchFile: string;
+    private snapshotPath: string;
+    private decisionPath: string;
+    private assetsDir: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set");
         this.nanoBanana = new NanoBananaService(apiKey);
+
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.metricsFile = path.join(baseBrainPath, 'metrics/landing_page_metrics.json');
+        this.stagingFile = path.join(baseBrainPath, 'staging/spec_block_staging.json');
+        this.researchFile = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.snapshotPath = path.join(baseBrainPath, 'run_artifacts/spec_watcher_snapshot.png');
+        this.decisionPath = path.join(baseBrainPath, 'run_artifacts/spec_watcher_decision.json');
+        this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log("📸 SpecWatcher: Capturing technical schematic snapshot...");
+        console.log(`📸 [${this.workspaceId}] SpecWatcher: Capturing technical schematic snapshot...`);
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0' });
 
             // Scroll to the spec section
@@ -59,8 +72,8 @@ export class SpecWatcher {
             const screenshot = await element.screenshot({ encoding: 'binary' });
 
             // Save for user visibility
-            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
-            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+            await fs.mkdir(path.dirname(this.snapshotPath), { recursive: true });
+            await fs.writeFile(this.snapshotPath, screenshot);
 
             return Buffer.from(screenshot);
         } catch (e) {
@@ -72,24 +85,23 @@ export class SpecWatcher {
     }
 
     async analyzeAndOptimize() {
-        console.log("🕵️ SpecWatcher Agent: Waking up...");
+        console.log(`🕵️ [${this.workspaceId}] SpecWatcher Agent: Waking up...`);
 
         // 1. Load Data
         // 1. Data Analysis (Get Config First)
-        const config = await SystemConfigService.getInstance().getConfig();
+        const config = await SystemConfigFactory.getInstance(this.workspaceId).getConfig();
         const notificationClient = NotificationClient.getInstance();
 
         // 0. Resolve Live State Path
-        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
         const activePath = config.active_assets_path || '';
-        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'spec_block.json');
+        const LIVE_FILE = path.join(this.assetsDir, activePath, 'spec_block.json');
 
         console.log(`📂 SpecWatcher: Loading Live State from ${activePath}`);
 
         const [metricsRaw, liveRaw, researchRaw] = await Promise.all([
-            fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(this.metricsFile, 'utf-8').catch(() => '{}'),
             fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
+            fs.readFile(this.researchFile, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
@@ -123,21 +135,23 @@ export class SpecWatcher {
         const preCheck = await notificationClient.requestApproval(
             'Spec Section',
             'PRE_GENERATION',
-            `Spec Interaction Rate Low (${interactionRate.toFixed(1)}% vs Target ${config.sections.spec.target_interaction_rate}%). Optimize schematic?`
+            `Spec Interaction Rate Low (${interactionRate.toFixed(1)}% vs Target ${config.sections.spec.target_interaction_rate}%). Optimize schematic?`,
+            undefined,
+            this.workspaceId
         );
 
         if (!preCheck.approved) return;
 
         // 2. Prepare Context
-        const selectedPalettes = researchCtx.colorPalettes.palettes.filter((p: any) => p.isSelected);
-        const validColors = selectedPalettes.flatMap((p: any) => p.colors);
+        const selectedPalettes = researchCtx.colorPalettes?.palettes?.filter((p: any) => p.isSelected) || [];
+        const validColors = selectedPalettes.flatMap((p: any) => p.colors) || [];
         const context = {
-            brandName: researchCtx.brandDNA.name.value,
-            mission: researchCtx.brandDNA.mission.value,
-            rationale: typeof researchCtx.brandDNA.rationale === 'string' ? researchCtx.brandDNA.rationale : researchCtx.brandDNA.rationale.value,
-            mood: researchCtx.brandDNA.mood.items,
+            brandName: researchCtx.brandDNA?.name?.value || "Our Brand",
+            mission: researchCtx.brandDNA?.mission?.value || "",
+            rationale: typeof researchCtx.brandDNA?.rationale === 'string' ? researchCtx.brandDNA.rationale : (researchCtx.brandDNA?.rationale?.value || ""),
+            mood: researchCtx.brandDNA?.mood?.items || [],
             colors: validColors,
-            fonts: researchCtx.typographyPairings.fonts.filter((f: any) => f.isSelected).map((f: any) => f.name),
+            fonts: researchCtx.typographyPairings?.fonts?.filter((f: any) => f.isSelected).map((f: any) => f.name) || [],
             imagery: []
         };
 
@@ -162,7 +176,8 @@ export class SpecWatcher {
                     'Spec Section',
                     'POST_GENERATION',
                     `New Schematic Ready (Confidence: ${result.confidence}%). Deploy?`,
-                    result
+                    result,
+                    this.workspaceId
                 );
 
                 if (!postCheck.approved) return;
@@ -181,9 +196,9 @@ export class SpecWatcher {
                     }
                 };
 
-                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
-                await fs.writeFile(STAGING_FILE, JSON.stringify(newSpec, null, 4));
-                await fs.writeFile(DECISION_PATH, JSON.stringify(result, null, 4));
+                await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
+                await fs.writeFile(this.stagingFile, JSON.stringify(newSpec, null, 4));
+                await fs.writeFile(this.decisionPath, JSON.stringify(result, null, 4));
 
                 console.log("🚀 Staged forensic fix! Technical Blueprint Evolved in staging.");
                 console.log("\n🧠 WATCHER THOUGHTS:\n", result.thoughts);
@@ -198,5 +213,10 @@ export class SpecWatcher {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    new SpecWatcher().analyzeAndOptimize().catch(console.error);
+    const args = process.argv.slice(2);
+    const workspaceArg = args.find(a => a.startsWith('--workspace='));
+    const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
+
+    new SpecWatcher(workspaceId).analyzeAndOptimize().catch(console.error);
 }
+

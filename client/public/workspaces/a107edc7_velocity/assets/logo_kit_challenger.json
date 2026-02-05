@@ -1,0 +1,83 @@
+{
+    "metadata": {
+        "generated_at": "2026-02-05T12:34:55.809Z",
+        "brand_name": "Nectar",
+        "palette_used": "Virtual Suede"
+    },
+    "kit": {
+        "primary": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_primary.png",
+        "inverted": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_inverted.png",
+        "icon": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_icon.png",
+        "icon_inverted": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_icon_inverted.png",
+        "wordmark": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_wordmark.png",
+        "wordmark_inverted": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_wordmark_inverted.png",
+        "social": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_social.png",
+        "social_inverted": "/workspaces/a107edc7_velocity/assets/generated_logos/logo_variant_social_inverted.png"
+    },
+    "palette": {
+        "name": "Virtual Suede",
+        "colors": [
+            "#1A1A1B",
+            "#E2D1C3",
+            "#8B9D77",
+            "#F4F4F9",
+            "#FF6B6B"
+        ],
+        "vibe": "Merging the plush textures of luxury urban wear with the glitchy vibrancy of digital life, featuring inclusive flesh tones, muted organic greens, and electric coral highlights.",
+        "isSelected": true,
+        "id": "5"
+    },
+    "brandDNA": {
+        "name": {
+            "value": "Nectar",
+            "isSelected": true
+        },
+        "mission": {
+            "value": "To democratize high-end designer streetwear by ensuring luxury aesthetics and quality are accessible to underserved communities and low-income families without barriers.",
+            "isSelected": true
+        },
+        "voice": {
+            "value": "Empowering, sophisticated, inclusive, and socially conscious.",
+            "isSelected": true
+        },
+        "values": {
+            "items": [
+                "Economic Accessibility",
+                "Design Excellence",
+                "Social Equity",
+                "Community Empowerment",
+                "Affordability"
+            ],
+            "isSelected": true
+        },
+        "tagline": {
+            "value": "The Sweet Taste of High-End Access.",
+            "isSelected": true
+        },
+        "industry": {
+            "value": "Streetwear Fashion & Social Enterprise",
+            "isSelected": true
+        },
+        "targetAudience": {
+            "items": [
+                "Low-income families",
+                "Urban youth",
+                "Underserved communities",
+                "Budget-conscious fashion enthusiasts",
+                "Celebrities"
+            ],
+            "isSelected": true
+        },
+        "mood": {
+            "items": [
+                "Modern",
+                "Sophisticated",
+                "Urban",
+                "Inclusive",
+                "Refined"
+            ],
+            "isSelected": true
+        },
+        "rationale": "Nectar bridges the gap between elite luxury and the street, using design as a tool for dignity and inclusion. These values reflect a commitment to dismantling the financial barriers that typically exclude low-income demographics from the high-end fashion narrative."
+    }
+}

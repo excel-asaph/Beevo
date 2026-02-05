@@ -7,7 +7,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
-import { SystemConfigService } from '../services/SystemConfigService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,34 +16,47 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/pas_block_challenger.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/pas_block_staging.json');
-const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/pas_watcher_snapshot.png');
-const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/pas_watcher_decision.json');
-
 puppeteer.use(StealthPlugin());
 
 export class PASWatcher {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
+    private workspaceId: string;
 
-    constructor() {
+    // Dynamic Paths
+    private metricsFile: string;
+    private stagingFile: string;
+    private researchFile: string;
+    private snapshotPath: string;
+    private decisionPath: string;
+    private assetsDir: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY || '';
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.metricsFile = path.join(baseBrainPath, 'metrics/landing_page_metrics.json');
+        this.stagingFile = path.join(baseBrainPath, 'staging/pas_block_staging.json');
+        this.researchFile = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.snapshotPath = path.join(baseBrainPath, 'run_artifacts/pas_watcher_snapshot.png');
+        this.decisionPath = path.join(baseBrainPath, 'run_artifacts/pas_watcher_decision.json');
+        this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log("📸 PASWatcher: Capturing persuasion snapshot...");
+        console.log(`📸 [${this.workspaceId}] PASWatcher: Capturing persuasion snapshot...`);
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0' });
 
             await page.evaluate(() => {
@@ -57,8 +70,8 @@ export class PASWatcher {
             if (!element) throw new Error("PAS block not found");
 
             const screenshot = await element.screenshot({ encoding: 'binary' });
-            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
-            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+            await fs.mkdir(path.dirname(this.snapshotPath), { recursive: true });
+            await fs.writeFile(this.snapshotPath, screenshot);
 
             return Buffer.from(screenshot);
         } catch (e) {
@@ -70,22 +83,21 @@ export class PASWatcher {
     }
 
     async analyzeAndOptimize() {
-        console.log("🕵️ PASWatcher Agent: Waking up...");
+        console.log(`🕵️ [${this.workspaceId}] PASWatcher Agent: Waking up...`);
 
-        const config = await SystemConfigService.getInstance().getConfig();
+        const config = await SystemConfigFactory.getInstance(this.workspaceId).getConfig();
         const notificationClient = NotificationClient.getInstance();
 
         // 0. Resolve Live State Path
-        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
         const activePath = config.active_assets_path || '';
-        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'pas_block.json');
+        const LIVE_FILE = path.join(this.assetsDir, activePath, 'pas_block.json');
 
         console.log(`📂 PASWatcher: Loading Live State from ${activePath}`);
 
         const [metricsRaw, liveRaw, researchRaw] = await Promise.all([
-            fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(this.metricsFile, 'utf-8').catch(() => '{}'),
             fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
+            fs.readFile(this.researchFile, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
@@ -121,7 +133,9 @@ export class PASWatcher {
         const preCheck = await notificationClient.requestApproval(
             'PAS Section',
             'PRE_GENERATION',
-            `PAS Engagement Low (Scroll: ${scrollDepth.toFixed(0)}%, Dwell: ${dwellTime.toFixed(0)}ms). Optimize logic?`
+            `PAS Engagement Low (Scroll: ${scrollDepth.toFixed(0)}%, Dwell: ${dwellTime.toFixed(0)}ms). Optimize logic?`,
+            undefined,
+            this.workspaceId
         );
 
         if (!preCheck.approved) return;
@@ -155,7 +169,8 @@ export class PASWatcher {
                     'PAS Section',
                     'POST_GENERATION',
                     `New PAS Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
-                    optimization
+                    optimization,
+                    this.workspaceId
                 );
 
                 if (!postCheck.approved) return;
@@ -178,9 +193,9 @@ export class PASWatcher {
                     }
                 };
 
-                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
-                await fs.writeFile(STAGING_FILE, JSON.stringify(newPAS, null, 4));
-                await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
+                await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
+                await fs.writeFile(this.stagingFile, JSON.stringify(newPAS, null, 4));
+                await fs.writeFile(this.decisionPath, JSON.stringify(optimization, null, 4));
                 console.log("🚀 Optimization Staged! PAS Section Evolved in staging.");
             }
         } catch (error) {
@@ -189,6 +204,12 @@ export class PASWatcher {
     }
 }
 
+// Arg parsing for CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    new PASWatcher().analyzeAndOptimize().catch(console.error);
+    const args = process.argv.slice(2);
+    const workspaceArg = args.find(a => a.startsWith('--workspace='));
+    const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
+
+    new PASWatcher(workspaceId).analyzeAndOptimize().catch(console.error);
 }
+

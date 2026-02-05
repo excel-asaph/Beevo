@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { SocialBlockConfig } from '../../../../shared/types';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface SocialBlockProps {
     config: SocialBlockConfig;
@@ -8,6 +9,7 @@ interface SocialBlockProps {
 
 export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
     const { track } = useTracking(config.id);
+    const { resolveAssetUrl } = useWorkspace();
     const containerRef = useRef<HTMLDivElement>(null);
     const dwellStartTime = useRef<number | null>(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -98,10 +100,11 @@ export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
                                 config.content.testimonials.forEach(t => {
                                     // Replace placeholders 'image_url_ID' with actual URL
                                     // The generator seems to output 'image_url_t1' etc.
-                                    html = html.replace(`image_url_${t.id}`, t.image_url);
+                                    const resolvedUrl = resolveAssetUrl(t.image_url);
+                                    html = html.replace(`image_url_${t.id}`, resolvedUrl);
                                     // Also try replacing just the ID if the generator format varies, purely defensive
-                                    html = html.replace(`'${t.id}'`, `'${t.image_url}'`);
-                                    html = html.replace(`"${t.id}"`, `"${t.image_url}"`);
+                                    html = html.replace(`'${t.id}'`, `'${resolvedUrl}'`);
+                                    html = html.replace(`"${t.id}"`, `"${resolvedUrl}"`);
                                 });
                             }
                             return html;

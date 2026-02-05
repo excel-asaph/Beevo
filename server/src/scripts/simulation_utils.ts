@@ -7,14 +7,25 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Global Workspace Resolution
+const args = process.argv.slice(2);
+const workspaceArg = args.find(a => a.startsWith('--workspace='));
+const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
+
 const API_BASE = 'http://127.0.0.1:3001';
 const EVENT_URL = `${API_BASE}/api/tracking/event`;
 const CONFIG_URL = `${API_BASE}/api/config`;
 
+const client = axios.create({
+    headers: {
+        'x-workspace-id': workspaceId
+    }
+});
+
 export async function getLiveState(blockName: string) {
     try {
-        console.log("🔍 Fetching Active System Config...");
-        const configRes = await axios.get(CONFIG_URL);
+        console.log(`🔍 [${workspaceId}] Fetching Active System Config...`);
+        const configRes = await client.get(CONFIG_URL);
         const config = configRes.data;
 
         if (!config.current_state_hash) {
@@ -22,10 +33,10 @@ export async function getLiveState(blockName: string) {
         }
 
         const assetsPath = config.active_assets_path || '';
-        const assetsDir = path.resolve(__dirname, '../../../client/public/assets');
+        const assetsDir = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}/assets`);
         const targetDir = path.join(assetsDir, assetsPath);
 
-        console.log(`📂 Target Asset Dir: ${assetsPath || 'root'}`);
+        console.log(`📂 [${workspaceId}] Target Asset Dir: ${assetsPath || 'root'}`);
 
         const fileName = `${blockName}_block.json`;
         const filePath = path.join(targetDir, fileName);
@@ -51,7 +62,7 @@ export async function getLiveState(blockName: string) {
 
 export async function sendSyntheticEvent(sessionId: string, stateHash: string, variantId: string, eventName: string, payload: any = {}) {
     try {
-        await axios.post(EVENT_URL, {
+        await client.post(EVENT_URL, {
             sessionId,
             sessionType: 'synthetic',
             timestamp: Date.now(),

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { useBrand } from '../../context/BrandContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface NavigationBarProps {
     config: {
@@ -12,6 +13,7 @@ interface NavigationBarProps {
 
 export const NavigationBar: React.FC<NavigationBarProps> = ({ config, brandId }) => {
     const { dna } = useBrand();
+    const { resolveAssetUrl } = useWorkspace();
     const { track } = useTracking(brandId + '_nav');
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -53,7 +55,7 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({ config, brandId })
                     <img
                         // Logic: On Dark Glass (Scrolled) or Dark Hero (Top), use Inverted (White) Logo if available.
                         // Default fallback to Primary if Inverted is missing.
-                        src={dna?.logoInvertedUrl?.value || dna?.logoUrl?.value}
+                        src={resolveAssetUrl(dna?.logoInvertedUrl?.value || dna?.logoUrl?.value)}
                         alt="Logo"
                         className="h-14 md:h-19 w-auto object-contain opacity-90 hover:scale-105 transition-transform duration-300"
 

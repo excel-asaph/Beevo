@@ -14,7 +14,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 // Paths
-const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
+const this.researchPath = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
 const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/hero_block_staging.json');
 
 // Interfaces
@@ -36,23 +36,21 @@ interface BrandResearch {
 
 export class InitialHeroGenerator {
     private client: GoogleGenAI;
-    private modelName = MODELS.ARCHITECT_TEXT;
+    private modelName = MODELS.ARCHITECT_TEXT; // Corrected typo from instruction
+    private workspaceId: string;
 
-    constructor() {
+    // Dynamic Paths
+    private stagingPath: string;
+    private activePath: string;
+    private archiveDir: string;
+    private videosDir: string;
+    private researchPath: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) throw new Error("GEMINI_API_KEY not set");
+        if (!apiKey) throw new Error("GEMINI_API_KEY not required for Vertex but used for GenAI");
         this.client = new GoogleGenAI({ apiKey });
-    }
-
-    async generate() {
-        console.log("Reading Brand Research...");
-        const rawData = await fs.readFile(RESEARCH_PATH, 'utf-8');
-        const research: BrandResearch = JSON.parse(rawData);
-
-        // 1. Extract Constraints & Context
-        const selectedPalettes = research.colorPalettes.palettes.filter(p => p.isSelected);
-        const selectedFonts = research.typographyPairings.fonts.filter(f => f.isSelected);
-
         if (selectedPalettes.length === 0) throw new Error("No Color Palette Selected");
 
         // Robust Rationale Extraction

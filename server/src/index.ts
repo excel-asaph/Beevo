@@ -1,14 +1,15 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
+import fsSync from 'fs';
 import path from 'path';
 import { SessionManager } from './sessions/SessionManager';
 import { WS_CONFIG } from '../../shared/constants';
 import { MetricsService } from './services/MetricsService';
 import { NotificationService } from './services/NotificationService';
-import { SystemConfigService } from './services/SystemConfigService.js';
+import { SystemConfigFactory } from './services/SystemConfigService.js';
 import { DatabaseService } from './services/DatabaseService.js';
 import { InitialLogoGenerator } from './agents/InitialLogoGenerator';
 import { bakeTransparency } from './scripts/transparency_baker';
@@ -27,7 +28,7 @@ const wss = new WebSocketServer({ server });
 
 // Session manager handles all client connections
 const sessionManager = new SessionManager();
-const metricsService = new MetricsService();
+// MetricsService is requested via getInstance(workspaceId)
 const notificationService = NotificationService.getInstance();
 notificationService.setSocketServer(wss);
 
@@ -35,23 +36,85 @@ app.use(express.json());
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, x-workspace-id');
     next();
 });
+
+// Middleware to extract workspace ID
+const workspaceMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const workspaceId = req.headers['x-workspace-id'] as string || req.query.workspaceId as string || 'default';
+    (req as any).workspaceId = workspaceId;
+    console.log(`🔒 Request for Workspace: ${workspaceId} [${req.method} ${req.url}]`);
+    next();
+};
+
+app.use(workspaceMiddleware);
+
+// Helper to get workspaceId
+const getWorkspaceId = (req: Request): string => (req as any).workspaceId;
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
-        activeSessions: sessionManager.getActiveSessionCount()
+        activeSessions: sessionManager.getActiveSessionCount(),
+        workspace: getWorkspaceId(req)
     });
+});
+
+// List all workspaces
+app.get('/api/workspaces', async (req, res) => {
+    try {
+        const workspacesDir = path.resolve(__dirname, '../../brain/workspaces');
+        await fs.mkdir(workspacesDir, { recursive: true });
+        const dirs = await fs.readdir(workspacesDir);
+
+        const workspaces = await Promise.all(dirs.map(async (id) => {
+            // Check if it's a directory
+            const stats = await fs.stat(path.join(workspacesDir, id));
+            if (!stats.isDirectory()) return null;
+
+            // Try to read metadata if it exists, otherwise use ID
+            return {
+                id,
+                name: id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Prettier name default
+                lastActive: stats.mtime
+            };
+        }));
+
+        res.json(workspaces.filter(Boolean));
+    } catch (error) {
+        console.error('Failed to list workspaces:', error);
+        res.status(500).json({ error: 'Failed to list workspaces' });
+    }
+});
+
+// Check if a workspace exists
+app.get('/api/workspaces/check/:id', async (req, res) => {
+    try {
+        const workspaceId = req.params.id;
+        const workspacePath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+
+        try {
+            const stats = await fs.stat(workspacePath);
+            if (stats.isDirectory()) {
+                return res.json({ exists: true });
+            }
+        } catch {
+            return res.json({ exists: false });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to check workspace' });
+    }
 });
 
 // Tracking Endpoint
 app.post('/api/tracking/event', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const event = req.body;
-        await metricsService.trackEvent(event);
+        await MetricsService.getInstance(workspaceId).trackEvent(event);
         res.json({ status: 'tracked' });
     } catch (error) {
         console.error('Metrics Error:', error);
@@ -62,8 +125,9 @@ app.post('/api/tracking/event', async (req, res) => {
 // HITL Endpoints (For Watcher Agents)
 app.post('/api/hitl/request', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { section, type, message, proposal } = req.body;
-        const id = await notificationService.requestApproval(section, type, message, proposal);
+        const id = await notificationService.requestApproval(section, type, message, proposal, workspaceId);
         res.json({ id, status: 'PENDING' });
     } catch (error) {
         console.error('HITL Request Error:', error);
@@ -96,7 +160,8 @@ app.post('/api/hitl/resolve', async (req, res) => {
 // Config Endpoint (For Client)
 app.get('/api/config', async (req, res) => {
     try {
-        const config = await SystemConfigService.getInstance().getConfig();
+        const workspaceId = getWorkspaceId(req);
+        const config = await SystemConfigFactory.getInstance(workspaceId).getConfig();
         res.json(config);
     } catch (error) {
         res.status(500).json({ error: 'Failed to load config' });
@@ -106,21 +171,25 @@ app.get('/api/config', async (req, res) => {
 // Debug/Bypass Endpoint: Fetch latest research for hydration
 app.get('/api/debug/research', async (req, res) => {
     try {
-        const researchPath = path.resolve(__dirname, '../brain/research_artifacts/complete_research_latest.json');
+        const workspaceId = getWorkspaceId(req);
+        // Updated to use workspace path
+        const researchPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/research_artifacts/complete_research_latest.json`);
         const data = await fs.readFile(researchPath, 'utf8');
         res.json(JSON.parse(data));
     } catch (error) {
-        console.error('Failed to load research artifact:', error);
+        console.error(`Failed to load research artifact for ${getWorkspaceId(req)}:`, error);
         res.status(404).json({ error: 'Research artifact not found' });
     }
 });
 
 app.post('/api/config/lock', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { section, isLocked } = req.body;
-        const config = await SystemConfigService.getInstance().getConfig();
+        const service = SystemConfigFactory.getInstance(workspaceId);
+        const config = await service.getConfig();
         (config.locks as any)[section] = isLocked;
-        await SystemConfigService.getInstance().updateConfig(config);
+        await service.updateConfig(config);
         res.json({ status: 'ok' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update lock' });
@@ -129,11 +198,13 @@ app.post('/api/config/lock', async (req, res) => {
 
 app.post('/api/config/feedback', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { directive, value } = req.body;
-        console.log(`📝 DIRECTIVE UPDATE: ${directive} = "${value}"`);
-        const config = await SystemConfigService.getInstance().getConfig();
+        console.log(`📝 DIRECTIVE UPDATE [${workspaceId}]: ${directive} = "${value}"`);
+        const service = SystemConfigFactory.getInstance(workspaceId);
+        const config = await service.getConfig();
         (config.feedback as any)[directive] = value;
-        await SystemConfigService.getInstance().updateConfig(config);
+        await service.updateConfig(config);
         res.json({ status: 'ok' });
     } catch (error) {
         res.status(500).json({ error: 'Failed to update feedback' });
@@ -142,14 +213,16 @@ app.post('/api/config/feedback', async (req, res) => {
 
 app.post('/api/config/update_section', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { section, metric, value } = req.body;
-        console.log(`📊 METRIC UPDATE: ${section}.${metric} = ${value}`);
-        const config = await SystemConfigService.getInstance().getConfig();
+        console.log(`📊 METRIC UPDATE [${workspaceId}]: ${section}.${metric} = ${value}`);
+        const service = SystemConfigFactory.getInstance(workspaceId);
+        const config = await service.getConfig();
 
         // Dynamic update with type safety workaround
         if ((config.sections as any)[section]) {
             (config.sections as any)[section][metric] = value;
-            await SystemConfigService.getInstance().updateConfig(config);
+            await service.updateConfig(config);
             res.json({ status: 'ok' });
         } else {
             res.status(404).json({ error: 'Section not found' });
@@ -162,10 +235,11 @@ app.post('/api/config/update_section', async (req, res) => {
 // Broadcast Refresh Endpoint (For Agents)
 app.post('/api/logos/generate', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { context, research } = req.body;
-        console.log(`🎨 LOGO REQUEST: Context="${context || 'None'}" ResearchKeys=${Object.keys(research || {}).join(',')}`);
+        console.log(`🎨 LOGO REQUEST [${workspaceId}]: Context="${context || 'None'}"`);
 
-        const generator = new InitialLogoGenerator();
+        const generator = new InitialLogoGenerator(workspaceId);
         await generator.generate(context);
 
         res.json({ status: 'ok', message: 'Logo generation complete' });
@@ -177,9 +251,9 @@ app.post('/api/logos/generate', async (req, res) => {
 
 app.post('/api/logos/finalize', async (req, res) => {
     try {
-        console.log(`🧼 LOGO FINALIZE REQUEST: Baking transparency...`);
-
-        const result = await bakeTransparency();
+        const workspaceId = getWorkspaceId(req);
+        console.log(`🧼 LOGO FINALIZE REQUEST [${workspaceId}]: Baking transparency...`);
+        const result = await bakeTransparency(workspaceId);
 
         res.json({ status: 'ok', kit: result });
     } catch (error) {
@@ -220,7 +294,8 @@ app.get('/api/analytics/states', async (req, res) => {
 
 app.get('/api/analytics/current', async (req, res) => {
     try {
-        const config = await SystemConfigService.getInstance().getConfig();
+        const workspaceId = getWorkspaceId(req);
+        const config = await SystemConfigFactory.getInstance(workspaceId).getConfig();
         const currentStateHash = config.current_state_hash || '';
 
         // Source of Truth: Database (State-Isolated Metrics)
@@ -319,7 +394,9 @@ app.get('/api/analytics/leaderboard', async (req, res) => {
 // Watcher Configuration Endpoints
 app.get('/api/config/watcher', async (req, res) => {
     try {
-        const configPath = path.resolve(__dirname, '../brain/watcher_config.json');
+        const workspaceId = getWorkspaceId(req);
+        // Updated to use workspace path
+        const configPath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}/watcher_config.json`);
         const data = await fs.readFile(configPath, 'utf-8');
         res.json(JSON.parse(data));
     } catch (e) {
@@ -329,8 +406,10 @@ app.get('/api/config/watcher', async (req, res) => {
 
 app.post('/api/config/watcher', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { bufferMinutes, intervalMinutes } = req.body;
-        const configPath = path.resolve(__dirname, '../brain/watcher_config.json');
+        // Updated to use workspace path
+        const configPath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}/watcher_config.json`);
 
         // Enforce Minimum 5 Minutes
         const safeConfig = {
@@ -338,8 +417,11 @@ app.post('/api/config/watcher', async (req, res) => {
             intervalMinutes: Math.max(5, Number(intervalMinutes) || 5)
         };
 
+        // Ensure dir exists
+        await fs.mkdir(path.dirname(configPath), { recursive: true });
+
         await fs.writeFile(configPath, JSON.stringify(safeConfig, null, 4));
-        console.log(`⚙️ Watcher Config Updated:`, safeConfig);
+        console.log(`⚙️ Watcher Config Updated [${workspaceId}]:`, safeConfig);
         res.json({ status: 'ok', config: safeConfig });
     } catch (e) {
         console.error("Config Save Error:", e);
@@ -350,8 +432,10 @@ app.post('/api/config/watcher', async (req, res) => {
 // Status Check: Are logos ready?
 app.get('/api/status/logos', async (req, res) => {
     try {
-        const generatedDir = path.resolve(__dirname, '../../client/public/assets/generated_logos');
-        const transparentDir = path.resolve(__dirname, '../../client/public/assets/transparent_logos');
+        const workspaceId = getWorkspaceId(req);
+        // Updated to use workspace path
+        const generatedDir = path.resolve(__dirname, `../../client/public/workspaces/${workspaceId}/assets/generated_logos`);
+        const transparentDir = path.resolve(__dirname, `../../client/public/workspaces/${workspaceId}/assets/transparent_logos`);
 
         let hasGenerated = false;
         let hasTransparent = false;
@@ -374,16 +458,26 @@ app.get('/api/status/logos', async (req, res) => {
 
 // Action: Run Initializer Flow (Init -> Watcher)
 app.post('/api/action/run-initializers', (req, res) => {
-    console.log("🚀 TRIGGER: Starting Full System Initialization...");
+    const workspaceId = getWorkspaceId(req);
+    console.log(`🚀 TRIGGER: Starting Full System Initialization for Workspace: ${workspaceId}...`);
 
     const orchestratorPath = path.resolve(__dirname, 'run_watchers.ts');
 
+    // Fix: Open log file for detached process output
+    const logPath = path.resolve(__dirname, '../initialization.log');
+    const out = fsSync.openSync(logPath, 'a');
+    const err = fsSync.openSync(logPath, 'a');
+
     // Spawn detached process so it keeps running
-    const child = spawn('npx', ['tsx', `"${orchestratorPath}"`, '--init'], {
+    // PASS WORKSPACE ID
+    // WINDOWS FIX: Use cmd /c to properly handle npx.cmd and prevent parent termination signals
+    const child = spawn('cmd', ['/c', 'npx', 'tsx', `"${orchestratorPath}"`, '--init', `--workspace=${workspaceId}`], {
         detached: true,
-        stdio: 'ignore',
-        shell: true
+        stdio: ['ignore', out, err], // Redirect to log file instead of ignore
+        windowsHide: true // Prevent popping up a new window
     });
+
+    child.unref(); // Allow parent to not wait
 
     child.unref(); // Allow parent to not wait
 
@@ -392,8 +486,9 @@ app.post('/api/action/run-initializers', (req, res) => {
 
 app.post('/api/config/revert', async (req, res) => {
     try {
+        const workspaceId = getWorkspaceId(req);
         const { stateHash } = req.body;
-        console.log(`⏪ REVERT REQUEST: State=${stateHash}`);
+        console.log(`⏪ REVERT REQUEST [${workspaceId}]: State=${stateHash}`);
 
         const db = DatabaseService.getInstance();
         const state = await db.getState(stateHash) as any;
@@ -404,12 +499,15 @@ app.post('/api/config/revert', async (req, res) => {
         // Apply snapshot to challenger files
         for (const [section, config] of Object.entries(snapshot)) {
             const filename = `${section}_block_challenger.json`;
-            const filePath = path.resolve(__dirname, '../../client/public/assets', filename);
+            // Updated path
+            const filePath = path.resolve(__dirname, `../../client/public/workspaces/${workspaceId}/assets`, filename);
+            await fs.mkdir(path.dirname(filePath), { recursive: true });
             await fs.writeFile(filePath, JSON.stringify(config, null, 4));
         }
 
         // Update current hash in config
-        await SystemConfigService.getInstance().updateConfig({ current_state_hash: stateHash } as any);
+        const service = SystemConfigFactory.getInstance(workspaceId);
+        await service.updateConfig({ current_state_hash: stateHash } as any);
 
         res.json({ status: 'ok', message: `Reverted to ${stateHash}` });
     } catch (error) {
@@ -434,11 +532,17 @@ app.post('/api/leads/submit', async (req, res) => {
 });
 
 // WebSocket connection handler
-wss.on('connection', (ws: WebSocket) => {
+wss.on('connection', (ws: WebSocket, req) => {
     console.log('🔌 New WebSocket connection');
 
+    // Parse workspaceId from URL query params
+    const params = new URLSearchParams(req.url?.split('?')[1]);
+    const workspaceId = params.get('workspaceId') || 'default';
+    console.log(`   Workspace: ${workspaceId}`);
+
     // Create a new session for this connection
-    const sessionId = sessionManager.createSession(ws);
+    // TODO: Update SessionManager to accept workspaceId
+    const sessionId = sessionManager.createSession(ws, workspaceId);
     console.log(`📋 Created session: ${sessionId}`);
 
     ws.on('message', async (data: Buffer) => {
@@ -464,6 +568,8 @@ wss.on('connection', (ws: WebSocket) => {
         sessionManager.destroySession(sessionId);
     });
 });
+
+
 
 const PORT = WS_CONFIG.SERVER_PORT;
 

@@ -1,3 +1,4 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,10 +11,6 @@ const __dirname = path.dirname(__filename);
 
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
-
-// Paths
-const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/proof_block_staging.json');
 
 // Interfaces
 interface BrandResearch {
@@ -39,17 +36,27 @@ interface BrandResearch {
 export class InitialProofGenerator {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
+    private workspaceId: string;
 
-    constructor() {
+    private researchPath: string;
+    private outputPath: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set");
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        this.researchPath = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.outputPath = path.join(baseBrainPath, 'staging/proof_block_staging.json');
     }
 
     async generate() {
-        console.log("🚀 Initial Proof Generator: Starting...");
-        const rawData = await fs.readFile(RESEARCH_PATH, 'utf-8');
+        console.log(`🚀 [${this.workspaceId}] Initial Proof Generator: Starting...`);
+        const rawData = await fs.readFile(this.researchPath, 'utf-8');
         const research: BrandResearch = JSON.parse(rawData);
 
         // 1. Extract Constraints & Context
@@ -127,14 +134,17 @@ export class InitialProofGenerator {
         // === OUTPUT ===
         console.log("Saving Staged Proof Block...");
         // Ensure staging dir exists
-        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
-        await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
-        console.log(`✅ Staged Proof Block Saved: ${OUTPUT_PATH}`);
+        await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
+        await fs.writeFile(this.outputPath, JSON.stringify(challenger, null, 4));
+        console.log(`✅ Staged Proof Block Saved: ${this.outputPath}`);
     }
 }
 
 // Auto-run if executed directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    const generator = new InitialProofGenerator();
+    // Default workspace for manual CLI run
+    const workspaceId = process.argv.find(a => a.startsWith('--workspace='))?.split('=')[1] || 'default';
+    const generator = new InitialProofGenerator(workspaceId);
     generator.generate().catch(console.error);
 }
+

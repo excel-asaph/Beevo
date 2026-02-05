@@ -267,7 +267,7 @@ const AIThinkingPage: React.FC<{
                     <ul className="space-y-2">
                         {steps.map((step, i) => (
                             <motion.li
-                                key={step.id}
+                                key={step.id || i}
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: i * 0.03 }}

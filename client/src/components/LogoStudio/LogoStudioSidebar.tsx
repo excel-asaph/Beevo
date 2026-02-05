@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Junction } from '@shared/types';
 import { useBrand } from '../../context/BrandContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { Download, Hexagon } from 'lucide-react';
 import { PipelineControl } from './PipelineControl';
+import { apiGenerateLogos, apiFinalizeLogos } from '../../api';
 
 export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
     const { dna, setDna, addThought } = useBrand();
+    const { workspaceId, resolveAssetUrl } = useWorkspace();
     const [logoKit, setLogoKit] = useState<null | {
         primary: string;
         inverted: string;
@@ -19,7 +22,8 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
 
     const fetchBakedKit = async () => {
         try {
-            const response = await fetch('/assets/logo_kit_challenger.json?t=' + Date.now()); // bust cache
+            const assetPath = `/workspaces/${workspaceId}/assets/logo_kit_challenger.json`;
+            const response = await fetch(assetPath + '?t=' + Date.now()); // bust cache
             if (response.ok) {
                 const data = await response.json();
                 console.log("🚀 Baked Logo Kit Found:", data);
@@ -44,13 +48,7 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
     const handleGenerate = async (context: string) => {
         try {
             console.log("Generatng with context:", context);
-            const res = await fetch('http://localhost:3000/api/logos/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ context })
-            });
-            if (!res.ok) throw new Error('Generation failed');
-
+            await apiGenerateLogos(workspaceId, context);
             // Re-fetch to see non-transparent results (we might want to change this flow to read generated_logos dir directly, 
             // but for now relying on baking being the "view" step or just waiting for finalize)
             // Actually, generateLogoKit usually updates logo_kit_challenger.json at the end, so we can re-fetch.
@@ -62,17 +60,15 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
 
     const handleFinalize = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/logos/finalize', { method: 'POST' });
-            if (!res.ok) throw new Error('Finalization failed');
-            const data = await res.json();
-            console.log("Finalized Kit:", data);
+            await apiFinalizeLogos(workspaceId);
+            console.log("Finalized Kit successfully");
 
             // Force refresh to see transparent logos
             await fetchBakedKit();
         } catch (e) {
             console.error("Finalization Error:", e);
         }
-    };
+    }
 
     return (
         <div className="fixed right-0 top-0 h-full w-[400px] bg-slate-900 border-l border-slate-700 shadow-2xl z-50 flex flex-col overflow-y-auto">
@@ -94,8 +90,8 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
                         <div className="space-y-2">
                             <span className="text-xs text-slate-400">Primary Marks</span>
                             <div className="grid grid-cols-2 gap-2">
-                                <AssetCard title="Primary" url={logoKit.primary} dark={false} />
-                                <AssetCard title="Inverted" url={logoKit.inverted} dark={true} />
+                                <AssetCard title="Primary" url={resolveAssetUrl(logoKit.primary)} dark={false} />
+                                <AssetCard title="Inverted" url={resolveAssetUrl(logoKit.inverted)} dark={true} />
                             </div>
                         </div>
 
@@ -103,8 +99,8 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
                         <div className="space-y-2">
                             <span className="text-xs text-slate-400">Icon / Symbol</span>
                             <div className="grid grid-cols-2 gap-2">
-                                <AssetCard title="Icon" url={logoKit.icon} dark={false} />
-                                <AssetCard title="Icon (Dark)" url={logoKit.icon_inverted} dark={true} />
+                                <AssetCard title="Icon" url={resolveAssetUrl(logoKit.icon)} dark={false} />
+                                <AssetCard title="Icon (Dark)" url={resolveAssetUrl(logoKit.icon_inverted)} dark={true} />
                             </div>
                         </div>
 
@@ -112,8 +108,8 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
                         <div className="space-y-2">
                             <span className="text-xs text-slate-400">Wordmark</span>
                             <div className="grid grid-cols-2 gap-2">
-                                <AssetCard title="Wordmark" url={logoKit.wordmark} dark={false} />
-                                <AssetCard title="Wordmark (Dark)" url={logoKit.wordmark_inverted} dark={true} />
+                                <AssetCard title="Wordmark" url={resolveAssetUrl(logoKit.wordmark)} dark={false} />
+                                <AssetCard title="Wordmark (Dark)" url={resolveAssetUrl(logoKit.wordmark_inverted)} dark={true} />
                             </div>
                         </div>
 
@@ -121,8 +117,8 @@ export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void 
                         <div className="space-y-2">
                             <span className="text-xs text-slate-400">Digital / Social</span>
                             <div className="grid grid-cols-2 gap-2">
-                                <AssetCard title="Social" url={logoKit.social} dark={false} />
-                                <AssetCard title="Social (Dark)" url={logoKit.social_inverted} dark={true} />
+                                <AssetCard title="Social" url={resolveAssetUrl(logoKit.social)} dark={false} />
+                                <AssetCard title="Social (Dark)" url={resolveAssetUrl(logoKit.social_inverted)} dark={true} />
                             </div>
                         </div>
                     </div>

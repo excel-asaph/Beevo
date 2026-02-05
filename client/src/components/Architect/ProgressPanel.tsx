@@ -1,6 +1,7 @@
 import React from 'react';
 import { Type as TypeIcon, Palette, Target, Edit2, Check, Sparkles, LayoutTemplate, Image as ImageIcon, Bookmark } from 'lucide-react';
 import type { BrandDNA } from '@shared/types';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface ProgressPanelProps {
     brandDNA: BrandDNA;
@@ -14,11 +15,12 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
     processingField
 }) => {
     const [previewColor, setPreviewColor] = React.useState<string | null>(null);
+    const { resolveAssetUrl } = useWorkspace();
 
     // Load Fonts when selected
     React.useEffect(() => {
-        if (!brandDNA.typography?.length) return;
-        const fontName = brandDNA.typography[0];
+        if (!brandDNA.typography?.items?.length) return;
+        const fontName = brandDNA.typography.items[0];
         const link = document.createElement('link');
         link.href = `https://fonts.googleapis.com/css2?family=${fontName.trim().replace(/\s+/g, '+')}&display=swap`;
         link.rel = 'stylesheet';
@@ -28,11 +30,11 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
         };
     }, [brandDNA.typography]);
 
-    const hasName = !!(brandDNA?.name && brandDNA.name.length > 0);
-    const hasMission = !!(brandDNA?.mission && brandDNA.mission.length > 0);
-    const hasFont = !!(brandDNA?.typography && brandDNA.typography.length > 0);
-    const hasColors = !!(brandDNA?.colors && brandDNA.colors.length > 0);
-    const hasVoice = !!(brandDNA?.voice && brandDNA.voice.length > 0);
+    const hasName = !!(brandDNA?.name?.value && brandDNA.name.value.length > 0);
+    const hasMission = !!(brandDNA?.mission?.value && brandDNA.mission.value.length > 0);
+    const hasFont = !!(brandDNA?.typography?.items && brandDNA.typography.items.length > 0);
+    const hasColors = !!(brandDNA?.colors?.items && brandDNA.colors.items.length > 0);
+    const hasVoice = !!(brandDNA?.voice?.value && brandDNA.voice.value.length > 0);
 
     // Check if a specific field is processing
     const isProcessing = (key: string) => processingField === key || (processingField === 'general' && !hasName); // Default to first item if general
@@ -57,7 +59,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 {/* Brand Name */}
                 <ProgressItem
                     label="Brand Name"
-                    value={brandDNA?.name}
+                    value={brandDNA?.name?.value}
                     isComplete={hasName}
                     isProcessing={isProcessing('name')}
                     icon={<Sparkles size={16} />}
@@ -67,7 +69,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 {/* Mission */}
                 <ProgressItem
                     label="Mission"
-                    value={brandDNA?.mission}
+                    value={brandDNA?.mission?.value}
                     isComplete={hasMission}
                     isProcessing={isProcessing('mission')}
                     icon={<Target size={16} />}
@@ -78,7 +80,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 {/* Typography */}
                 <ProgressItem
                     label="Typography"
-                    value={brandDNA?.typography?.[0]}
+                    value={brandDNA?.typography?.items?.[0]}
                     isComplete={hasFont}
                     isProcessing={isProcessing('typography')}
                     icon={<TypeIcon size={16} />}
@@ -87,9 +89,9 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                         hasFont && (
                             <div
                                 className="text-2xl mt-2 text-white"
-                                style={{ fontFamily: `"${brandDNA.typography[0]}", sans-serif` }}
+                                style={{ fontFamily: `"${brandDNA.typography.items[0]}", sans-serif` }}
                             >
-                                {brandDNA.name || 'Sample Text'}
+                                {brandDNA.name?.value || 'Sample Text'}
                             </div>
                         )
                     }
@@ -98,7 +100,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 {/* Colors */}
                 <ProgressItem
                     label="Color Palette"
-                    value={hasColors ? `${brandDNA.colors.length} colors` : undefined}
+                    value={hasColors ? `${brandDNA.colors.items.length} colors` : undefined}
                     isComplete={hasColors}
                     isProcessing={isProcessing('colors')}
                     icon={<Palette size={16} />}
@@ -106,7 +108,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     preview={
                         hasColors && (
                             <div className="flex gap-2 mt-2">
-                                {brandDNA.colors.map((color, i) => (
+                                {brandDNA.colors.items.map((color, i) => (
                                     <div
                                         key={i}
                                         className="flex flex-col items-center cursor-pointer group"
@@ -128,7 +130,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 {/* Voice */}
                 <ProgressItem
                     label="Brand Voice"
-                    value={brandDNA?.voice}
+                    value={brandDNA?.voice?.value}
                     isComplete={hasVoice}
                     isProcessing={isProcessing('voice')}
                     icon={<Sparkles size={16} />}
@@ -177,7 +179,7 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                             <div className="flex -space-x-2 mt-2 overflow-hidden py-1 pl-1">
                                 {brandDNA.logoAssets.map((logo, i) => (
                                     <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-800 bg-white flex items-center justify-center overflow-hidden hover:z-10 hover:scale-110 transition-transform">
-                                        <img src={logo.url} alt={logo.name || 'Logo'} className="w-full h-full object-contain" />
+                                        <img src={resolveAssetUrl(logo.url)} alt={logo.name || 'Logo'} className="w-full h-full object-contain" />
                                     </div>
                                 ))}
                             </div>
@@ -195,21 +197,21 @@ export const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     <div
                         className="p-4 rounded-xl transition-colors duration-300"
                         style={{
-                            background: previewColor || (hasColors && brandDNA.colors[0] ? brandDNA.colors[0] : '#3b82f6')
+                            background: previewColor || (hasColors && brandDNA.colors.items[0] ? brandDNA.colors.items[0] : '#3b82f6')
                         }}
                     >
                         <h4
                             className="text-2xl font-bold text-white"
-                            style={{ fontFamily: hasFont ? `"${brandDNA.typography[0]}", sans-serif` : 'inherit' }}
+                            style={{ fontFamily: hasFont ? `"${brandDNA.typography.items[0]}", sans-serif` : 'inherit' }}
                         >
-                            {hasName ? brandDNA.name : 'Your Brand'}
+                            {hasName ? brandDNA.name.value : 'Your Brand'}
                         </h4>
                         {hasMission && (
-                            <p className="text-white/80 text-sm mt-1">{brandDNA.mission}</p>
+                            <p className="text-white/80 text-sm mt-1">{brandDNA.mission.value}</p>
                         )}
                         {hasVoice && (
                             <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-white/10">
-                                {brandDNA.voice.split(/,| and /).map((tag, i) => (
+                                {brandDNA.voice.value.split(/,| and /).map((tag, i) => (
                                     <span key={i} className="px-2 py-1 bg-black/20 text-white/90 text-[10px] uppercase font-bold tracking-wider rounded backdrop-blur-sm">
                                         {tag.trim()}
                                     </span>

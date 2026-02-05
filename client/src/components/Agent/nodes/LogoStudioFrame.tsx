@@ -2,6 +2,7 @@ import React, { memo, useState } from 'react';
 import { NodeProps, NodeToolbar, Position, useReactFlow } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Settings2, Sparkles, Ghost } from 'lucide-react';
+import { useWorkspace } from '../../../context/WorkspaceContext';
 
 // Types
 export interface LogoStudioNodeData {
@@ -95,28 +96,31 @@ const LogoSkeleton: React.FC<{ delay?: number }> = ({ delay = 0 }) => (
 const LogoResultItem: React.FC<{
     logo: { id: string; url: string; title: string };
     index: number;
-}> = ({ logo, index }) => (
-    <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3, delay: index * 0.1 }}
-        className="flex flex-col items-center gap-2"
-    >
-        <div className="w-32 h-32 rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex items-center justify-center">
-            <img
-                src={logo.url}
-                alt={logo.title}
-                className="w-full h-full object-contain p-2"
-                onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23f3f4f6" width="100" height="100"/><text x="50" y="55" text-anchor="middle" fill="%239ca3af" font-size="12">Logo</text></svg>';
-                }}
-            />
-        </div>
-        <span className="text-xs font-medium text-gray-600 text-center max-w-[128px] truncate">
-            {logo.title}
-        </span>
-    </motion.div>
-);
+}> = ({ logo, index }) => {
+    const { resolveAssetUrl } = useWorkspace();
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            className="flex flex-col items-center gap-2"
+        >
+            <div className="w-32 h-32 rounded-2xl bg-white shadow-md border border-gray-100 overflow-hidden flex items-center justify-center">
+                <img
+                    src={resolveAssetUrl(logo.url)}
+                    alt={logo.title}
+                    className="w-full h-full object-contain p-2"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23f3f4f6" width="100" height="100"/><text x="50" y="55" text-anchor="middle" fill="%239ca3af" font-size="12">Logo</text></svg>';
+                    }}
+                />
+            </div>
+            <span className="text-xs font-medium text-gray-600 text-center max-w-[128px] truncate">
+                {logo.title}
+            </span>
+        </motion.div>
+    );
+};
 
 // Reusable Tooltip Button
 const TooltipButton = ({
@@ -302,7 +306,7 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                                     className="flex flex-wrap gap-4 justify-start"
                                 >
                                     {logos.map((logo, i) => (
-                                        <LogoResultItem key={logo.id} logo={logo} index={i} />
+                                        <LogoResultItem key={logo.id || i} logo={logo} index={i} />
                                     ))}
                                 </motion.div>
                             ) : (

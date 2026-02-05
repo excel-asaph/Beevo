@@ -4,7 +4,7 @@ import { GoogleGenAI } from '@google/genai';
 import { MODELS } from '../../../shared/constants.js';
 import { GeminiLiveConnection } from '../gemini/LiveConnection';
 import { BrandStateManager } from '../state/BrandStateManager';
-import { stateManager } from '../services/StateManager';
+import { WorkspaceManager } from '../services/StateManager';
 import {
     ClientMessage,
     ServerMessage,
@@ -22,6 +22,7 @@ interface Session {
     currentPalettes: ColorPalette[];
     currentFonts: FontSuggestion[];
     canvasMode: 'none' | 'fonts' | 'colors';
+    workspaceId: string;
     // Phase 3: Brand Vault
     vaultContext: string;
     vaultStats: {
@@ -33,37 +34,36 @@ interface Session {
 
 export class SessionManager {
     private sessions: Map<string, Session> = new Map();
+    private workspaceListeners: Set<string> = new Set();
 
     constructor() {
-        // REACTIVE SYNC: Listen for global state updates
-        stateManager.on('stateUpdated', (newState: any) => {
-            console.log('🔄 [SessionManager] Detected global state update. Broadcasting to all sessions...');
-            // Broadcast to all active sessions
-            for (const [id, session] of this.sessions.entries()) {
-                if (session.isActive && session.ws.readyState === 1) { // 1 = OPEN
-                    // Sync session memory
-                    // Use updateBatch to ensure internal state matches disk
-                    session.stateManager.updateBatch(newState.brandDNA);
-
-                    // Send FULL state update (Single Source of Truth)
-                    console.log(`📦 [SessionManager] Broadcasting FULL state (v${newState.stateVersion}) to ${id}`);
-                    this.sendToClient(id, {
-                        type: 'FULL_STATE_UPDATE',
-                        state: newState
-                    });
-
-
-                }
-            }
-        });
+        // No global listener anymore - handled per workspace in createSession
     }
 
-    createSession(ws: WebSocket): string {
+    private broadcastToWorkspace(workspaceId: string, newState: any) {
+        console.log(`🔄 [SessionManager] Broadcasting update to workspace: ${workspaceId}`);
+        for (const [id, session] of this.sessions.entries()) {
+            if (session.workspaceId === workspaceId && session.isActive && session.ws.readyState === 1) {
+                // Sync session memory
+                session.stateManager.updateBatch(newState.brandDNA);
+
+                // Send FULL state update
+                console.log(`📦 [SessionManager] Broadcasting FULL state (v${newState.stateVersion}) to session ${id}`);
+                this.sendToClient(id, {
+                    type: 'FULL_STATE_UPDATE',
+                    state: newState
+                });
+            }
+        }
+    }
+
+    createSession(ws: WebSocket, workspaceId: string = 'default'): string {
         const sessionId = uuidv4();
 
         const session: Session = {
             id: sessionId,
             ws,
+            workspaceId,
             geminiConnection: null,
             stateManager: new BrandStateManager(sessionId),
             isActive: false,
@@ -76,7 +76,14 @@ export class SessionManager {
 
         this.sessions.set(sessionId, session);
 
-        this.sessions.set(sessionId, session);
+        // Ensure we are listening to this workspace
+        if (!this.workspaceListeners.has(workspaceId)) {
+            const manager = WorkspaceManager.getStateManager(workspaceId);
+            manager.on('stateUpdated', (newState: any) => {
+                this.broadcastToWorkspace(workspaceId, newState);
+            });
+            this.workspaceListeners.add(workspaceId);
+        }
 
         // Send session ID to client
         this.sendToClient(sessionId, {
@@ -88,7 +95,8 @@ export class SessionManager {
         // ==========================================
         // INITIAL STATE HYDRATION (Fix for State Loss)
         // ==========================================
-        const existingState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(workspaceId);
+        const existingState = manager.loadLatest();
         if (existingState && existingState.brandDNA) {
             console.log(`💧 Hydrating session ${sessionId} with existing state (v${existingState.stateVersion || '?'})`);
 
@@ -217,13 +225,13 @@ export class SessionManager {
                 // Callback for getting current palettes
                 () => session.currentPalettes,
                 // Callback for getting current canvas mode
-                // Callback for getting current canvas mode
                 () => session.canvasMode,
                 // Callback for batch updating state (single broadcast)
                 (updates: Record<string, any>) => {
                     session.stateManager.updateBatch(updates);
                     // Broadcast removed: StateManager listener handles it
-                }
+                },
+                session.workspaceId
             );
 
             await session.geminiConnection.connect();
@@ -239,6 +247,16 @@ export class SessionManager {
                 status: 'connected',
                 geminiConnected: true
             });
+
+            // CHECK FOR EXISTING RESEARCH & SET MODIFICATION PHASE
+            const dna = session.stateManager.getDNA();
+            const hasName = !!dna.name?.value;
+            // RELAXED CHECK: If we have at least a Name, we are past Discovery.
+            // This handles both fully restored sessions (from JSON) and in-progress execution.
+            if (hasName) {
+                console.log(`🔄 Existing research detected (Name: ${dna.name?.value}). Switching to MODIFICATION phase.`);
+                await session.geminiConnection.setPhase('modification');
+            }
 
         } catch (error) {
             console.error('Failed to start session:', error);
@@ -327,7 +345,7 @@ ${canvasInfo}
             session.stateManager.update('typography', [value]);
 
             // Persist to disk immediately (Listener will handle broadcast)
-            await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+            await WorkspaceManager.getStateManager(session.workspaceId).saveWithHistory('brandDNA', session.stateManager.getDNA());
         } else if (selectionType === 'color') {
             // Look up the palette by name to get actual colors
             const palette = session.currentPalettes.find(p => p.name === value);
@@ -335,13 +353,14 @@ ${canvasInfo}
                 session.stateManager.update('colors', palette.colors);
 
                 // Persist to disk immediately (Listener will handle broadcast)
-                await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+                await WorkspaceManager.getStateManager(session.workspaceId).saveWithHistory('brandDNA', session.stateManager.getDNA());
             } else {
                 console.warn(`⚠️ Palette "${value}" not found in currentPalettes`);
             }
         } else if (selectionType === 'structure') {
             // Updated to handle array-based LogoStructureOption selection
-            const currentState = stateManager.loadLatest();
+            const manager = WorkspaceManager.getStateManager(session.workspaceId);
+            const currentState = manager.loadLatest();
             const currentOptions = currentState?.logoStructures?.options || [];
 
             if (currentOptions.length > 0) {
@@ -351,7 +370,7 @@ ${canvasInfo}
                     isSelected: opt.id === value
                 }));
 
-                await stateManager.saveWithHistory('logoStructures', {
+                await manager.saveWithHistory('logoStructures', {
                     options: updatedOptions,
                     rationale: `User manually selected logo structure: ${value}`
                 });
@@ -361,7 +380,7 @@ ${canvasInfo}
 
         } else if (selectionType === 'imagery') {
             session.stateManager.update('imagery', value);
-            await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+            await WorkspaceManager.getStateManager(session.workspaceId).saveWithHistory('brandDNA', session.stateManager.getDNA());
         }
 
         // Also notify the AI about the selection so it can continue the conversation
@@ -547,7 +566,7 @@ ${canvasInfo}
                     if (coreData.voice) session.stateManager.update('voice', coreData.voice);
 
                     // Persist to disk immediately (Listener will handle broadcast)
-                    await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+                    await WorkspaceManager.getStateManager(session.workspaceId).saveWithHistory('brandDNA', session.stateManager.getDNA());
 
                     // Notify Voice AI to narrate progress
                     if (session.geminiConnection) {
@@ -624,7 +643,7 @@ ${canvasInfo}
                     if (visualData.imagery) session.stateManager.update('imagery', visualData.imagery);
 
                     // Persist to disk immediately (Listener will handle broadcast)
-                    await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+                    await WorkspaceManager.getStateManager(session.workspaceId).saveWithHistory('brandDNA', session.stateManager.getDNA());
 
                     // Notify Voice AI to narrate completion
                     if (session.geminiConnection) {
@@ -642,7 +661,7 @@ ${canvasInfo}
         session.stateManager.update(field, value);
 
         // Persist to disk immediately (Listener will handle broadcast)
-        await stateManager.saveWithHistory('brandDNA', session.stateManager.getDNA());
+        await WorkspaceManager.getStateManager(session.workspaceId).saveWithHistory('brandDNA', session.stateManager.getDNA());
     }
 
     private sendToClient(sessionId: string, message: ServerMessage): void {

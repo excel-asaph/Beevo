@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useConfig } from '../../hooks/useConfig';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface FormOrchestratorProps {
     type: 'CONTACT' | 'INTENT' | 'OFFER';
@@ -9,6 +10,7 @@ interface FormOrchestratorProps {
 
 export const FormOrchestrator: React.FC<FormOrchestratorProps> = ({ type, context, onClose }) => {
     const { config } = useConfig();
+    const { workspaceId } = useWorkspace();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [formData, setFormData] = useState<Record<string, string>>({});
@@ -23,7 +25,10 @@ export const FormOrchestrator: React.FC<FormOrchestratorProps> = ({ type, contex
 
             const response = await fetch('http://localhost:3001/api/leads/submit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-workspace-id': workspaceId
+                },
                 body: JSON.stringify({
                     type,
                     formData,

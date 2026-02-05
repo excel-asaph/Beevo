@@ -26,8 +26,17 @@ export interface BrandDNA {
     values: SelectableArray;
     targetAudience: SelectableArray;
     mood: SelectableArray;
-    industry?: SelectableString;
+    industry: SelectableString;
     rationale?: string;
+    // New fields for Logo Studio and Visuals
+    typography: SelectableArray;
+    colors: SelectableArray;
+    logoType?: string;
+    imagery?: string;
+    designGoals?: string;
+    logoAssets?: Array<{ url: string; name?: string }>;
+    logoUrl?: SelectableString;
+    logoInvertedUrl?: SelectableString;
 }
 
 export interface SWOT {

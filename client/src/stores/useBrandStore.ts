@@ -63,7 +63,7 @@ interface BrandStore {
     // UI State
     voiceState: 'idle' | 'listening' | 'thinking' | 'speaking';
     aiMessage: string;
-    phase: 'onboarding' | 'loading' | 'canvas';
+    phase: 'entry' | 'onboarding' | 'loading' | 'canvas';
     loadingMessage: string;
 
     // Agentic workflow state
@@ -90,7 +90,7 @@ interface BrandStore {
     // UI State
     setVoiceState: (state: 'idle' | 'listening' | 'thinking' | 'speaking') => void;
     setAiMessage: (message: string) => void;
-    setPhase: (phase: 'onboarding' | 'loading' | 'canvas') => void;
+    setPhase: (phase: 'entry' | 'onboarding' | 'loading' | 'canvas') => void;
     setLoadingMessage: (message: string) => void;
 
     // Agentic workflow actions
@@ -107,9 +107,12 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
         mission: { value: '', isSelected: false },
         voice: { value: '', isSelected: false },
         tagline: { value: '', isSelected: false },
+        industry: { value: '', isSelected: false },
         values: { items: [], isSelected: false },
         targetAudience: { items: [], isSelected: false },
-        mood: { items: [], isSelected: false }
+        mood: { items: [], isSelected: false },
+        typography: { items: [], isSelected: false },
+        colors: { items: [], isSelected: false }
     },
     projectName: 'Untitled',
     colorOptions: [],
@@ -124,7 +127,7 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
     },
     voiceState: 'idle',
     aiMessage: '',
-    phase: 'onboarding',
+    phase: 'entry',
     loadingMessage: 'Extracting brand identity...',
     thoughtSignatures: [],
     researchStatus: {

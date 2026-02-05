@@ -14,7 +14,7 @@ import { getLogoStrategist, BrandContext } from '../agents/LogoStrategist';
 import { BrainLogger } from '../utils/BrainLogger';
 import { ResearchLogger } from '../utils/ResearchLogger';
 import { ExecutionEngine } from '../services/ExecutionEngine';
-import { stateManager } from '../services/StateManager';
+import { WorkspaceManager } from '../services/StateManager';
 
 interface FunctionCall {
     id: string;
@@ -43,6 +43,7 @@ export class ToolHandler {
     private researchCycleCompleted: boolean = false;
     private onPauseVoice: () => void;
     private onResumeVoice: () => void;
+    private workspaceId: string;
 
     constructor(
         sendToClient: (message: ServerMessage) => void,
@@ -53,18 +54,22 @@ export class ToolHandler {
         getDNA: () => BrandDNA = () => ({
             name: { value: '', isSelected: true },
             mission: { value: '', isSelected: true },
-
             values: { items: [], isSelected: true },
             voice: { value: '', isSelected: true },
             tagline: { value: '', isSelected: true },
             targetAudience: { items: [], isSelected: true },
-            mood: { items: [], isSelected: true }
-        } as BrandDNA),
+            mood: { items: [], isSelected: true },
+            industry: { value: '', isSelected: true },
+            typography: { fonts: [], rationale: '' },
+            colors: { palettes: [], rationale: '' }
+        } as any as BrandDNA),
         updateBatch: (updates: Record<string, any>) => void = () => { },
         onPauseVoice: () => void = () => { },
         onResumeVoice: () => void = () => { },
-        onPhaseChange: (phase: 'discovery' | 'execution' | 'modification') => void = () => { }
+        onPhaseChange: (phase: 'discovery' | 'execution' | 'modification') => void = () => { },
+        workspaceId: string = 'default'
     ) {
+        this.workspaceId = workspaceId;
         this.sendToClient = sendToClient;
         this.updateState = updateState;
         this.storePalettes = storePalettes;
@@ -76,7 +81,7 @@ export class ToolHandler {
         this.onPauseVoice = onPauseVoice;
         this.onResumeVoice = onResumeVoice;
         this.searchService = new SearchGroundingService(process.env.GEMINI_API_KEY || '');
-        this.executionEngine = new ExecutionEngine();
+        this.executionEngine = new ExecutionEngine(workspaceId);
     }
 
     public setConversationHistory(history: string): void {
@@ -149,7 +154,8 @@ export class ToolHandler {
                         // ---------------------------------------------------------
 
                         // Save FULL state - this triggers SessionManager to broadcast FULL_STATE_UPDATE
-                        await stateManager.saveFullState(researchResult);
+                        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+                        await manager.saveFullState(researchResult);
 
                         // Send Competitors list (Keep this as UI notification for now, or could depend on full state)
                         // Actually, client likely parses competitors from Full State if we add it there.
@@ -308,7 +314,8 @@ export class ToolHandler {
 
     private async handleCreatePalette(args: any): Promise<string> {
         this.setCanvasMode('colors');
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const existingPalettes = currentState?.colorPalettes?.palettes || [];
 
         // Strict Limit Check (Max 10)
@@ -329,7 +336,7 @@ export class ToolHandler {
         // Merge logic
         const updatedPalettes = [...existingPalettes, ...newPalettes];
 
-        await stateManager.saveWithHistory('colorPalettes', {
+        await manager.saveWithHistory('colorPalettes', {
             palettes: updatedPalettes,
             rationale: `Created new palettes based on: ${query}`
         });
@@ -340,8 +347,8 @@ export class ToolHandler {
     private async handleDeletePalette(args: any): Promise<string> {
         const instruction = args.instruction || args.names?.join(', '); // Fallback to names if old call
         if (!instruction) return "No instruction provided for deletion.";
-
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const existingPalettes = currentState?.colorPalettes?.palettes || [];
 
         // Resolve which palettes to delete (Now returns IDs)
@@ -354,7 +361,7 @@ export class ToolHandler {
 
         const deletedCount = existingPalettes.length - keptPalettes.length;
 
-        await stateManager.saveWithHistory('colorPalettes', {
+        await manager.saveWithHistory('colorPalettes', {
             palettes: keptPalettes,
             rationale: `Deleted ${deletedCount} palettes`
         });
@@ -373,7 +380,8 @@ export class ToolHandler {
     // Helper for Select/Unselect logic
     private async _updatePaletteSelection(args: any, isSelected: boolean): Promise<string> {
         const instruction = args.instruction;
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const palettes = currentState?.colorPalettes?.palettes || [];
 
         if (!instruction) return "No instruction provided.";
@@ -393,7 +401,7 @@ export class ToolHandler {
             return p;
         });
 
-        await stateManager.saveWithHistory('colorPalettes', {
+        await manager.saveWithHistory('colorPalettes', {
             palettes: updatedPalettes,
             rationale: `User ${isSelected ? 'selected' : 'unselected'} ${changeCount} palettes`
         });
@@ -404,8 +412,8 @@ export class ToolHandler {
     private async handleUpdateColorsInPalette(args: any): Promise<string> {
         const { paletteName, instruction } = args;
         if (!instruction) return "Missing instruction.";
-
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const palettes = currentState?.colorPalettes?.palettes || [];
 
         // 1. Identify target palette(s)
@@ -435,7 +443,7 @@ export class ToolHandler {
             updatedPalettes[idx] = { ...currentPalette, colors: newColors };
         }
 
-        await stateManager.saveWithHistory('colorPalettes', { palettes: updatedPalettes });
+        await manager.saveWithHistory('colorPalettes', { palettes: updatedPalettes });
         return `Updated colors in ${targetIndices.length} palette(s) based on: "${instruction}".`;
     }
 
@@ -446,7 +454,8 @@ export class ToolHandler {
 
     private async handleCreateFonts(args: any): Promise<string> {
         this.setCanvasMode('fonts');
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const existingFonts = currentState?.typographyPairings?.fonts || [];
 
         if (existingFonts.length >= 10) return "Limit reached (10 fonts). Delete some first.";
@@ -468,7 +477,7 @@ export class ToolHandler {
             id: (i + 1).toString()
         }));
 
-        await stateManager.saveWithHistory('typographyPairings', {
+        await manager.saveWithHistory('typographyPairings', {
             fonts: finalFonts,
             rationale: `Created new fonts: ${query}`
         });
@@ -480,7 +489,8 @@ export class ToolHandler {
         const instruction = args.instruction || args.names?.join(', ');
         if (!instruction) return "No instruction provided.";
 
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const existing = currentState?.typographyPairings?.fonts || [];
 
         const namesToDelete = await this.executionEngine.resolveFontSelector(existing, instruction);
@@ -488,14 +498,14 @@ export class ToolHandler {
         if (namesToDelete.length === 0) return "I couldn't identify which fonts to delete.";
 
         // Filter
-        const kept = existing.filter(f =>
+        const kept = existing.filter((f: any) =>
             !namesToDelete.some((n: string) => f.name.toLowerCase() === n.toLowerCase())
         );
 
         // Re-index
-        const reindexed = kept.map((f, i) => ({ ...f, id: (i + 1).toString() }));
+        const reindexed = kept.map((f: any, i: number) => ({ ...f, id: (i + 1).toString() }));
 
-        await stateManager.saveWithHistory('typographyPairings', {
+        await manager.saveWithHistory('typographyPairings', {
             fonts: reindexed,
             rationale: `Deleted fonts: ${namesToDelete.join(', ')}`
         });
@@ -515,7 +525,8 @@ export class ToolHandler {
         const instruction = args.instruction;
         if (!instruction) return "No instruction provided.";
 
-        const currentState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const currentState = manager.loadLatest();
         const fonts = currentState?.typographyPairings?.fonts || [];
 
         const targetNames = await this.executionEngine.resolveFontSelector(fonts, instruction);
@@ -523,7 +534,7 @@ export class ToolHandler {
         if (targetNames.length === 0) return `I couldn't identify which fonts to ${isSelected ? 'select' : 'unselect'}.`;
 
         let count = 0;
-        const updated = fonts.map(f => {
+        const updated = fonts.map((f: any) => {
             const match = targetNames.some((n: string) => f.name.toLowerCase() === n.toLowerCase());
             if (match) {
                 count++;
@@ -532,7 +543,7 @@ export class ToolHandler {
             return f;
         });
 
-        await stateManager.saveWithHistory('typographyPairings', { fonts: updated });
+        await manager.saveWithHistory('typographyPairings', { fonts: updated });
         return `${isSelected ? 'Selected' : 'Unselected'} ${count} fonts.`;
     }
 
@@ -551,7 +562,8 @@ export class ToolHandler {
             finalValue = directValue;
         } else if (instruction) {
             // CASE 2: Instruction Provided (Execution Engine does the work)
-            const state = stateManager.loadLatest();
+            const manager = WorkspaceManager.getStateManager(this.workspaceId);
+            const state = manager.loadLatest();
             const currentObj = state?.brandDNA?.[field];
             const currentContent = currentObj
                 ? (isArray ? (currentObj as any).items : (currentObj as any).value)
@@ -567,12 +579,13 @@ export class ToolHandler {
             : { value: finalValue, isSelected: true };
 
         // Load state again to be safe
-        const latestState = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const latestState = manager.loadLatest();
         if (!latestState || !latestState.brandDNA) return "Error: No state found";
 
         // Update persistence state
         latestState.brandDNA[field] = wrapped as any;
-        await stateManager.saveWithHistory('brandDNA', latestState.brandDNA);
+        await manager.saveWithHistory('brandDNA', latestState.brandDNA);
 
         // Update in-memory session state
         this.updateState(field, wrapped);
@@ -597,7 +610,8 @@ export class ToolHandler {
             const options: LogoStructureOption[] = args.options;
             const selectedCount = options.filter(o => o.isSelected).length;
 
-            await stateManager.saveWithHistory('logoStructures', {
+            const manager = WorkspaceManager.getStateManager(this.workspaceId);
+            await manager.saveWithHistory('logoStructures', {
                 options,
                 rationale: 'User updated logo structure selection'
             });
@@ -632,7 +646,8 @@ export class ToolHandler {
             isSelected: !!opt.isSelected
         }));
 
-        await stateManager.saveWithHistory('logoStructures', {
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        await manager.saveWithHistory('logoStructures', {
             options,
             rationale: args.rationale || 'AI-generated logo structure options'
         });
@@ -648,7 +663,8 @@ export class ToolHandler {
         const count = args.count || 3;
         const query = args.query;
         const suggestions = await this.executionEngine.createImagerySuggestions(query, count);
-        await stateManager.saveWithHistory('imagery', {
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        await manager.saveWithHistory('imagery', {
             suggestions,
             rationale: `Generated imagery concepts: ${query}`
         });
@@ -667,12 +683,13 @@ export class ToolHandler {
     private async handleDeleteImagerySuggestions(args: any): Promise<string> {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
-        const state = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const state = manager.loadLatest();
         const current = state?.imagery?.suggestions || [];
         const ids = await this.executionEngine.resolveImagerySelector(current, instruction);
         if (ids.length === 0) return "Could not find items to delete.";
-        const kept = current.filter(s => !ids.includes(s.id));
-        await stateManager.saveWithHistory('imagery', { suggestions: kept });
+        const kept = current.filter((s: any) => !ids.includes(s.id));
+        await manager.saveWithHistory('imagery', { suggestions: kept });
         // Removed redundant sendToClient - relies on StateManager broadcast
         return `Deleted ${current.length - kept.length} items.`;
     }
@@ -680,15 +697,16 @@ export class ToolHandler {
     private async _updateImagerySelection(args: any, isSelected: boolean): Promise<string> {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
-        const state = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const state = manager.loadLatest();
         const current = state?.imagery?.suggestions || [];
         const ids = await this.executionEngine.resolveImagerySelector(current, instruction);
         if (ids.length === 0) return "Could not identify items.";
-        const updated = current.map(s => {
+        const updated = current.map((s: any) => {
             if (ids.includes(s.id)) return { ...s, isSelected: isSelected };
             return s;
         });
-        await stateManager.saveWithHistory('imagery', { suggestions: updated });
+        await manager.saveWithHistory('imagery', { suggestions: updated });
         // Removed redundant sendToClient - relies on StateManager broadcast
         return `${isSelected ? 'Selected' : 'Unselected'} ${ids.length} items.`;
     }
@@ -698,9 +716,10 @@ export class ToolHandler {
         this.setCanvasMode('none' as any);
 
         const query = args.query || 'modern logo';
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
 
         // Get brand context - Prefer latest state from file
-        const state = stateManager.loadLatest();
+        const state = manager.loadLatest();
         const dna = state?.brandDNA || this.getDNA();
 
         const brandContext: BrandContext = {
@@ -771,7 +790,7 @@ export class ToolHandler {
                 isSelected: false
             }));
 
-            await stateManager.saveWithHistory('logoInspirations', {
+            await manager.saveWithHistory('logoInspirations', {
                 inspirations,
                 rationale: `Searched for: ${query}. Insights: ${results.insights.recommendation}`
             });
@@ -796,7 +815,7 @@ export class ToolHandler {
             try {
                 const count = args.count || 4;
                 const inspirations = await this.executionEngine.searchLogoInspirations(query, count);
-                await stateManager.saveWithHistory('logoInspirations', {
+                await manager.saveWithHistory('logoInspirations', {
                     inspirations,
                     rationale: `Fallback search for: ${query}`
                 });
@@ -819,12 +838,13 @@ export class ToolHandler {
     private async handleDeleteLogoInspirations(args: any): Promise<string> {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
-        const state = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const state = manager.loadLatest();
         const current = state?.logoInspirations?.inspirations || [];
         const ids = await this.executionEngine.resolveLogoInspirationSelector(current, instruction);
         if (ids.length === 0) return "Could not find items to delete.";
-        const kept = current.filter(i => !ids.includes(i.id));
-        await stateManager.saveWithHistory('logoInspirations', { inspirations: kept });
+        const kept = current.filter((i: any) => !ids.includes(i.id));
+        await manager.saveWithHistory('logoInspirations', { inspirations: kept });
         this.sendToClient({ type: 'LOGO_INSPIRATIONS', inspirations: kept } as any);
         return `Deleted ${current.length - kept.length} items.`;
     }
@@ -832,15 +852,16 @@ export class ToolHandler {
     private async _updateInspirationSelection(args: any, isSelected: boolean): Promise<string> {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
-        const state = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const state = manager.loadLatest();
         const current = state?.logoInspirations?.inspirations || [];
         const ids = await this.executionEngine.resolveLogoInspirationSelector(current, instruction);
         if (ids.length === 0) return "Could not identify items.";
-        const updated = current.map(item => {
+        const updated = current.map((item: any) => {
             if (ids.includes(item.id)) return { ...item, isSelected: isSelected };
             return item;
         });
-        await stateManager.saveWithHistory('logoInspirations', { inspirations: updated });
+        await manager.saveWithHistory('logoInspirations', { inspirations: updated });
         this.sendToClient({ type: 'LOGO_INSPIRATIONS', inspirations: updated } as any);
         return `${isSelected ? 'Selected' : 'Unselected'} ${ids.length} items.`;
     }
@@ -850,8 +871,9 @@ export class ToolHandler {
         // Simple Google Search via SearchService
         const results = await this.searchService.search(query);
 
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
         // Save to state with history (append to existing queries)
-        const currentState = stateManager.loadLatest();
+        const currentState = manager.loadLatest();
         const existingQueries = currentState?.generalResearch?.queries || [];
 
         const newQuery = {
@@ -861,7 +883,7 @@ export class ToolHandler {
             timestamp: new Date().toISOString()
         };
 
-        await stateManager.saveWithHistory('generalResearch', {
+        await manager.saveWithHistory('generalResearch', {
             queries: [...existingQueries, newQuery]
         });
 
@@ -879,8 +901,9 @@ export class ToolHandler {
         const count = args.count || 3;
         const query = args.query;
 
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
         // Load current state to append to existing list
-        const currentState = stateManager.loadLatest();
+        const currentState = manager.loadLatest();
         const currentOptions = currentState?.logoStructures?.options || [];
 
         // Create new structures (engine handles ID generation based on currentOptions length)
@@ -889,7 +912,7 @@ export class ToolHandler {
         // Append new structures to the existing list
         const updatedOptions = [...currentOptions, ...newStructures];
 
-        await stateManager.saveWithHistory('logoStructures', {
+        await manager.saveWithHistory('logoStructures', {
             options: updatedOptions,
             rationale: `Created ${newStructures.length} new logo structures for: ${query}`
         });
@@ -910,7 +933,8 @@ export class ToolHandler {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
 
-        const state = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const state = manager.loadLatest();
         const current = state?.logoStructures?.options || [];
 
         const targetIds = await this.executionEngine.resolveLogoStructureSelector(current, instruction);
@@ -923,7 +947,7 @@ export class ToolHandler {
         // This matches the Typography implementation (handleDeleteFonts)
         const reindexed = kept.map((s: any, i: number) => ({ ...s, id: String(i + 1) }));
 
-        await stateManager.saveWithHistory('logoStructures', {
+        await manager.saveWithHistory('logoStructures', {
             options: reindexed,
             rationale: `Deleted ${targetIds.length} structures`
         });
@@ -936,7 +960,8 @@ export class ToolHandler {
         const instruction = args.instruction;
         if (!instruction) return "No instruction.";
 
-        const state = stateManager.loadLatest();
+        const manager = WorkspaceManager.getStateManager(this.workspaceId);
+        const state = manager.loadLatest();
         const current = state?.logoStructures?.options || [];
 
         const targetIds = await this.executionEngine.resolveLogoStructureSelector(current, instruction);
@@ -944,7 +969,7 @@ export class ToolHandler {
         if (targetIds.length === 0) return "Could not identify structures.";
 
         let changeCount = 0;
-        const updated = current.map(s => {
+        const updated = current.map((s: any) => {
             if (targetIds.includes(s.id)) {
                 changeCount++;
                 return { ...s, isSelected: isSelected };
@@ -952,7 +977,7 @@ export class ToolHandler {
             return s;
         });
 
-        await stateManager.saveWithHistory('logoStructures', {
+        await manager.saveWithHistory('logoStructures', {
             options: updated,
             rationale: `User ${isSelected ? 'selected' : 'unselected'} ${changeCount} logo structures`
         });

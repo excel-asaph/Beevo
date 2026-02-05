@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { StateAnalytics } from './Analytics/StateAnalytics';
 import { Settings, BarChart2 } from 'lucide-react';
+import { useWorkspace } from '../context/WorkspaceContext';
 
 interface SystemConfig {
     sections: Record<string, any>;
@@ -37,7 +38,7 @@ interface InterventionRequest {
     proposal?: any;
 }
 
-const WS_URL = 'ws://localhost:3001';
+const WS_URL_BASE = 'ws://localhost:3001';
 const API_URL = 'http://localhost:3001';
 
 // Separate component for the save button to handle local loading state cleanly
@@ -55,6 +56,7 @@ const SaveButton: React.FC<{ onClick: () => void; isSaving: boolean }> = ({ onCl
 );
 
 export const HITLControlCenter: React.FC = () => {
+    const { workspaceId } = useWorkspace();
     const [config, setConfig] = useState<SystemConfig | null>(null);
     const [interventions, setInterventions] = useState<InterventionRequest[]>([]);
     const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
@@ -68,17 +70,17 @@ export const HITLControlCenter: React.FC = () => {
     useEffect(() => {
         loadConfig();
         loadPendingRequests();
-    }, []);
+    }, [workspaceId]);
 
     const loadConfig = () => {
-        fetch(`${API_URL}/api/config`)
+        fetch(`${API_URL}/api/config`, { headers: { 'x-workspace-id': workspaceId } })
             .then(res => res.json())
             .then(setConfig)
             .catch(console.error);
     };
 
     const loadPendingRequests = () => {
-        fetch(`${API_URL}/api/hitl/pending`)
+        fetch(`${API_URL}/api/hitl/pending`, { headers: { 'x-workspace-id': workspaceId } })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -89,7 +91,9 @@ export const HITLControlCenter: React.FC = () => {
     };
 
     // WebSocket for Live Interventions
-    const { sendMessage, lastMessage } = useWebSocket(WS_URL, {
+    // Append workspaceId to WS URL
+    const wsUrl = `${WS_URL_BASE}?workspaceId=${workspaceId}`;
+    const { sendMessage, lastMessage } = useWebSocket(wsUrl, {
         shouldReconnect: () => true,
     });
 
@@ -107,7 +111,7 @@ export const HITLControlCenter: React.FC = () => {
     const handleResolve = async (id: string, action: 'APPROVED' | 'REJECTED') => {
         await fetch(`${API_URL}/api/hitl/resolve`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
             body: JSON.stringify({ id, action, feedback })
         });
         // Optimistic update
@@ -126,7 +130,7 @@ export const HITLControlCenter: React.FC = () => {
 
         await fetch(`${API_URL}/api/config/lock`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
             body: JSON.stringify({ section, isLocked })
         });
     };
@@ -142,7 +146,7 @@ export const HITLControlCenter: React.FC = () => {
     const saveDirective = async (field: string, value: string) => {
         await fetch(`${API_URL}/api/config/feedback`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
             body: JSON.stringify({ directive: field, value })
         });
     };
@@ -194,7 +198,7 @@ export const HITLControlCenter: React.FC = () => {
         // For now, I will add a generic update call.
         await fetch(`${API_URL}/api/config/update_section`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
             body: JSON.stringify({ section, metric, value })
         });
     };

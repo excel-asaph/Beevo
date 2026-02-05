@@ -5,22 +5,29 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const HISTORY_DIR = path.resolve(__dirname, '../../../client/public/assets/history/');
-
 export class MediaService {
-    private static instance: MediaService;
+    private static instances: Map<string, MediaService> = new Map();
+    private workspaceId: string;
+    private historyDir: string;
+    private publicPathPrefix: string;
 
-    private constructor() { }
-
-    public static getInstance(): MediaService {
-        if (!MediaService.instance) {
-            MediaService.instance = new MediaService();
-        }
-        return MediaService.instance;
+    private constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
+        // Physical path: client/public/workspaces/${workspaceId}/history
+        this.historyDir = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}/history`);
+        // URL path: /workspaces/${workspaceId}/history
+        this.publicPathPrefix = `/workspaces/${workspaceId}/history`;
     }
 
-    private async ensureDir() {
-        await fs.mkdir(HISTORY_DIR, { recursive: true });
+    public static getInstance(workspaceId: string = 'default'): MediaService {
+        if (!MediaService.instances.has(workspaceId)) {
+            MediaService.instances.set(workspaceId, new MediaService(workspaceId));
+        }
+        return MediaService.instances.get(workspaceId)!;
+    }
+
+    private async ensureDir(targetDir: string) {
+        await fs.mkdir(targetDir, { recursive: true });
     }
 
     /**
@@ -30,8 +37,8 @@ export class MediaService {
     public async archiveAsset(filenamePrefix: string, extension: string, data: Buffer, variantId?: string): Promise<string> {
         // If variantId is provided, nest inside history/variantId/
         // Otherwise keep in root history/
-        const targetDir = variantId ? path.join(HISTORY_DIR, variantId) : HISTORY_DIR;
-        await fs.mkdir(targetDir, { recursive: true });
+        const targetDir = variantId ? path.join(this.historyDir, variantId) : this.historyDir;
+        await this.ensureDir(targetDir);
 
         const timestamp = Date.now();
         const filename = `${filenamePrefix}_${timestamp}.${extension}`;
@@ -40,10 +47,10 @@ export class MediaService {
         await fs.writeFile(filePath, data);
 
         const relativePath = variantId
-            ? `/assets/history/${variantId}/${filename}`
-            : `/assets/history/${filename}`;
+            ? `${this.publicPathPrefix}/${variantId}/${filename}`
+            : `${this.publicPathPrefix}/${filename}`;
 
-        console.log(`💾 Asset archived: ${relativePath}`);
+        console.log(`💾 [${this.workspaceId}] Asset archived: ${relativePath}`);
         return relativePath;
     }
 
@@ -51,8 +58,8 @@ export class MediaService {
      * Specialized helper for Gemini file downloads.
      */
     public async archiveGeminiFile(client: any, fileUri: string, filenamePrefix: string, extension: string, variantId?: string): Promise<string> {
-        const targetDir = variantId ? path.join(HISTORY_DIR, variantId) : HISTORY_DIR;
-        await fs.mkdir(targetDir, { recursive: true });
+        const targetDir = variantId ? path.join(this.historyDir, variantId) : this.historyDir;
+        await this.ensureDir(targetDir);
 
         const timestamp = Date.now();
         const filename = `${filenamePrefix}_${timestamp}.${extension}`;
@@ -65,10 +72,11 @@ export class MediaService {
         });
 
         const relativePath = variantId
-            ? `/assets/history/${variantId}/${filename}`
-            : `/assets/history/${filename}`;
+            ? `${this.publicPathPrefix}/${variantId}/${filename}`
+            : `${this.publicPathPrefix}/${filename}`;
 
-        console.log(`💾 Video archived from Gemini: ${relativePath}`);
+        console.log(`💾 [${this.workspaceId}] Video archived from Gemini: ${relativePath}`);
         return relativePath;
     }
 }
+

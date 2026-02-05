@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useConfig } from './useConfig';
+import { useWorkspace } from '../context/WorkspaceContext';
 
 export type TrackingEvent = {
     blockId: string;
@@ -11,6 +12,8 @@ export type TrackingEvent = {
 
 export const useTracking = (blockId: string) => {
     const { config, loading } = useConfig();
+
+    const { workspaceId } = useWorkspace();
 
     const track = useCallback((eventType: TrackingEvent['eventType'], meta?: any) => {
         const stateHash = config?.current_state_hash || 'unknown';
@@ -27,7 +30,10 @@ export const useTracking = (blockId: string) => {
         try {
             fetch('http://localhost:3001/api/tracking/event', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-workspace-id': workspaceId
+                },
                 body: JSON.stringify({
                     sessionId: 'manual_session', // Simple session for manual testing
                     componentId: blockId,
@@ -41,7 +47,7 @@ export const useTracking = (blockId: string) => {
 
         // For now, allow dispatching to window for the "Watcher Agent" to potentially pick up if we use a browser extension or local script
         window.dispatchEvent(new CustomEvent('beevo_track', { detail: event }));
-    }, [blockId, config]);
+    }, [blockId, config, workspaceId]);
 
     return { track, isReady: !loading && !!config };
 };

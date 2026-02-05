@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Palette, Type, Target, Sparkles, MicOff, CheckCircle2, Loader2, ChevronDown } from 'lucide-react';
+import { Search, Palette, Type, Target, Sparkles, MicOff, CheckCircle2, Loader2, ChevronDown, XCircle } from 'lucide-react';
 
 // Type for streaming thoughts
 interface ThoughtItem {
     id: string;
     text: string;
-    status: 'pending' | 'active' | 'complete';
+    status: 'pending' | 'active' | 'complete' | 'error';
 }
 
 interface ResearchStep {
     id: string;
     label: string;
     icon: React.ReactNode;
-    status: 'pending' | 'active' | 'complete';
+    status: 'pending' | 'active' | 'complete' | 'error';
 }
 
 interface ResearchScreenProps {
@@ -58,11 +58,13 @@ const ThinkingStream: React.FC<{ thoughts: ThoughtItem[] }> = ({ thoughts }) => 
                         ? 'text-amber-300'
                         : thought.status === 'complete'
                             ? 'text-slate-300'
-                            : 'text-slate-500'
+                            : thought.status === 'error'
+                                ? 'text-red-400'
+                                : 'text-slate-500'
                         }`}
                 >
                     <span className="mr-2">
-                        {thought.status === 'complete' ? '✓' : thought.status === 'active' ? '›' : '○'}
+                        {thought.status === 'complete' ? '✓' : thought.status === 'active' ? '›' : thought.status === 'error' ? '✕' : '○'}
                     </span>
                     {thought.text}
                 </div>
@@ -158,6 +160,7 @@ const AccordionStep: React.FC<{
         switch (step.status) {
             case 'complete': return <CheckCircle2 size={14} className="text-emerald-400" />;
             case 'active': return <Loader2 size={14} className="text-amber-400 animate-spin" />;
+            case 'error': return <XCircle size={14} className="text-red-400" />;
             default: return <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-600" />;
         }
     };

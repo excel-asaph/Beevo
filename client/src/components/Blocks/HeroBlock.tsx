@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { HeroBlockConfig } from '../../../../shared/types';
+import { useWorkspace } from '../../context/WorkspaceContext';
 
 interface HeroBlockProps {
     config: HeroBlockConfig;
@@ -8,6 +9,7 @@ interface HeroBlockProps {
 
 export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
     const { track, isReady } = useTracking(config.id);
+    const { resolveAssetUrl } = useWorkspace();
     const videoRef = useRef<HTMLVideoElement>(null);
     const hasTrackedRetention = useRef(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -59,7 +61,7 @@ export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
     // Construct Video URL (assuming convention or using the uploaded file directly for cold start)
     // Logic: For Cold Start, we know it's "veo_video_hero_challenger.mp4"
     // Future: config.visual_asset.source_id -> mapped to URL
-    const videoSrc = config.visual_asset?.source_url || '/assets/veo_video_hero_challenger.mp4';
+    const videoSrc = resolveAssetUrl(config.visual_asset?.source_url || '/assets/veo_video_hero_challenger.mp4');
 
     return (
         <div

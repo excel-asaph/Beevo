@@ -10,18 +10,19 @@ import {
     BackgroundVariant,
     useReactFlow,
     SelectionMode,
+    Edge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Wifi, WifiOff, Mic, MicOff } from 'lucide-react';
+import { ArrowLeft, Sparkles, Wifi, WifiOff } from 'lucide-react';
 import type { ReactFlowInstance } from '@xyflow/react';
 
 // Custom nodes
 import { StickyNode } from './nodes/StickyNode';
-import { PaletteNode, ColorOption } from './nodes/PaletteNode';
-import { TypographyNode, FontOption } from './nodes/TypographyNode';
+import { PaletteNode } from './nodes/PaletteNode';
+import { TypographyNode } from './nodes/TypographyNode';
 import { VoiceOrbNode } from './nodes/VoiceOrbNode';
-import { InspirationNode, InspirationNodeData } from './nodes/InspirationNode';
+import { InspirationNode } from './nodes/InspirationNode';
 import { VaultNode } from './nodes/VaultNode';
 import { FrameNode } from './nodes/FrameNode';
 import { ThoughtSignatureNode } from './nodes';
@@ -36,29 +37,32 @@ import { LogoStudioFrame } from './nodes/LogoStudioFrame';
 import { ThinkingPanel, ThinkingPhase, ThinkingStep } from './ThinkingPanel';
 import { ResearchScreen } from './ResearchScreen';
 import { DropZone } from './DropZone';
-import { WatcherSettings } from '../Architect/WatcherSettings';
+// No WatcherSettings needed here
 import { ControlHud, InteractionMode } from './ControlHud';
 import { CanvasNavigation } from './CanvasNavigation';
 import { CanvasHeader } from './CanvasHeader';
 import { ControlCenter } from './ControlCenter';
+import { WorkspaceLanding } from './WorkspaceLanding';
 
 // Hooks & Store
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { useWebSocket } from '../../hooks/useWebSocket';
 import { useAudioStream } from '../../hooks/useAudioStream';
 import { useBrandStore } from '../../stores/useBrandStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useCanvasHistory } from '../../hooks/useCanvasHistory';
-import type { FontSuggestion, ColorPalette, LogoInspiration, LogoStructureOption } from '@shared/types';
+import type { LogoInspiration, LogoStructureOption } from '@shared/types';
+import { apiGenerateLogos, apiFinalizeLogos } from '../../api';
 
 // React Flow node with proper typing
 // Helper to fetch kit from backend
-const fetchLogoKit = async () => {
+const fetchLogoKit = async (workspaceId: string) => {
     try {
         // Cache-busting with timestamp
-        const res = await fetch(`http://localhost:3000/client/public/assets/logo_kit_challenger.json?t=${Date.now()}`);
-        // Fallback or direct access via public URL
-        // If dev server serves public folder at root:
-        const url = `/assets/logo_kit_challenger.json?t=${Date.now()}`;
+        // const res = await fetch(`http://localhost:3000/client/public/assets/logo_kit_challenger.json?t=${Date.now()}`);
+
+        // Dynamic path based on workspace isolation
+        const url = `/workspaces/${workspaceId}/assets/logo_kit_challenger.json?t=${Date.now()}`;
         const res2 = await fetch(url);
 
         if (!res2.ok) throw new Error("Kit not found");
@@ -67,22 +71,6 @@ const fetchLogoKit = async () => {
         console.warn("Failed to fetch logo kit", e);
         return null;
     }
-};
-
-const apiGenerateLogos = async (context?: string) => {
-    const res = await fetch('http://localhost:3000/api/logos/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context })
-    });
-    if (!res.ok) throw new Error("Generation failed");
-    return res.json();
-};
-
-const apiFinalizeLogos = async () => {
-    const res = await fetch('http://localhost:3000/api/logos/finalize', { method: 'POST' });
-    if (!res.ok) throw new Error("Finalization failed");
-    return res.json();
 };
 
 type CanvasNode = Node<Record<string, unknown>>;
@@ -111,8 +99,7 @@ interface CanvasProps {
     onBack?: () => void;
 }
 
-// Frame definitions for canvas layout
-// Using new Figma-style solid background colors: 'white' | 'cream' | 'gray' | 'blue'
+
 // Frame definitions for canvas layout
 // Using new Figma-style solid background colors: 'white' | 'cream' | 'gray' | 'blue'
 // Consistent 30px gap between frames
@@ -120,7 +107,6 @@ const FRAME_GAP = 30;
 const NODE_GAP = 16; // Consistent 16px gap (matching Logo Structure gap-4)
 const FRAME_START_X = 50;
 
-// Define frame widths (generous to accommodate content)
 // Define frame widths (generous to accommodate content)
 const FRAME_WIDTHS = {
     identity: 200,
@@ -133,7 +119,6 @@ const FRAME_WIDTHS = {
     tools: 280,
 };
 
-// Calculate X positions sequentially
 // Calculate X positions sequentially
 // Note: All frames are now arranged horizontally
 const getFrameX = (index: number) => {
@@ -180,6 +165,10 @@ const estimateHeight = (content: string | any[], type: 'text' | 'tags' = 'text')
 };
 
 export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
+
+
+
+    const { workspaceId } = useWorkspace();
     // ========== ZUSTAND STORE - SPLIT SUBSCRIPTIONS FOR STABILITY ==========
 
     // Brand data slice - uses shallow comparison to prevent re-renders when values haven't changed
@@ -240,6 +229,15 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     const [generatedLogos, setGeneratedLogos] = useState<any[]>([]); // Relaxed type for mapping
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
 
+    // Auto-skip discovery/research if flag is present (Development/Testing Convenience)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('skip_discovery') === 'true' || params.get('skip') === 'true') {
+            console.log("⏩ Skipping discovery/research phases...");
+            setPhase('canvas');
+        }
+    }, [setPhase]);
+
     // Handler for running logo generation
     const handleRunLogoGeneration = useCallback(async () => {
         console.log("▶️ Run button clicked!");
@@ -249,16 +247,13 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         if (!dna.name?.value) missingItems.push('Brand Name');
         if (!dna.mission?.value) missingItems.push('Mission Statement');
 
-        // Basic validation... (omitted detailed check for brevity, user wants fast run)
-        // If you want strict validation back, uncomment checks.
-
         console.log("✅ Starting generation...");
 
         if (!showLogoStudio) {
             setShowLogoStudio(true);
             setIsLogoGenerating(true);
             setGeneratedLogos([]);
-            setAiMessage("Generating logo concepts based on your research... This may take up to 20 seconds.");
+            setAiMessage("Checking for existing logo concepts...");
 
             // Focus on the new frame IMMEDIATELY (with small delay for render)
             if (rfInstance) {
@@ -272,16 +267,46 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             }
 
             try {
-                // Call API
-                await apiGenerateLogos();
+                // 1. CHECK FOR EXISTING LOGOS FIRST
+                const existingKit = await fetchLogoKit(workspaceId);
 
-                // Poll for result or just wait? 
-                // Since apiGenerateLogos awaits the process in this simple setup (or returns fast?)
-                // server/src/agents/InitialLogoGenerator.ts awaits generation.
-                // So when it returns, files are ready.
+                if (existingKit && Object.keys(existingKit).length > 0) {
+                    console.log("📂 Found existing logo kit, skipping generation.");
+
+                    // REFRESH KIT LOGIC (Shared)
+                    // FORCE OPAQUE PATHS (User Requirement)
+                    const mapping = [
+                        { id: 'primary', title: 'Primary Logo' },
+                        { id: 'inverted', title: 'Inverted Logo' },
+                        { id: 'icon', title: 'Brand Icon' },
+                        { id: 'icon_inverted', title: 'Icon (Inverted)' },
+                        { id: 'wordmark', title: 'Wordmark' },
+                        { id: 'wordmark_inverted', title: 'Wordmark (Inverted)' },
+                        { id: 'social', title: 'Social Asset' },
+                        { id: 'social_inverted', title: 'Social (Inverted)' },
+                    ];
+
+                    const mappedLogos = mapping.map(m => ({
+                        id: m.id,
+                        title: m.title,
+                        // Use timestamp to force refresh image in browser
+                        url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${m.id}.png?v=${Date.now()}`,
+                        displayName: m.title
+                    }));
+
+                    setGeneratedLogos(mappedLogos);
+                    setIsLogoGenerating(false);
+                    setAiMessage("Loaded existing logo concepts.");
+                    return; // EXIT EARLY
+                }
+
+                setAiMessage("Generating logo concepts based on your research... This may take up to 20 seconds.");
+
+                // 2. IF NO EXISTING LOGOS, RUN GENERATION
+                await apiGenerateLogos(workspaceId);
 
                 // REFRESH KIT
-                const kit = await fetchLogoKit();
+                const kit = await fetchLogoKit(workspaceId);
 
                 // FORCE OPAQUE PATHS (User Requirement)
                 // We map known keys to the predictable generated path
@@ -300,7 +325,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     id: m.id,
                     title: m.title,
                     // Use timestamp to force refresh image in browser
-                    url: `/assets/generated_logos/logo_variant_${m.id}.png?v=${Date.now()}`,
+                    url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${m.id}.png?v=${Date.now()}`,
                     displayName: m.title
                 }));
 
@@ -314,7 +339,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 setIsLogoGenerating(false);
             }
         }
-    }, [showLogoStudio, dna, setAiMessage, rfInstance]);
+    }, [showLogoStudio, dna, setAiMessage, rfInstance, workspaceId]);
 
     // HUD Interaction State
     const [interactionMode, setInteractionMode] = useState<InteractionMode>('select');
@@ -327,11 +352,11 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     const [transcript, setTranscript] = useState<Array<{ role: 'user' | 'ai'; text: string; timestamp: Date }>>([]);
 
     // React Flow instance for zoom/fit controls
-    const { zoomIn, zoomOut, fitView } = useReactFlow();
+    useReactFlow();
 
     // React Flow integration - sync store nodes to ReactFlow
     const [nodes, setNodes, onNodesChange] = useNodesState<CanvasNode>([]);
-    const [edges, , onEdgesChange] = useEdgesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
     // NOTE: The sync effect that merges store nodes with ReactFlow is located
     // AFTER the selection handler definitions (handleColorSelect, handleFontSelect)
@@ -477,10 +502,11 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 const inspirations = state.logoInspirations.inspirations.map((l: any, i: number) => ({
                     id: l.id || `logo-${i}`,
                     url: l.url || l.imageUrl,
-                    brandName: l.displayName || l.brandName,
-                    source: l.source,
+                    displayName: l.brandName || l.source || 'Logo', // Map brandName/source to displayName
+                    isSelected: l.isSelected || false,
+                    brandName: l.brandName, // Keep original brandName if needed
+                    source: l.source, // Keep original source if needed
                     description: l.description,
-                    isSelected: l.isSelected
                 }));
                 setLogoInspirations(inspirations);
             }
@@ -496,6 +522,10 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 console.log('📦 Setting imagery options from FULL_STATE:', state.imagery.suggestions.length);
                 setImageryOptions(state.imagery.suggestions);
             }
+
+            // Force phase to canvas now that data is loaded
+            console.log('🎨 Data loaded, switching phase to CANVAS');
+            setPhase('canvas');
         },
 
         onLogoStructureOptions: (options) => {
@@ -521,6 +551,8 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             const inspirations: LogoInspiration[] = logos.map((l: any, i: number) => ({
                 id: l.id || `logo-${Date.now()}-${i}`,
                 url: l.url || l.imageUrl,
+                displayName: l.brandName || l.name || l.source || 'Competitor', // Map brandName/name/source to displayName
+                isSelected: false,
                 brandName: l.brandName,
                 source: l.source,
                 description: l.description
@@ -674,9 +706,15 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         silenceThresholdMs: 1500 // 1.5s of silence triggers speech end (increased for natural pauses)
     });
 
-    // Connect on mount
+    // Connect when phase is not entry, but prevent disconnect on phase change
     useEffect(() => {
-        ws.connect();
+        if (phase !== 'entry' && ws.status === 'disconnected') {
+            ws.connect();
+        }
+    }, [phase, ws.status]);
+
+    // Cleanup only on unmount
+    useEffect(() => {
         return () => {
             ws.disconnect();
             audio.stopRecording();
@@ -1093,7 +1131,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         label: 'Typography',
                         status: typographyStatus,
                         options: fontOptions,
-                        selectedFonts: typographyStatus === 'saved' && dna.typography?.items ? dna.typography.items.map((name, i) => ({
+                        selectedFonts: typographyStatus === 'saved' && dna.typography?.items ? dna.typography.items.map((name: string, i: number) => ({
                             id: `font-${i}`,
                             name,
                             category: 'sans-serif' as const,
@@ -1235,7 +1273,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     // Estimate height: prioritized measured > data.minHeight > fallback
                     // We use generous fallbacks to ensure clearance
                     let h = 300;
-                    if (node.type === 'frame') h = node.data?.minHeight || 400;
+                    if (node.type === 'frame') h = (node.data as any)?.minHeight || 400;
                     if (node.type === 'text') h = 100;
                     if (node.type === 'infoCard') h = 150;
 
@@ -1263,13 +1301,13 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                             setIsLogoGenerating(true);
                             setAiMessage("Refining designs...");
                             try {
-                                await apiGenerateLogos(ctx);
+                                await apiGenerateLogos(workspaceId, ctx);
                                 // Refresh logic (duplicated for now, could be extracted)
                                 const mapping = ['primary', 'inverted', 'icon', 'icon_inverted', 'wordmark', 'wordmark_inverted', 'social', 'social_inverted'];
                                 const mappedLogos = mapping.map(id => ({
                                     id,
                                     title: id.charAt(0).toUpperCase() + id.slice(1).replace('_', ' '),
-                                    url: `/assets/generated_logos/logo_variant_${id}.png?v=${Date.now()}`
+                                    url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${id}.png?v=${Date.now()}`
                                 }));
                                 setGeneratedLogos(mappedLogos);
                                 setIsLogoGenerating(false);
@@ -1288,8 +1326,8 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                             console.log('Finalizing (Baking Transparency)...');
                             setAiMessage("Making logos transparent...");
                             try {
-                                const res = await apiFinalizeLogos();
-                                setAiMessage("Transparency baked! Check /assets/transparent_logos/ folder.");
+                                await apiFinalizeLogos(workspaceId);
+                                setAiMessage("Transparency baked! Check /workspaces/" + workspaceId + "/assets/transparent_logos/ folder.");
                                 window.alert("Transparency baked successfully!");
                             } catch (e) {
                                 console.error(e);
@@ -1458,6 +1496,18 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         };
     }, [nodes, phase, manuallyMovedFrames]);
 
+    // ========== EFFECT: Initial Fit View ==========
+    const initialFitDone = useRef(false);
+    useEffect(() => {
+        if (phase === 'canvas' && nodes.length > 0 && !initialFitDone.current && rfInstance) {
+            // Small delay to ensure layout is stable
+            setTimeout(() => {
+                rfInstance.fitView({ padding: 0.1, duration: 800 });
+                initialFitDone.current = true;
+            }, 500);
+        }
+    }, [phase, nodes.length, rfInstance]);
+
     // File upload handlers
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -1513,6 +1563,11 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         };
         reader.readAsDataURL(file);
     }, [ws, addThinkingStep]);
+
+    // Render entry phase (Brand Name Entry)
+    if (phase === 'entry') {
+        return <WorkspaceLanding />;
+    }
 
     // Render onboarding phase
     if (phase === 'onboarding') {
@@ -1608,12 +1663,12 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         return (
             <ResearchScreen
                 isVisible={true}
-                currentStep={researchStatus.step}
+                currentStep={researchStatus.step || 0}
                 message={researchStatus.message || loadingMessage}
-                competitors={researchStatus.competitors}
+                competitors={researchStatus.competitors || []}
                 thoughts={thinkingSteps}
-                brandName={dna.name}
-                industry={dna.industry}
+                brandName={dna.name.value}
+                industry={dna.industry.value}
             />
         );
     }
@@ -1658,7 +1713,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     {/* Controls and MiniMap removed - using custom ControlHud instead */}
 
                     {/* Control HUD */}
-                    <Panel position="left" style={{ top: '50%', left: '24px', transform: 'translateY(-50%)', margin: 0 }} className="z-50">
+                    <Panel position="bottom-left" style={{ top: '50%', left: '24px', transform: 'translateY(-50%)', margin: 0 }} className="z-50">
                         <ControlHud
                             mode={interactionMode}
                             setMode={setInteractionMode}
@@ -1723,6 +1778,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     transcript={transcript}
                 />
             </div>
+
         </div>
     );
 };

@@ -40,7 +40,7 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
             <p className="text-xs text-slate-400 mb-2">Choose a palette:</p>
             {nodeData.options?.map((palette, index) => (
                 <motion.button
-                    key={palette.id}
+                    key={palette.id || index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}

@@ -1,3 +1,4 @@
+
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,28 +15,36 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Paths
-// Paths
-const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.resolve(__dirname, '../../brain/staging/social_block_staging.json');
-const ASSETS_DIR = path.join(process.cwd(), 'client/public/assets');
-
 export class InitialSocialGenerator {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
+    private workspaceId: string;
 
-    constructor() {
+    private researchPath: string;
+    private outputPath: string;
+    private assetsDir: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set");
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.researchPath = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.outputPath = path.join(baseBrainPath, 'staging/social_block_staging.json');
+        this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
     async generate() {
-        console.log("🚀 Initial Social Generator: Starting...");
+        console.log(`🚀 [${this.workspaceId}] Initial Social Generator: Starting...`);
 
         // 1. Read Research
-        const rawData = await fs.readFile(RESEARCH_PATH, 'utf-8');
+        const rawData = await fs.readFile(this.researchPath, 'utf-8');
         const research = JSON.parse(rawData);
 
         // 2. Prepare Context
@@ -67,7 +76,7 @@ export class InitialSocialGenerator {
         for (let i = 0; i < testimonials.length; i++) {
             const t = testimonials[i];
             const imageName = `testimonial_${i + 1}_challenger.png`;
-            const imagePath = path.join(ASSETS_DIR, imageName);
+            const imagePath = path.join(this.assetsDir, imageName);
 
             console.log(`...Baking Headshot for ${t.name} (${t.title})`);
             // generateImage now returns the relative path from MediaService
@@ -103,8 +112,8 @@ export class InitialSocialGenerator {
 
         // 6. Save
         console.log("Saving Staged Social Block...");
-        await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
-        await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
+        await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
+        await fs.writeFile(this.outputPath, JSON.stringify(challenger, null, 4));
         console.log("✅ Done.");
     }
 
@@ -135,16 +144,10 @@ export class InitialSocialGenerator {
 
             if (imageBase64) {
                 // CHANGED: Use MediaService to archive timestamped asset
-                const mediaService = MediaService.getInstance();
+                const mediaService = MediaService.getInstance(this.workspaceId);
                 const buffer = Buffer.from(imageBase64, 'base64');
 
                 // We want to return the RELATIVE PATH to the caller so they can put it in the testimonial object
-                // The Caller currently passes `outputPath` which is the staging location... wait.
-                // The caller passes `path.join(ASSETS_DIR, imageName)` where `imageName` is `testimonial_1_challenger.png`.
-                // We want to IGNORE that output path and use MediaService instead.
-
-                // We will overwrite the caller's logic slightly in the next step, but for now let's change this method signature?
-                // Actually, let's keep the signature but ignore outputPath or use it as a hint for the filename base.
                 const filenameBase = `testimonial_${Date.now()}`; // Unique prefix
                 const relativePath = await mediaService.archiveAsset(
                     filenameBase,
@@ -169,6 +172,9 @@ export class InitialSocialGenerator {
 
 // Auto-run if executed directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    const generator = new InitialSocialGenerator();
+    // Default workspace for manual CLI run
+    const workspaceId = process.argv.find(a => a.startsWith('--workspace='))?.split('=')[1] || 'default';
+    const generator = new InitialSocialGenerator(workspaceId);
     generator.generate().catch(console.error);
 }
+

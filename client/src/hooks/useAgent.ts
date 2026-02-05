@@ -164,58 +164,58 @@ export function useAgent(options: UseAgentOptions = {}) {
             setBrandDNA(dna);
 
             // Update cards based on DNA fields
-            if (dna.name) {
+            if (dna.name?.value) {
                 upsertCard({
                     id: 'brandName',
                     type: 'brandName',
                     title: 'Brand Name',
                     status: 'complete',
-                    value: dna.name
+                    value: dna.name.value
                 });
             }
 
-            if (dna.mission) {
+            if (dna.mission?.value) {
                 upsertCard({
                     id: 'mission',
                     type: 'mission',
                     title: 'Mission',
                     status: 'complete',
-                    value: dna.mission
+                    value: dna.mission.value
                 });
             }
 
-            if (dna.colors && dna.colors.length > 0) {
+            if (dna.colors?.items && dna.colors.items.length > 0) {
                 upsertCard({
                     id: 'colors',
                     type: 'colors',
                     title: 'Color Palette',
                     status: 'complete',
-                    value: dna.colors
+                    value: dna.colors.items
                 });
             }
 
-            if (dna.typography && dna.typography.length > 0) {
+            if (dna.typography?.items && dna.typography.items.length > 0) {
                 upsertCard({
                     id: 'typography',
                     type: 'typography',
                     title: 'Typography',
                     status: 'complete',
-                    value: dna.typography
+                    value: dna.typography.items
                 });
             }
 
-            if (dna.voice) {
+            if (dna.voice?.value) {
                 upsertCard({
                     id: 'voice',
                     type: 'voice',
                     title: 'Brand Voice',
                     status: 'complete',
-                    value: dna.voice
+                    value: dna.voice.value
                 });
             }
 
             // Notify completion if we have enough data
-            const hasMinimumDNA = dna.name && dna.mission && dna.colors?.length;
+            const hasMinimumDNA = !!(dna.name?.value && dna.mission?.value && dna.colors?.items?.length);
             if (hasMinimumDNA) {
                 optionsRef.current.onBrandDNAComplete?.(dna);
             }

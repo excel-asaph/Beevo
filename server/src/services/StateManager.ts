@@ -7,6 +7,7 @@ import { ResearchPhaseObject } from '../../../shared/types';
 // ESM-compatible __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 /**
  * StateManager - Handles research state persistence with rolling history
  * 
@@ -18,10 +19,13 @@ export class StateManager extends EventEmitter {
     private readonly artifactsDir: string;
     private readonly latestFile: string;
     private readonly previousFile: string;
+    private workspaceId: string;
 
-    constructor(artifactsDir?: string) {
+    constructor(workspaceId: string) {
         super();
-        this.artifactsDir = artifactsDir || path.join(__dirname, '../../brain/research_artifacts');
+        this.workspaceId = workspaceId;
+        // Dynamic path based on workspaceId
+        this.artifactsDir = path.join(__dirname, `../../brain/workspaces/${workspaceId}/research_artifacts`);
         this.latestFile = path.join(this.artifactsDir, 'complete_research_latest.json');
         this.previousFile = path.join(this.artifactsDir, 'complete_research_previous.json');
 
@@ -41,7 +45,7 @@ export class StateManager extends EventEmitter {
                 return JSON.parse(content) as ResearchPhaseObject;
             }
         } catch (error) {
-            console.error('❌ [StateManager] Failed to load latest state:', error);
+            console.error(`❌ [StateManager:${this.workspaceId}] Failed to load latest state:`, error);
         }
         return null;
     }
@@ -60,7 +64,7 @@ export class StateManager extends EventEmitter {
         let currentState = this.loadLatest();
 
         if (!currentState) {
-            console.warn('⚠️ [StateManager] No existing state - creating new one');
+            console.warn(`⚠️ [StateManager:${this.workspaceId}] No existing state - creating new one`);
             currentState = this.createEmptyState();
         }
 
@@ -75,7 +79,7 @@ export class StateManager extends EventEmitter {
         // Step 3: Save updated state to Latest
         await this.saveLatest(currentState);
 
-        console.log(`✅ [StateManager] Saved ${String(section)} (v${currentState.stateVersion})`);
+        console.log(`✅ [StateManager:${this.workspaceId}] Saved ${String(section)} (v${currentState.stateVersion})`);
     }
 
     /**
@@ -94,7 +98,7 @@ export class StateManager extends EventEmitter {
 
         await this.saveLatest(state);
 
-        console.log(`✅ [StateManager] Saved full state (v${state.stateVersion})`);
+        console.log(`✅ [StateManager:${this.workspaceId}] Saved full state (v${state.stateVersion})`);
     }
 
     /**
@@ -104,10 +108,10 @@ export class StateManager extends EventEmitter {
         try {
             if (fs.existsSync(this.latestFile)) {
                 fs.copyFileSync(this.latestFile, this.previousFile);
-                console.log('📦 [StateManager] Rotated Latest -> Previous');
+                console.log(`📦 [StateManager:${this.workspaceId}] Rotated Latest -> Previous`);
             }
         } catch (error) {
-            console.error('❌ [StateManager] Failed to rotate files:', error);
+            console.error(`❌ [StateManager:${this.workspaceId}] Failed to rotate files:`, error);
         }
     }
 
@@ -117,14 +121,6 @@ export class StateManager extends EventEmitter {
     private async saveLatest(state: ResearchPhaseObject): Promise<void> {
         fs.writeFileSync(this.latestFile, JSON.stringify(state, null, 2), 'utf-8');
         this.emit('stateUpdated', state);
-    }
-
-    /**
-     * NO-OP: Legacy cleanup is no longer needed with strict rotation.
-     * Use manual cleanup if needed.
-     */
-    private async cleanupOldVersions(): Promise<void> {
-        // Logic removed - strict rotation only keeps 2 files.
     }
 
     /**
@@ -166,5 +162,16 @@ export class StateManager extends EventEmitter {
     }
 }
 
-// Export singleton instance
-export const stateManager = new StateManager();
+// Global Factory for managing multiple workspace states
+export class WorkspaceManager {
+    private static instances: Map<string, StateManager> = new Map();
+
+    static getStateManager(workspaceId: string): StateManager {
+        if (!this.instances.has(workspaceId)) {
+            console.log(`✨ Creating StateManager for workspace: ${workspaceId}`);
+            this.instances.set(workspaceId, new StateManager(workspaceId));
+        }
+        return this.instances.get(workspaceId)!;
+    }
+}
+

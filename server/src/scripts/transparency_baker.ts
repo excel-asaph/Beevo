@@ -7,20 +7,25 @@ import puppeteer from 'puppeteer';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const KIT_PATH = path.resolve(__dirname, '../../../client/public/assets/logo_kit_challenger.json');
 const PUBLIC_DIR = path.resolve(__dirname, '../../../client/public');
-const OUTPUT_DIR = path.resolve(__dirname, '../../../client/public/assets/transparent_logos');
 
-async function processImage(page: any, relativePath: string): Promise<string | null> {
+async function processImage(page: any, relativePath: string, workspaceId: string): Promise<string | null> {
+    const workspaceAssetsDir = path.join(PUBLIC_DIR, `workspaces/${workspaceId}/assets`);
+    const outputDir = path.join(workspaceAssetsDir, 'transparent_logos');
+
+    // Ensure output dir exists
+    await fs.mkdir(outputDir, { recursive: true });
+
     // Clean path (remove existing query params)
     const cleanPath = relativePath.split('?')[0];
+    // Source is always in workspace generated_logos
     const fullPath = path.join(PUBLIC_DIR, cleanPath);
     const filename = path.basename(cleanPath, path.extname(cleanPath));
 
-    // Output path: assets/transparent_logos/[filename]_transparent.png
+    // Output path: workspaces/:id/assets/transparent_logos/[filename]_transparent.png
     const outputFilename = `${filename}_transparent.png`;
-    const outputPath = path.join(OUTPUT_DIR, outputFilename);
-    const outputRelativePath = `/assets/transparent_logos/${outputFilename}`;
+    const outputPath = path.join(outputDir, outputFilename);
+    const outputRelativePath = `/workspaces/${workspaceId}/assets/transparent_logos/${outputFilename}`;
 
     try {
         await fs.access(fullPath);
@@ -193,18 +198,22 @@ async function processImage(page: any, relativePath: string): Promise<string | n
     return null;
 }
 
-export async function bakeTransparency() {
-    console.log("🧼 Starting Transparency Production Line (V3 - Global Key)...");
+export async function bakeTransparency(workspaceId: string = 'default') {
+    console.log(`🧼 Starting Transparency Production Line for Workspace: ${workspaceId} (V3 - Global Key)...`);
+
+    const kitPath = path.resolve(PUBLIC_DIR, `workspaces/${workspaceId}/assets/logo_kit_challenger.json`);
+    const workspaceAssetsDir = path.join(PUBLIC_DIR, `workspaces/${workspaceId}/assets`);
+    const transparentOutputDir = path.join(workspaceAssetsDir, 'transparent_logos');
 
     // Ensure output dir exists
-    await fs.mkdir(OUTPUT_DIR, { recursive: true });
+    await fs.mkdir(transparentOutputDir, { recursive: true });
 
     let kit: any = { kit: {}, brandDNA: {} };
     try {
-        const kitRaw = await fs.readFile(KIT_PATH, 'utf-8');
+        const kitRaw = await fs.readFile(kitPath, 'utf-8');
         kit = JSON.parse(kitRaw);
     } catch (e) {
-        console.warn("⚠️ Logo Kit JSON not found. Regenerating from source images...");
+        console.warn(`⚠️ Logo Kit JSON not found at ${kitPath}. Regenerating from source images...`);
     }
 
     const browser = await puppeteer.launch({
@@ -218,14 +227,13 @@ export async function bakeTransparency() {
     const timestamp = Date.now();
 
     for (const key of logoKeys) {
-        // Enforce Source of Truth: Always look in generated_logos
-        // We do NOT trust kit.kit[key] because it might point to a previously transparent file
-        const sourceRelativePath = `/assets/generated_logos/logo_variant_${key}.png`;
+        // Enforce Source of Truth: Always look in generated_logos within the workspace
+        const sourceRelativePath = `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${key}.png`;
 
         console.log(`\n🔍 Logo Key: ${key}`);
         console.log(`   Source: ${sourceRelativePath}`);
 
-        const newPath = await processImage(page, sourceRelativePath);
+        const newPath = await processImage(page, sourceRelativePath, workspaceId);
         if (newPath) {
             kit.kit[key] = `${newPath}?v=${timestamp}`;
             console.log(`   📌 Updated kit.${key} -> ${newPath}`);
@@ -248,8 +256,8 @@ export async function bakeTransparency() {
         kit.brandDNA.logoUrl.value = kit.kit.primary;
     }
 
-    await fs.writeFile(KIT_PATH, JSON.stringify(kit, null, 4));
-    console.log("✨ Kit updated. Transparent logos saved to public/transparent_logos.");
+    await fs.writeFile(kitPath, JSON.stringify(kit, null, 4));
+    console.log(`✨ Kit updated. Transparent logos saved to ${transparentOutputDir}`);
     return kit;
 }
 

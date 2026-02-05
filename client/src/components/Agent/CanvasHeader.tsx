@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Sparkles, Wifi, WifiOff } from 'lucide-react';
 import { useBrandStore } from '../../stores/useBrandStore';
 import { WatcherSettings } from '../Architect/WatcherSettings';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher';
 
 interface CanvasHeaderProps {
     onBack?: () => void;
@@ -64,6 +65,10 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({ onBack, connectionSt
                     <span className="text-[#2563eb] font-black italic text-xl tracking-tighter select-none cursor-default">
                         BEEVO
                     </span>
+                    <span className="mx-4 text-gray-300 font-light select-none">/</span>
+
+                    <WorkspaceSwitcher />
+
                     <span className="mx-4 text-gray-300 font-light select-none">/</span>
 
                     {/* Project Title with Popover Tooltip */}
@@ -145,8 +150,8 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({ onBack, connectionSt
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-all ${isControlCenterOpen
-                            ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white'
-                            : 'bg-gradient-to-br from-orange-500 to-amber-500 text-white hover:from-orange-400 hover:to-amber-400'
+                        ? 'bg-gradient-to-br from-orange-400 to-orange-600 text-white'
+                        : 'bg-gradient-to-br from-orange-500 to-amber-500 text-white hover:from-orange-400 hover:to-amber-400'
                         }`}
                 >
                     <motion.div

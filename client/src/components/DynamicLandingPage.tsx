@@ -11,9 +11,12 @@ import { FormOrchestrator } from './Forms/FormOrchestrator';
 
 import { useConfig } from '../hooks/useConfig';
 
+import { useWorkspace } from '../context/WorkspaceContext';
+
 export const DynamicLandingPage: React.FC = () => {
     const { setDna } = useBrand();
     const { config } = useConfig();
+    const { workspaceId } = useWorkspace();
     const [configs, setConfigs] = useState<{ hero: any, proof: any, pas: any, spec: any, social: any, offer: any }>({
         hero: null, proof: null, pas: null, spec: null, social: null, offer: null
     });
@@ -68,7 +71,17 @@ export const DynamicLandingPage: React.FC = () => {
             try {
                 // Determine base path (e.g., "states/v_123456" or default to root if missing)
                 const basePath = config.active_assets_path ? `/${config.active_assets_path}` : '';
-                const assetRoot = `/assets${basePath}`;
+
+                // Workspace Isolation: If workspaceId is present, try to fetch from workspace folder.
+                // However, Vite serving logic for 'public' is straightforward.
+                // If the backend generated paths relative to 'workspaces/{id}/assets', we need to match that.
+                // The 'getLiveState' script suggests files are in 'client/public/workspaces/{id}/assets/{subpath}'.
+                // So the URL should be `/workspaces/${workspaceId}/assets${basePath}`.
+
+                let assetRoot = `/assets${basePath}`;
+                if (workspaceId && workspaceId !== 'default') {
+                    assetRoot = `/workspaces/${workspaceId}/assets${basePath}`;
+                }
 
                 console.log(`[Loader] Fetching page assets from: ${assetRoot}`);
 
@@ -83,6 +96,10 @@ export const DynamicLandingPage: React.FC = () => {
                     return res.json();
                 };
 
+                const logoPath = workspaceId && workspaceId !== 'default'
+                    ? `/workspaces/${workspaceId}/assets/logo_kit_challenger.json`
+                    : `/assets/logo_kit_challenger.json`;
+
                 const [heroData, proofData, pasData, specData, socialData, offerData, logoData] = await Promise.all([
                     fetchJson(`${assetRoot}/hero_block.json`, 'Hero'),
                     fetchJson(`${assetRoot}/proof_block.json`, 'Proof'),
@@ -90,7 +107,7 @@ export const DynamicLandingPage: React.FC = () => {
                     fetchJson(`${assetRoot}/spec_block.json`, 'Spec'),
                     fetchJson(`${assetRoot}/social_block.json`, 'Social'),
                     fetchJson(`${assetRoot}/offer_block.json`, 'Offer'),
-                    fetchJson(`/assets/logo_kit_challenger.json`, 'Logo')
+                    fetchJson(logoPath, 'Logo')
                 ]);
 
                 setConfigs({ hero: heroData, proof: proofData, pas: pasData, spec: specData, social: socialData, offer: offerData });
@@ -115,7 +132,7 @@ export const DynamicLandingPage: React.FC = () => {
         };
 
         fetchConfigs();
-    }, [config, setDna]); // Re-run when config changes (Atomic Switch Support!)
+    }, [config, setDna, workspaceId]); // Re-run when config or workspace changes
 
     const hasTrackedPage = useState(false); // Using state ref pattern or just ref to guard
 
@@ -126,7 +143,10 @@ export const DynamicLandingPage: React.FC = () => {
                 const stateHash = config.current_state_hash || 'unknown';
                 fetch('http://localhost:3001/api/tracking/event', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-workspace-id': workspaceId
+                    },
                     body: JSON.stringify({
                         sessionId: 'manual_session',
                         componentId: 'page_root',
@@ -140,7 +160,7 @@ export const DynamicLandingPage: React.FC = () => {
                 }).catch(console.error);
             }, 500);
         }
-    }, [loading, configs, config, hasTrackedPage]);
+    }, [loading, configs, config, hasTrackedPage, workspaceId]);
 
     if (loading) return <div className="h-screen flex items-center justify-center bg-black text-white">Loading Optimization Engine...</div>;
     if (error) return <div className="h-screen flex items-center justify-center bg-red-900 text-white">{error}</div>;

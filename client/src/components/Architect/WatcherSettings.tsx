@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { Timer, Save, Clock, PlayCircle, Activity } from 'lucide-react';
 
 export const WatcherSettings: React.FC = () => {
+    const { workspaceId } = useWorkspace();
     const [config, setConfig] = useState({ bufferMinutes: 5, intervalMinutes: 5 });
     const [status, setStatus] = useState<{ ready: boolean, hasGenerated: boolean }>({ ready: false, hasGenerated: false });
     const [isSaving, setIsSaving] = useState(false);
@@ -10,14 +12,15 @@ export const WatcherSettings: React.FC = () => {
 
     useEffect(() => {
         // Load Config
-        fetch('http://localhost:3000/api/config/watcher')
+        // Load Config
+        fetch('http://localhost:3000/api/config/watcher', { headers: { 'x-workspace-id': workspaceId } })
             .then(res => res.json())
             .then(data => setConfig(data))
             .catch(err => console.error("Failed to load watcher settings", err));
 
         // Check Status (Do logos exist?)
         const checkStatus = () => {
-            fetch('http://localhost:3000/api/status/logos')
+            fetch('http://localhost:3000/api/status/logos', { headers: { 'x-workspace-id': workspaceId } })
                 .then(res => res.json())
                 .then(data => setStatus(data))
                 .catch(err => console.warn("Status check failed", err));
@@ -26,14 +29,14 @@ export const WatcherSettings: React.FC = () => {
         checkStatus();
         const interval = setInterval(checkStatus, 10000); // Poll every 10s
         return () => clearInterval(interval);
-    }, []);
+    }, [workspaceId]);
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
             await fetch('http://localhost:3000/api/config/watcher', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
                 body: JSON.stringify(config)
             });
             setTimeout(() => setIsSaving(false), 500);
@@ -49,7 +52,10 @@ export const WatcherSettings: React.FC = () => {
 
         setIsRunningDate(Date.now());
         try {
-            await fetch('http://localhost:3000/api/action/run-initializers', { method: 'POST' });
+            await fetch('http://localhost:3000/api/action/run-initializers', {
+                method: 'POST',
+                headers: { 'x-workspace-id': workspaceId }
+            });
         } catch (e) {
             console.error("Failed to trigger init", e);
         }

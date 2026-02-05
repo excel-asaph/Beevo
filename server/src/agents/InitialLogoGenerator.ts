@@ -13,24 +13,44 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 // Paths
 // Paths - Resolved relative to this file (server/src/agents)
-const RESEARCH_PATH = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const OUTPUT_PATH = path.resolve(__dirname, '../../../client/public/assets/logo_kit_challenger.json');
-const INSPIRATION_DIR = path.resolve(__dirname, '../../../client/public/assets/logo_inspiration');
-const GENERATED_DIR = path.resolve(__dirname, '../../../client/public/assets/generated_logos');
+// CONSTANTS REMOVED in favor of dynamic paths in constructor
 
 export class InitialLogoGenerator {
     private client: GoogleGenAI;
     private modelName = MODELS.FORGE_IMAGE;
+    private workspaceId: string;
 
-    constructor() {
+    // Dynamic Paths
+    private researchPath: string;
+    private outputPath: string;
+    private inspirationDir: string;
+    private generatedDir: string;
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set in .env.local");
         this.client = new GoogleGenAI({ apiKey });
+
+        // Initialize Dynamic Paths
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.researchPath = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.outputPath = path.join(baseClientPath, 'assets/logo_kit_challenger.json');
+        this.inspirationDir = path.join(baseClientPath, 'assets/logo_inspiration');
+        this.generatedDir = path.join(baseClientPath, 'assets/generated_logos');
     }
 
     async generate(additionalContext?: string) {
-        console.log("🚀 Starting Logo Generator...");
-        const rawData = await fs.readFile(RESEARCH_PATH, 'utf-8');
+        console.log(`🚀 [${this.workspaceId}] Starting Logo Generator...`);
+
+        // Ensure directories exist
+        await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
+        await fs.mkdir(this.inspirationDir, { recursive: true });
+        await fs.mkdir(this.generatedDir, { recursive: true });
+
+        const rawData = await fs.readFile(this.researchPath, 'utf-8');
         const research = JSON.parse(rawData);
 
 
@@ -41,7 +61,6 @@ export class InitialLogoGenerator {
         }
 
         // 1. Process Inspirations
-        await fs.mkdir(INSPIRATION_DIR, { recursive: true });
         const selectedInspirations = research.logoInspirations.inspirations.filter((i: any) => i.isSelected);
         const inspirationParts: any[] = [];
 
@@ -55,7 +74,7 @@ export class InitialLogoGenerator {
                     const buffer = Buffer.from(data, 'base64');
                     // Force inspiration naming convention
                     const filename = `inspiration_${index + 1}.${ext}`;
-                    const filePath = path.join(INSPIRATION_DIR, filename);
+                    const filePath = path.join(this.inspirationDir, filename);
 
                     await fs.writeFile(filePath, buffer);
                     console.log(`   - Saved ${filename}`);
@@ -94,7 +113,7 @@ export class InitialLogoGenerator {
         `;
 
         // 3. Setup Generated Directory
-        await fs.mkdir(GENERATED_DIR, { recursive: true });
+        // (already done in generate init)
         const generatedPaths: Record<string, string> = {};
 
         // 4. Generate PRIMARY First (The Anchor)
@@ -134,8 +153,8 @@ export class InitialLogoGenerator {
                 primaryBase64 = imagePart.inlineData.data || '';
                 const buffer = Buffer.from(primaryBase64, 'base64');
                 const filename = `logo_variant_primary.png`;
-                await fs.writeFile(path.join(GENERATED_DIR, filename), buffer);
-                generatedPaths['primary'] = `/assets/generated_logos/${filename}`;
+                await fs.writeFile(path.join(this.generatedDir, filename), buffer);
+                generatedPaths['primary'] = `/workspaces/${this.workspaceId}/assets/generated_logos/${filename}`;
                 console.log(`   ✅ Primary Generated & Saved to ${filename}`);
             } else {
                 throw new Error("No image returned for Primary Logo");
@@ -183,8 +202,8 @@ export class InitialLogoGenerator {
                     const data = imagePart.inlineData.data;
                     const buffer = Buffer.from(data, 'base64');
                     const filename = `logo_variant_${variant.key}.png`;
-                    await fs.writeFile(path.join(GENERATED_DIR, filename), buffer);
-                    generatedPaths[variant.key] = `/assets/generated_logos/${filename}`;
+                    await fs.writeFile(path.join(this.generatedDir, filename), buffer);
+                    generatedPaths[variant.key] = `/workspaces/${this.workspaceId}/assets/generated_logos/${filename}`;
                 } else {
                     console.warn(`     ⚠️ No image returned for ${variant.key}`);
                     generatedPaths[variant.key] = generatedPaths['primary'] || ''; // Fallback
@@ -219,8 +238,8 @@ export class InitialLogoGenerator {
             brandDNA: research.brandDNA
         };
 
-        await fs.writeFile(OUTPUT_PATH, JSON.stringify(finalOutput, null, 4));
-        console.log(`✅ Logo Kit Baked to: ${OUTPUT_PATH}`);
+        await fs.writeFile(this.outputPath, JSON.stringify(finalOutput, null, 4));
+        console.log(`✅ Logo Kit Baked to: ${this.outputPath}`);
     }
 
     private getPlaceholder(text: string): string {
@@ -230,6 +249,7 @@ export class InitialLogoGenerator {
 
 // Auto-run
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    const generator = new InitialLogoGenerator();
+    // Default workspace for manual CLI run
+    const generator = new InitialLogoGenerator('default');
     generator.generate().catch(console.error);
 }

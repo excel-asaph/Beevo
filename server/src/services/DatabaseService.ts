@@ -8,36 +8,41 @@ import crypto from 'crypto';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_PATH = path.resolve(__dirname, '../../brain/beevo_history.db');
 const SCHEMA_PATH = path.resolve(__dirname, '../db/schema.sql');
 
 export class DatabaseService {
-    private static instance: DatabaseService;
+    private static instances: Map<string, DatabaseService> = new Map();
     private db: Database | null = null;
+    private workspaceId: string;
+    private dbPath: string;
 
-    private constructor() { }
+    private constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
+        // Independent DB per workspace
+        this.dbPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/beevo_history.db`);
+    }
 
-    public static getInstance(): DatabaseService {
-        if (!DatabaseService.instance) {
-            DatabaseService.instance = new DatabaseService();
+    public static getInstance(workspaceId: string = 'default'): DatabaseService {
+        if (!DatabaseService.instances.has(workspaceId)) {
+            DatabaseService.instances.set(workspaceId, new DatabaseService(workspaceId));
         }
-        return DatabaseService.instance;
+        return DatabaseService.instances.get(workspaceId)!;
     }
 
     public async initialize() {
         if (this.db) return;
 
-        // Ensure brain directory exists
-        await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
+        // Ensure brain/workspace exists
+        await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
 
         this.db = await open({
-            filename: DB_PATH,
+            filename: this.dbPath,
             driver: sqlite3.Database
         });
 
         const schema = await fs.readFile(SCHEMA_PATH, 'utf8');
         await this.db.exec(schema);
-        console.log('✅ SQLite History Database Initialized');
+        console.log(`✅ [${this.workspaceId}] SQLite History Database Initialized`);
     }
 
     public async savePageState(stateHash: string, sections: any, mediaRefs: any, metrics: any = {}) {
@@ -102,3 +107,4 @@ export class DatabaseService {
         return await this.db?.all('SELECT * FROM lead_submissions WHERE page_state_hash = ?', [stateHash]);
     }
 }
+

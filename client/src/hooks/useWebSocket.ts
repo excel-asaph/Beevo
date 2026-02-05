@@ -4,6 +4,7 @@ import type {
     ServerMessage
 } from '@shared/messages';
 import type { BrandDNA, FontSuggestion, ColorPalette, LogoStructureOption, ImagerySuggestion, ResearchPhaseObject } from '@shared/types';
+import { useWorkspace } from '../context/WorkspaceContext';
 
 // WebSocket connection states
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -58,6 +59,7 @@ interface UseWebSocketReturn {
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
+    const { workspaceId } = useWorkspace();
     const wsRef = useRef<WebSocket | null>(null);
     const [status, setStatus] = useState<ConnectionStatus>('disconnected');
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -208,7 +210,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         setStatus('connecting');
 
         // Connect to backend WebSocket
-        const wsUrl = process.env.WS_URL || 'ws://localhost:3001';
+        const baseUrl = process.env.WS_URL || 'ws://localhost:3001';
+        const wsUrl = `${baseUrl}?workspaceId=${workspaceId}`;
         const ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
@@ -231,7 +234,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         };
 
         wsRef.current = ws;
-    }, [handleMessage]);
+    }, [handleMessage, workspaceId]);
 
     const disconnect = useCallback(() => {
         if (wsRef.current) {
@@ -268,7 +271,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }, [sendMessage]);
 
     // VAD: Signal that user has finished speaking
-    const sendActivityEnd = useCallback(() => {
+    const sendActivityEnd = useCallback(( ) => {
         return sendMessage({ type: 'ACTIVITY_END' });
     }, [sendMessage]);
 

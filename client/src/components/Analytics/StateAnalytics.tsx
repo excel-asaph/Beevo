@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { BarChart3, TrendingUp, Users, Target, Clock } from 'lucide-react';
 
 interface StateVariant {
@@ -18,6 +19,7 @@ interface LeaderboardItem {
 }
 
 export const StateAnalytics: React.FC = () => {
+    const { workspaceId } = useWorkspace();
     const [current, setCurrent] = useState<any>(null);
     const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,14 +28,16 @@ export const StateAnalytics: React.FC = () => {
         const fetchAnalytics = async () => {
             try {
                 // Fetch Leaderboard
-                const resLeader = await fetch('http://localhost:3001/api/analytics/leaderboard');
+                // Fetch Leaderboard
+                const resLeader = await fetch('http://localhost:3001/api/analytics/leaderboard', { headers: { 'x-workspace-id': workspaceId } });
                 if (resLeader.ok) {
                     const data = await resLeader.json();
                     setLeaderboard(data);
                 }
 
                 // Fetch Current State
-                const resCurrent = await fetch('http://localhost:3001/api/analytics/current');
+                // Fetch Current State
+                const resCurrent = await fetch('http://localhost:3001/api/analytics/current', { headers: { 'x-workspace-id': workspaceId } });
                 if (resCurrent.ok) {
                     const data = await resCurrent.json();
                     setCurrent(data);
@@ -49,7 +53,7 @@ export const StateAnalytics: React.FC = () => {
         fetchAnalytics();
         const interval = setInterval(fetchAnalytics, 5000); // 5s refresh for live data
         return () => clearInterval(interval);
-    }, []);
+    }, [workspaceId]);
 
     if (loading) return <div className="p-8 text-white/50 animate-pulse">Synchronizing State Intelligence...</div>;
 

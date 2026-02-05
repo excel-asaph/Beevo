@@ -54,6 +54,11 @@ export class GeminiLiveConnection {
 
     /** Set the current phase and update Live's context accordingly */
     public async setPhase(phase: 'discovery' | 'execution' | 'modification'): Promise<void> {
+        // ALWAYS update Brain phase to keep them in sync
+        if (this.brain) {
+            await this.brain.setPhase(phase);
+        }
+
         if (phase === 'modification' && this.liveSession && this.isConnected) {
             console.log('🔄 Switching Live to MODIFICATION phase context');
 
@@ -110,7 +115,8 @@ Acknowledge this change by greeting the user and asking how you can help refine 
         getFonts: () => FontSuggestion[],
         getPalettes: () => ColorPalette[],
         getCanvasMode: () => 'none' | 'fonts' | 'colors',
-        updateStateBatch: (updates: Record<string, any>) => void = () => { }
+        updateStateBatch: (updates: Record<string, any>) => void = () => { },
+        workspaceId: string = 'default'
     ) {
         this.sessionId = sessionId;
         this.sendToClient = sendToClient;
@@ -134,7 +140,8 @@ Acknowledge this change by greeting the user and asking how you can help refine 
                 }
                 // Also update Live's context for modification phase
                 this.setPhase(phase);
-            }
+            },
+            workspaceId
         );
         // Store references for ToolDecisionAgent
         this.getDNA = getDNA;
@@ -150,7 +157,8 @@ Acknowledge this change by greeting the user and asking how you can help refine 
             sendToClient,
             this.toolHandler,
             () => this.interruptLive(),
-            getDNA
+            getDNA,
+            workspaceId
         );
         console.log(`🧠 Bridge Architecture: Brain initialized for session ${sessionId}`);
     }

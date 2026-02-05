@@ -7,8 +7,9 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
-import { SystemConfigService } from '../services/SystemConfigService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
+import { MediaService } from '../services/MediaService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,42 +17,54 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/proof_block_challenger.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/proof_block_staging.json');
-const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_snapshot.png');
-const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/proof_watcher_decision.json');
-
-// Models
-
 puppeteer.use(StealthPlugin());
 
 export class ProofWatcher {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
+    private workspaceId: string;
+    private paths: {
+        metrics: string;
+        staging: string;
+        research: string;
+        snapshot: string;
+        decision: string;
+    };
 
-    constructor() {
+    constructor(workspaceId: string = 'default') {
+        this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY || '';
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+
+        // Dynamic Paths
+        const baseBrain = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        // If default, maybe map to old paths? No, strict isolation means we move to workspace folders.
+        // Assuming migration or fresh start.
+
+        this.paths = {
+            metrics: path.join(baseBrain, 'metrics/landing_page_metrics.json'),
+            staging: path.join(baseBrain, 'staging/proof_block_staging.json'),
+            research: path.join(baseBrain, 'research_artifacts/complete_research_latest.json'),
+            snapshot: path.join(baseBrain, 'run_artifacts/proof_watcher_snapshot.png'),
+            decision: path.join(baseBrain, 'run_artifacts/proof_watcher_decision.json')
+        };
     }
 
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log("📸 ProofWatcher: Capturing block snapshot...");
+        console.log(`📸 ProofWatcher [${this.workspaceId}]: Capturing block snapshot...`);
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
 
-            // Using standard port for simulation
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
-            await page.goto(url, { waitUntil: 'load', timeout: 10000 });
+            // Pass workspaceId to frontend via URL
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 });
 
             // Wait for proof block
-            await page.waitForSelector('[data-component="proof-block"]', { timeout: 5000 });
+            await page.waitForSelector('[data-component="proof-block"]', { timeout: 10000 });
 
             // Give animations time to complete
             await new Promise(r => setTimeout(r, 2000));
@@ -61,8 +74,8 @@ export class ProofWatcher {
             if (!element) throw new Error("Proof block not found");
 
             const screenshot = await element.screenshot({ encoding: 'binary' });
-            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
-            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+            await fs.mkdir(path.dirname(this.paths.snapshot), { recursive: true });
+            await fs.writeFile(this.paths.snapshot, screenshot);
 
             return Buffer.from(screenshot);
         } catch (e) {
@@ -74,31 +87,48 @@ export class ProofWatcher {
     }
 
     async analyzeAndOptimize() {
-        console.log("🕵️ Proof Watcher: Waking up...");
+        console.log(`🕵️ Proof Watcher [${this.workspaceId}]: Waking up...`);
 
-        // 1. Load Data
         // 1. Data Analysis (Get Config First)
-        const config = await SystemConfigService.getInstance().getConfig();
+        // Use Factory for workspace-specific config
+        const configService = SystemConfigFactory.getInstance(this.workspaceId);
+        const config = await configService.getConfig();
         const notificationClient = NotificationClient.getInstance();
 
         // 0. Resolve Live State Path
-        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
+        // Assets are now workspace-specific
+        const ASSETS_DIR = path.resolve(__dirname, `../../brain/workspaces/${this.workspaceId}/assets`);
         const activePath = config.active_assets_path || '';
-        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'proof_block.json');
+        // Note: active_assets_path in config might be relative or just a version string. 
+        // Assuming it's a version string or relative path inside workspace assets.
+        // If config.active_assets_path is empty, we look in root assets of workspace? 
+        // Actually, let's stick to the pattern: workspace/assets/proof_block.json if activePath is empty.
 
-        console.log(`📂 ProofWatcher: Loading Live State from ${activePath}`);
+        // Wait, logic in other watchers:
+        // const LIVE_FILE = path.resolve(ASSETS_DIR, activePath, 'proof_block.json');
+
+        // Ensure directory exists
+        const liveFileDir = path.join(ASSETS_DIR, activePath);
+        const LIVE_FILE = path.join(liveFileDir, 'proof_block.json');
+
+        console.log(`📂 ProofWatcher: Loading Live State from ${LIVE_FILE}`);
 
         const [metricsRaw, liveRaw, researchRaw] = await Promise.all([
-            fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(this.paths.metrics, 'utf-8').catch(() => '{}'),
             fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
+            fs.readFile(this.paths.research, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
         const currentProof = JSON.parse(liveRaw);
         const researchCtx = JSON.parse(researchRaw);
 
-        const variantId = currentProof.id || 'proof_section_v1';
+        if (!currentProof.id) {
+            console.error("❌ No valid live proof block found. Aborting.");
+            return;
+        }
+
+        const variantId = currentProof.id;
         const data = metricsInfo[variantId];
 
         // 0. Check Lock
@@ -126,7 +156,9 @@ export class ProofWatcher {
         const preCheck = await notificationClient.requestApproval(
             'Proof Section',
             'PRE_GENERATION',
-            `Proof Dwell Time is low (${avgDwell.toFixed(0)}ms vs Target ${config.sections.proof.target_dwell_ms}ms). Optimize?`
+            `Proof Dwell Time is low (${avgDwell.toFixed(0)}ms vs Target ${config.sections.proof.target_dwell_ms}ms). Optimize?`,
+            undefined,
+            this.workspaceId
         );
 
         if (!preCheck.approved) {
@@ -171,7 +203,8 @@ export class ProofWatcher {
                     'Proof Section',
                     'POST_GENERATION',
                     `New Proof Strategy Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
-                    optimization
+                    optimization,
+                    this.workspaceId
                 );
 
                 if (!postCheck.approved) {
@@ -199,9 +232,9 @@ export class ProofWatcher {
                     }
                 };
 
-                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
-                await fs.writeFile(STAGING_FILE, JSON.stringify(newProof, null, 4));
-                await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
+                await fs.mkdir(path.dirname(this.paths.staging), { recursive: true });
+                await fs.writeFile(this.paths.staging, JSON.stringify(newProof, null, 4));
+                await fs.writeFile(this.paths.decision, JSON.stringify(optimization, null, 4));
                 console.log("🚀 Optimization Staged! Proof Section Mutated in staging.");
             }
         } catch (error) {
@@ -212,5 +245,10 @@ export class ProofWatcher {
 
 // Run if executed directly
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    new ProofWatcher().analyzeAndOptimize().catch(console.error);
+    // Parse CLI NameArgs
+    const args = process.argv.slice(2);
+    const workspaceIdx = args.indexOf('--workspace');
+    const workspaceId = workspaceIdx !== -1 ? args[workspaceIdx + 1] : 'default';
+
+    new ProofWatcher(workspaceId).analyzeAndOptimize().catch(console.error);
 }

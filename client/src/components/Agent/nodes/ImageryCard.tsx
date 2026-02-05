@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ImageIcon } from 'lucide-react';
+import { useWorkspace } from '../../../context/WorkspaceContext';
 
 export interface ImageryCardProps {
     images: { url: string; label?: string }[];
@@ -13,6 +14,7 @@ export const ImageryCard: React.FC<ImageryCardProps> = ({
     title = 'Imagery',
     onImageClick,
 }) => {
+    const { resolveAssetUrl } = useWorkspace();
     const hasImages = images && images.length > 0;
 
     return (
@@ -46,7 +48,7 @@ export const ImageryCard: React.FC<ImageryCardProps> = ({
                         onClick={() => onImageClick?.(img.url)}
                     >
                         <img
-                            src={img.url}
+                            src={resolveAssetUrl(img.url)}
                             alt={img.label || `Inspiration ${index + 1}`}
                             className="w-full h-full object-cover transition-transform group-hover:scale-110"
                             onError={(e) => {

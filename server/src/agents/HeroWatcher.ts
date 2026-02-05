@@ -7,8 +7,9 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
-import { SystemConfigService } from '../services/SystemConfigService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
+import { MediaService } from '../services/MediaService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,45 +17,55 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Constants
-const METRICS_FILE = path.resolve(__dirname, '../../brain/metrics/landing_page_metrics.json');
-const CHALLENGER_FILE = path.resolve(__dirname, '../../../client/public/assets/hero_block.json');
-const STAGING_FILE = path.resolve(__dirname, '../../brain/staging/hero_block_staging.json');
-const RESEARCH_FILE = path.resolve(__dirname, '../../brain/research_artifacts/complete_research_latest.json');
-const SNAPSHOT_PATH = path.resolve(__dirname, '../../brain/run_artifacts/hero_watcher_snapshot.png');
-const DECISION_PATH = path.resolve(__dirname, '../../brain/run_artifacts/hero_watcher_decision.json');
-
-import { MediaService } from '../services/MediaService.js';
-
-// Models
-
-
 const WATCHER_MODEL = MODELS.ARCHITECT_TEXT;
 
 puppeteer.use(StealthPlugin());
 
 export class HeroWatcher {
     private client: GoogleGenAI;
+    private workspaceId: string;
 
-    constructor() {
+    // Dynamic Paths
+    private metricsFile: string;
+    private stagingFile: string;
+    private researchFile: string;
+    private snapshotPath: string;
+    private decisionPath: string;
+    private assetsDir: string;
+    // activePath and liveFile are determined at runtime via config
+
+    constructor(workspaceId: string) {
+        this.workspaceId = workspaceId;
         this.client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
+        const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
+
+        this.metricsFile = path.join(baseBrainPath, 'metrics/landing_page_metrics.json');
+        this.stagingFile = path.join(baseBrainPath, 'staging/hero_block_staging.json');
+        this.researchFile = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
+        this.snapshotPath = path.join(baseBrainPath, 'run_artifacts/hero_watcher_snapshot.png');
+        this.decisionPath = path.join(baseBrainPath, 'run_artifacts/hero_watcher_decision.json');
+        this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log("📸 Hero Watcher: Capturing live snapshot...");
+        console.log(`📸 [${this.workspaceId}] Hero Watcher: Capturing live snapshot...`);
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page`;
+            // Add workspace param to URL so client knows which workspace to load (if client supports it)
+            // Assuming client reads ?workspace=...
+            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0' });
             await page.waitForSelector('[data-component="hero-block"]', { timeout: 5000 });
             const screenshot = await page.screenshot({ encoding: 'binary' });
 
             // Save for user visibility
-            await fs.mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
-            await fs.writeFile(SNAPSHOT_PATH, screenshot);
+            await fs.mkdir(path.dirname(this.snapshotPath), { recursive: true });
+            await fs.writeFile(this.snapshotPath, screenshot);
 
             return Buffer.from(screenshot);
         } catch (e) {
@@ -66,23 +77,22 @@ export class HeroWatcher {
     }
 
     async analyzeAndOptimize() {
-        console.log("🕵️ Hero Watcher Agent: Waking up...");
+        console.log(`🕵️ [${this.workspaceId}] Hero Watcher Agent: Waking up...`);
 
         // 1. Load Data
-        // 0. Resolve Live State Path (Atomic Deployment)
-        const config = await SystemConfigService.getInstance().getConfig();
-        const notificationClient = NotificationClient.getInstance();
+        const configService = SystemConfigFactory.getInstance(this.workspaceId);
+        const config = await configService.getConfig();
+        const notificationClient = NotificationClient.getInstance(); // TODO: NotificationClient workspace aware?
 
-        const ASSETS_DIR = path.resolve(__dirname, '../../../client/public/assets');
         const activePath = config.active_assets_path || '';
-        const LIVE_FILE = path.join(ASSETS_DIR, activePath, 'hero_block.json');
+        const LIVE_FILE = path.join(this.assetsDir, activePath, 'hero_block.json');
 
-        console.log(`📂 HeroWatcher: Loading Live State from ${activePath}`);
+        console.log(`📂 HeroWatcher: Loading Live State from ${activePath} (in ${this.assetsDir})`);
 
         const [metricsRaw, challengerRaw, researchRaw] = await Promise.all([
-            fs.readFile(METRICS_FILE, 'utf-8').catch(() => '{}'),
+            fs.readFile(this.metricsFile, 'utf-8').catch(() => '{}'),
             fs.readFile(LIVE_FILE, 'utf-8').catch(() => '{}'),
-            fs.readFile(RESEARCH_FILE, 'utf-8').catch(() => '{}')
+            fs.readFile(this.researchFile, 'utf-8').catch(() => '{}')
         ]);
 
         const metricsInfo = JSON.parse(metricsRaw);
@@ -92,17 +102,29 @@ export class HeroWatcher {
         // Load current video for context
         let videoBuffer = null;
         if (currentHero.visual_asset?.source_url) {
-            // Note: Visual assets might be in history or root, we use the URL as reference
-            // But we need absolute path. If it starts with /assets, we prepend client/public
-            const videoPath = path.resolve(__dirname, '../../../client/public', currentHero.visual_asset.source_url.startsWith('/') ? currentHero.visual_asset.source_url.substring(1) : currentHero.visual_asset.source_url);
+            // Note: Visual assets might be in history or root.
+            // If it starts with /workspaces/XYZ, we need to map it to client/public/workspaces/XYZ
+            // If it starts with /assets, it might be legacy or mapped to client/public/assets?
+            // "source_url" is a public URL path.
+            // We need to resolve it to a local file path.
+
+            const sourceUrl = currentHero.visual_asset.source_url;
+            let videoPath = '';
+
+            if (sourceUrl.startsWith('/workspaces')) {
+                // /workspaces/XYZ/... -> client/public/workspaces/XYZ/...
+                videoPath = path.resolve(__dirname, '../../../client/public', sourceUrl.replace(/^\//, ''));
+            } else {
+                // Fallback to legacy assets or root
+                videoPath = path.resolve(__dirname, '../../../client/public', sourceUrl.replace(/^\//, ''));
+            }
+
             videoBuffer = await fs.readFile(videoPath).catch(() => null);
             if (videoBuffer) console.log("📺 HeroWatcher: Contextual Video Loaded.");
         }
 
         const activeVariantId = currentHero.id || 'hero_section_v1';
         const data = metricsInfo[activeVariantId];
-
-
 
         // 0. Check Lock
         if (config.locks.hero) {
@@ -135,7 +157,9 @@ export class HeroWatcher {
         const preCheck = await notificationClient.requestApproval(
             'Hero Section',
             'PRE_GENERATION',
-            `Hero metrics are low (CTR: ${ctr.toFixed(1)}% vs Target ${config.sections.hero.target_ctr}%). Attempt optimization?`
+            `Hero metrics are low (CTR: ${ctr.toFixed(1)}% vs Target ${config.sections.hero.target_ctr}%). Attempt optimization?`,
+            undefined, // No proposal yet
+            this.workspaceId
         );
 
         if (!preCheck.approved) {
@@ -184,12 +208,6 @@ export class HeroWatcher {
                - If Contrast < 4.5:1: Use a lighter/darker color from palette OR add backdrop blur.
                - If Retention < 40%: Refine the video movement/subject.
             4. **Mutate**: Propose a Specific Fix.
-
-            ${(config.feedback.hero_directive || preCheck.feedback) ? `
-            **🛑 HIGH PRIORITY USER DIRECTIVE 🛑**:
-            The user has explicitly ordered: "${[config.feedback.hero_directive, preCheck.feedback].filter(Boolean).join('. ')}"
-            YOU MUST COMPLY WITH THIS ABOVE ALL OTHER STRATEGIC GOALS.
-            ` : ''}
             
             **OUTPUT JSON**:
             {
@@ -240,7 +258,8 @@ export class HeroWatcher {
                     'Hero Section',
                     'POST_GENERATION',
                     `New Hero Strategy Ready (Confidence: ${optimization.confidence}%). Deploy to Challenger & Bake Video?`,
-                    optimization
+                    optimization,
+                    this.workspaceId
                 );
 
                 if (!postCheck.approved) {
@@ -290,9 +309,9 @@ export class HeroWatcher {
 
                 // NEW: Write to STAGING instead of Live. 
                 // The Coordinator (run_watchers.ts) will "Seal" this change.
-                await fs.mkdir(path.dirname(STAGING_FILE), { recursive: true });
-                await fs.writeFile(STAGING_FILE, JSON.stringify(newHero, null, 4));
-                await fs.writeFile(DECISION_PATH, JSON.stringify(optimization, null, 4));
+                await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
+                await fs.writeFile(this.stagingFile, JSON.stringify(newHero, null, 4));
+                await fs.writeFile(this.decisionPath, JSON.stringify(optimization, null, 4));
                 console.log("🚀 Proposed changes written to STAGING. Pending Sealing.");
 
                 // NEW: Automatic "Bake" Loop
@@ -342,8 +361,8 @@ export class HeroWatcher {
             const videos = operation.response?.generatedVideos;
             if (!videos || !videos.length) throw new Error("No videos returned.");
 
-            // NEW: Use centralized MediaService
-            const browserPath = await MediaService.getInstance().archiveGeminiFile(
+            // NEW: Use centralized MediaService with workspaceId
+            const browserPath = await MediaService.getInstance(this.workspaceId).archiveGeminiFile(
                 this.client,
                 (videos[0].video as any).uri,
                 'hero_video',
@@ -352,13 +371,13 @@ export class HeroWatcher {
             );
 
             // Update the STAGING file with the NEW asset path
-            const stagingRaw = await fs.readFile(STAGING_FILE, 'utf-8').catch(() => '{}');
+            const stagingRaw = await fs.readFile(this.stagingFile, 'utf-8').catch(() => '{}');
             const currentStaging = JSON.parse(stagingRaw);
             currentStaging.visual_asset = {
                 ...currentStaging.visual_asset,
                 source_url: browserPath
             };
-            await fs.writeFile(STAGING_FILE, JSON.stringify(currentStaging, null, 4));
+            await fs.writeFile(this.stagingFile, JSON.stringify(currentStaging, null, 4));
 
             console.log(`✅ Success! Video baked and staging updated: ${browserPath}`);
         } catch (error) {
@@ -368,5 +387,8 @@ export class HeroWatcher {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    new HeroWatcher().analyzeAndOptimize().catch(console.error);
+    // Default workspace for manual CLI run
+    const workspaceId = process.argv.find(a => a.startsWith('--workspace='))?.split('=')[1] || 'default';
+    new HeroWatcher(workspaceId).analyzeAndOptimize().catch(console.error);
 }
+

@@ -11,7 +11,7 @@ import { MODELS } from '../../../shared/constants';
 import { ServerMessage } from '../../../shared/messages';
 import { ToolHandler } from './ToolHandler';
 import { BrandDNA } from '../../../shared/types';
-import { stateManager } from '../services/StateManager';
+import { WorkspaceManager } from '../services/StateManager';
 
 // Tool declarations for the Brain (same as before, but ONLY here)
 const brainToolDeclarations: FunctionDeclaration[] = [
@@ -429,11 +429,13 @@ export class BrainConnection {
         private sendToClient: (msg: ServerMessage) => void,
         private toolHandler: ToolHandler,
         private interruptLive: () => void,
-        private getBrandDNA: () => Partial<BrandDNA>
+        private getBrandDNA: () => Partial<BrandDNA>,
+        private workspaceId: string = 'default'
     ) {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error('GEMINI_API_KEY not set');
         this.client = new GoogleGenAI({ apiKey });
+
         console.log(`🧠 Brain initialized for session: ${sessionId}`);
         this.phaseStartTime = Date.now();
     }
@@ -557,7 +559,8 @@ export class BrainConnection {
 
                 case 'execution':
                     // PHASE 2: BUILDER BRAIN - Sequential Atomic Tools
-                    const fullState = stateManager.loadLatest();
+                    const manager = WorkspaceManager.getStateManager(this.workspaceId);
+                    const fullState = manager.loadLatest();
                     const hasColors = fullState?.colorPalettes?.palettes && fullState.colorPalettes.palettes.length > 0;
                     const hasFonts = fullState?.typographyPairings?.fonts && fullState.typographyPairings.fonts.length > 0;
 
@@ -591,7 +594,8 @@ export class BrainConnection {
                 case 'modification':
                     // PHASE 3: MODIFIER BRAIN - Post-canvas changes
                     // Load full research state for complete context
-                    const researchState = stateManager.loadLatest();
+                    const modifierManager = WorkspaceManager.getStateManager(this.workspaceId);
+                    const researchState = modifierManager.loadLatest();
 
                     // Build complete context from research state
                     const researchContext = researchState ? JSON.stringify({
@@ -679,7 +683,10 @@ export class BrainConnection {
                         `  Logo Structure: ${structureDisplay} (${researchState?.logoStructures?.options?.length || 0} Options Available)`,
                         '',
                         `History (This Phase Only):`,
-                        `${historyText}`
+                        `${historyText}`,
+                        '',
+                        '🧩 TOOL EXECUTION HISTORY (What you have already done):',
+                        toolHistoryXML
                     ].join('\n');
                     break;
             }

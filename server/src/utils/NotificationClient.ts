@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { WS_CONFIG } from '../../../shared/constants.js';
 
@@ -23,7 +24,8 @@ export class NotificationClient {
         section: string,
         type: 'PRE_GENERATION' | 'POST_GENERATION',
         message: string,
-        proposal?: any
+        proposal?: any,
+        workspaceId: string = 'default'
     ): Promise<{ approved: boolean; feedback?: string }> {
         try {
             // 1. Send Request
@@ -32,6 +34,10 @@ export class NotificationClient {
                 type,
                 message,
                 proposal
+            }, {
+                headers: {
+                    'x-workspace-id': workspaceId
+                }
             });
 
             const { id, status } = response.data;
@@ -70,3 +76,4 @@ export class NotificationClient {
         }
     }
 }
+

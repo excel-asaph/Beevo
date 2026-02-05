@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrandProvider, useBrand } from './context/BrandContext';
+import { WorkspaceProvider } from './context/WorkspaceContext';
 import { Strategist } from './components/Strategist';
 import { ArchitectMain } from './components/Architect';
 import { Forge } from './components/Forge';
@@ -181,9 +182,11 @@ const MainLayout: React.FC = () => {
 
 const App: React.FC = () => {
     return (
-        <BrandProvider>
-            <MainLayout />
-        </BrandProvider>
+        <WorkspaceProvider>
+            <BrandProvider>
+                <MainLayout />
+            </BrandProvider>
+        </WorkspaceProvider>
     );
 };
 

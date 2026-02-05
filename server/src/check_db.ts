@@ -6,10 +6,15 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_PATH = path.resolve(__dirname, '../brain/beevo_history.db');
 
 async function checkDB() {
-    console.log(`📂 Opening Database: ${DB_PATH}`);
+    const args = process.argv.slice(2);
+    const workspaceArg = args.find(a => a.startsWith('--workspace='));
+    const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
+
+    const DB_PATH = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/beevo_history.db`);
+
+    console.log(`📂 Opening Database for Workspace [${workspaceId}]: ${DB_PATH}`);
     try {
         const db = await open({
             filename: DB_PATH,

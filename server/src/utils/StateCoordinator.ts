@@ -28,7 +28,7 @@ export class StateCoordinator {
 
         this.stagingDir = path.join(baseBrain, 'staging');
         this.assetsDir = path.join(baseClient, 'assets');
-        this.historyDir = path.join(baseBrain, 'history'); // History is kept in brain or assets? Original was brain/history
+        this.historyDir = path.join(this.assetsDir, 'history');
     }
 
     public static getInstance(workspaceId: string = 'default'): StateCoordinator {
@@ -127,7 +127,7 @@ export class StateCoordinator {
         }
 
         // 6. Archive in Database
-        const db = DatabaseService.getInstance(); // Database is shared for now, or assume it handles its own schema? 
+        const db = DatabaseService.getInstance(this.workspaceId);
         // Ideally, we pass workspaceId to DatabaseService methods, but for now we assume shared DB with possible workspace column later.
         // The task description said "Ensure all agents and API endpoints correctly handle workspace context."
         // We might need to update DatabaseService to accept workspaceId. But let's check DatabaseService later.
@@ -176,7 +176,7 @@ export class StateCoordinator {
     private async pruneOldStates() {
         try {
             const KEEP_COUNT = 5;
-            const db = DatabaseService.getInstance();
+            const db = DatabaseService.getInstance(this.workspaceId);
             const allStates = await db.getAllStates(); // TODO: Filter by workspace in DB? 
             // Currently DB is global, so this might prune other workspaces' states if we don't filter.
             // Assumption: we are only looking at folders in THIS workspace's state directory.

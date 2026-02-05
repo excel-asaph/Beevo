@@ -1,0 +1,52 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1770317100865",
+    "meta": {
+        "strategy": "Social Proof based on Brand Voice",
+        "tone": "Empowering, sophisticated, inclusive, and socially conscious.",
+        "active_variant": "challenger",
+        "layout_strategy": "FORENSIC_GRID"
+    },
+    "content": {
+        "headline": "THE ARCHITECTS OF THE NEW ERA",
+        "subhead": "Where Parisian craftsmanship meets the raw energy of the streets—witness the voices of the movement.",
+        "testimonials": [
+            {
+                "id": "testimonial_001",
+                "name": "Marcus Thorne",
+                "title": "Director",
+                "company": "Metro Youth Alliance",
+                "quote": "Nectar doesn't just provide clothes; they provide a sense of belonging. It's a revolutionary shift for our community.",
+                "image_prompt": "High-end business portrait of a Black man in his 40s with a warm smile, wearing a minimalist black hoodie, soft studio lighting, neutral background.",
+                "image_url": "/workspaces/a107edc7_velocity/assets/history/social_v1770317100865/testimonial_1_1770317108307.png"
+            },
+            {
+                "id": "testimonial_002",
+                "name": "Elena Rodriguez",
+                "title": "Lead Stylist",
+                "company": "Urban Fashion",
+                "quote": "The craftsmanship rivals the houses in Paris, but the heart is strictly for the streets.",
+                "image_prompt": "Professional headshot of a Latina woman in her 30s with creative styling, urban luxury aesthetic, soft focus background.",
+                "image_url": "/workspaces/a107edc7_velocity/assets/history/social_v1770317100865/testimonial_2_1770317115374.png"
+            },
+            {
+                "id": "testimonial_004",
+                "name": "Amara Okafor",
+                "title": "Founder",
+                "company": "New Thread Initiative",
+                "quote": "Nectar is dismantling barriers while maintaining an elite aesthetic. Luxury is about how you feel in your skin.",
+                "image_prompt": "Elegant professional portrait of a woman in her 30s with natural hair, wearing a structured designer jacket, sophisticated lighting.",
+                "image_url": "/workspaces/a107edc7_velocity/assets/history/social_v1770317100865/testimonial_3_1770317122505.png"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#0F0F10] text-[#F4F4F9] py-24 px-6 font-['Bricolage_Grotesque']\">\n  <div class=\"max-w-7xl mx-auto\">\n    <div class=\"text-center mb-16\">\n      <h2 class=\"text-5xl md:text-7xl font-black mb-6 uppercase tracking-tighter\">\n        THE ARCHITECTS <span class=\"text-[#E2D1C3] italic block md:inline\">OF THE NEW ERA</span>\n      </h2>\n      <div class=\"h-px w-24 bg-[#E2D1C3] mx-auto mb-6\"></div>\n      <p class=\"text-[#E2D1C3]/60 text-lg max-w-xl mx-auto font-light\">Voices of a movement redefining luxury through radical inclusion and unapologetic craftsmanship.</p>\n    </div>\n\n    <div class=\"grid grid-cols-1 md:grid-cols-12 gap-4 auto-rows-[100px] md:auto-rows-[120px]\">\n      <!-- PRIMARY TESTIMONIAL: MARCUS -->\n      <div class=\"md:col-span-8 md:row-span-4 bg-[#161617] border border-white/10 rounded-3xl p-8 md:p-12 flex flex-col justify-between group hover:border-[#E2D1C3]/30 transition-all duration-500 relative overflow-hidden\">\n        <div class=\"absolute top-0 right-0 p-4 opacity-10\">\n          <span class=\"text-xs font-mono uppercase tracking-[0.3em]\">COORD // 01.A</span>\n        </div>\n        <p class=\"text-2xl md:text-4xl font-light leading-tight mb-12 relative z-10\">\n          \"Nectar doesn't just provide clothes; they provide a <span class=\"text-[#E2D1C3] italic\">sense of belonging</span>. Seeing our youth walk with such confidence is a revolutionary shift.\"\n        </p>\n        <div class=\"flex items-center gap-6 relative z-10\">\n          <img src=\"testimonial_001_url\" alt=\"Marcus Thorne\" class=\"w-20 h-20 rounded-full border border-[#E2D1C3]/30 grayscale group-hover:grayscale-0 transition-all duration-700\">\n          <div>\n            <p class=\"font-bold text-xl uppercase tracking-tighter\">Marcus Thorne</p>\n            <p class=\"text-xs uppercase tracking-[0.3em] text-[#E2D1C3]/60\">Director, Metro Youth Alliance</p>\n          </div>\n        </div>\n      </div>\n\n      <!-- STATS: MEMBERS -->\n      <div class=\"md:col-span-4 md:row-span-2 bg-[#E2D1C3] text-[#0F0F10] rounded-3xl p-8 flex flex-col justify-center items-center text-center\">\n        <p class=\"text-5xl font-black tracking-tighter\">15K+</p>\n        <p class=\"text-xs uppercase font-bold tracking-[0.2em] opacity-80\">Active Members</p>\n      </div>\n\n      <!-- SECONDARY: ELENA -->\n      <div class=\"md:col-span-4 md:row-span-3 bg-[#161617] border border-white/5 rounded-3xl p-8 flex flex-col justify-between hover:bg-[#1A1A1B] transition-colors\">\n        <p class=\"text-lg italic font-light opacity-80\">\n          \"The craftsmanship rivals Paris, but the heart is strictly for the streets.\"\n        </p>\n        <div class=\"flex items-center gap-4 mt-6\">\n          <img src=\"testimonial_002_url\" alt=\"Elena Rodriguez\" class=\"w-12 h-12 rounded-full grayscale\">\n          <div>\n            <p class=\"text-sm font-bold uppercase\">Elena Rodriguez</p>\n            <p class=\"text-[10px] uppercase tracking-widest text-[#E2D1C3]\">Lead Stylist</p>\n          </div>\n        </div>\n      </div>\n\n      <!-- STATS: SENTIMENT -->\n      <div class=\"md:col-span-4 md:row-span-2 bg-white/5 border border-white/10 rounded-3xl p-8 flex flex-col justify-center\">\n        <div class=\"flex justify-between items-end mb-2\">\n          <p class=\"text-4xl font-bold text-[#E2D1C3]\">98%</p>\n          <div class=\"w-12 h-1 bg-[#E2D1C3]/20 rounded-full overflow-hidden\">\n            <div class=\"w-[98%] h-full bg-[#E2D1C3]\"></div>\n          </div>\n        </div>\n        <p class=\"text-[10px] uppercase tracking-[0.3em] opacity-50\">Sentiment Score</p>\n      </div>\n\n      <!-- TERTIARY: AMARA -->\n      <div class=\"md:col-span-4 md:row-span-3 bg-[#161617] border border-white/5 rounded-3xl p-8 flex flex-col justify-between hover:bg-[#1A1A1B] transition-colors\">\n        <p class=\"text-lg font-light\">\n          \"Dismantling barriers while maintaining an elite aesthetic. Luxury is how you feel.\"\n        </p>\n        <div class=\"flex items-center gap-4 mt-6\">\n          <img src=\"testimonial_004_url\" alt=\"Amara Okafor\" class=\"w-12 h-12 rounded-full grayscale\">\n          <div>\n            <p class=\"text-sm font-bold uppercase\">Amara Okafor</p>\n            <p class=\"text-[10px] uppercase tracking-widest text-[#E2D1C3]\">Founder, New Thread</p>\n          </div>\n        </div>\n      </div>\n\n      <!-- STATS: RATING -->\n      <div class=\"md:col-span-4 md:row-span-2 bg-[#1A1A1B] border border-[#E2D1C3]/10 rounded-3xl p-8 flex items-center justify-between\">\n        <div>\n          <p class=\"text-3xl font-black text-white\">4.9/5</p>\n          <p class=\"text-[9px] uppercase tracking-[0.2em] opacity-40\">Verified Reviews</p>\n        </div>\n        <div class=\"flex gap-0.5\">\n          <div class=\"w-2 h-2 bg-[#E2D1C3] rounded-full\"></div>\n          <div class=\"w-2 h-2 bg-[#E2D1C3] rounded-full\"></div>\n          <div class=\"w-2 h-2 bg-[#E2D1C3] rounded-full\"></div>\n          <div class=\"w-2 h-2 bg-[#E2D1C3] rounded-full\"></div>\n          <div class=\"w-2 h-2 bg-[#E2D1C3]/30 rounded-full\"></div>\n        </div>\n      </div>\n    </div>\n  </div>\n</section>"
+    },
+    "styles": {
+        "backgroundColor": "#1A1A1B",
+        "color": "#F4F4F9",
+        "fontFamily": "Bricolage Grotesque"
+    }
+}

@@ -16,7 +16,8 @@
     "build:client": "npm run build --workspace=client",
     "build:server": "npm run build --workspace=server",
     "init:system": "npm run dev --workspace=server -- src/run_initializers.ts",
-    "start:watchers": "npm run dev --workspace=server -- src/run_watchers.ts"
+    "start:watchers": "npm run dev --workspace=server -- src/run_watchers.ts",
+    "db:check": "npx tsx server/src/check_db.ts"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

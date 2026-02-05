@@ -135,7 +135,10 @@ export class StateManager extends EventEmitter {
                 tagline: { value: '', isSelected: true },
                 values: { items: [], isSelected: true },
                 targetAudience: { items: [], isSelected: true },
-                mood: { items: [], isSelected: true }
+                mood: { items: [], isSelected: true },
+                industry: { value: '', isSelected: true },
+                typography: { items: [], isSelected: true },
+                colors: { items: [], isSelected: true }
             },
             competitorResearch: {
                 competitors: [],

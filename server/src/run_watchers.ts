@@ -16,10 +16,14 @@ const WATCHERS = [
     'SpecWatcher.ts'
 ];
 
-// Helper to extract workspaceId
 const getWorkspaceId = () => {
     const arg = process.argv.find(a => a.startsWith('--workspace='));
     return arg ? arg.split('=')[1] : 'default';
+};
+
+const getOnlyWatcher = () => {
+    const arg = process.argv.find(a => a.startsWith('--only='));
+    return arg ? arg.split('=')[1] : null;
 };
 
 const WORKSPACE_ID = getWorkspaceId();
@@ -70,10 +74,15 @@ const orchestratedLoop = async () => {
 
     // 2. Initial Startup Buffer
     const config = await loadConfig();
-    const bufferMs = Math.max(5, config.bufferMinutes) * 60 * 1000;
+    const isNow = process.argv.includes('--now');
+    const bufferMs = isNow ? 0 : Math.max(5, config.bufferMinutes) * 60 * 1000;
 
-    console.log(`⏳ [Orchestrator] Waiting ${bufferMs / 60000} minutes before first Watcher Run (Startup Buffer)...`);
-    await new Promise(resolve => setTimeout(resolve, bufferMs));
+    if (bufferMs > 0) {
+        console.log(`⏳ [Orchestrator] Waiting ${bufferMs / 60000} minutes before first Watcher Run (Startup Buffer)...`);
+        await new Promise(resolve => setTimeout(resolve, bufferMs));
+    } else if (isNow) {
+        console.log(`🚀 [Orchestrator] --now detected: Bypassing startup buffer.`);
+    }
 
     // 3. Watcher Loop
     const executeCycle = async () => {
@@ -82,8 +91,22 @@ const orchestratedLoop = async () => {
 
         console.log(`\n🚀 [${new Date().toLocaleTimeString()}] Triggering Watcher Fleet [${WORKSPACE_ID}]...`);
 
-        const promises = WATCHERS.map(watcher => {
-            return new Promise<void>((resolve) => {
+        const onlyWatcher = getOnlyWatcher();
+        const activeWatchers = onlyWatcher
+            ? WATCHERS.filter(w => w.toLowerCase().includes(onlyWatcher.toLowerCase()))
+            : WATCHERS;
+
+        if (onlyWatcher) {
+            console.log(`🎯 Targeting specific watcher: ${activeWatchers.join(', ')}`);
+        }
+
+        const promises = activeWatchers.map((watcher, index) => {
+            return new Promise<void>(async (resolve) => {
+                // Stagger spawn to prevent CPU/IO spike (2s delay per watcher)
+                if (index > 0) {
+                    await new Promise(r => setTimeout(r, index * 2000));
+                }
+
                 const watcherPath = path.resolve(__dirname, 'agents', watcher);
                 // Pass workspace arg
                 const child = spawn('node', ['--import', 'tsx', watcherPath, `--workspace=${WORKSPACE_ID}`], {

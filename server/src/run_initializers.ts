@@ -18,7 +18,7 @@ const getWorkspaceId = () => {
 const WORKSPACE_ID = getWorkspaceId();
 
 const ASSETS_DIR = path.resolve(__dirname, `../../client/public/workspaces/${WORKSPACE_ID}/assets`);
-const HISTORY_DIR = path.resolve(__dirname, `../../brain/workspaces/${WORKSPACE_ID}/history`);
+const HISTORY_DIR = path.join(ASSETS_DIR, 'history');
 // States are inside assets
 const STATES_DIR = path.resolve(ASSETS_DIR, 'states');
 

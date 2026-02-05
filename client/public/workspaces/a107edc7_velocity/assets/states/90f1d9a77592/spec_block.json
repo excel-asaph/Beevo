@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1770316439906",
+    "meta": {
+        "strategy": "The Nectar Systems Architecture leverages a forensic design philosophy to showcase the high-precision technology powering luxury inclusivity. By blueprinting the technical foundations—from parity protocols to utility layers—we elevate street-ready fashion to an executive-level science, proving that dignity and accessibility are the ultimate luxury standards.",
+        "tone": "Empowering, sophisticated, inclusive, and socially conscious.",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "Nectar Systems Architecture",
+        "subhead": "A forensic breakdown of the technical protocols governing inclusive luxury and urban utility.",
+        "nodes": [
+            {
+                "id": "node-1",
+                "label": "Financial Parity Protocol",
+                "description": "Synchronized pricing tiers utilizing localized economic data to maintain a 98% Inclusion Rate across diverse demographics.",
+                "icon": "shield-check"
+            },
+            {
+                "id": "node-2",
+                "label": "Artisanal Integrity Matrix",
+                "description": "End-to-end provenance tracking ensuring 100% transparency of material sourcing and ethical labor conditions.",
+                "icon": "microscope"
+            },
+            {
+                "id": "node-3",
+                "label": "Adaptive Utility Layer",
+                "description": "Hybrid-weave textile engineering delivering a 4.5x Durability Rating relative to traditional high-fashion garments.",
+                "icon": "layers"
+            },
+            {
+                "id": "node-4",
+                "label": "Equity Value Engine",
+                "description": "Smart-contract enabled revenue distribution directing 22% of gross margins to community-led fashion initiatives.",
+                "icon": "trending-up"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<link href='https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;700&display=swap' rel='stylesheet'><div class='w-full bg-[#0D0D0D] text-[#F4F4F9] py-20 px-6 font-[\"Bricolage_Grotesque\"]'><div class='max-w-7xl mx-auto border border-[#E2D1C3]/20 relative'><div class='absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-[#8B9D77]'></div><div class='absolute -top-3 -right-3 w-6 h-6 border-t-2 border-r-2 border-[#8B9D77]'></div><div class='absolute -bottom-3 -left-3 w-6 h-6 border-b-2 border-l-2 border-[#8B9D77]'></div><div class='absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-[#8B9D77]'></div><div class='p-8 md:p-12 border-b border-[#E2D1C3]/20 flex flex-col md:flex-row justify-between items-end gap-8'><div class='max-w-2xl'><span class='font-[\"JetBrains_Mono\"] text-[#8B9D77] text-xs tracking-widest uppercase mb-4 block'>[ SYSTEM_OVERRIDE_V2.0 ]</span><h2 class='text-6xl md:text-8xl font-black tracking-[calc(-0.05em)] text-[#E2D1C3] uppercase italic leading-none'>Architecture</h2></div><div class='hidden md:block text-right font-[\"JetBrains_Mono\"] text-[10px] text-[#F4F4F9]/30 uppercase tracking-[0.2em]'><p>INDEX: 770-315-430</p><p>LAT: 40.7128° N // LON: 74.0060° W</p></div></div><div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4'><div class='p-8 border-b md:border-b-0 md:border-r border-[#E2D1C3]/20' data-tier-id='parity-node'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#8B9D77] block mb-12'>01 // PARITY_PROTOCOL</span><div class='text-7xl font-bold text-[#E2D1C3] mb-4 tracking-tighter'>98%</div><h4 class='text-xl font-bold uppercase mb-3'>Financial Parity</h4><p class='text-sm text-[#F4F4F9]/50 leading-relaxed font-light italic'>\"Automated economic synchronization ensuring accessible luxury at localized scale.\"</p></div><div class='p-8 border-b md:border-b-0 md:border-r border-[#E2D1C3]/20' data-tier-id='integrity-node'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#E2D1C3] block mb-12'>02 // PROVENANCE_MATRIX</span><div class='text-7xl font-bold text-[#E2D1C3] mb-4 tracking-tighter'>100%</div><h4 class='text-xl font-bold uppercase mb-3'>Integrity Matrix</h4><p class='text-sm text-[#F4F4F9]/50 leading-relaxed font-light italic'>\"Forensic tracking across the entire supply chain from raw fiber to final stitch.\"</p></div><div class='p-8 border-b md:border-b-0 md:border-r border-[#E2D1C3]/20' data-tier-id='utility-node'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#8B9D77] block mb-12'>03 // PERFORMANCE_LAYER</span><div class='text-7xl font-bold text-[#E2D1C3] mb-4 tracking-tighter'>4.5x</div><h4 class='text-xl font-bold uppercase mb-3'>Utility Layer</h4><p class='text-sm text-[#F4F4F9]/50 leading-relaxed font-light italic'>\"Reinforced textile durability exceeding global luxury standards by significant margins.\"</p></div><div class='p-8' data-tier-id='equity-node'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#F4F4F9] block mb-12'>04 // IMPACT_ENGINE</span><div class='text-7xl font-bold text-[#E2D1C3] mb-4 tracking-tighter'>22%</div><h4 class='text-xl font-bold uppercase mb-3'>Equity Engine</h4><p class='text-sm text-[#F4F4F9]/50 leading-relaxed font-light italic'>\"Smart-contract yield distribution directly benefiting community-led growth.\"</p></div></div><div class='bg-[#E2D1C3]/5 p-8 border-t border-[#E2D1C3]/20 grid grid-cols-1 md:grid-cols-3 gap-12'><div class='flex flex-col gap-4'><div class='flex items-center gap-2'><div class='w-2 h-2 rounded-full bg-[#8B9D77]'></div><span class='font-[\"JetBrains_Mono\"] text-[10px] uppercase font-bold'>Operator: Marcus V.</span></div><p class='text-[13px] text-[#F4F4F9]/70 leading-relaxed'>\"The parity protocol isn't just charity; it's a market evolution that treats the consumer with dignity.\"</p></div><div class='flex flex-col gap-4'><div class='flex items-center gap-2'><div class='w-2 h-2 rounded-full bg-[#E2D1C3]'></div><span class='font-[\"JetBrains_Mono\"] text-[10px] uppercase font-bold'>Strategist: Elena G.</span></div><p class='text-[13px] text-[#F4F4F9]/70 leading-relaxed'>\"Nectar architecturalizes the uniform of the modern citizen by focusing on high-utility urban logic.\"</p></div><div class='flex flex-col gap-4'><div class='flex items-center gap-2'><div class='w-2 h-2 rounded-full bg-[#F4F4F9]'></div><span class='font-[\"JetBrains_Mono\"] text-[10px] uppercase font-bold'>Architect: Julian K.</span></div><p class='text-[13px] text-[#F4F4F9]/70 leading-relaxed'>\"Forensic transparency is the only way forward. We are building the infrastructure of honest fashion.\"</p></div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#1A1A1B",
+        "color": "#F4F4F9",
+        "fontFamily": "Bricolage Grotesque"
+    }
+}

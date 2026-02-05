@@ -17,7 +17,11 @@ export class BrandStateManager {
             voice: { value: '', isSelected: false },
             tagline: { value: '', isSelected: false },
             targetAudience: { items: [], isSelected: false },
-            mood: { items: [], isSelected: false }
+            mood: { items: [], isSelected: false },
+            industry: { value: '', isSelected: false },
+            rationale: '',
+            typography: { items: [], isSelected: false },
+            colors: { items: [], isSelected: false }
         };
         this.saveSnapshot(); // Initial state
     }
@@ -90,27 +94,20 @@ export class BrandStateManager {
                 this.dna.mood = ensureStructure(value, true);
                 break;
 
+            case 'industry':
+                this.dna.industry = ensureStructure(value, false);
+                break;
+
+            case 'rationale':
+                this.dna.rationale = typeof value === 'string' ? value : (value.value || '');
+                break;
+
             case 'logoUrl':
                 if (this.dna.logoUrl) {
                     this.dna.logoUrl = { ...this.dna.logoUrl, value: value.value || value };
                 } else {
                     this.dna.logoUrl = { value: value.value || value, isSelected: true };
                 }
-                break;
-
-            // Phase 9: Logo & Competitive Intelligence (Legacy/Future fields)
-
-
-            case 'logoInspiration':
-                this.dna.logoInspiration = value;
-                break;
-
-            case 'logoUsageContexts':
-                this.dna.logoUsageContexts = Array.isArray(value) ? value : [value];
-                break;
-
-            case 'competitorInsights':
-                this.dna.competitorInsights = value;
                 break;
 
             case 'logoAssets':

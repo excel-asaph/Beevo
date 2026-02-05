@@ -54,7 +54,7 @@ export class InitialHeroGenerator {
         this.researchPath = path.join(baseBrain, 'research_artifacts/complete_research_latest.json');
         this.stagingPath = path.join(baseBrain, 'staging');
         this.activePath = path.join(baseClient, 'assets');
-        this.archiveDir = path.join(baseBrain, 'history');
+        this.archiveDir = path.join(this.activePath, 'history');
         this.videosDir = path.join(baseClient, 'assets/videos');
     }
 
@@ -251,7 +251,7 @@ export class InitialHeroGenerator {
 
             // 4. Archive using MediaService 
             // Assuming import is added at top
-            const mediaService = MediaService.getInstance();
+            const mediaService = MediaService.getInstance(this.workspaceId);
 
             // Use specialized helper for direct Gemini download -> History
             const relativePath = await mediaService.archiveGeminiFile(

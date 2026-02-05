@@ -1,0 +1,52 @@
+{
+    "id": "proof_section_v1",
+    "variant_id": "proof_v1770315430202",
+    "meta": {
+        "strategy": "Nano Banana - A minimalist, high-contrast, forensic visual framework designed to highlight the technical superiority and accessibility of Nectar's streetwear.",
+        "tone": "Empowering, sophisticated, inclusive, and socially conscious.",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "Kinetic Flow",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "DIGNITY BY DESIGN",
+        "subhead": "Dismantling luxury gatekeeping through forensic material science. Every stitch is a data point; every price point is a social protest.",
+        "graphic_caption": "Comparative Analysis: Series 01 Material Resilience and Market Equilibrium Mapping.",
+        "evidence_items": [
+            {
+                "id": "res-01",
+                "label": "Resilience",
+                "value": "100+",
+                "description": "Zero structural degradation after industrial stress testing.",
+                "unit": "Cycles"
+            },
+            {
+                "id": "mas-01",
+                "label": "Density",
+                "value": "450",
+                "description": "Heavyweight technical weave for urban protection.",
+                "unit": "GSM"
+            },
+            {
+                "id": "eq-01",
+                "label": "Equity",
+                "value": "4.8x",
+                "description": "Value parity compared to legacy luxury house pricing.",
+                "unit": "Multiplier"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "primary_color": "#1A1A1B",
+        "accent_color": "#FF6B6B",
+        "show_labels": true,
+        "animation_duration": 1.5,
+        "visual_code": "<section class=\"w-full bg-[#1A1A1B] text-[#F4F4F9] py-24 px-4 font-['Bricolage_Grotesque']\">\n  <div class=\"max-w-7xl mx-auto\">\n    <div class=\"text-center mb-20\">\n      <span class=\"text-[#FF6B6B] font-mono text-[10px] tracking-[0.5em] uppercase mb-6 block\">Protocol_v1.07 // Material Intelligence</span>\n      <h2 class=\"text-7xl md:text-9xl font-black uppercase tracking-tighter leading-[0.75] mb-8 italic\">\n        DIGNITY<br/><span class=\"text-[#8B9D77] not-italic\">BY DESIGN</span>\n      </h2>\n      <p class=\"max-w-xl mx-auto text-xs md:text-sm text-[#F4F4F9]/50 leading-relaxed font-mono uppercase tracking-tight\">\n        Systemic disruption through textile engineering. We reject the scarcity model to provide forensic-grade protection for the global collective.\n      </p>\n    </div>\n\n    <div class=\"grid grid-cols-1 md:grid-cols-3 gap-0 border-t border-b border-[#8B9D77]/30 mb-12\">\n      <div class=\"p-12 border-r border-[#8B9D77]/30 flex flex-col justify-between\">\n        <div>\n          <div class=\"text-[10px] font-mono text-[#8B9D77] uppercase tracking-widest mb-12\">[ 01 // Resilience ]</div>\n          <div class=\"text-8xl font-black tracking-tighter mb-4\">100<span class=\"text-[#FF6B6B] text-4xl\">+</span></div>\n        </div>\n        <div>\n          <div class=\"text-[11px] font-mono uppercase mb-2\">Wash Integrity Cycle</div>\n          <p class=\"text-[10px] font-mono text-[#F4F4F9]/40 uppercase leading-snug\">Zero structural degradation after industrial stress testing. Built for generational utility.</p>\n        </div>\n      </div>\n\n      <div class=\"p-12 border-r border-[#8B9D77]/30 flex flex-col justify-between bg-[#8B9D77]/5\">\n        <div>\n          <div class=\"text-[10px] font-mono text-[#8B9D77] uppercase tracking-widest mb-12\">[ 02 // Density ]</div>\n          <div class=\"text-8xl font-black tracking-tighter mb-4\">450</div>\n        </div>\n        <div>\n          <div class=\"text-[11px] font-mono uppercase mb-2\">GSM Organic Mass</div>\n          <p class=\"text-[10px] font-mono text-[#F4F4F9]/40 uppercase leading-snug\">Heavyweight technical weave optimized for urban protection and thermal regulation.</p>\n        </div>\n      </div>\n\n      <div class=\"p-12 flex flex-col justify-between\">\n        <div>\n          <div class=\"text-[10px] font-mono text-[#8B9D77] uppercase tracking-widest mb-12\">[ 03 // Equity ]</div>\n          <div class=\"text-8xl font-black tracking-tighter mb-4\">4.8<span class=\"text-[#FF6B6B] text-4xl\">x</span></div>\n        </div>\n        <div>\n          <div class=\"text-[11px] font-mono uppercase mb-2\">Value Multiplier</div>\n          <p class=\"text-[10px] font-mono text-[#F4F4F9]/40 uppercase leading-snug\">Direct-to-consumer material parity compared to legacy luxury house markups.</p>\n        </div>\n      </div>\n    </div>\n\n    <div class=\"grid grid-cols-1 md:grid-cols-2 gap-12 items-center\">\n      <div class=\"flex items-start gap-6 bg-[#F4F4F9]/5 p-8 border-l-2 border-[#FF6B6B]\">\n        <div class=\"w-16 h-16 shrink-0 grayscale border border-[#8B9D77]/40\">\n          \n        </div>\n        <div>\n          <p class=\"text-lg italic text-[#F4F4F9] leading-tight mb-4 font-serif\">\"The material quality is forensic. You feel the 450 GSM weight—it's built to outlast any luxury brand in my archive.\"</p>\n          <cite class=\"text-[10px] font-mono uppercase tracking-widest text-[#8B9D77] not-italic font-bold italic\">— Julian R. // Textile Auditor</cite>\n        </div>\n      </div>\n      <div class=\"flex flex-col sm:flex-row gap-4\">\n        <button data-cta-id=\"download-specs-v3\" class=\"flex-1 py-5 bg-[#8B9D77] text-[#1A1A1B] font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#F4F4F9] transition-all\">\n          Download Technical Specs\n        </button>\n        <button data-cta-id=\"access-network-v3\" class=\"flex-1 py-5 border border-[#8B9D77] text-[#8B9D77] font-black uppercase text-[10px] tracking-[0.2em] hover:bg-[#8B9D77]/10 transition-all\">\n          Join Nectar Network\n        </button>\n      </div>\n    </div>\n\n    <div class=\"mt-20 pt-8 border-t border-[#8B9D77]/10 flex justify-between font-mono text-[9px] text-[#F4F4F9]/30 uppercase tracking-[0.4em]\">\n      <span>Object ID: N_PRTCL_01</span>\n      <span>Revision: Dec_24 // Forensic Grade</span>\n    </div>\n  </div>\n</section>"
+    },
+    "styles": {
+        "backgroundColor": "#F4F4F9",
+        "color": "#1A1A1B",
+        "fontFamily": "Bricolage Grotesque"
+    }
+}

@@ -57,7 +57,7 @@ export class PASWatcher {
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
             const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
-            await page.goto(url, { waitUntil: 'networkidle0' });
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             await page.evaluate(() => {
                 const el = document.querySelector('[data-component="pas-block"]');
@@ -158,7 +158,7 @@ export class PASWatcher {
             };
 
             const combinedFeedback = [config.feedback.pas_directive, preCheck.feedback].filter(Boolean).join('. ');
-            const optimization = await this.nanoBanana.refineVisual(currentPAS, performance, nanoContext, snapshot || undefined, combinedFeedback);
+            const optimization = await this.nanoBanana.refineVisual(currentPAS, performance, nanoContext, snapshot || undefined, combinedFeedback, 'pas');
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 

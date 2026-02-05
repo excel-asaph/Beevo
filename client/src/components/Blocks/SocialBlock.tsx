@@ -98,13 +98,19 @@ export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
                             // Hydrate images
                             if (config.content.testimonials) {
                                 config.content.testimonials.forEach(t => {
-                                    // Replace placeholders 'image_url_ID' with actual URL
-                                    // The generator seems to output 'image_url_t1' etc.
+                                    // 1. Resolve Asset URL
                                     const resolvedUrl = resolveAssetUrl(t.image_url);
-                                    html = html.replace(`image_url_${t.id}`, resolvedUrl);
-                                    // Also try replacing just the ID if the generator format varies, purely defensive
-                                    html = html.replace(`'${t.id}'`, `'${resolvedUrl}'`);
-                                    html = html.replace(`"${t.id}"`, `"${resolvedUrl}"`);
+
+                                    // 2. Hydrate all potential placeholder formats
+                                    // Format A: 'testimonial_001_url' (Standard from Nano Generator)
+                                    html = html.split(`${t.id}_url`).join(resolvedUrl);
+
+                                    // Format B: 'image_url_testimonial_001' (Legacy/Alternative)
+                                    html = html.split(`image_url_${t.id}`).join(resolvedUrl);
+
+                                    // Format C: Direct ID match (Fallback)
+                                    html = html.split(`'${t.id}'`).join(`'${resolvedUrl}'`);
+                                    html = html.split(`"${t.id}"`).join(`"${resolvedUrl}"`);
                                 });
                             }
                             return html;

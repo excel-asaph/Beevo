@@ -58,14 +58,16 @@ export class SocialWatcher {
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
             const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
-            await page.goto(url, { waitUntil: 'networkidle0' });
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             await page.evaluate(() => {
                 const el = document.querySelector('[data-component="social-block"]');
                 if (el) el.scrollIntoView();
             });
 
-            await new Promise(r => setTimeout(r, 1500));
+            // Wait specifically for the component to be rendered and visible
+            await page.waitForSelector('[data-component="social-block"]', { timeout: 10000 });
+            await new Promise(r => setTimeout(r, 2000)); // Extra buffer for hydration
 
             const element = await page.$('[data-component="social-block"]');
             if (!element) throw new Error("Social block not found");
@@ -158,8 +160,15 @@ export class SocialWatcher {
                 imagery: []
             };
 
-            const combinedFeedback = [config.feedback.social_directive, preCheck.feedback].filter(Boolean).join('. ');
-            const optimization = await this.nanoBanana.refineVisual(currentSocial, performance, nanoContext, snapshot || undefined, combinedFeedback);
+            const socialGuardrails = `
+                **STRICT IMAGE CONTRACT**: 
+                - Use the EXACT placeholder format '{ testimonial_id }_url' (e.g., 'testimonial_001_url') for the 'src' attribute of images in your 'visual_code'. 
+                - The frontend Hydrator will replace these placeholders with headshot URLs.
+                - DO NOT use the 'image_url' property value directly in the HTML.
+            `;
+
+            const combinedFeedback = [config.feedback.social_directive, socialGuardrails, preCheck.feedback].filter(Boolean).join('. ');
+            const optimization = await this.nanoBanana.refineVisual(currentSocial, performance, nanoContext, snapshot || undefined, combinedFeedback, 'social');
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 

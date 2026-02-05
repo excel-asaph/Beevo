@@ -80,6 +80,8 @@ export class NanoBananaService {
             - **CRITICAL**: The HTML/UI you generate must be "Executive Dashboard" style, NOT "Debug Consoles". Do NOT put "v1.0", "Alpha", or underscores in the UI elements.
             - NO underscores in labels (e.g. "CRM_SYNC_01" -> "Pipeline Synchronization").
             - NO "Dev-Speak" or System IDs (e.g. "Module: Lead_Gen_Alpha" -> "Module: Growth Engine").
+            - **NO IMAGES**: This section has NO image capability. DO NOT include <img> tags, DO NOT include image placeholders, and DO NOT use image URLs. This is a schematic/data-driven section only.
+            - **NO PERSONAS**: Strictly NO names, NO job titles, and NO human quotes. This is a technical proof block, not a social testimonial block.
             - **EXCEPTION**: You MUST preserve impressive NUMBERS (e.g. "99.9% Uptime", "4.8x ROI"). Keep the stats, but make the labels "Executive-Level Branding".
 
             **TASK**:
@@ -176,7 +178,9 @@ export class NanoBananaService {
             3. **Generative Code**: Write 'visual_code' string:
                - **IMPORTANT**: Start the string with a valid HTML tag (e.g. \`<section ...\`). Do NOT omit the opening bracket.
                - Use a high-impact CSS Grid (grid-cols-12).
-               - Respect the 1280px (max-w-7xl) container contract.
+                - Respect the 1280px (max-w-7xl) container contract.
+                - **NO IMAGES**: This section has NO image capability. DO NOT include <img> tags, DO NOT include image placeholders, and DO NOT use image URLs.
+                - **NO PERSONAS**: Strictly NO names, job titles, or human testimonials. This is a technical Problem-Agitation-Solution logic block.
              **DESIGN GUARDRAILS**:
             - **Colors**: ${JSON.stringify(context.colors)}
             - **Fonts**: ${JSON.stringify(context.fonts)}
@@ -225,7 +229,7 @@ export class NanoBananaService {
         return JSON.parse(text);
     }
 
-    async refineVisual(current: any, performance: any, context: NanoBananaContext, snapshotBuffer?: Buffer, userFeedback?: string): Promise<any> {
+    async refineVisual(current: any, performance: any, context: NanoBananaContext, snapshotBuffer?: Buffer, userFeedback?: string, componentType: string = 'generic'): Promise<any> {
         const parts: any[] = [];
 
         if (snapshotBuffer) {
@@ -239,7 +243,7 @@ export class NanoBananaService {
 
         const prompt = `
             You are 'Watcher', a Senior UX Architect and Conversion Strategist.
-            Optimize this "Nano Banana" section by evolving its GRID STRUCTURE.
+            Optimize this "Nano Banana" ${componentType.toUpperCase()} section by evolving its GRID STRUCTURE.
             
             **CURRENT PERFORMANCE**:
             - Avg Dwell Time: ${performance.avgDwell}ms (Goal: 2000ms+)
@@ -251,10 +255,12 @@ export class NanoBananaService {
             1. **Analyze**: Look at the provided Snapshot image and the current JSON config.
             2. **Forensic Audit**: Identify conversion killers (poor contrast, cluttered layout, weak hierarchy).
             3. Mutate the Grid Strategy (SPLIT | CLOUDS | TRIPTYCH) if needed.
-            3. Rewrite the 'visual_code' to be more immersive or intuitive.
-            4. Ensure "${context.brandName}" storytelling remains central.
-            5. **ALIGNMENT ALERT**: The Hero section above is strictly center-aligned. Ensure your layout feels balanced—avoid heavy left-side-only weights.
-            6. **BOUNDARY CONTRACT**: Your code operates within a 1280px (max-w-7xl) limit.
+            4. Rewrite the 'visual_code' to be more immersive or intuitive.
+            5. Ensure "${context.brandName}" storytelling remains central.
+            6. **ALIGNMENT ALERT**: The Hero section above is strictly center-aligned. Ensure your layout feels balanced—avoid heavy left-side-only weights.
+            7. **BOUNDARY CONTRACT**: Your code operates within a 1280px (max-w-7xl) limit.
+            8. **DOMAIN ISOLATION**: This is a ${componentType.toUpperCase()} section. Focus purely on ${componentType === 'social' ? 'social proof and testimonials' : 'technical specifications and data'}. 
+            ${componentType !== 'social' ? 'STRICTLY NO PERSONAS, NO TESTIMONIALS, and NO HUMAN QUOTES.' : ''}
 
             ${userFeedback ? `
             **🛑 HIGH PRIORITY USER DIRECTIVE 🛑**:
@@ -262,23 +268,88 @@ export class NanoBananaService {
             YOU MUST COMPLY WITH THIS ABOVE ALL OTHER STRATEGIC GOALS.
             ` : ''}
 
-            **OUTPUT JSON**:
-            {
-                "thoughts": "Detailed forensic diagnosis of layout effectiveness",
-                "changes": {
-                    "layout_strategy": "String",
-                    "headline": "String",
-                    "subhead": "String",
-                "visual_code": "Updated HTML/Tailwind (Include data-tier-id and data-cta-id for offer tracking)",
-                "evidence_items": "Array of 3-6 items",
-                "testimonials": "Array of testimonials (typically 3-6 items)",
-                "tiers": "Updated Offer Tiers (if offer section)"
-            },
-                "confidence": 0-100
-            }
+            Return JSON.
         `;
 
         parts.push({ text: prompt });
+
+        // Build dynamic schema based on componentType
+        const schemaProperties: any = {
+            layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH', 'FORENSIC_GRID', 'MASONRY', 'GRID', 'STACK', 'BLUEPRINT', 'NODES'] },
+            headline: { type: Type.STRING },
+            subhead: { type: Type.STRING },
+            visual_code: { type: Type.STRING }
+        };
+
+        const requiredFields = ["layout_strategy", "headline", "subhead", "visual_code"];
+
+        if (componentType === 'proof') {
+            schemaProperties.evidence_items = {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        id: { type: Type.STRING },
+                        label: { type: Type.STRING },
+                        value: { type: Type.STRING },
+                        unit: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        icon: { type: Type.STRING },
+                        visual_type: { type: Type.STRING }
+                    },
+                    required: ["id", "label", "value"]
+                }
+            };
+        } else if (componentType === 'social') {
+            schemaProperties.testimonials = {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        id: { type: Type.STRING },
+                        name: { type: Type.STRING },
+                        title: { type: Type.STRING },
+                        company: { type: Type.STRING },
+                        quote: { type: Type.STRING },
+                        image_prompt: { type: Type.STRING }
+                    },
+                    required: ["id", "name", "title", "company", "quote", "image_prompt"]
+                }
+            };
+        } else if (componentType === 'spec') {
+            schemaProperties.nodes = {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        id: { type: Type.STRING },
+                        label: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        icon: { type: Type.STRING }
+                    },
+                    required: ["id", "label", "description"]
+                }
+            };
+        } else if (componentType === 'offer') {
+            schemaProperties.tiers = {
+                type: Type.ARRAY,
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        id: { type: Type.STRING },
+                        name: { type: Type.STRING },
+                        price: { type: Type.STRING },
+                        interval: { type: Type.STRING },
+                        description: { type: Type.STRING },
+                        features: { type: Type.ARRAY, items: { type: Type.STRING } },
+                        cta_text: { type: Type.STRING },
+                        is_highlighted: { type: Type.BOOLEAN },
+                        badge: { type: Type.STRING }
+                    },
+                    required: ["id", "name", "price", "description", "features", "cta_text"]
+                }
+            };
+        }
 
         const response = await this.client.models.generateContent({
             model: this.textModel,
@@ -291,44 +362,8 @@ export class NanoBananaService {
                         thoughts: { type: Type.STRING },
                         changes: {
                             type: Type.OBJECT,
-                            properties: {
-                                layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH', 'FORENSIC_GRID', 'MASONRY', 'GRID', 'STACK', 'BLUEPRINT', 'NODES'] },
-                                headline: { type: Type.STRING },
-                                subhead: { type: Type.STRING },
-                                visual_code: { type: Type.STRING },
-                                evidence_items: {
-                                    type: Type.ARRAY,
-                                    items: {
-                                        type: Type.OBJECT,
-                                        properties: {
-                                            id: { type: Type.STRING },
-                                            label: { type: Type.STRING },
-                                            value: { type: Type.STRING },
-                                            unit: { type: Type.STRING },
-                                            description: { type: Type.STRING },
-                                            icon: { type: Type.STRING },
-                                            visual_type: { type: Type.STRING }
-                                        },
-                                        required: ["id", "label", "value"]
-                                    }
-                                },
-                                testimonials: {
-                                    type: Type.ARRAY,
-                                    items: {
-                                        type: Type.OBJECT,
-                                        properties: {
-                                            id: { type: Type.STRING },
-                                            name: { type: Type.STRING },
-                                            title: { type: Type.STRING },
-                                            company: { type: Type.STRING },
-                                            quote: { type: Type.STRING },
-                                            image_prompt: { type: Type.STRING }
-                                        },
-                                        required: ["id", "name", "title", "company", "quote", "image_prompt"]
-                                    }
-                                }
-                            },
-                            required: ["layout_strategy", "headline", "subhead", "visual_code"]
+                            properties: schemaProperties,
+                            required: requiredFields
                         },
                         confidence: { type: Type.NUMBER }
                     },
@@ -346,7 +381,8 @@ export class NanoBananaService {
         try {
             // Clean up text in case of markdown noise (though responseMimeType should handle it)
             const cleanText = text.trim().replace(/^```json/, '').replace(/```$/, '');
-            return JSON.parse(cleanText);
+            const result = JSON.parse(cleanText);
+            return result;
         } catch (e) {
             console.error("❌ NanoBanana: Failed to parse AI JSON response:", text);
             throw e;
@@ -377,6 +413,8 @@ export class NanoBananaService {
             - **Colors**: ${JSON.stringify(context.colors)}
             - **Fonts**: ${JSON.stringify(context.fonts)}
             - **Typography Rule**: Use ${JSON.stringify(context.fonts[0])} for all labels and descriptions.
+            - **NO IMAGES**: This section has NO image capability. DO NOT include <img> tags, DO NOT include image placeholders, and DO NOT use image URLs.
+            - **NO PERSONAS**: Strictly NO names, job titles, or quotes from "Operators" or "Architects". This is a clinical technical schematic.
             
             **STRICT CONTENT GUARDRAILS (PROHIBITED)**:
             - **CRITICAL**: The HTML/UI you generate must be "Executive Dashboard" style, NOT "Debug Consoles". Do NOT put "v1.0", "Alpha", or underscores in the UI elements.
@@ -449,7 +487,6 @@ export class NanoBananaService {
             4. **Layout Strategy**: Choose a grid pattern (MASONRY | GRID | STACK).
             5. **Visual Layout**: Write 'visual_code' string:
                - Use the chosen layout strategy.
-               - **IMPORTANT**: Use the \`image_url\` property from each testimonial object for the \`src\` attribute of images in your \`visual_code\`.
                - Ensure high contrast and professional executive look.
                - Center-align the section headline.
             
@@ -520,8 +557,9 @@ export class NanoBananaService {
                - Each tier card must have a \`data-tier-id="[tier-id]"\` attribute.
                - Every button or clickable action MUST have a \`data-cta-id="[action-slug]"\` attribute.
                - **OPTIONAL**: You can still include \`onclick="window.track('offer_cta_click', { tierId: '[tier-id]', actionId: '[action-slug]' })"\` for redundancy.
-               - The visual code must render the cards, pricing, and features described in the JSON.
-               - Ensure absolute adherence to the brand's mood (${context.mood.join(', ')}) and colors (${JSON.stringify(context.colors)}).
+                - The visual code must render the cards, pricing, and features described in the JSON.
+                - Ensure absolute adherence to the brand's mood (${context.mood.join(', ')}) and colors (${JSON.stringify(context.colors)}).
+                - **NO PERSONAS**: Strictly NO names, NO job titles, and NO human quotes. This is a technical offer block, not a social testimonial block.
             
             **DESIGN GUARDRAILS**:
             - 'Executive Dashboard' aesthetic. No generic landing page templates.
@@ -575,7 +613,9 @@ export class NanoBananaService {
 
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
         if (!text) throw new Error("Offer generation failed");
-        return JSON.parse(text);
+        const result = JSON.parse(text);
+
+        return result;
     }
 }
 

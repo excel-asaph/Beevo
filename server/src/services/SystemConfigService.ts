@@ -40,6 +40,9 @@ export class SystemConfigService {
         } catch {
             // Config missing. Create default or copy global template?
             // Let's create a basic default structure if missing
+            if (this.workspaceId === 'default') {
+                throw new Error("SystemConfig missing for 'default' workspace (Creation skipped)");
+            }
             const dir = path.dirname(this.configPath);
             await fs.mkdir(dir, { recursive: true });
 

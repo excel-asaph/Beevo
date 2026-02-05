@@ -28,19 +28,20 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         localStorage.setItem('beevo_user_id', cleanId);
     };
 
-    const [workspaceId, setWorkspaceId] = useState<string>('default');
-
-    useEffect(() => {
+    const [workspaceId, setWorkspaceId] = useState<string>(() => {
         const params = new URLSearchParams(window.location.search);
         const ws = params.get('workspace');
-        if (ws) {
-            setWorkspaceId(ws);
-        } else {
-            // If no workspace in URL, check if we had one active in this session/tab
-            const saved = sessionStorage.getItem('active_workspace');
-            if (saved) setWorkspaceId(saved);
+        if (ws) return ws;
+        const saved = sessionStorage.getItem('active_workspace');
+        return saved || 'default';
+    });
+
+    useEffect(() => {
+        // Sync to session storage if it was found in URL
+        if (workspaceId !== 'default') {
+            sessionStorage.setItem('active_workspace', workspaceId);
         }
-    }, []);
+    }, [workspaceId]);
 
     const updateWorkspace = (id: string) => {
         setWorkspaceId(id);

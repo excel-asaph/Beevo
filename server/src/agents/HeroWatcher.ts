@@ -59,7 +59,7 @@ export class HeroWatcher {
             // Add workspace param to URL so client knows which workspace to load (if client supports it)
             // Assuming client reads ?workspace=...
             const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
-            await page.goto(url, { waitUntil: 'networkidle0' });
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
             await page.waitForSelector('[data-component="hero-block"]', { timeout: 5000 });
             const screenshot = await page.screenshot({ encoding: 'binary' });
 
@@ -243,9 +243,8 @@ export class HeroWatcher {
                 }
             });
 
-            const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-            const optimization = JSON.parse(responseText);
-
+            const combinedFeedback = [config.feedback.hero_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const optimization = await this.nanoBanana.refineVisual(currentHero, performance, context, snapshotBuffer || undefined, combinedFeedback, 'hero');
             console.log("\n🧠 WATCHER DIAGNOSIS:\n", optimization.thoughts);
             console.log("\n💡 PROPOSED FIX:", optimization.changes);
 

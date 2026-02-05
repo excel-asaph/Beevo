@@ -12,7 +12,7 @@ async function checkDB() {
     const workspaceArg = args.find(a => a.startsWith('--workspace='));
     const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
 
-    const DB_PATH = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/beevo_history.db`);
+    const DB_PATH = path.resolve(__dirname, `../brain/workspaces/${workspaceId}/beevo_history.db`);
 
     console.log(`📂 Opening Database for Workspace [${workspaceId}]: ${DB_PATH}`);
     try {

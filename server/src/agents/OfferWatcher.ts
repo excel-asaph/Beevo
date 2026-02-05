@@ -57,7 +57,7 @@ export class OfferWatcher {
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
             const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
-            await page.goto(url, { waitUntil: 'networkidle0' });
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             await page.evaluate(() => {
                 const el = document.querySelector('[data-component="offer-block"]');
@@ -159,7 +159,7 @@ export class OfferWatcher {
             };
 
             const combinedFeedback = [config.feedback.offer_directive, preCheck.feedback].filter(Boolean).join('. ');
-            const optimization = await this.nanoBanana.refineVisual(currentOffer, performance, nanoContext, snapshot || undefined, combinedFeedback);
+            const optimization = await this.nanoBanana.refineVisual(currentOffer, performance, nanoContext, snapshot || undefined, combinedFeedback, 'offer');
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 

@@ -1,0 +1,76 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_v1770315430204",
+    "meta": {
+        "strategy": "A premium tiered acquisition model focusing on 'The Social Dividend'. We leverage the Triptych layout to contrast basic accessibility with exclusive archival access, positioning each purchase as a direct investment in social dignity and high-end street craft.",
+        "offer_type": "one-time",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Empowering, sophisticated, inclusive, and socially conscious.",
+        "industry": "Streetwear Fashion & Social Enterprise"
+    },
+    "content": {
+        "headline": "Engineering Dignity.",
+        "subhead": "Radical transparency meets precision tailoring. Choose your contribution level to a new standard of labor and luxury.",
+        "tiers": [
+            {
+                "id": "core-essence",
+                "name": "The Core Essence",
+                "price": "$125+",
+                "description": "Essential garments engineered for daily utility and refined silhouettes.",
+                "features": [
+                    "100% Heavyweight Organic Cotton",
+                    "Ethical Production Guarantee",
+                    "Digital Authenticity Certificate",
+                    "Community Impact Report"
+                ],
+                "cta_text": "Shop Essentials",
+                "badge": "Everyday Luxury",
+                "interval": "per item",
+                "is_highlighted": false
+            },
+            {
+                "id": "seasonal-capsule",
+                "name": "Seasonal Capsule",
+                "price": "$380+",
+                "description": "Limited-edition drops featuring avant-garde textures and artisanal techniques.",
+                "features": [
+                    "Numbered Limited Release",
+                    "Hybrid Fabric Engineering",
+                    "Direct-to-Community Funding Contribution",
+                    "Early Access to Next Drop"
+                ],
+                "cta_text": "Secure Selection",
+                "badge": "Most Coveted",
+                "interval": "per drop",
+                "is_highlighted": true
+            },
+            {
+                "id": "vanguard-archive",
+                "name": "Vanguard Archive",
+                "price": "$950+",
+                "description": "The pinnacle of Nectar craftsmanship. Bespoke finishes and lifetime utility.",
+                "features": [
+                    "Custom Fit Consultation",
+                    "Hand-Finished Details",
+                    "Lifetime Repair & Restoration",
+                    "Vanguard Archive Club Membership"
+                ],
+                "cta_text": "Enter The Archive",
+                "badge": "Elite Tier",
+                "interval": "one-time",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "All purchases contribute to our local dignity-in-work initiatives. 30-day ethical returns."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"py-24 bg-[#0E0E0F] text-[#F4F4F9] font-sans selection:bg-[#8B9D77] selection:text-[#0E0E0F]\"><div class=\"max-w-7xl mx-auto px-6\"><div class=\"text-center mb-20\"><div class=\"inline-block border border-[#8B9D77] px-4 py-1.5 mb-8 text-[11px] tracking-[0.5em] text-[#8B9D77] uppercase font-mono\">System Architecture v2.4</div><h2 class=\"text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.85] mb-8\">Engineering<br/>Dignity.</h2><p class=\"max-w-2xl mx-auto text-lg text-gray-400 font-light leading-relaxed uppercase tracking-tight\">Precision tailoring meets radical social transparency. Select your entry point into the movement.</p></div><div class=\"grid grid-cols-2 md:grid-cols-4 border border-white/10 mb-20 divide-x divide-y md:divide-y-0 divide-white/10\"><div class=\"p-8 flex flex-col items-center text-center\"><span class=\"text-[10px] uppercase tracking-widest text-[#8B9D77] font-mono mb-4\">Wage Premium</span><span class=\"text-4xl font-mono tracking-tighter\">+210%</span></div><div class=\"p-8 flex flex-col items-center text-center\"><span class=\"text-[10px] uppercase tracking-widest text-[#8B9D77] font-mono mb-4\">Fabric Weight</span><span class=\"text-4xl font-mono tracking-tighter\">500GSM</span></div><div class=\"p-8 flex flex-col items-center text-center\"><span class=\"text-[10px] uppercase tracking-widest text-[#8B9D77] font-mono mb-4\">Circular Index</span><span class=\"text-4xl font-mono tracking-tighter uppercase\">Grade A</span></div><div class=\"p-8 flex flex-col items-center text-center\"><span class=\"text-[10px] uppercase tracking-widest text-[#8B9D77] font-mono mb-4\">Supply Chain</span><span class=\"text-4xl font-mono tracking-tighter uppercase\">100% MAP</span></div></div><div class=\"grid grid-cols-1 lg:grid-cols-3 gap-6 mb-20\"><div data-tier-id=\"core-essence\" class=\"group bg-[#141415] border border-white/5 p-10 flex flex-col hover:border-[#8B9D77]/30 transition-all duration-500\"><div class=\"mb-12\"><span class=\"text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2\">[ Spec: 001_Utility ]</span><h3 class=\"text-3xl font-bold uppercase tracking-tighter\">Core Essence</h3></div><div class=\"text-5xl font-mono mb-8 tracking-tighter\">$125<span class=\"text-lg text-[#8B9D77] align-top ml-1\">.00</span></div><p class=\"text-xs text-gray-500 mb-12 uppercase leading-relaxed h-12\">Industrial-grade essentials for daily refined silhouettes.</p><ul class=\"space-y-4 mb-16 flex-grow\"><li class=\"text-[11px] uppercase tracking-widest text-gray-400 flex items-center gap-3\"><div class=\"w-1 h-1 bg-[#8B9D77]\"></div>100% Organic Cotton</li><li class=\"text-[11px] uppercase tracking-widest text-gray-400 flex items-center gap-3\"><div class=\"w-1 h-1 bg-white/20\"></div>Ethical Prod. Guarantee</li><li class=\"text-[11px] uppercase tracking-widest text-gray-400 flex items-center gap-3\"><div class=\"w-1 h-1 bg-white/20\"></div>Digital Auth. Certificate</li></ul><button data-cta-id=\"shop-essentials\" class=\"w-full py-5 border border-white/10 hover:border-[#8B9D77] hover:text-[#8B9D77] transition-all font-mono uppercase tracking-[0.3em] text-[10px]\">Initialize Order</button></div><div data-tier-id=\"seasonal-capsule\" class=\"group bg-[#1A1A1B] border border-[#8B9D77]/50 p-10 flex flex-col relative scale-105 z-10 shadow-2xl shadow-[#8B9D77]/5\"><div class=\"absolute -top-3 left-1/2 -translate-x-1/2 bg-[#8B9D77] text-[#0E0E0F] text-[9px] font-bold px-4 py-1 uppercase tracking-[0.3em] whitespace-nowrap\">Active Drop</div><div class=\"mb-12\"><span class=\"text-[10px] font-mono text-[#8B9D77] uppercase tracking-widest block mb-2\">[ Spec: 002_AvantGarde ]</span><h3 class=\"text-3xl font-bold uppercase tracking-tighter text-[#E2D1C3]\">Seasonal Capsule</h3></div><div class=\"text-5xl font-mono mb-8 tracking-tighter text-[#8B9D77]\">$380<span class=\"text-lg opacity-50 text-[#F4F4F9] align-top ml-1\">.00</span></div><p class=\"text-xs text-gray-300 mb-12 uppercase leading-relaxed h-12\">Artisanal textures and numbered limited-edition drops.</p><ul class=\"space-y-4 mb-16 flex-grow\"><li class=\"text-[11px] uppercase tracking-widest text-[#F4F4F9] flex items-center gap-3\"><div class=\"w-1.5 h-1.5 bg-[#8B9D77]\"></div>Numbered Limited Release</li><li class=\"text-[11px] uppercase tracking-widest text-[#F4F4F9] flex items-center gap-3\"><div class=\"w-1.5 h-1.5 bg-[#8B9D77]\"></div>Hybrid Fabric Engineering</li><li class=\"text-[11px] uppercase tracking-widest text-[#FF6B6B] flex items-center gap-3\"><div class=\"w-1.5 h-1.5 bg-[#FF6B6B]\"></div>Direct Impact Fund</li></ul><button data-cta-id=\"secure-selection\" class=\"w-full py-6 bg-[#8B9D77] text-[#0E0E0F] hover:bg-[#E2D1C3] transition-all font-mono font-bold uppercase tracking-[0.3em] text-[10px]\">Secure Selection</button></div><div data-tier-id=\"vanguard-archive\" class=\"group bg-[#141415] border border-white/5 p-10 flex flex-col hover:border-[#E2D1C3]/30 transition-all duration-500\"><div class=\"mb-12\"><span class=\"text-[10px] font-mono text-gray-500 uppercase tracking-widest block mb-2\">[ Spec: 003_Bespoke ]</span><h3 class=\"text-3xl font-bold uppercase tracking-tighter\">Vanguard Archive</h3></div><div class=\"text-5xl font-mono mb-8 tracking-tighter text-[#E2D1C3]\">$950<span class=\"text-lg text-[#8B9D77] align-top ml-1\">.00</span></div><p class=\"text-xs text-gray-500 mb-12 uppercase leading-relaxed h-12\">The pinnacle of Nectar craftsmanship with lifetime repair.</p><ul class=\"space-y-4 mb-16 flex-grow\"><li class=\"text-[11px] uppercase tracking-widest text-gray-400 flex items-center gap-3\"><div class=\"w-1 h-1 bg-[#E2D1C3]\"></div>Bespoke Fit Consultation</li><li class=\"text-[11px] uppercase tracking-widest text-gray-400 flex items-center gap-3\"><div class=\"w-1 h-1 bg-[#E2D1C3]\"></div>Lifetime Repair Protocol</li><li class=\"text-[11px] uppercase tracking-widest text-gray-400 flex items-center gap-3\"><div class=\"w-1 h-1 bg-[#E2D1C3]\"></div>Archive Club Access</li></ul><button data-cta-id=\"enter-archive\" class=\"w-full py-5 bg-white text-[#0E0E0F] hover:bg-[#E2D1C3] transition-all font-mono font-bold uppercase tracking-[0.3em] text-[10px]\">Request Access</button></div></div><div class=\"grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5 border border-white/5\"><div class=\"bg-[#0E0E0F] p-10 flex flex-col\"><p class=\"text-sm text-gray-400 italic mb-8 leading-relaxed\">\"Nectar isn't just a brand; it's a structural shift in how we value labor. The quality is forensic.\"</p><div class=\"flex items-center gap-4\"><div class=\"flex flex-col\"><span class=\"text-[10px] font-bold uppercase tracking-widest\">Marcus Chen</span><span class=\"text-[9px] text-[#8B9D77] uppercase font-mono tracking-widest\">Curator</span></div></div></div><div class=\"bg-[#0E0E0F] p-10 flex flex-col\"><p class=\"text-sm text-gray-400 italic mb-8 leading-relaxed\">\"The transparency in their supply chain sets a new standard. Knowing who made my clothes changes everything.\"</p><div class=\"flex items-center gap-4\"><div class=\"flex flex-col\"><span class=\"text-[10px] font-bold uppercase tracking-widest\">Elena Rossi</span><span class=\"text-[9px] text-[#8B9D77] uppercase font-mono tracking-widest\">Analyst</span></div></div></div></div><div class=\"mt-16 text-center text-[9px] text-gray-600 uppercase tracking-[0.5em] font-mono\">Dignity Through Industry • All Sales Final • Global Logistics Enabled</div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#1A1A1B",
+        "color": "#F4F4F9",
+        "fontFamily": "Bricolage Grotesque",
+        "accentColor": "#8B9D77"
+    }
+}

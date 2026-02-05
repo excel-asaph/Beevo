@@ -56,7 +56,7 @@ export class SpecWatcher {
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
             const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
-            await page.goto(url, { waitUntil: 'networkidle0' });
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             // Scroll to the spec section
             await page.evaluate(() => {
@@ -166,7 +166,7 @@ export class SpecWatcher {
             };
 
             const combinedFeedback = [config.feedback.spec_directive, preCheck.feedback].filter(Boolean).join('. ');
-            const result = await this.nanoBanana.refineVisual(currentSpec, performance, context, snapshot || undefined, combinedFeedback);
+            const result = await this.nanoBanana.refineVisual(currentSpec, performance, context, snapshot || undefined, combinedFeedback, 'spec');
 
             // 4. Apply Fix
             if (result.confidence > config.sections.spec.watcher_confidence_min) {

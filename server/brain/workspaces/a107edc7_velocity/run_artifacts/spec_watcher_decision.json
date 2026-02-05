@@ -1,0 +1,57 @@
+{
+    "thoughts": "The current dwell time is exceptionally high, which indicates users are engaging with the technical specifics. To optimize for conversion, I am evolving the 'BLUEPRINT' layout into a high-density 'FORENSIC_GRID'. This mutation replaces the flat horizontal row with a 2x2 technical cluster that increases visual verticality and aligns better with the center-weighted hero above. We are sharpening the 'Forensic' narrative by introducing 'DATA_LOG' aesthetics—using JetBrains Mono for all metadata and Bricolage Grotesque for the high-impact stats. The testimonials are transformed from a footer into 'FIELD_OBSERVATIONS' to reinforce the credibility of the data points above them.",
+    "changes": {
+        "layout_strategy": "FORENSIC_GRID",
+        "headline": "NECTAR SYSTEMS ARCHITECTURE",
+        "subhead": "The technical framework governing inclusive luxury and urban utility protocols.",
+        "visual_code": "<link href='https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=JetBrains+Mono:wght@400;700&display=swap' rel='stylesheet'><div class='w-full bg-[#0D0D0D] text-[#F4F4F9] py-24 px-6 font-[\"Bricolage_Grotesque\"] overflow-hidden'><div class='max-w-7xl mx-auto border border-[#E2D1C3]/10 bg-[#0D0D0D] relative shadow-2xl'><div class='absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8B9D77]/40 to-transparent'></div><div class='flex flex-col lg:flex-row border-b border-[#E2D1C3]/10'><div class='flex-1 p-10 md:p-16 border-r border-[#E2D1C3]/10 bg-grid-white/[0.02]'><span class='font-[\"JetBrains_Mono\"] text-[#8B9D77] text-xs tracking-[0.3em] uppercase mb-6 block'>[ MODULE_PROTOCOL_01 ]</span><h2 class='text-7xl md:text-9xl font-black tracking-tighter text-[#E2D1C3] uppercase italic leading-[0.85] mb-8'>SYSTEM<br/>SPECS</h2><div class='font-[\"JetBrains_Mono\"] text-[10px] text-[#F4F4F9]/30 uppercase tracking-[0.2em] space-y-1'><p>REF: ARCH-INFRA-V2</p><p>COORD: 40.7128° N // 74.0060° W</p></div></div><div class='flex-1 grid grid-cols-1 md:grid-cols-2'><div class='p-10 border-b md:border-b-0 md:border-r border-[#E2D1C3]/10' data-tier-id='parity'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#8B9D77] block mb-8 underline decoration-[#8B9D77]/30 underline-offset-4'>01 // PARITY</span><div class='text-6xl font-bold text-[#E2D1C3] mb-2 tracking-tighter'>98%</div><h4 class='text-lg font-bold uppercase mb-4'>Inclusion Rate</h4><p class='text-sm text-[#F4F4F9]/40 leading-relaxed'>Automated economic synchronization ensuring accessible luxury at localized scale.</p></div><div class='p-10' data-tier-id='integrity'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#E2D1C3] block mb-8 underline decoration-[#E2D1C3]/30 underline-offset-4'>02 // PROVENANCE</span><div class='text-6xl font-bold text-[#E2D1C3] mb-2 tracking-tighter'>100%</div><h4 class='text-lg font-bold uppercase mb-4'>Integrity Matrix</h4><p class='text-sm text-[#F4F4F9]/40 leading-relaxed'>Forensic tracking across the entire supply chain from raw fiber to final stitch.</p></div></div></div><div class='flex flex-col lg:flex-row border-b border-[#E2D1C3]/10'><div class='flex-1 grid grid-cols-1 md:grid-cols-2'><div class='p-10 border-b md:border-b-0 md:border-r border-[#E2D1C3]/10' data-tier-id='utility'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#8B9D77] block mb-8 underline decoration-[#8B9D77]/30 underline-offset-4'>03 // PERFORMANCE</span><div class='text-6xl font-bold text-[#E2D1C3] mb-2 tracking-tighter'>4.5x</div><h4 class='text-lg font-bold uppercase mb-4'>Utility Layer</h4><p class='text-sm text-[#F4F4F9]/40 leading-relaxed'>Reinforced textile durability exceeding global luxury standards by significant margins.</p></div><div class='p-10 border-b md:border-b-0 border-[#E2D1C3]/10' data-tier-id='equity'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#F4F4F9] block mb-8 underline decoration-[#F4F4F9]/30 underline-offset-4'>04 // IMPACT</span><div class='text-6xl font-bold text-[#E2D1C3] mb-2 tracking-tighter'>22%</div><h4 class='text-lg font-bold uppercase mb-4'>Equity Engine</h4><p class='text-sm text-[#F4F4F9]/40 leading-relaxed'>Smart-contract yield distribution directly benefiting community-led growth.</p></div></div><div class='flex-1 p-10 md:p-16 bg-[#E2D1C3]/5 flex items-center'><div class='w-full'><span class='font-[\"JetBrains_Mono\"] text-[10px] text-[#E2D1C3] uppercase tracking-widest block mb-4'>[ CORE_PHILOSOPHY ]</span><p class='text-2xl md:text-3xl font-light italic text-[#F4F4F9]/80 leading-snug'>\"Building the infrastructure of honest fashion through forensic transparency.\"</p></div></div></div><div class='grid grid-cols-1 md:grid-cols-3'><div class='p-10 border-r border-[#E2D1C3]/10 flex flex-col justify-between h-full'><p class='text-[13px] text-[#F4F4F9]/60 leading-relaxed mb-8'>\"The parity protocol isn't just charity; it's a market evolution that treats the consumer with dignity.\"</p><div class='flex items-center gap-3'><div class='w-8 h-[1px] bg-[#8B9D77]'></div><span class='font-[\"JetBrains_Mono\"] text-[10px] uppercase font-bold tracking-widest'>M. V. / OPERATOR</span></div></div><div class='p-10 border-r border-[#E2D1C3]/10 flex flex-col justify-between h-full'><p class='text-[13px] text-[#F4F4F9]/60 leading-relaxed mb-8'>\"Nectar architecturalizes the uniform of the modern citizen by focusing on high-utility urban logic.\"</p><div class='flex items-center gap-3'><div class='w-8 h-[1px] bg-[#E2D1C3]'></div><span class='font-[\"JetBrains_Mono\"] text-[10px] uppercase font-bold tracking-widest'>E. G. / STRATEGIST</span></div></div><div class='p-10 flex flex-col justify-between h-full'><p class='text-[13px] text-[#F4F4F9]/60 leading-relaxed mb-8'>\"Forensic transparency is the only way forward. We are building the infrastructure of honest fashion.\"</p><div class='flex items-center gap-3'><div class='w-8 h-[1px] bg-[#F4F4F9]'></div><span class='font-[\"JetBrains_Mono\"] text-[10px] uppercase font-bold tracking-widest'>J. K. / ARCHITECT</span></div></div></div></div></div>",
+        "evidence_items": [
+            {
+                "id": "parity",
+                "label": "Financial Parity Rate",
+                "value": "98%",
+                "description": "Localized pricing synchronization.",
+                "icon": "globe",
+                "unit": "percent",
+                "visual_type": "stat"
+            },
+            {
+                "id": "integrity",
+                "label": "Supply Chain Integrity",
+                "value": "100%",
+                "description": "Full provenance transparency.",
+                "icon": "shield",
+                "unit": "percent",
+                "visual_type": "stat"
+            },
+            {
+                "id": "utility",
+                "label": "Textile Durability",
+                "value": "4.5x",
+                "description": "Relative to luxury standards.",
+                "icon": "zap",
+                "unit": "multiplier",
+                "visual_type": "stat"
+            }
+        ],
+        "testimonials": [
+            {
+                "id": "t1",
+                "name": "Marcus V.",
+                "title": "System Operator",
+                "company": "Nectar Labs",
+                "quote": "The parity protocol isn't just charity; it's a market evolution that treats the consumer with dignity.",
+                "image_prompt": "Futuristic technical portrait of a male operator in techwear, minimalist laboratory background, cool lighting."
+            },
+            {
+                "id": "t2",
+                "name": "Elena G.",
+                "title": "Urban Strategist",
+                "company": "Nectar Labs",
+                "quote": "Nectar architecturalizes the uniform of the modern citizen by focusing on high-utility urban logic.",
+                "image_prompt": "Sophisticated female designer portrait, architectural background, high-contrast monochrome style."
+            }
+        ]
+    },
+    "confidence": 95
+}

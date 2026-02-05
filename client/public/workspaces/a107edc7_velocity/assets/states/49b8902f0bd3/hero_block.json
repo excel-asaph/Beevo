@@ -1,0 +1,163 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1770315429743",
+    "meta": {
+        "strategy": "Nectar bridges the gap between elite luxury and the street, using design as a tool for dignity and inclusion. These values reflect a commitment to dismantling the financial barriers that typically exclude low-income demographics from the high-end fashion narrative.",
+        "tone": "Empowering, sophisticated, inclusive, and socially conscious.",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "type": "video",
+        "source_url": "/workspaces/a107edc7_velocity/assets/history/hero_v1770315429743/hero_video_1770315480044.mp4",
+        "source_id": "generated_veo_asset",
+        "prompt_signature": "Cinematic 4k slow-motion: 0-2s A confident model in a structured beige suit walking toward the camera in a Brutalist concrete tunnel, dramatic side-lighting; 2-4s Smooth transition to a trio of models in silhouette against a golden sunset, minimal movement. No glitches. High-contrast urban grading.",
+        "attributes": {
+            "lighting": "Naturalistic side-lighting with a soft glow, creating high-contrast depth and emphasizing garment structure.",
+            "camera_movement": "A slow, elegant dolly-in towards the subject's face to capture a gaze of quiet confidence.",
+            "subject_focus": "The intersection of human dignity and refined design, centered on a diverse protagonist.",
+            "color_grade": "#E2D1C3"
+        }
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "RECLAIMED LUXURY. DEFINED STREET.",
+            "styles": {
+                "color": "#FFFFFF",
+                "fontFamily": "Bricolage Grotesque",
+                "fontSize": "5rem",
+                "fontWeight": "800",
+                "textShadow": "0 10px 20px rgba(0,0,0,0.3)"
+            }
+        },
+        "subhead": {
+            "text": "The fusion of high-end tailoring and urban grit. Elevate your silhouette.",
+            "styles": {
+                "color": "#F0F0F0",
+                "fontFamily": "Bricolage Grotesque",
+                "fontSize": "1.25rem",
+                "marginTop": "1.5rem"
+            }
+        },
+        "cta": {
+            "text": "EXPLORE THE DROP",
+            "action_id": "open_intent_form",
+            "styles": {
+                "backgroundColor": "#FF6B6B",
+                "color": "#1A1A1B",
+                "fontFamily": "Bricolage Grotesque",
+                "padding": "14px 28px",
+                "borderRadius": "4px",
+                "fontWeight": "600"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "alignItems": "center",
+            "textAlign": "center",
+            "padding": "40px",
+            "backdropFilter": "none"
+        },
+        "overlay_gradient": "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.2), rgba(0,0,0,0.6))"
+    },
+    "navigation": {
+        "links": [
+            {
+                "label": "Offer",
+                "action_id": "open_offer_form"
+            },
+            {
+                "label": "Partnership",
+                "action_id": "open_intent_form"
+            },
+            {
+                "label": "Contact",
+                "action_id": "open_contact_form"
+            }
+        ],
+        "styles": {
+            "color": "#F4F4F9",
+            "fontFamily": "Bricolage Grotesque",
+            "fontSize": "0.75rem",
+            "fontWeight": "700",
+            "letterSpacing": "0.2em",
+            "textTransform": "uppercase"
+        }
+    },
+    "forms": {
+        "contact": {
+            "id": "standard_inquiry",
+            "title": "Get in Touch",
+            "submit_text": "Send Message",
+            "fields": [
+                {
+                    "id": "full_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Jane Doe"
+                },
+                {
+                    "id": "email_address",
+                    "label": "Email Address",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "jane@example.com"
+                },
+                {
+                    "id": "message_body",
+                    "label": "Message",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "How can we help you today?"
+                }
+            ],
+            "subtitle": "Have questions about Nectar? We're here to bridge the gap."
+        },
+        "intent": {
+            "id": "partnership_intent",
+            "title": "Join the Movement",
+            "submit_text": "Secure Partnership",
+            "fields": [
+                {
+                    "id": "partner_name",
+                    "label": "Name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "id": "scaling_goal",
+                    "label": "Industry Scaling Goal",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "How do you plan to scale fashion accessibility?"
+                },
+                {
+                    "id": "infrastructure",
+                    "label": "Current Infrastructure",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Community Organization",
+                        "Independent Designer",
+                        "Retail Partner",
+                        "Manufacturing"
+                    ]
+                },
+                {
+                    "id": "impact_metrics",
+                    "label": "Primary Impact Focus",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Financial Inclusion",
+                        "Creative Dignity",
+                        "Urban Distribution"
+                    ]
+                }
+            ],
+            "subtitle": "Help us dismantle the financial barriers of elite fashion."
+        }
+    }
+}

@@ -29,6 +29,7 @@ export class ProofWatcher {
         research: string;
         snapshot: string;
         decision: string;
+        assetsDir: string;
     };
 
     constructor(workspaceId: string = 'default') {
@@ -37,17 +38,17 @@ export class ProofWatcher {
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
 
-        // Dynamic Paths
+        // Initialize Dynamic Paths
         const baseBrain = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
-        // If default, maybe map to old paths? No, strict isolation means we move to workspace folders.
-        // Assuming migration or fresh start.
+        const baseClient = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
 
         this.paths = {
             metrics: path.join(baseBrain, 'metrics/landing_page_metrics.json'),
             staging: path.join(baseBrain, 'staging/proof_block_staging.json'),
             research: path.join(baseBrain, 'research_artifacts/complete_research_latest.json'),
             snapshot: path.join(baseBrain, 'run_artifacts/proof_watcher_snapshot.png'),
-            decision: path.join(baseBrain, 'run_artifacts/proof_watcher_decision.json')
+            decision: path.join(baseBrain, 'run_artifacts/proof_watcher_decision.json'),
+            assetsDir: path.join(baseClient, 'assets')
         };
     }
 
@@ -61,7 +62,7 @@ export class ProofWatcher {
 
             // Pass workspaceId to frontend via URL
             const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
-            await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 });
+            await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             // Wait for proof block
             await page.waitForSelector('[data-component="proof-block"]', { timeout: 10000 });
@@ -96,20 +97,8 @@ export class ProofWatcher {
         const notificationClient = NotificationClient.getInstance();
 
         // 0. Resolve Live State Path
-        // Assets are now workspace-specific
-        const ASSETS_DIR = path.resolve(__dirname, `../../brain/workspaces/${this.workspaceId}/assets`);
         const activePath = config.active_assets_path || '';
-        // Note: active_assets_path in config might be relative or just a version string. 
-        // Assuming it's a version string or relative path inside workspace assets.
-        // If config.active_assets_path is empty, we look in root assets of workspace? 
-        // Actually, let's stick to the pattern: workspace/assets/proof_block.json if activePath is empty.
-
-        // Wait, logic in other watchers:
-        // const LIVE_FILE = path.resolve(ASSETS_DIR, activePath, 'proof_block.json');
-
-        // Ensure directory exists
-        const liveFileDir = path.join(ASSETS_DIR, activePath);
-        const LIVE_FILE = path.join(liveFileDir, 'proof_block.json');
+        const LIVE_FILE = path.join(this.paths.assetsDir, activePath, 'proof_block.json');
 
         console.log(`📂 ProofWatcher: Loading Live State from ${LIVE_FILE}`);
 
@@ -192,7 +181,7 @@ export class ProofWatcher {
 
             const performance = { avgDwell };
             const combinedFeedback = [config.feedback.proof_directive, preCheck.feedback].filter(Boolean).join('. ');
-            const optimization = await this.nanoBanana.refineVisual(currentProof, performance, nanoContext, snapshotBuffer || undefined, combinedFeedback);
+            const optimization = await this.nanoBanana.refineVisual(currentProof, performance, nanoContext, snapshotBuffer || undefined, combinedFeedback, 'proof');
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
 
@@ -247,8 +236,8 @@ export class ProofWatcher {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // Parse CLI NameArgs
     const args = process.argv.slice(2);
-    const workspaceIdx = args.indexOf('--workspace');
-    const workspaceId = workspaceIdx !== -1 ? args[workspaceIdx + 1] : 'default';
+    const workspaceArg = args.find(a => a.startsWith('--workspace='));
+    const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
 
     new ProofWatcher(workspaceId).analyzeAndOptimize().catch(console.error);
 }

@@ -66,7 +66,7 @@ app.get('/health', (req, res) => {
 // List all workspaces
 app.get('/api/workspaces', async (req, res) => {
     try {
-        const workspacesDir = path.resolve(__dirname, '../../brain/workspaces');
+        const workspacesDir = path.resolve(__dirname, '../brain/workspaces');
         await fs.mkdir(workspacesDir, { recursive: true });
         const dirs = await fs.readdir(workspacesDir);
 
@@ -94,7 +94,7 @@ app.get('/api/workspaces', async (req, res) => {
 app.get('/api/workspaces/check/:id', async (req, res) => {
     try {
         const workspaceId = req.params.id;
-        const workspacePath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const workspacePath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}`);
 
         try {
             const stats = await fs.stat(workspacePath);
@@ -173,7 +173,7 @@ app.get('/api/debug/research', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
         // Updated to use workspace path
-        const researchPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/research_artifacts/complete_research_latest.json`);
+        const researchPath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}/research_artifacts/complete_research_latest.json`);
         const data = await fs.readFile(researchPath, 'utf8');
         res.json(JSON.parse(data));
     } catch (error) {
@@ -277,7 +277,7 @@ app.post('/api/broadcast/refresh', (req, res) => {
 // Analytics & State History Endpoints
 app.get('/api/analytics/states', async (req, res) => {
     try {
-        const db = DatabaseService.getInstance();
+        const db = DatabaseService.getInstance(getWorkspaceId(req));
         const states = await db.getAllStates() || [];
         const leads = await db.getAllLeads() || [];
 
@@ -299,7 +299,7 @@ app.get('/api/analytics/current', async (req, res) => {
         const currentStateHash = config.current_state_hash || '';
 
         // Source of Truth: Database (State-Isolated Metrics)
-        const db = DatabaseService.getInstance();
+        const db = DatabaseService.getInstance(getWorkspaceId(req));
 
         // 1. Get State Metrics (Views, Clicks)
         const state = await db.getState(currentStateHash) as any;
@@ -347,7 +347,7 @@ app.get('/api/analytics/current', async (req, res) => {
 
 app.get('/api/analytics/leaderboard', async (req, res) => {
     try {
-        const db = DatabaseService.getInstance();
+        const db = DatabaseService.getInstance(getWorkspaceId(req));
         const leads = await db.getAllLeads() || [];
         const states = await db.getAllStates() || [];
 
@@ -493,7 +493,7 @@ app.post('/api/config/revert', async (req, res) => {
         const { stateHash } = req.body;
         console.log(`⏪ REVERT REQUEST [${workspaceId}]: State=${stateHash}`);
 
-        const db = DatabaseService.getInstance();
+        const db = DatabaseService.getInstance(getWorkspaceId(req));
         const state = await db.getState(stateHash) as any;
         if (!state) return res.status(404).json({ error: 'State not found' });
 
@@ -524,7 +524,7 @@ app.post('/api/leads/submit', async (req, res) => {
         const { type, formData, stateHash } = req.body;
         console.log(`📩 LEAD SUBMISSION: Type=${type}, State=${stateHash}`);
 
-        const db = DatabaseService.getInstance();
+        const db = DatabaseService.getInstance(getWorkspaceId(req));
         await db.saveLead(type, formData, stateHash);
 
         res.json({ status: 'ok', message: 'Lead captured successfully' });

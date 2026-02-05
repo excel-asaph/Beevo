@@ -13,10 +13,10 @@ export class MediaService {
 
     private constructor(workspaceId: string) {
         this.workspaceId = workspaceId;
-        // Physical path: client/public/workspaces/${workspaceId}/history
-        this.historyDir = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}/history`);
-        // URL path: /workspaces/${workspaceId}/history
-        this.publicPathPrefix = `/workspaces/${workspaceId}/history`;
+        // Physical path: client/public/workspaces/${workspaceId}/assets/history
+        this.historyDir = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}/assets/history`);
+        // URL path: /workspaces/${workspaceId}/assets/history
+        this.publicPathPrefix = `/workspaces/${workspaceId}/assets/history`;
     }
 
     public static getInstance(workspaceId: string = 'default'): MediaService {

@@ -162,8 +162,8 @@ app.post('/api/config/update_section', async (req, res) => {
 // Broadcast Refresh Endpoint (For Agents)
 app.post('/api/logos/generate', async (req, res) => {
     try {
-        const { context } = req.body;
-        console.log(`🎨 LOGO REQUEST: Context="${context || 'None'}"`);
+        const { context, research } = req.body;
+        console.log(`🎨 LOGO REQUEST: Context="${context || 'None'}" ResearchKeys=${Object.keys(research || {}).join(',')}`);
 
         const generator = new InitialLogoGenerator();
         await generator.generate(context);

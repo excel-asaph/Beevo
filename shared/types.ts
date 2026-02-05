@@ -21,30 +21,13 @@ export interface SelectableArray {
 export interface BrandDNA {
     name: SelectableString;
     mission: SelectableString;
-
     voice: SelectableString;
     tagline: SelectableString;
     values: SelectableArray;
     targetAudience: SelectableArray;
     mood: SelectableArray;
-    keywords?: SelectableArray;
-    logoUrl?: SelectableString;
-    logoInvertedUrl?: SelectableString;
-    logoVariants?: any; // 8-file kit
-
     industry?: SelectableString;
     rationale?: string;
-
-    // Legacy/Optional fields kept for compatibility or future use
-    paletteCount?: number;
-    logoType?: string;
-    imagery?: string;
-    designGoals?: string;
-    logoInspiration?: string;
-    logoUsageContexts?: string[];
-    competitorInsights?: any;
-    researchInsights?: any[];
-    logoAssets?: any[];
 }
 
 export interface SWOT {

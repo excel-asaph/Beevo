@@ -1,80 +1,80 @@
 {
     "hero_section_v1": {
         "variant_id": "hero_section_v1",
-        "views": 10,
+        "views": 17,
         "clicks": 1,
-        "retention_count": 6,
-        "retention_sum_ms": 18000,
+        "retention_count": 12,
+        "retention_sum_ms": 36000,
         "dwell_count": 0,
         "dwell_sum_ms": 0,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T16:26:46.671Z"
+        "last_updated": "2026-02-04T22:57:46.192Z"
     },
     "page_root": {
         "variant_id": "page_root",
-        "views": 10,
+        "views": 17,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
         "dwell_count": 0,
         "dwell_sum_ms": 0,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T16:26:43.490Z"
+        "last_updated": "2026-02-04T22:57:33.347Z"
     },
     "proof_section_v1": {
         "variant_id": "proof_section_v1",
-        "views": 5,
+        "views": 10,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 34,
-        "dwell_sum_ms": 106158,
+        "dwell_count": 40,
+        "dwell_sum_ms": 125937,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T15:12:22.994Z"
+        "last_updated": "2026-02-04T22:57:45.016Z"
     },
     "pas_section_v1": {
         "variant_id": "pas_section_v1",
-        "views": 5,
+        "views": 9,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 36,
-        "dwell_sum_ms": 60726,
+        "dwell_count": 43,
+        "dwell_sum_ms": 72481,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T15:12:22.573Z"
+        "last_updated": "2026-02-04T22:57:44.067Z"
     },
     "spec_section_v1": {
         "variant_id": "spec_section_v1",
-        "views": 8,
+        "views": 11,
         "clicks": 0,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 35,
-        "dwell_sum_ms": 6354068,
+        "dwell_count": 41,
+        "dwell_sum_ms": 6547649,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T16:26:48.128Z"
+        "last_updated": "2026-02-04T22:57:43.112Z"
     },
     "social_section_v1": {
         "variant_id": "social_section_v1",
-        "views": 7,
+        "views": 10,
         "clicks": 0,
         "retention_count": 7,
         "retention_sum_ms": 21000,
-        "dwell_count": 34,
-        "dwell_sum_ms": 222698,
-        "velocity_sum": 32369.65772611335,
-        "last_updated": "2026-02-02T15:12:21.079Z"
+        "dwell_count": 38,
+        "dwell_sum_ms": 227983,
+        "velocity_sum": 36756.36517149162,
+        "last_updated": "2026-02-04T22:57:42.432Z"
     },
     "offer_section_v1": {
         "variant_id": "offer_section_v1",
-        "views": 5,
+        "views": 8,
         "clicks": 4,
         "retention_count": 0,
         "retention_sum_ms": 0,
-        "dwell_count": 18,
-        "dwell_sum_ms": 344517,
+        "dwell_count": 21,
+        "dwell_sum_ms": 354617,
         "velocity_sum": 0,
-        "last_updated": "2026-02-02T15:09:44.872Z"
+        "last_updated": "2026-02-04T22:57:41.134Z"
     },
     "hero_section_v1_nav": {
         "variant_id": "hero_section_v1_nav",

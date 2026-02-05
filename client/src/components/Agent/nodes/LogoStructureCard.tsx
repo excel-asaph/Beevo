@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Layout, Check, Info } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { LogoStructureOption } from '@shared/types';
 
 export interface LogoStructureCardProps {
@@ -9,65 +9,61 @@ export interface LogoStructureCardProps {
 }
 
 export const LogoStructureCard: React.FC<LogoStructureCardProps> = ({ options, onSelect }) => {
-    // Debug log
-    React.useEffect(() => {
-        if (options && options.length > 0) {
-            console.log('🎨 LogoStructureCard rendering with options:', options.length);
-        }
-    }, [options]);
+    // Helper to get icon based on type
+    const getStructureIcon = (type: string) => {
+        const t = type.toLowerCase();
+        if (t.includes('wordmark')) return <div className="flex gap-1"><div className="w-8 h-2 bg-current rounded-sm" /></div>;
+        if (t.includes('combination')) return <div className="flex gap-1 items-center"><div className="w-3 h-3 border-2 border-current rounded-full" /><div className="w-6 h-2 bg-current rounded-sm" /></div>;
+        if (t.includes('abstract')) return <div className="w-4 h-4 border-2 border-current rounded-tr-lg rounded-bl-lg" />;
+        return <div className="w-4 h-4 border-2 border-current rounded-sm" />;
+    };
 
     if (!options || options.length === 0) return null;
 
     return (
         <div className="flex flex-col gap-4 w-full">
-            <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
-                    <Layout className="w-4 h-4 text-indigo-400" />
-                </div>
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Logo Structure</h3>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {options.map((option) => (
                     <motion.div
                         key={option.id}
-                        layout
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         whileHover={{ scale: 1.02, translateY: -2 }}
                         onClick={() => onSelect && onSelect(option.id)}
                         className={`
-                            relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 group overflow-hidden
+                            relative p-5 rounded-3xl border-2 cursor-pointer transition-all duration-300 group overflow-hidden
                             ${option.isSelected
-                                ? 'bg-white border-green-500 shadow-xl'
-                                : 'bg-gray-50 border-gray-200 hover:border-green-300 hover:bg-white shadow-md'}
+                                ? 'bg-white border-indigo-500 shadow-xl ring-1 ring-indigo-500/20'
+                                : 'bg-white border-slate-100 hover:border-indigo-300 hover:shadow-lg'}
                         `}
                     >
-                        {/* selection indicator */}
-                        <div className={`
-                            absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300
-                            ${option.isSelected
-                                ? 'bg-green-500 scale-100 shadow-lg shadow-green-500/50'
-                                : 'bg-gray-200 scale-90 opacity-0 group-hover:opacity-100'}
-                        `}>
-                            <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                        </div>
-
-                        {/* Background Gradient Blob - reduced intensity and changed colors for light mode */}
-                        <div className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-[50px] transition-all duration-500 ${option.isSelected ? 'bg-green-500/10' : 'bg-gray-200/50 group-hover:bg-green-500/5'
-                            }`} />
+                        {/* Selected Indicator */}
+                        {option.isSelected && (
+                            <div className="absolute top-3 right-3 text-indigo-500">
+                                <div className="bg-indigo-500 text-white rounded-full p-1 shadow-sm">
+                                    <Check className="w-3 h-3" strokeWidth={3} />
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex flex-col h-full relative z-10">
-                            <h4 className={`text-xl font-bold mb-3 tracking-tight ${option.isSelected ? 'text-gray-900' : 'text-gray-800'}`}>
-                                {option.type}
-                            </h4>
+                            {/* Header: Icon + Title */}
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className={`p-2 rounded-lg ${option.isSelected ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-500'} transition-colors`}>
+                                    {getStructureIcon(option.type)}
+                                </div>
+                                <h4 className={`text-lg font-bold tracking-tight ${option.isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
+                                    {option.type}
+                                </h4>
+                            </div>
 
-                            <p className="text-sm text-gray-600 font-medium leading-relaxed mb-4 flex-grow">
+                            {/* Full Description */}
+                            <p className="text-sm text-gray-500 font-medium leading-relaxed mb-4">
                                 {option.reasoning}
                             </p>
 
-                            <div className="pt-4 mt-auto border-t border-gray-100 flex items-center gap-2">
-                                <div className={`px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold ${option.suitability.toLowerCase() === 'high' ? 'bg-green-100 text-green-700' :
+                            <div className="mt-auto flex items-center gap-2">
+                                <div className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold ${option.suitability.toLowerCase() === 'high' ? 'bg-green-100 text-green-700' :
                                     option.suitability.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                                         'bg-gray-100 text-gray-500'
                                     }`}>

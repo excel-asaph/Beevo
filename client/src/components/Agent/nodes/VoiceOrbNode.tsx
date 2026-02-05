@@ -116,7 +116,7 @@ export const VoiceOrbNode: React.FC<NodeProps> = ({ data }) => {
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-2 max-w-[200px] p-3 bg-white rounded-xl shadow-lg border border-slate-100"
+                    className="mt-2 max-w-[200px] p-3 bg-white rounded-3xl shadow-lg border border-slate-100"
                 >
                     <p className="text-sm text-slate-700 text-center leading-relaxed">
                         {nodeData.message}

@@ -48,7 +48,7 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
                     onHoverEnd={() => setHoveredPalette(null)}
                     onClick={() => nodeData.onSelect?.(palette.id, palette)}
                     className={`
-                        w-full p-3 rounded-lg border transition-all
+                        w-full p-3 rounded-2xl border transition-all
                         ${hoveredPalette === palette.id
                             ? 'border-indigo-400 bg-indigo-50 shadow-md'
                             : (palette.isSelected ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300')
@@ -70,7 +70,7 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
                                 initial={{ scale: 0 }}
                                 animate={{ scale: 1 }}
                                 transition={{ delay: index * 0.1 + i * 0.05 }}
-                                className="w-8 h-8 rounded-md shadow-inner border border-white/50"
+                                className="w-8 h-8 rounded-xl shadow-inner border border-white/50"
                                 style={{ backgroundColor: color }}
                                 title={color}
                             />
@@ -134,7 +134,7 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
                         className="flex-1 group relative"
                     >
                         <div
-                            className="aspect-square rounded-lg shadow-md border border-white/50"
+                            className="aspect-square rounded-2xl shadow-md border border-white/50"
                             style={{ backgroundColor: color }}
                         />
                         <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -157,10 +157,10 @@ export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
             animate={{ scale: 1, opacity: 1 }}
             whileHover={{ scale: 1.01 }}
             className={`
-                relative min-w-[280px] max-w-[320px] p-4 rounded-xl
+                relative min-w-[280px] max-w-[320px] p-4 rounded-3xl
                 bg-white border border-slate-200
                 shadow-lg shadow-slate-200/50
-                ${selected ? 'ring-2 ring-indigo-400' : ''}
+                ${selected ? 'ring-2 ring-blue-500' : ''}
                 ${isLocked ? 'opacity-60' : ''}
                 cursor-grab active:cursor-grabbing
             `}

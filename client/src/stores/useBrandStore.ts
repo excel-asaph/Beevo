@@ -43,8 +43,8 @@ export interface ResearchStatus {
 }
 
 interface BrandStore {
-    // Core Data
     dna: BrandDNA;
+    projectName: string;
 
     // Suggestion Options (temporary, for selection UI)
     colorOptions: ColorOption[];
@@ -97,6 +97,7 @@ interface BrandStore {
     addThoughtSignature: (signature: ThoughtSignature) => void;
     clearThoughtSignatures: () => void;
     setResearchStatus: (status: Partial<ResearchStatus>) => void;
+    setProjectName: (name: string) => void;
 }
 
 export const useBrandStore = create<BrandStore>((set, get) => ({
@@ -110,6 +111,7 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
         targetAudience: { items: [], isSelected: false },
         mood: { items: [], isSelected: false }
     },
+    projectName: 'Untitled',
     colorOptions: [],
     fontOptions: [],
     logoOptions: [],
@@ -207,6 +209,7 @@ export const useBrandStore = create<BrandStore>((set, get) => ({
     setResearchStatus: (status) => set((state) => ({
         researchStatus: { ...state.researchStatus, ...status }
     })),
+    setProjectName: (projectName) => set({ projectName }),
 }));
 
 export default useBrandStore;

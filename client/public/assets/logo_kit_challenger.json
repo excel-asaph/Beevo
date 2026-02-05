@@ -1,18 +1,18 @@
 {
     "metadata": {
-        "generated_at": "2026-02-02T13:12:44.783Z",
+        "generated_at": "2026-02-05T04:49:30.426Z",
         "brand_name": "Bluetone",
         "palette_used": "Savannah Circuit"
     },
     "kit": {
-        "primary": "/assets/transparent_logos/logo_variant_primary_transparent.png?v=1770038437806",
-        "inverted": "/assets/transparent_logos/logo_variant_inverted_transparent.png?v=1770038437806",
-        "icon": "/assets/transparent_logos/logo_variant_icon_transparent.png?v=1770038437806",
-        "icon_inverted": "/assets/transparent_logos/logo_variant_icon_inverted_transparent.png?v=1770038437806",
-        "wordmark": "/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770038437806",
-        "wordmark_inverted": "/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png?v=1770038437806",
-        "social": "/assets/transparent_logos/logo_variant_social_transparent.png?v=1770038437806",
-        "social_inverted": "/assets/transparent_logos/logo_variant_social_inverted_transparent.png?v=1770038437806"
+        "primary": "/assets/generated_logos/logo_variant_primary.png",
+        "inverted": "/assets/generated_logos/logo_variant_inverted.png",
+        "icon": "/assets/generated_logos/logo_variant_icon.png",
+        "icon_inverted": "/assets/generated_logos/logo_variant_icon_inverted.png",
+        "wordmark": "/assets/generated_logos/logo_variant_wordmark.png",
+        "wordmark_inverted": "/assets/generated_logos/logo_variant_wordmark_inverted.png",
+        "social": "/assets/generated_logos/logo_variant_social.png",
+        "social_inverted": "/assets/generated_logos/logo_variant_social_inverted.png"
     },
     "palette": {
         "name": "Savannah Circuit",
@@ -36,10 +36,6 @@
             "value": "To revolutionize African mobility by providing innovative electric and autonomous vehicles, including transit and law-abiding robots, aiming for 50% accessibility across the continent by 2035.",
             "isSelected": true
         },
-        "voice": {
-            "value": "Innovative, adaptive, visionary, and legally-conscious",
-            "isSelected": true
-        },
         "values": {
             "items": [
                 "Sustainable Innovation",
@@ -50,12 +46,12 @@
             ],
             "isSelected": true
         },
-        "tagline": {
-            "value": "Driving Africa into the Future.",
+        "voice": {
+            "value": "Innovative, adaptive, visionary, and legally-conscious",
             "isSelected": true
         },
-        "industry": {
-            "value": "Electric and Autonomous Transportation",
+        "tagline": {
+            "value": "Driving Africa into the Future.",
             "isSelected": true
         },
         "targetAudience": {
@@ -78,10 +74,10 @@
             ],
             "isSelected": true
         },
-        "paletteCount": 3,
-        "rationale": "Blutone bridges the gap between cutting-edge autonomous technology and the unique regulatory landscapes of Africa, fostering a future-proof transport ecosystem that is both sustainable and culturally adaptive.",
-        "logoUrl": {
-            "value": "/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770038437806"
-        }
+        "industry": {
+            "value": "Sustainable Autonomous Transportation",
+            "isSelected": true
+        },
+        "rationale": "Extracted from research context."
     }
 }

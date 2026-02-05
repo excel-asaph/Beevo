@@ -5,6 +5,7 @@ import { LogoStudioSidebar } from '../LogoStudio/LogoStudioSidebar';
 import { Hexagon } from 'lucide-react';
 import { useBrandStore } from '../../stores/useBrandStore';
 import { debugResearchData } from '../../data/debug_research';
+import { ReactFlowProvider } from '@xyflow/react';
 
 interface AgentCanvasProps {
     onBack?: () => void;
@@ -71,7 +72,9 @@ export const AgentCanvas: React.FC<AgentCanvasProps> = ({ onBack }) => {
 
     return (
         <div className="relative w-full h-full">
-            <Canvas onBack={onBack} />
+            <ReactFlowProvider>
+                <Canvas onBack={onBack} />
+            </ReactFlowProvider>
 
             {/* Logo Studio Trigger - Floating Action Button */}
             {!isLogoStudioOpen && (

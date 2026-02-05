@@ -77,7 +77,6 @@ export class ExecutionEngine {
         - industry: Specific industry/niche
         - targetAudience: LIST of target demographics/personas
         - mood: LIST of mood keywords (e.g. ['modern', 'minimalist'])
-        - paletteCount: Number of palettes requested (default 3)
         - rationale: Brief Strategic Rationale (1-2 sentences) explaining WHY these values fit the brand info provided.
         
         Return ONLY valid JSON.
@@ -108,7 +107,6 @@ export class ExecutionEngine {
             industry: toSelectable(extracted.industry || 'General Business'),
             targetAudience: toSelectableArray(extracted.targetAudience || ['General public']),
             mood: toSelectableArray(extracted.mood || ['Modern']),
-            paletteCount: extracted.paletteCount || 3,
             rationale: extracted.rationale || 'Extracted from conversation analysis.'
         };
 
@@ -616,7 +614,6 @@ export class ExecutionEngine {
             competitorResearch: competitors,
             colorPalettes: palettes,
             typographyPairings: fonts,
-
             // Initialize Modification Phase sections (Logo Structures populated from Phase 5)
             logoStructures: logoStructures,
             logoInspirations: { inspirations: [] },

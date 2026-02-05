@@ -33,6 +33,13 @@ export class InitialLogoGenerator {
         const rawData = await fs.readFile(RESEARCH_PATH, 'utf-8');
         const research = JSON.parse(rawData);
 
+
+        // Safety check for critical path
+        if (!research.brandDNA?.name?.value) {
+            console.error("❌ CRITICAL: Missing Brand Name in research data", JSON.stringify(research.brandDNA, null, 2));
+            throw new Error("Missing Brand Name in research data");
+        }
+
         // 1. Process Inspirations
         await fs.mkdir(INSPIRATION_DIR, { recursive: true });
         const selectedInspirations = research.logoInspirations.inspirations.filter((i: any) => i.isSelected);
@@ -73,10 +80,13 @@ export class InitialLogoGenerator {
             items.length ? `${label}:\n${items.map(i => `  - ${formatter(i)}`).join('\n')}` : '';
 
         const baseContext = `
-            Brand: ${research.brandDNA.name.value}
-            Industry: ${research.brandDNA.industry.value}
-            Mission: ${research.brandDNA.mission.value}
-            Vibe: ${research.brandDNA.mood.items.join(', ')}
+            Brand: ${research.brandDNA.name?.value || 'Unknown'}
+            Industry: ${research.brandDNA.industry?.value || 'Technology'}
+            Mission: ${research.brandDNA.mission?.value || 'Unknown'}
+            Values: ${research.brandDNA.values?.items?.join(', ') || ''}
+            Target Audience: ${research.brandDNA.targetAudience?.items?.join(', ') || ''}
+            Vibe: ${research.brandDNA.mood?.items?.join(', ') || 'Modern'}
+            Strategic Rationale: ${research.brandDNA.rationale || ''}
             
             ${formatList(selectedPalettes, 'Selected Palettes', p => `${p.name} [${p.colors.join(', ')}] - ${p.vibe}`)}
             ${formatList(selectedFonts, 'Selected Typography', f => `${f.name} (${f.category}) paired with ${f.pairing} - ${f.reasoning}`)}
@@ -92,20 +102,22 @@ export class InitialLogoGenerator {
         let primaryBase64 = "";
 
         try {
-            let primaryPrompt = `Create the PRIMARY Official Logo. High fidelity, professional, vector-style. 
-            Synthesize all the following brand inputs into a cohesive, market-leading design.
-            ${baseContext}`;
+            let primaryPrompt = `Create the PRIMARY Official Logo. High fidelity, professional, vector-style.`;
 
             if (additionalContext) {
-                primaryPrompt += `\n\nUSER OVERRIDE / ADDITIONAL CONTEXT:\n"${additionalContext}"\nPlease prioritize this instruction.`;
+                console.log(`additionalContext: ${additionalContext}`)
+                primaryPrompt += `\n\nCRITICAL USER INSTRUCTION (PRIORITIZE THIS ABOVE ALL ELSE):\n"${additionalContext}"\n`;
+                primaryPrompt += `\nIMPORTANT: If the user instruction above conflicts with any of the brand inputs below (e.g. if User asks for an icon but Research says "Wordmark", or if User asks for a car but Research says "Abstract"), YOU MUST FOLLOW THE USER INSTRUCTION IGNORE THE RESEARCH CONSTRAINT. The User Instruction is the absolute truth.\n`;
             }
+
+            primaryPrompt += `\nSynthesize all the following brand inputs into a cohesive, market-leading design (subject to the override above).\n${baseContext}`;
 
             const primaryResponse = await this.client.models.generateContent({
                 model: this.modelName,
                 contents: [{
                     role: 'user',
                     parts: [
-                        { text: "You are an expert Logo Designer. Use the attached inspiration images as stylistic guides. " + primaryPrompt },
+                        { text: "You are an expert Logo Designer. Use the attached inspiration images as stylistic guides BUT prioritize the textual instructions below.\n\n" + primaryPrompt },
                         ...inspirationParts
                     ]
                 }],

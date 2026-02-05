@@ -40,7 +40,7 @@ export const VaultNode: React.FC<NodeProps> = ({ data, selected }) => {
         <div
             {...getRootProps()}
             className={`
-                w-64 relative group rounded-xl transition-all duration-300 overflow-hidden
+                w-64 relative group rounded-3xl transition-all duration-300 overflow-hidden
                 ${selected ? 'ring-4 ring-indigo-500/20' : ''}
                 ${isDragActive ? 'scale-105 shadow-2xl shadow-indigo-500/30' : 'shadow-lg'}
             `}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Type, Check, RefreshCw, Lock } from 'lucide-react';
@@ -33,6 +33,42 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as TypographyNodeData;
     const [hoveredFont, setHoveredFont] = useState<string | null>(null);
 
+    // ==========================================
+    // DYNAMIC FONT LOADING
+    // ==========================================
+    useEffect(() => {
+        if (!nodeData.options?.length) return;
+
+        // Extract unique font names from options
+        const fontNames = new Set<string>();
+        nodeData.options.forEach(f => {
+            if (f.name) fontNames.add(f.name);
+            if (f.pairing) fontNames.add(f.pairing);
+        });
+
+        const fontFamilies = Array.from(fontNames)
+            .map(name => name.trim().replace(/\s+/g, '+'))
+            .join('&family=');
+
+        if (!fontFamilies) return;
+
+        // Check if already exists to avoid duplicate requests
+        const linkId = `dynamic-fonts-${fontFamilies.substring(0, 20)}`;
+        if (document.getElementById(linkId)) return;
+
+        const link = document.createElement('link');
+        link.id = linkId;
+        link.href = `https://fonts.googleapis.com/css2?family=${fontFamilies}&display=swap`;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+
+        // Optional: Cleanup not strictly required as we want fonts to persist for other nodes,
+        // but can be added if memory is a concern. For now, we keep them loaded.
+        return () => {
+            // document.head.removeChild(link); 
+        };
+    }, [nodeData.options]);
+
     const status = nodeData.status || 'empty';
     const isLocked = status === 'locked';
 
@@ -56,7 +92,7 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
                     onHoverEnd={() => setHoveredFont(null)}
                     onClick={() => nodeData.onSelect?.(font.id, font)}
                     className={`
-                        w-full p-3 rounded-lg border transition-all text-left
+                        w-full p-3 rounded-2xl border transition-all text-left
                         ${hoveredFont === font.id
                             ? 'border-indigo-400 bg-indigo-50 shadow-md'
                             : (font.isSelected ? 'border-emerald-500 bg-emerald-50 shadow-md ring-1 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300')
@@ -141,7 +177,7 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
                     initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
-                    className="p-3 bg-slate-50 rounded-lg"
+                    className="p-3 bg-slate-50 rounded-2xl"
                 >
                     <div className="flex items-center justify-between mb-1">
                         <span
@@ -188,10 +224,10 @@ export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
             animate={{ scale: 1, opacity: 1 }}
             whileHover={{ scale: 1.01 }}
             className={`
-                relative min-w-[280px] max-w-[320px] p-4 rounded-xl
+                relative min-w-[280px] max-w-[320px] p-4 rounded-3xl
                 bg-white border border-slate-200
                 shadow-lg shadow-slate-200/50
-                ${selected ? 'ring-2 ring-indigo-400' : ''}
+                ${selected ? 'ring-2 ring-blue-500' : ''}
                 ${isLocked ? 'opacity-60' : ''}
                 cursor-grab active:cursor-grabbing
             `}

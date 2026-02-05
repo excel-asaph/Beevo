@@ -29,7 +29,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
     const renderOptions = () => (
         <div className="space-y-3">
             <p className="text-xs text-slate-400 mb-2">Select an inspiration:</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 gap-2">
                 {nodeData.options?.map((logo, index) => (
                     <motion.button
                         key={logo.id}
@@ -40,7 +40,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
                         onHoverEnd={() => setHoveredLogo(null)}
                         onClick={() => nodeData.onSelect?.(logo.id)}
                         className={`
-                            relative group overflow-hidden rounded-lg border transition-all flex flex-col
+                            relative group overflow-hidden rounded-2xl border transition-all flex flex-col
                             ${logo.isSelected
                                 ? 'border-emerald-500 ring-2 ring-emerald-100 shadow-md bg-emerald-50/10'
                                 : hoveredLogo === logo.id
@@ -52,7 +52,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
                         <div className="aspect-square w-full relative overflow-hidden bg-slate-50">
                             <img
                                 src={logo.url}
-                                alt={logo.brandName || 'Logo inspiration'}
+                                alt={logo.displayName || 'Logo inspiration'}
                                 className="w-full h-full object-cover"
                             />
                             {/* Overlay on hover or selection */}
@@ -76,7 +76,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
                                 text-xs font-medium truncate block w-full text-center
                                 ${logo.isSelected ? 'text-emerald-700' : 'text-slate-600'}
                             `}>
-                                {logo.brandName}
+                                {logo.displayName}
                             </span>
                         </div>
                     </motion.button>
@@ -106,7 +106,7 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
             <div className="grid grid-cols-2 gap-2">
                 {nodeData.saved?.map((logo, i) => (
-                    <div key={i} className="rounded-lg overflow-hidden border border-emerald-200 shadow-sm relative aspect-square">
+                    <div key={i} className="rounded-2xl overflow-hidden border border-emerald-200 shadow-sm relative aspect-square">
                         <img src={logo.url} className="w-full h-full object-cover" />
                     </div>
                 ))}
@@ -115,25 +115,9 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
     );
 
     return (
-        <div className={`
-            w-80 bg-white rounded-xl shadow-lg border-2 transition-all duration-300 overflow-hidden
-            ${selected ? 'border-pink-400 ring-4 ring-pink-100' : 'border-slate-100'}
-        `}>
-            {/* Header */}
-            <div className={`
-                px-4 py-3 border-b flex items-center justify-between
-                ${status === 'saved' ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50/50 border-slate-100'}
-            `}>
-                <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded-md ${status === 'saved' ? 'bg-emerald-100 text-emerald-600' : 'bg-pink-100 text-pink-600'}`}>
-                        <ImageIcon className="w-4 h-4" />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-700">{nodeData.label}</span>
-                </div>
-            </div>
-
+        <div className="w-[656px]">
             {/* Content */}
-            <div className="p-4">
+            <div className="relative">
                 <AnimatePresence mode="wait">
                     {status === 'empty' && (
                         <motion.div
@@ -169,8 +153,8 @@ export const InspirationNode: React.FC<NodeProps> = ({ data, selected }) => {
             </div>
 
             {/* Handles */}
-            <Handle type="target" position={Position.Top} className="!bg-slate-300 !w-3 !h-3" />
-            <Handle type="source" position={Position.Bottom} className="!bg-slate-300 !w-3 !h-3" />
+            <Handle type="target" position={Position.Top} className="!bg-slate-300 !w-3 !h-3 opacity-0" />
+            <Handle type="source" position={Position.Bottom} className="!bg-slate-300 !w-3 !h-3 opacity-0" />
         </div>
     );
 };

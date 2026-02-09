@@ -105,9 +105,6 @@ app.get('/api/workspaces', async (req, res) => {
             let thumbnailUrl = null;
             try {
                 await fs.access(path.join(workspacePath, 'thumbnail.png'));
-                // Create a public URL path (assuming we expose this directory statically or via endpoint)
-                // For now, let's serve it via a direct endpoint or static mount
-                // We'll use a new endpoint /api/workspaces/:id/thumbnail
                 thumbnailUrl = `/api/workspaces/${id}/thumbnail?t=${stats.mtimeMs}`;
             } catch (e) {
                 // No thumbnail
@@ -128,6 +125,23 @@ app.get('/api/workspaces', async (req, res) => {
         res.status(500).json({ error: 'Failed to list workspaces', details: String(error) });
     }
 });
+
+// --- Production: Serve Static Client Files ---
+if (process.env.NODE_ENV === 'production') {
+    const clientDistPath = path.resolve(__dirname, '../../client/dist');
+    console.log(`🚀 Production Mode: Serving static files from ${clientDistPath}`);
+
+    app.use(express.static(clientDistPath));
+
+    // Handle SPA routing (catch-all for frontend routes)
+    app.get('*', (req, res, next) => {
+        // Skip API and WS routes
+        if (req.path.startsWith('/api') || req.path.startsWith('/ws') || req.path === '/health') {
+            return next();
+        }
+        res.sendFile(path.join(clientDistPath, 'index.html'));
+    });
+}
 
 // Check if a workspace exists
 app.get('/api/workspaces/check/:id', async (req, res) => {
@@ -1101,9 +1115,9 @@ app.post('/api/push/unsubscribe', (req, res) => {
 
 
 
-const PORT = WS_CONFIG.SERVER_PORT;
+const PORT = Number(process.env.PORT) || WS_CONFIG.SERVER_PORT || 3001;
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║

@@ -208,7 +208,7 @@ export const DynamicLandingPage: React.FC<DynamicLandingPageProps> = ({ isPrevie
     useEffect(() => {
         if (!loading && configs.hero && config?.current_state_hash && !hasTracked && !isPreview) {
             const stateHash = config.current_state_hash || 'unknown';
-            fetch('http://localhost:3001/api/tracking/event', {
+            fetch('/api/tracking/event', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

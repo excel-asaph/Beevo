@@ -12,7 +12,7 @@ const args = process.argv.slice(2);
 const workspaceArg = args.find(a => a.startsWith('--workspace='));
 const workspaceId = workspaceArg ? workspaceArg.split('=')[1] : 'default';
 
-const API_BASE = 'http://127.0.0.1:3001';
+const API_BASE = process.env.SERVER_URL || 'http://127.0.0.1:3001';
 const EVENT_URL = `${API_BASE}/api/tracking/event`;
 const CONFIG_URL = `${API_BASE}/api/config`;
 

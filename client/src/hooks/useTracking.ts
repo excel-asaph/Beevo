@@ -57,7 +57,7 @@ export const useTracking = (blockId: string) => {
         // Send to backend
         console.log(`%c 🎯 METRIC SENT: ${eventType} [${stateHash}] `, 'background: #222; color: #bada55; padding: 2px 5px; border-radius: 3px;', { blockId, ...meta });
         try {
-            fetch('http://localhost:3001/api/tracking/event', {
+            fetch('/api/tracking/event', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

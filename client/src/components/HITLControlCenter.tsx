@@ -44,8 +44,8 @@ interface InterventionRequest {
     proposal?: any;
 }
 
-const WS_URL_BASE = 'ws://localhost:3001';
-const API_URL = 'http://localhost:3001';
+const WS_URL_BASE = process.env.WS_URL || (process.env.VITE_PROD ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}` : 'ws://localhost:3001');
+const API_URL = process.env.VITE_PROD ? '' : 'http://localhost:3001';
 
 // Separate component for the save button to handle local loading state cleanly
 const SaveButton: React.FC<{ onClick: () => void; isSaving: boolean }> = ({ onClick, isSaving }) => (

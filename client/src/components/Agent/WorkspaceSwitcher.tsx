@@ -55,7 +55,7 @@ export const WorkspaceSwitcher: React.FC = () => {
     const fetchWorkspaces = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('http://localhost:3000/api/workspaces');
+            const res = await fetch('/api/workspaces');
             const data = await res.json();
             setWorkspaces(data);
         } catch (error) {

@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { WS_CONFIG } from '../../../shared/constants.js';
 
-const API_BASE = `http://127.0.0.1:${WS_CONFIG.SERVER_PORT || 3000}/api/hitl`;
+const API_BASE = `http://127.0.0.1:${WS_CONFIG.SERVER_PORT || 3001}/api/hitl`;
 
 /**
  * Client for interacting with the internal Notification/HITL API.

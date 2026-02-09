@@ -23,7 +23,7 @@ import { StateAnalytics } from '../../Analytics/StateAnalytics';
 import { SystemConfig, InterventionRequest } from '@shared/types';
 import { usePushNotifications } from '../../../hooks/usePushNotifications';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = process.env.VITE_PROD ? '' : 'http://localhost:3001';
 
 // --- Shared Components for Clean UI ---
 

@@ -77,7 +77,8 @@ export class SocialWatcher {
             browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
             await page.setViewport({ width: 1440, height: 900 });
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
+            const clientBaseUrl = process.env.CLIENT_URL || `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}`;
+            const url = `${clientBaseUrl}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             await page.evaluate(() => {

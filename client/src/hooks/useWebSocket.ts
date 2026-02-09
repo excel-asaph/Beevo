@@ -286,7 +286,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         setStatus('connecting');
 
         // Connect to backend WebSocket
-        const baseUrl = process.env.WS_URL || 'ws://localhost:3001';
+        let baseUrl = process.env.WS_URL || 'ws://localhost:3001';
+
+        // Handle production relative path
+        if (baseUrl === '') {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            baseUrl = `${protocol}//${window.location.host}`;
+        }
+
         const wsUrl = `${baseUrl}?workspaceId=${workspaceId}`;
         const ws = new WebSocket(wsUrl);
 

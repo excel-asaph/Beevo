@@ -19,7 +19,7 @@ export const useConfig = () => {
 
     const fetchConfig = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/config', {
+            const res = await fetch('/api/config', {
                 headers: { 'x-workspace-id': workspaceId }
             });
             if (res.ok) {

@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '../', '');
+    const isProduction = mode === 'production';
+
     return {
         server: {
             port: 3000,
@@ -22,14 +24,26 @@ export default defineConfig(({ mode }) => {
         },
         plugins: [react()],
         define: {
+            'process.env.VITE_PROD': JSON.stringify(isProduction),
             'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
             'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-            'process.env.WS_URL': JSON.stringify('ws://localhost:3001')
+            'process.env.WS_URL': JSON.stringify(env.WS_URL || (isProduction ? '' : 'ws://localhost:3001'))
         },
         resolve: {
             alias: {
                 '@': path.resolve(__dirname, './src'),
                 '@shared': path.resolve(__dirname, '../shared'),
+            }
+        },
+        build: {
+            outDir: 'dist',
+            emptyOutDir: true,
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        vendor: ['react', 'react-dom', 'framer-motion'],
+                    }
+                }
             }
         }
     };

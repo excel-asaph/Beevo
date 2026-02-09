@@ -51,7 +51,7 @@ export const StateAnalytics: React.FC = () => {
             try {
                 // Fetch Leaderboard
                 // Fetch Leaderboard
-                const resLeader = await fetch('http://localhost:3001/api/analytics/leaderboard', { headers: { 'x-workspace-id': workspaceId } });
+                const resLeader = await fetch('/api/analytics/leaderboard', { headers: { 'x-workspace-id': workspaceId } });
                 if (resLeader.ok) {
                     const data = await resLeader.json();
                     setLeaderboard(data);
@@ -59,7 +59,7 @@ export const StateAnalytics: React.FC = () => {
 
                 // Fetch Current State
                 // Fetch Current State
-                const resCurrent = await fetch('http://localhost:3001/api/analytics/current', { headers: { 'x-workspace-id': workspaceId } });
+                const resCurrent = await fetch('/api/analytics/current', { headers: { 'x-workspace-id': workspaceId } });
                 if (resCurrent.ok) {
                     const data = await resCurrent.json();
                     setCurrent(data);

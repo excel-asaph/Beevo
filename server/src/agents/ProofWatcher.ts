@@ -79,7 +79,8 @@ export class ProofWatcher {
             await page.setViewport({ width: 1440, height: 900 });
 
             // Pass workspaceId to frontend via URL
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
+            const clientBaseUrl = process.env.CLIENT_URL || `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}`;
+            const url = `${clientBaseUrl}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
 
             // Wait for proof block

@@ -31,14 +31,14 @@ export const WatcherSettings: React.FC<WatcherSettingsProps> = ({ onRunInitializ
     useEffect(() => {
         // Load Config
         // Load Config
-        fetch('http://localhost:3000/api/config/watcher', { headers: { 'x-workspace-id': workspaceId } })
+        fetch('/api/config/watcher', { headers: { 'x-workspace-id': workspaceId } })
             .then(res => res.json())
             .then(data => setConfig(data))
             .catch(err => console.error("Failed to load watcher settings", err));
 
         // Check Status (Do logos exist?)
         const checkStatus = () => {
-            fetch('http://localhost:3000/api/status/logos', { headers: { 'x-workspace-id': workspaceId } })
+            fetch('/api/status/logos', { headers: { 'x-workspace-id': workspaceId } })
                 .then(res => res.json())
                 .then(data => setStatus(data))
                 .catch(err => console.warn("Status check failed", err));
@@ -52,7 +52,7 @@ export const WatcherSettings: React.FC<WatcherSettingsProps> = ({ onRunInitializ
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await fetch('http://localhost:3000/api/config/watcher', {
+            await fetch('/api/config/watcher', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
                 body: JSON.stringify(config)
@@ -76,7 +76,7 @@ export const WatcherSettings: React.FC<WatcherSettingsProps> = ({ onRunInitializ
         } else {
             // Fallback for standalone usage (though it should always be passed in ControlCenter)
             try {
-                await fetch('http://localhost:3000/api/action/run-initializers', {
+                await fetch('/api/action/run-initializers', {
                     method: 'POST',
                     headers: { 'x-workspace-id': workspaceId }
                 });

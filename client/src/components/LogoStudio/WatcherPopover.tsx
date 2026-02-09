@@ -43,7 +43,7 @@ export const WatcherPopover: React.FC<WatcherPopoverProps> = ({ onRun, onClose }
 
     useEffect(() => {
         // Load Config
-        fetch('http://localhost:3000/api/config/watcher', { headers: { 'x-workspace-id': workspaceId } })
+        fetch('/api/config/watcher', { headers: { 'x-workspace-id': workspaceId } })
             .then(res => res.json())
             .then(data => setConfig(data))
             .catch(err => console.error("Failed to load watcher settings", err));
@@ -58,7 +58,7 @@ export const WatcherPopover: React.FC<WatcherPopoverProps> = ({ onRun, onClose }
                 intervalMinutes: Number(config.intervalMinutes) || 1
             };
 
-            await fetch('http://localhost:3000/api/config/watcher', {
+            await fetch('/api/config/watcher', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-workspace-id': workspaceId },
                 body: JSON.stringify(payload)

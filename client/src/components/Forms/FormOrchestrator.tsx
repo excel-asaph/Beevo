@@ -41,7 +41,7 @@ export const FormOrchestrator: React.FC<FormOrchestratorProps> = ({ type, contex
         try {
             console.log(`[Form] Submitting with integrity hash: ${config?.current_state_hash || 'unknown'}`);
 
-            const response = await fetch('http://localhost:3001/api/leads/submit', {
+            const response = await fetch('/api/leads/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -81,7 +81,8 @@ export class HeroWatcher {
             await page.setViewport({ width: 1440, height: 900 });
             // Add workspace param to URL so client knows which workspace to load (if client supports it)
             // Assuming client reads ?workspace=...
-            const url = `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}/?mode=landing_page&workspace=${this.workspaceId}`;
+            const clientBaseUrl = process.env.CLIENT_URL || `http://localhost:${WS_CONFIG.CLIENT_PORT || 3000}`;
+            const url = `${clientBaseUrl}/?mode=landing_page&workspace=${this.workspaceId}`;
             await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
             await page.waitForSelector('[data-component="hero-block"]', { timeout: 5000 });
             const screenshot = await page.screenshot({ encoding: 'binary' });

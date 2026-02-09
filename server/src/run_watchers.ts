@@ -44,7 +44,7 @@ async function loadConfig() {
 async function broadcastLog(log: any) {
     try {
         // Determine API Port (Default 3000, but Beevo server is on 3001)
-        await fetch('http://localhost:3001/api/broadcast/log', {
+        await fetch('http://127.0.0.1:3001/api/broadcast/log', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

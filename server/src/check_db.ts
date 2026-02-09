@@ -7,6 +7,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Utility script to check the status of the SQLite database.
+ * Prints recent page states and lead submissions to the console.
+ * 
+ * Usage: node check_db.js --workspace=workspaceId
+ */
 async function checkDB() {
     const args = process.argv.slice(2);
     const workspaceArg = args.find(a => a.startsWith('--workspace='));

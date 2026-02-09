@@ -2,10 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { PASBlockConfig } from '../../../../shared/types';
 
+/**
+ * Props for the PASBlock component.
+ */
 interface PASBlockProps {
+    /** Configuration data for the PAS section. */
     config: PASBlockConfig;
 }
 
+/**
+ * Renders the Problem-Agitation-Solution (PAS) section.
+ * 
+ * Features:
+ * - Viewport intersection tracking for visibility.
+ * - Dwell time monitoring.
+ * - Renders dynamic HTML content for the visual narrative.
+ * 
+ * @param {PASBlockProps} props - The component props.
+ */
 export const PASBlock: React.FC<PASBlockProps> = ({ config }) => {
     const { track } = useTracking(config.id);
     const containerRef = useRef<HTMLDivElement>(null);

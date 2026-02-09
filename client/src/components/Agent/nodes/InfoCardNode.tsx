@@ -17,11 +17,19 @@ const ICON_MAP: Record<string, LucideIcon> = {
     values: Heart,
 };
 
+/**
+ * Data structure for the InfoCardNode.
+ */
 export interface InfoCardNodeData {
+    /** Title of the card. */
     title: string;
+    /** Content to display. Can be a string or an array of strings (for tags). */
     content: string | string[];
+    /** Icon key to display (must match keys in ICON_MAP) or a raw emoji string. */
     icon?: string; // Key from ICON_MAP or emoji
+    /** Visual variant of the card. Defaults to 'default'. */
     variant?: 'default' | 'compact';
+    /** How to display array content. 'text' joins with commas, 'tags' renders badges. */
     displayMode?: 'text' | 'tags'; // 'tags' for pill/badge display
 }
 
@@ -37,13 +45,26 @@ const Tag = ({ label }: { label: string }) => (
             backgroundColor: '#f3f4f6',
             borderRadius: 16,
             border: '1px solid #e5e7eb',
-            whiteSpace: 'nowrap',
+            whiteSpace: 'normal',
+            lineHeight: 1.4,
+            textAlign: 'left',
         }}
     >
         {label}
     </span>
 );
 
+/**
+ * A custom Node component for ReactFlow that displays informational content cards.
+ * 
+ * Features:
+ * - Supports various content types (Mission, Tagline, Audience, etc.) via icons.
+ * - Flexible content rendering (text block or tag list).
+ * - "Compact" mode for tighter layouts.
+ * - Clean, card-based UI with optional selection styling.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 const InfoCardNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as InfoCardNodeData;
     const { title, content, icon = 'mission', variant = 'default', displayMode = 'text' } = nodeData;

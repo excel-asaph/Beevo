@@ -1,159 +1,227 @@
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, Check, Loader, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Brain, ChevronDown, ChevronUp, History, Trash2 } from 'lucide-react';
+import { useBrandStore } from '../../stores/useBrandStore';
+import { useActivityStore, ActivityItem as ActivityItemType } from '../../stores/useActivityStore';
+import { ActivityItem } from '../ControlCenter/ActivityItem';
 
+/**
+ * Extended ActivityItem type that supports grouping of related activities.
+ */
+export interface GroupedActivityItem extends ActivityItemType {
+    /** Child activities grouped under this item. */
+    children?: ActivityItemType[];
+    /** Whether this item represents a group header. */
+    isGroup?: boolean;
+}
+
+// Legacy types for compatibility
+/** @deprecated Use ActivityStatus from store instead */
 export type ThinkingPhase = 'idle' | 'analyzing' | 'researching' | 'generating' | 'complete' | 'error';
-
+/** @deprecated Use ActivityItem from store instead */
 export interface ThinkingStep {
     id: string;
     text: string;
     status: 'pending' | 'active' | 'complete' | 'error';
 }
 
+/**
+ * Props for the ThinkingPanel component.
+ */
 interface ThinkingPanelProps {
-    phase: ThinkingPhase;
-    steps: ThinkingStep[];
-    currentAction?: string;
+    // Legacy props (maintained for compatibility but ignored for content)
+    /** @deprecated Legacy prop */
+    phase?: any;
+    /** @deprecated Legacy prop */
+    steps?: any;
+    /** @deprecated Legacy prop */
+    currentAction?: any;
+    /** Whether the panel starts in a collapsed state. overrides store state if provided. */
     isCollapsed?: boolean;
+    /** Callback to toggle collapse state. */
     onToggleCollapse?: () => void;
 }
 
-const phaseLabels: Record<ThinkingPhase, string> = {
-    idle: 'Ready',
-    analyzing: 'Analyzing',
-    researching: 'Researching',
-    generating: 'Generating',
-    complete: 'Complete',
-    error: 'Error',
-};
-
-const phaseColors: Record<ThinkingPhase, string> = {
-    idle: 'text-slate-400',
-    analyzing: 'text-amber-500',
-    researching: 'text-sky-500',
-    generating: 'text-indigo-500',
-    complete: 'text-emerald-500',
-    error: 'text-red-500',
-};
-
+/**
+ * A floating control panel that displays the AI's "Thread of Thought" or activity feed.
+ * 
+ * Features:
+ * - Smart grouping of related sequential activities.
+ * - Real-time status updates (running, complete, error).
+ * - Collapsible UI with a glassmorphism design.
+ * - History clearing functionality.
+ * 
+ * @param {ThinkingPanelProps} props - The component props.
+ */
 export const ThinkingPanel: React.FC<ThinkingPanelProps> = ({
-    phase,
-    steps,
-    currentAction,
-    isCollapsed = false,
-    onToggleCollapse,
+    isCollapsed: propCollapsed,
+    onToggleCollapse: propToggle
 }) => {
-    const isActive = phase !== 'idle';
-    const isComplete = phase === 'complete';
+    const { activities, isPanelOpen, setPanelOpen, clearActivities, hydrateActivities } = useActivityStore();
+    const { activeWorkspaceId } = useBrandStore();
+
+    // Internal state for which item is expanded (accordion logic)
+    const [expandedIds, setExpandedIds] = useState<string[]>([]);
+
+    // Use store state or prop state (hybrid)
+    const isOpen = propCollapsed !== undefined ? !propCollapsed : isPanelOpen;
+    const togglePanel = propToggle || (() => setPanelOpen(!isPanelOpen));
+
+    const activeCount = activities.filter(a => a.status === 'running').length;
+
+    // Hydrate on mount or project change
+    useEffect(() => {
+        if (activeWorkspaceId) {
+            hydrateActivities(activeWorkspaceId);
+        }
+    }, [activeWorkspaceId, hydrateActivities]);
+
+    // ==========================================
+    // GROUPING LOGIC (The "Smart Mixer")
+    // ==========================================
+    const groupedActivities = useMemo(() => {
+        const result: GroupedActivityItem[] = [];
+        let currentGroup: GroupedActivityItem | null = null;
+
+        // Iterate through raw activities
+        for (const item of activities) {
+            // Check if this item should belong to the current group
+            // Rule: Same Title + Sequential Timestamp (within reasonable window, logic simplified to just title here for now)
+            if (currentGroup && item.title === currentGroup.title) {
+                // Add to existing group
+                currentGroup.children = [...(currentGroup.children || []), item];
+                // Update timestamp to latest item
+                currentGroup.timestamp = item.timestamp;
+                // If any child is running, group is running
+                if (item.status === 'running') currentGroup.status = 'running';
+            } else {
+                // If we have a previous group, push it to results
+                if (currentGroup) {
+                    result.push(currentGroup);
+                }
+
+                // Start new "Group Candidate"
+                currentGroup = {
+                    ...item,
+                    children: [item], // It contains itself as the first child
+                    isGroup: false // Will set to true if more than 1 child
+                };
+            }
+        }
+
+        // Push the last group
+        if (currentGroup) {
+            result.push(currentGroup);
+        }
+
+        // Post-process: If a "Group" has only 1 child, flatten it back to a single item
+        return result.map(g => {
+            if (g.children && g.children.length > 1) {
+                return {
+                    ...g,
+                    isGroup: true,
+                    // Title should indicate count? handled in UI
+                    id: `group-${g.children[0].id}` // Stable Group ID
+                };
+            }
+            // Return the single child (original item)
+            return g.children ? g.children[0] : g;
+        });
+    }, [activities]);
+
+    // Auto-expand NEW groups or running items
+    useEffect(() => {
+        const runningItems = groupedActivities.filter(a => a.status === 'running' || a.status === 'pending');
+        if (runningItems.length > 0) {
+            const latest = runningItems[runningItems.length - 1];
+            if (!expandedIds.includes(latest.id)) {
+                setExpandedIds(prev => [...prev, latest.id]);
+            }
+        }
+    }, [groupedActivities.length]);
+
+    const toggleItem = (id: string) => {
+        setExpandedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
 
     return (
         <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             className={`
-                w-72 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-200
-                overflow-hidden
+                w-96 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-slate-200
+                overflow-hidden flex flex-col max-h-[85vh]
             `}
         >
             {/* Header */}
-            <button
-                onClick={onToggleCollapse}
-                className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
-            >
+            <div className="flex items-center justify-between p-3 border-b border-slate-100 bg-white/50">
                 <div className="flex items-center space-x-2">
-                    <motion.div
-                        animate={isActive && !isComplete ? { rotate: 360 } : {}}
-                        transition={{ duration: 2, repeat: isActive && !isComplete ? Infinity : 0, ease: 'linear' }}
+                    <div className={`
+                        w-8 h-8 rounded-lg flex items-center justify-center
+                        ${activeCount > 0 ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'}
+                    `}>
+                        <Brain className={`w-5 h-5 ${activeCount > 0 ? 'animate-pulse' : ''}`} />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-semibold text-slate-800">Control Center</h3>
+                        <p className="text-[10px] text-slate-500 font-medium tracking-wide">
+                            {activeCount > 0 ? `${activeCount} PROCESSES ACTIVE` : 'SYSTEM READY'}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center space-x-1">
+                    <button
+                        onClick={clearActivities}
+                        className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-red-500 transition-colors"
+                        title="Clear History"
                     >
-                        <Brain className={`w-5 h-5 ${phaseColors[phase]}`} />
-                    </motion.div>
-                    <span className="font-semibold text-slate-800">AI Thinking</span>
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={togglePanel}
+                        className="p-1.5 hover:bg-slate-100 rounded-md text-slate-400 hover:text-indigo-600 transition-colors"
+                    >
+                        {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                    </button>
                 </div>
+            </div>
 
-                <div className="flex items-center space-x-2">
-                    <span className={`text-xs font-medium ${phaseColors[phase]}`}>
-                        {phaseLabels[phase]}
-                    </span>
-                    {onToggleCollapse && (
-                        isCollapsed ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />
-                    )}
-                </div>
-            </button>
-
-            {/* Content */}
+            {/* Activity Feed */}
             <AnimatePresence>
-                {!isCollapsed && (
+                {isOpen && (
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-slate-100"
+                        className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30"
                     >
-                        {/* Current action */}
-                        {currentAction && (
-                            <div className="px-4 py-2 bg-slate-50 border-b border-slate-100">
-                                <p className="text-xs text-slate-500">{currentAction}</p>
+                        {groupedActivities.length === 0 ? (
+                            <div className="p-12 text-center text-slate-300 flex flex-col items-center">
+                                <History className="w-12 h-12 mb-3 opacity-20" />
+                                <p className="text-xs font-medium">No activity history recorded.</p>
                             </div>
-                        )}
-
-                        {/* Steps list */}
-                        <div className="max-h-64 overflow-y-auto p-4">
-                            {steps.length === 0 && (
-                                <p className="text-sm text-slate-400 text-center py-4">
-                                    AI reasoning will appear here...
-                                </p>
-                            )}
-
-                            <ul className="space-y-2">
-                                {steps.map((step, i) => (
-                                    <motion.li
-                                        key={step.id}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        className="flex items-start space-x-2"
-                                    >
-                                        {step.status === 'active' && (
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                            >
-                                                <Loader className="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0" />
-                                            </motion.div>
-                                        )}
-                                        {step.status === 'complete' && (
-                                            <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                                        )}
-                                        {step.status === 'error' && (
-                                            <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                        )}
-                                        {step.status === 'pending' && (
-                                            <div className="w-4 h-4 rounded-full border-2 border-slate-300 mt-0.5 flex-shrink-0" />
-                                        )}
-
-                                        <span className={`text-sm ${step.status === 'active' ? 'text-slate-700' :
-                                                step.status === 'complete' ? 'text-slate-500' :
-                                                    step.status === 'error' ? 'text-red-600' :
-                                                        'text-slate-400'
-                                            }`}>
-                                            {step.text}
-                                        </span>
-                                    </motion.li>
+                        ) : (
+                            <div className="flex flex-col-reverse justify-end min-h-0 py-2">
+                                {/* Render grouped list */}
+                                {groupedActivities.slice().reverse().map((item) => (
+                                    <ActivityItem
+                                        key={item.id}
+                                        item={item}
+                                        isExpanded={expandedIds.includes(item.id)}
+                                        onToggle={() => toggleItem(item.id)}
+                                    />
                                 ))}
-                            </ul>
-                        </div>
-
-                        {/* Completion badge */}
-                        {isComplete && steps.length > 0 && (
-                            <div className="px-4 py-3 bg-emerald-50 border-t border-emerald-100">
-                                <div className="flex items-center justify-center space-x-2">
-                                    <Check className="w-4 h-4 text-emerald-600" />
-                                    <span className="text-sm font-medium text-emerald-700">
-                                        All tasks completed
-                                    </span>
-                                </div>
                             </div>
                         )}
+
+                        {/* Footer Status Bar */}
+                        <div className="p-2 border-t border-slate-100 bg-white/50 text-[10px] text-slate-400 text-center uppercase tracking-widest font-semibold flex items-center justify-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            System Online
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

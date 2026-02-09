@@ -1,0 +1,61 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1770630701520",
+    "meta": {
+        "strategy": "Social Proof based on Brand Voice",
+        "tone": "Empathetic, expert, and restorative.",
+        "active_variant": "challenger",
+        "layout_strategy": "GRID"
+    },
+    "content": {
+        "headline": "Endorsed by the Architects of Human Health",
+        "subhead": "See why leading physical therapists and wellness executives trust Stitch for restorative sleep.",
+        "testimonials": [
+            {
+                "id": "testimonial_001",
+                "name": "Julian Thorne",
+                "title": "Chief of Physiotherapy",
+                "company": "Wellness Peak",
+                "quote": "The structural integrity of Stitch mattresses provides the precise spinal alignment my patients need to truly recover during the night.",
+                "image_prompt": "Professional headshot of a male physical therapist in his 40s, wearing a clean charcoal sweater, soft lighting, warm clinical environment, high-end photography, cinematic depth of field.",
+                "image_url": "/workspaces/a107edc7_stitch/assets/history/social_v1770630701520/testimonial_1770630712916_1770630712917.png"
+            },
+            {
+                "id": "testimonial_002",
+                "name": "Elena Rodriguez",
+                "title": "Sleep Consultant",
+                "company": "Serenity Health",
+                "quote": "Stitch bridges the gap between clinical support and the soft sanctuary of a home bedroom, making wellness feel effortless.",
+                "image_prompt": "Professional headshot of a female sleep consultant in her 30s, sophisticated look, wearing a sage green silk blouse, natural office light, blurred background of a modern library, 8k resolution.",
+                "image_url": "/workspaces/a107edc7_stitch/assets/history/social_v1770630701520/testimonial_1770630724847_1770630724848.png"
+            },
+            {
+                "id": "testimonial_003",
+                "name": "Marcus Chen",
+                "title": "Executive Director",
+                "company": "Spinal Health Institute",
+                "quote": "I recommend Stitch because it respects the body's natural ergonomics, turning sleep into a restorative medical asset.",
+                "image_prompt": "Professional headshot of a male medical director in his 50s, distinguished appearance, wearing a white clinical coat over a dress shirt, bright airy medical suite background, soft professional lighting.",
+                "image_url": "/workspaces/a107edc7_stitch/assets/history/social_v1770630701520/testimonial_1770630741438_1770630741439.png"
+            },
+            {
+                "id": "testimonial_004",
+                "name": "Sarah Jenkins",
+                "title": "Wellness Program Manager",
+                "company": "Global Core Corp",
+                "quote": "Finally, a sleep solution that combines rigorous health standards with the soothing comfort of a high-end luxury retreat.",
+                "image_prompt": "Professional headshot of a female executive in her 40s, confident and warm, wearing a beige blazer, modern corporate lounge background with plants, high-end editorial style.",
+                "image_url": "/workspaces/a107edc7_stitch/assets/history/social_v1770630701520/testimonial_1770630769356_1770630769356.png"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class=\"bg-[#F2F0E9] py-20 px-6 font-['Montserrat']\"><div class=\"max-w-7xl mx-auto\"><div class=\"text-center mb-16\"><h2 class=\"text-4xl font-bold text-[#4A5D23] mb-4\">Endorsed by the Architects of Human Health</h2><p class=\"text-xl text-[#8A9A5B] max-w-2xl mx-auto\">Leading physical therapists and wellness executives trust Stitch for precision-engineered, restorative sleep.</p></div><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8\"><div class=\"bg-white p-8 rounded-xl shadow-sm flex flex-col items-center text-center border border-[#E8E4D9]\"><img src=\"testimonial_001_url\" alt=\"Julian Thorne\" class=\"w-24 h-24 rounded-full mb-6 object-cover border-4 border-[#BDBB99]\" /><p class=\"text-[#4A5D23] italic mb-6\">\"The structural integrity of Stitch mattresses provides the precise spinal alignment my patients need to truly recover during the night.\"</p><div><h4 class=\"font-bold text-[#4A5D23]\">Julian Thorne</h4><p class=\"text-sm text-[#8A9A5B]\">Chief of Physiotherapy, Wellness Peak</p></div></div><div class=\"bg-white p-8 rounded-xl shadow-sm flex flex-col items-center text-center border border-[#E8E4D9]\"><img src=\"testimonial_002_url\" alt=\"Elena Rodriguez\" class=\"w-24 h-24 rounded-full mb-6 object-cover border-4 border-[#BDBB99]\" /><p class=\"text-[#4A5D23] italic mb-6\">\"Stitch bridges the gap between clinical support and the soft sanctuary of a home bedroom, making wellness feel effortless.\"</p><div><h4 class=\"font-bold text-[#4A5D23]\">Elena Rodriguez</h4><p class=\"text-sm text-[#8A9A5B]\">Sleep Consultant, Serenity Health</p></div></div><div class=\"bg-white p-8 rounded-xl shadow-sm flex flex-col items-center text-center border border-[#E8E4D9]\"><img src=\"testimonial_003_url\" alt=\"Marcus Chen\" class=\"w-24 h-24 rounded-full mb-6 object-cover border-4 border-[#BDBB99]\" /><p class=\"text-[#4A5D23] italic mb-6\">\"I recommend Stitch because it respects the body's natural ergonomics, turning sleep into a restorative medical asset.\"</p><div><h4 class=\"font-bold text-[#4A5D23]\">Marcus Chen</h4><p class=\"text-sm text-[#8A9A5B]\">Executive Director, Spinal Health Institute</p></div></div><div class=\"bg-white p-8 rounded-xl shadow-sm flex flex-col items-center text-center border border-[#E8E4D9]\"><img src=\"testimonial_004_url\" alt=\"Sarah Jenkins\" class=\"w-24 h-24 rounded-full mb-6 object-cover border-4 border-[#BDBB99]\" /><p class=\"text-[#4A5D23] italic mb-6\">\"Finally, a sleep solution that combines rigorous health standards with the soothing comfort of a high-end luxury retreat.\"</p><div><h4 class=\"font-bold text-[#4A5D23]\">Sarah Jenkins</h4><p class=\"text-sm text-[#8A9A5B]\">Wellness Program Manager, Global Core Corp</p></div></div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#F2F0E9",
+        "color": "#4A5D23",
+        "fontFamily": "Montserrat"
+    }
+}

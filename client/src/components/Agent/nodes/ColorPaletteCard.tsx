@@ -2,13 +2,30 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Check } from 'lucide-react';
 
+/**
+ * Props for the ColorPaletteCard component.
+ */
 export interface ColorPaletteCardProps {
+    /** Array of hex color codes to display. */
     colors: string[];
+    /** Name of the palette (e.g., "Modern Minimalist"). */
     paletteName?: string;
+    /** Callback triggered when a specific color swatch is clicked. */
     onColorClick?: (color: string) => void;
+    /** Whether this palette is currently selected/active. */
     isSelected?: boolean;
 }
 
+/**
+ * A card component that displays a set of colors as a palette.
+ * 
+ * Features:
+ * - Interactive color swatches with hover effects.
+ * - Selection state styling.
+ * - Displays hex codes on hover.
+ * 
+ * @param {ColorPaletteCardProps} props - The component props.
+ */
 export const ColorPaletteCard: React.FC<ColorPaletteCardProps> = ({
     colors,
     paletteName = 'Color Palette',

@@ -1,0 +1,169 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1770654391655",
+    "meta": {
+        "strategy": "HECTOR positions itself as a disruptive force by democratizing sustainable transportation, bridging the gap between high-end EV technology and everyday affordability for the European mass market.",
+        "tone": "Inclusive, approachable, and visionary.",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "type": "video",
+        "source_url": "/assets/placeholders/hero_placeholder.mp4",
+        "source_id": "generated_veo_asset",
+        "prompt_signature": "A sleek, minimalist HECTOR electric vehicle glides smoothly through a vibrant, sun-drenched European city plaza at dawn. The car features aerodynamic lines and a signature LED light bar. Diverse groups of young professionals and families are seen in the background, interacting naturally in a clean, high-tech urban environment. The atmosphere is optimistic and visionary, captured in 4k with hyper-realistic textures.",
+        "attributes": {
+            "lighting": "Natural golden hour illumination with soft, diffused highlights and long, gentle shadows to emphasize the vehicle's clean contours.",
+            "camera_movement": "A dynamic low-angle tracking shot that starts parallel to the car and smoothly orbits to a wide frontal hero shot.",
+            "subject_focus": "The HECTOR EV's front fascia and integrated sensor array, symbolizing advanced but accessible technology.",
+            "color_grade": "#F2E9E1"
+        }
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "Clean Energy For Everyone",
+            "styles": {
+                "color": "#8E443D",
+                "fontFamily": "Montserrat",
+                "fontSize": "5rem",
+                "fontWeight": "900",
+                "textShadow": "2px 2px 8px rgba(93, 92, 97, 0.2)"
+            }
+        },
+        "subhead": {
+            "text": "Join HECTOR in democratizing sustainable urban mobility across Europe with premium technology at mass-market prices.",
+            "styles": {
+                "color": "#5D5C61",
+                "fontFamily": "Montserrat",
+                "fontSize": "1.25rem",
+                "marginTop": "1.5rem"
+            }
+        },
+        "cta": {
+            "text": "Join the Movement",
+            "action_id": "open_intent_form",
+            "styles": {
+                "backgroundColor": "#E2725B",
+                "color": "#FFFBF2",
+                "fontFamily": "Montserrat",
+                "padding": "14px 28px",
+                "borderRadius": "4px",
+                "fontWeight": "600"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "alignItems": "center",
+            "textAlign": "center",
+            "padding": "40px"
+        },
+        "overlay_gradient": "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))"
+    },
+    "navigation": {
+        "links": [
+            {
+                "label": "Offer",
+                "action_id": "open_offer_form"
+            },
+            {
+                "label": "Partnership",
+                "action_id": "open_intent_form"
+            },
+            {
+                "label": "Contact",
+                "action_id": "open_contact_form"
+            }
+        ],
+        "styles": {
+            "color": "#8E443D",
+            "fontFamily": "Montserrat",
+            "fontSize": "0.75rem",
+            "fontWeight": "700",
+            "letterSpacing": "0.2em",
+            "textTransform": "uppercase"
+        }
+    },
+    "forms": {
+        "contact": {
+            "id": "contact_form_001",
+            "title": "Connect with HECTOR",
+            "submit_text": "Send Message",
+            "fields": [
+                {
+                    "id": "full_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Enter your name"
+                },
+                {
+                    "id": "email_address",
+                    "label": "Email Address",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "email@example.com"
+                },
+                {
+                    "id": "message",
+                    "label": "How can we help?",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "Tell us about your inquiry..."
+                }
+            ],
+            "subtitle": "Questions about our mission? Reach out to our European team."
+        },
+        "intent": {
+            "id": "intent_form_001",
+            "title": "Fuel the Revolution",
+            "submit_text": "Apply for Early Access",
+            "fields": [
+                {
+                    "id": "user_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "id": "user_email",
+                    "label": "Work Email",
+                    "type": "email",
+                    "required": true
+                },
+                {
+                    "id": "scaling_goal",
+                    "label": "European Scaling Goal",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Individual Mobility",
+                        "Fleet Deployment",
+                        "Retail Distribution",
+                        "Infrastructure Partnership"
+                    ]
+                },
+                {
+                    "id": "infrastructure_status",
+                    "label": "Current Infrastructure",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "Describe your current transportation or energy setup..."
+                },
+                {
+                    "id": "newsletter_opt_in",
+                    "label": "I want to receive updates on clean energy democratization.",
+                    "type": "checkbox",
+                    "required": false
+                }
+            ],
+            "subtitle": "Provide your details to help us scale sustainable mobility for the many."
+        }
+    },
+    "styles": {
+        "backgroundColor": "#E2725B",
+        "color": "#FFFFFF",
+        "accentColor": "#FFFBF2",
+        "fontFamily": "Montserrat"
+    }
+}

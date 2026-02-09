@@ -11,6 +11,9 @@ export interface VideoAttributes {
     color_grade: string;
 }
 
+/**
+ * Service for generating videos using Google GenAI (Veo model).
+ */
 export class VideoGenerator {
     private client: GoogleGenAI;
     private modelName = MODELS.FORGE_VIDEO_HQ;
@@ -19,6 +22,14 @@ export class VideoGenerator {
         this.client = new GoogleGenAI({ apiKey });
     }
 
+    /**
+     * Generates a video based on the provided attributes and saves it to the output path.
+     * Polls the operation until completion.
+     * 
+     * @param {VideoAttributes} attributes - The video generation parameters (prompt, lighting, etc.).
+     * @param {string} outputPath - The file path to save the generated video.
+     * @returns {Promise<string>} The filename of the saved video.
+     */
     async generateVideo(attributes: VideoAttributes, outputPath: string): Promise<string> {
         console.log(`🎥 Starting Veo Generation: ${outputPath}`);
 

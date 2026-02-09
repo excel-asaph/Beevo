@@ -6,9 +6,14 @@ import type { ThinkingPhase } from '../components/Agent/ThinkingCard';
 import type { BrandDNA } from '@shared/types';
 
 // Thinking step for the AI reasoning display
+/**
+ * Represents a discrete step in the AI's reasoning process.
+ */
 interface ThinkingStep {
     id: string;
+    /** The description of the thinking step. */
     text: string;
+    /** Current status of the step. */
     status: 'pending' | 'active' | 'complete' | 'error';
     timestamp?: number;
 }
@@ -26,11 +31,29 @@ interface ThinkingStep {
 //     sessionId: string | null;
 // }
 
+/**
+ * Configuration options for the useAgent hook.
+ */
 interface UseAgentOptions {
+    /** Callback triggered when Brand DNA extraction is complete. */
     onBrandDNAComplete?: (dna: BrandDNA) => void;
+    /** Callback triggered on agent errors. */
     onError?: (message: string) => void;
 }
 
+/**
+ * A comprehensive hook for interacting with the AI Agent.
+ * 
+ * Features:
+ * - Manages WebSocket connection to the agent server.
+ * - Handles real-time audio streaming (input and output).
+ * - Tracks "Orb State" (speaking, listening, processing).
+ * - visualizes the AI's "Thinking Process" via steps and phases.
+ * - Updates dynamic UI cards based on agent output (suggestions, extraction).
+ * 
+ * @param {UseAgentOptions} options - Configuration callbacks.
+ * @returns {Object} Agent state and control methods.
+ */
 export function useAgent(options: UseAgentOptions = {}) {
     // Core state
     const [orbState, setOrbState] = useState<OrbState>('idle');

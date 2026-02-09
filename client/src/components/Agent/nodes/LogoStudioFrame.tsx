@@ -1,23 +1,39 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
+import { WatcherPopover } from '../../LogoStudio/WatcherPopover';
+
 import { NodeProps, NodeToolbar, Position, useReactFlow } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Settings2, Sparkles, Ghost } from 'lucide-react';
+import { Play, PenTool } from 'lucide-react';
+
 import { useWorkspace } from '../../../context/WorkspaceContext';
+import { useBrandStore } from '../../../stores/useBrandStore';
 
 // Types
+/**
+ * Data structure for the LogoStudioFrame.
+ */
 export interface LogoStudioNodeData {
+    /** Title of the logo studio frame. */
     title: string;
+    /** Whether logo generation is in progress. */
     isGenerating: boolean;
+    /** List of generated logos. */
     logos: Array<{
         id: string;
         url: string;
         title: string;
     }>;
+    /** Callback to trigger logo generation. */
     onGenerate?: (context: string) => void;
+    /** Callback to export selected logos. */
     onExport?: () => void;
+    /** Callback to finalize selected logos. */
     onFinalize?: () => void;
-    // Persist visual preferences
+    /** Callback to trigger landing page generation. */
+    onRun?: (e: React.MouseEvent) => void; // Trigger landing page generation
+    /** Theme color key. */
     color?: string;
+    /** Whether the frame is locked. */
     locked?: boolean;
 }
 
@@ -55,11 +71,11 @@ const UnlockIcon = () => (
     </svg>
 );
 
-const ExportIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M8 10.5V3" />
-        <path d="M4.5 6.5L8 3l3.5 3.5" />
-        <path d="M2.5 10.5v2A1.25 1.25 0 0 0 3.75 13.75h8.5a1.25 1.25 0 0 0 1.25-1.25v-2" />
+
+
+const RunIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M4.5 2.5a1 1 0 0 1 1.5-.87l8 4.62a1 1 0 0 1 0 1.74l-8 4.62a1 1 0 0 1-1.5-.87V2.5z" />
     </svg>
 );
 
@@ -80,17 +96,7 @@ const FRAME_THEMES: Record<string, { bg: string; border: string; title: string }
 };
 
 // Skeleton loader
-const LogoSkeleton: React.FC<{ delay?: number }> = ({ delay = 0 }) => (
-    <motion.div
-        initial={{ opacity: 0.4 }}
-        animate={{ opacity: [0.4, 0.7, 0.4] }}
-        transition={{ duration: 1.5, repeat: Infinity, delay }}
-        className="w-32 h-32 rounded-2xl"
-        style={{
-            background: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 50%, #f9a8d4 100%)',
-        }}
-    />
-);
+import { SkeletonBlock, SkeletonText, SkeletonCircle } from '../../ui/Skeleton';
 
 // Individual logo result
 const LogoResultItem: React.FC<{
@@ -132,12 +138,13 @@ const TooltipButton = ({
 }: {
     icon?: any,
     label?: string,
-    onClick?: () => void,
+    onClick?: (e: React.MouseEvent) => void,
     className?: string,
     children?: React.ReactNode
 }) => (
     <div className="relative group flex items-center justify-center">
         <button
+            type="button"
             onClick={onClick}
             className={`p-1 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-900 transition-colors ${className}`}
         >
@@ -158,6 +165,7 @@ const ViewToggle: React.FC<{
 }> = ({ value, onChange }) => (
     <div className="flex items-center gap-2 bg-gray-100 rounded-full p-1">
         <button
+            type="button"
             onClick={() => onChange('logos')}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${value === 'logos'
                 ? 'bg-white text-gray-800 shadow-sm'
@@ -167,6 +175,7 @@ const ViewToggle: React.FC<{
             Logos
         </button>
         <button
+            type="button"
             onClick={() => onChange('context')}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${value === 'context'
                 ? 'bg-white text-gray-800 shadow-sm'
@@ -179,15 +188,38 @@ const ViewToggle: React.FC<{
 );
 
 // Main Component
+/**
+ * A specialized Frame Node for the Logo Studio experience.
+ * 
+ * Features:
+ * - Logo generation interface with prompt input.
+ * - Grid display of generated logo results.
+ * - Selection and export capabilities.
+ * - Integration with "Watcher" for state monitoring.
+ * - Frame controls (locking, expansion).
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) => {
     const nodeData = data as unknown as LogoStudioNodeData;
-    const { title, isGenerating, logos, onGenerate, onExport, onFinalize } = nodeData;
+    const { title, isGenerating, logos, onGenerate, onExport, onFinalize, onRun } = nodeData;
 
     // Use local state if data props aren't available, but try to sync? 
     // Ideally we update node data
     const [viewMode, setViewMode] = useState<'logos' | 'context'>('logos');
     const [contextText, setContextText] = useState('');
     const [showColorPicker, setShowColorPicker] = useState(false);
+    const [showWatcherPopover, setShowWatcherPopover] = useState(false);
+
+    // Store action for persistence
+    const setLayoutOverride = useBrandStore((state) => state.setLayoutOverride);
+
+    // Auto-switch to Logos view when generation finishes
+    useEffect(() => {
+        if (!isGenerating) {
+            setViewMode('logos');
+        }
+    }, [isGenerating]);
 
     // Derived from data or default
     const color = nodeData.color || 'white';
@@ -197,12 +229,25 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
     const theme = FRAME_THEMES[color] || FRAME_THEMES.white;
     const colorOrder = ['white', 'gray', 'red', 'peach', 'orange', 'yellow', 'green', 'mint', 'cyan', 'blue', 'purple', 'violet'];
 
-    // Frame dimensions
+    // ... (dimensions calc)
+    // ... (dimensions calc)
     const frameWidth = 680;
-    const frameHeight = isGenerating ? 320 : Math.max(320, Math.ceil(logos.length / 4) * 180 + 100);
+    // Predictive Layout Constants
+    const PREDICTED_LOGO_COUNT = 6;
+    const ROW_HEIGHT = 180;
+    const BASE_HEIGHT = 100;
 
-    // Pinkish theme for loading state (overrides user color if generating)
-    const activeBg = isGenerating ? 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)' : theme.bg;
+    // Calculate heights
+    const skeletonHeight = Math.ceil(PREDICTED_LOGO_COUNT / 4) * ROW_HEIGHT + BASE_HEIGHT;
+    const contentHeight = Math.ceil(logos.length / 4) * ROW_HEIGHT + BASE_HEIGHT;
+
+    // Dynamic Frame Height
+    const frameHeight = isGenerating
+        ? skeletonHeight
+        : (viewMode === 'logos' ? Math.max(320, contentHeight) : 320);
+
+    // Neutral background for loading state (matches Landing Page)
+    const activeBg = theme.bg;
     const activeBorder = selected ? '#3b82f6' : theme.border;
 
     const handleFocus = () => {
@@ -210,6 +255,7 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
     };
 
     const handleColorChange = (newColor: string) => {
+        // 1. Optimistic Update
         setNodes((nodes) =>
             nodes.map((node) =>
                 node.id === id
@@ -217,17 +263,30 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                     : node
             )
         );
+        // 2. Persist to DB
+        setLayoutOverride(id, { color: newColor });
         setShowColorPicker(false);
     };
 
+    const toggleColorPicker = () => {
+        if (!showColorPicker) {
+            setShowWatcherPopover(false);
+        }
+        setShowColorPicker(!showColorPicker);
+    };
+
     const handleLockToggle = () => {
+        const nextLocked = !locked;
+        // 1. Optimistic Update
         setNodes((nodes) =>
             nodes.map((node) =>
                 node.id === id
-                    ? { ...node, data: { ...node.data, locked: !locked }, draggable: !locked }
+                    ? { ...node, data: { ...node.data, locked: nextLocked }, draggable: !nextLocked }
                     : node
             )
         );
+        // 2. Persist to DB
+        setLayoutOverride(id, { locked: nextLocked });
     };
 
     return (
@@ -252,7 +311,7 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                 }}
                 className="custom-drag-handle"
             >
-                <span>🎨</span>
+                <PenTool className="w-4 h-4" />
                 {title}
             </div>
 
@@ -277,7 +336,7 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                 <div className="absolute top-0 left-0 right-0 px-4 py-3 flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-sm z-10">
                     <ViewToggle value={viewMode} onChange={setViewMode} />
                     <div className="flex items-center gap-2">
-                        <Settings2 className="w-4 h-4 text-gray-400" />
+                        {/* Settings Removed */}
                     </div>
                 </div>
 
@@ -290,10 +349,15 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="flex flex-wrap gap-4 justify-center items-center h-full"
+                                className="flex flex-wrap gap-4 justify-start"
                             >
-                                {[0, 1, 2, 3, 4, 5].map((i) => (
-                                    <LogoSkeleton key={i} delay={i * 0.15} />
+                                {Array.from({ length: PREDICTED_LOGO_COUNT }).map((_, i) => (
+                                    <div key={i} className="flex flex-col items-center gap-2">
+                                        <div className="w-32 h-32 rounded-2xl relative overflow-hidden">
+                                            <SkeletonBlock className="w-full h-full bg-white/40 border border-white/60 shadow-sm" />
+                                        </div>
+                                        <SkeletonText width={80} className="h-3 bg-black/5" />
+                                    </div>
                                 ))}
                             </motion.div>
                         ) : (
@@ -315,14 +379,12 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                                     <textarea
                                         value={contextText}
                                         onChange={(e) => setContextText(e.target.value)}
+                                        onFocus={() => setShowWatcherPopover(false)}
                                         placeholder="Add context..."
                                         className="flex-1 w-full p-3 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-pink-300"
                                     />
                                     <div className="flex items-center justify-end mt-3 gap-2">
-                                        <button onClick={() => onFinalize?.()} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                            <Ghost className="w-3.5 h-3.5" /> Transparent
-                                        </button>
-                                        <button onClick={() => onGenerate?.(contextText)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-pink-500 rounded-lg shadow-sm hover:bg-pink-600 transition-colors">
+                                        <button type="button" onClick={() => onGenerate?.(contextText)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-pink-500 rounded-lg shadow-sm hover:bg-pink-600 transition-colors">
                                             <Play className="w-3.5 h-3.5" /> Generate
                                         </button>
                                     </div>
@@ -347,17 +409,54 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                     transition={{ duration: 0.2 }}
                     className="flex gap-2 items-center"
                 >
-                    {/* AI Assistant Button */}
-                    <TooltipButton label="AI Assistant" className="bg-white rounded-xl shadow-lg border border-gray-100 !p-1 hover:!bg-gray-50">
-                        <Sparkles className="w-4 h-4 text-gray-700" strokeWidth={1.75} />
-                    </TooltipButton>
+                    {/* Run Button - Triggers Watcher Config Popover */}
+                    {onRun && (
+                        <div className="relative">
+                            <TooltipButton
+                                label="Build Landing Page"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (!showWatcherPopover) {
+                                        setShowColorPicker(false);
+                                    }
+                                    setShowWatcherPopover(!showWatcherPopover);
+                                }}
+                                className={`bg-white rounded-xl shadow-lg border border-gray-100 !p-1.5 hover:!bg-gray-50 ${showWatcherPopover ? 'bg-orange-50 !text-orange-500 ring-2 ring-orange-100' : ''}`}
+                            >
+                                <RunIcon />
+                            </TooltipButton>
+
+                            {/* Watcher Popover - Positioned Above */}
+                            <AnimatePresence>
+                                {showWatcherPopover && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="absolute bottom-full mb-3 left-0 -translate-x-[110%] z-50 origin-bottom nodrag nopan"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <WatcherPopover
+                                            onRun={() => {
+                                                onRun({} as React.MouseEvent); // Trigger the original run handler
+                                                setShowWatcherPopover(false);
+                                            }}
+                                            onClose={() => setShowWatcherPopover(false)}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
 
                     {/* Main Controls Pill */}
                     <div className="bg-white rounded-xl shadow-lg border border-gray-100 flex items-center px-1.5 py-0.5 gap-1">
                         {/* Color Picker */}
                         <div className="relative">
                             <button
-                                onClick={() => setShowColorPicker(!showColorPicker)}
+                                type="button"
+                                onClick={toggleColorPicker}
                                 className="flex items-center gap-1.5 p-1 hover:bg-gray-100 rounded-md text-gray-600 hover:text-gray-900 transition-colors"
                             >
                                 <div
@@ -380,8 +479,12 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                                                 const isWhite = colorKey === 'white';
                                                 return (
                                                     <button
+                                                        type="button"
                                                         key={colorKey}
-                                                        onClick={() => handleColorChange(colorKey)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleColorChange(colorKey);
+                                                        }}
                                                         className={`w-5 h-5 rounded-full border-2 transition-all ${isSelected ? 'border-gray-400 scale-110' : 'border-black/5 hover:scale-110 hover:border-black/10'}`}
                                                         style={{ background: isWhite ? '#e5e7eb' : colorTheme.bg }}
                                                         title={colorKey.charAt(0).toUpperCase() + colorKey.slice(1)}
@@ -399,24 +502,39 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                         <div className="w-[1px] h-4 bg-gray-200 mx-0.5" />
 
                         {locked ? (
-                            <TooltipButton label="Unlock" onClick={handleLockToggle}>
+                            <TooltipButton label="Unlock" onClick={() => {
+                                setShowWatcherPopover(false);
+                                handleLockToggle();
+                            }}>
                                 <UnlockIcon />
                             </TooltipButton>
                         ) : (
                             <>
-                                <TooltipButton label="Arrange" onClick={() => { /* No-op for now */ }}>
+                                <TooltipButton label="Arrange" onClick={() => {
+                                    setShowWatcherPopover(false);
+                                    /* No-op for now */
+                                }}>
                                     <ArrangeIcon />
                                 </TooltipButton>
-                                <TooltipButton label="Lock" onClick={handleLockToggle}>
+                                <TooltipButton label="Lock" onClick={() => {
+                                    setShowWatcherPopover(false);
+                                    handleLockToggle();
+                                }}>
                                     <LockIcon />
                                 </TooltipButton>
 
                                 <div className="w-[1px] h-4 bg-gray-200 mx-0.5" />
 
-                                <TooltipButton label="Fit to content" onClick={() => { /* Auto-handled */ }}>
+                                <TooltipButton label="Fit to content" onClick={() => {
+                                    setShowWatcherPopover(false);
+                                    /* Auto-handled */
+                                }}>
                                     <FitToContentIcon />
                                 </TooltipButton>
-                                <TooltipButton label="Focus (F)" onClick={handleFocus}>
+                                <TooltipButton label="Focus (F)" onClick={() => {
+                                    setShowWatcherPopover(false);
+                                    handleFocus();
+                                }}>
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
                                         <circle cx="8" cy="8" r="5" />
                                         <line x1="8" y1="1" x2="8" y2="3.5" />
@@ -424,9 +542,6 @@ const LogoStudioFrameComponent: React.FC<NodeProps> = ({ id, data, selected }) =
                                         <line x1="1" y1="8" x2="3.5" y2="8" />
                                         <line x1="12.5" y1="8" x2="15" y2="8" />
                                     </svg>
-                                </TooltipButton>
-                                <TooltipButton label="Export" onClick={onExport}>
-                                    <ExportIcon />
                                 </TooltipButton>
                             </>
                         )}

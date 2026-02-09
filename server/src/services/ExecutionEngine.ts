@@ -34,6 +34,10 @@ export type StreamThoughtCallback = (
 // EXECUTION ENGINE
 // ==========================================
 
+/**
+ * Engine responsible for executing the multi-phase brand research and generation process.
+ * Orchestrates calls to Gemini/NanoBanana to extract DNA, research competitors, and generate visual identity assets.
+ */
 export class ExecutionEngine {
     private genAI: GoogleGenAI;
     private researchAgent: ResearchAgent;
@@ -45,16 +49,29 @@ export class ExecutionEngine {
         this.genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
         this.researchAgent = new ResearchAgent();
 
-        // Ensure artifacts directory exists
-        this.artifactsDir = path.join(process.cwd(), 'brain', 'workspaces', workspaceId, 'research_artifacts');
-        if (!fs.existsSync(this.artifactsDir)) {
-            fs.mkdirSync(this.artifactsDir, { recursive: true });
+        // Ensure artifacts directory exists (ONLY IF WORKSPACE EXISTS)
+        // Fix for Ghost Workspaces: Do not create folders if the workspace itself doesn't exist.
+        const workspaceRoot = path.join(process.cwd(), 'brain', 'workspaces', workspaceId);
+        this.artifactsDir = path.join(workspaceRoot, 'research_artifacts');
+
+        if (workspaceId !== 'default' && !fs.existsSync(workspaceRoot)) {
+            console.warn(`🚧 [ExecutionEngine] Workspace missing: ${workspaceId} -> Skipping artifact dir creation.`);
+        } else {
+            if (!fs.existsSync(this.artifactsDir)) {
+                fs.mkdirSync(this.artifactsDir, { recursive: true });
+            }
         }
     }
 
     // ==========================================
     // PHASE 1: EXTRACT BRAND DNA
     // ==========================================
+    /**
+     * Phase 1: Extracts Brand DNA from the conversation history.
+     * 
+     * @param {string} conversationHistory - The chat history to analyze.
+     * @returns {Promise<BrandDNA>} The extracted Brand DNA object.
+     */
     async extractBrandDNA(conversationHistory: string): Promise<BrandDNA> {
         console.log('🔹 Phase 1: Extracting Brand DNA...');
 
@@ -102,7 +119,6 @@ export class ExecutionEngine {
         const dna: BrandDNA = {
             name: toSelectable(extracted.name || 'Untitled Brand'),
             mission: toSelectable(extracted.mission || 'To define'),
-
             voice: toSelectable(extracted.voice || 'Professional'),
             values: toSelectableArray(extracted.values),
             tagline: toSelectable(extracted.tagline || 'Building the future'),
@@ -118,6 +134,12 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 2: RESEARCH COMPETITORS
     // ==========================================
+    /**
+     * Phase 2: Researches competitors based on the extracted Brand DNA.
+     * 
+     * @param {BrandDNA} dna - The brand DNA.
+     * @returns {Promise<CompetitorResearch>} The competitor research results.
+     */
     async researchCompetitors(dna: BrandDNA): Promise<CompetitorResearch> {
         const industry = dna.industry?.value || 'General';
         const context = `${dna.name.value} - ${dna.mission.value}`;
@@ -144,6 +166,15 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 3: GENERATE COLORS
     // ==========================================
+    /**
+     * Phase 3: Generates color palettes for the brand.
+     * 
+     * @param {BrandDNA} dna - The brand DNA.
+     * @param {CompetitorResearch} [competitors] - Competitor research for differentiation.
+     * @param {number} [count=3] - Number of palettes to generate.
+     * @param {string} [mood] - Optional mood override.
+     * @returns {Promise<ColorPalettes>} The generated color palettes.
+     */
     async generateColorPalettes(
         dna: BrandDNA,
         competitors?: CompetitorResearch,
@@ -198,6 +229,14 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 4: GENERATE TYPOGRAPHY
     // ==========================================
+    /**
+     * Phase 4: Generates typography pairings for the brand.
+     * 
+     * @param {BrandDNA} dna - The brand DNA.
+     * @param {number} [count=3] - Number of pairings to generate.
+     * @param {string} [style] - Optional style override.
+     * @returns {Promise<TypographyPairings>} The generated typography pairings.
+     */
     async generateTypography(
         dna: BrandDNA,
         count: number = 3,
@@ -639,6 +678,13 @@ export class ExecutionEngine {
     // MAIN ENTRY POINT
     // ==========================================
 
+    /**
+     * Runs the full 5-phase research cycle sequentially.
+     * 
+     * @param {string} conversationHistory - The initial conversation history.
+     * @param {StreamThoughtCallback} [onStreamThought] - Callback for streaming thought updates.
+     * @returns {Promise<ResearchPhaseObject>} The complete research result.
+     */
     async runFullResearchCycle(
         conversationHistory: string,
         onStreamThought?: StreamThoughtCallback
@@ -648,106 +694,130 @@ export class ExecutionEngine {
         const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
         const DELAY_MS = 400; // 400ms between thoughts for smooth streaming
 
+
+
+        // Persistence Helper
+        // Get StateManager for this workspace
+        const stateManager = WorkspaceManager.getStateManager(this.workspaceId);
+
+        // Ensure clean start for new run (clear old thoughts)
+        stateManager.clearThoughts();
+
+        const logThought = (stepIndex: number, nodeId: string, title: string, reasoning: string) => {
+            // 1. Stream to UI
+            onStreamThought?.(stepIndex, nodeId, title, reasoning);
+
+            // 2. Persist to File using StateManager
+            stateManager.appendThought({
+                id: `thought-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                stepIndex,
+                nodeId,
+                title,
+                content: reasoning,
+                timestamp: new Date().toISOString()
+            });
+        };
+
         // =========================================
         // PHASE 1: DNA EXTRACTION
         // =========================================
-        onStreamThought?.(0, 'identity', 'Analyzing Brand Vision', 'Extracting brand essence from conversation...');
+        logThought(0, 'identity', 'Analyzing Brand Vision', 'Extracting brand essence from conversation...');
         await sleep(DELAY_MS);
 
         const dna = await this.extractBrandDNA(conversationHistory);
 
-        onStreamThought?.(0, 'identity', 'Brand Identity Defined', `Identified "${dna.name.value}" in ${dna.industry?.value}`);
+        logThought(0, 'identity', 'Brand Identity Defined', `Identified "${dna.name.value}" in ${dna.industry?.value}`);
         await sleep(DELAY_MS);
 
-        onStreamThought?.(0, 'identity', 'Core Values', `Values: ${dna.values.items.slice(0, 3).join(', ')}`);
+        logThought(0, 'identity', 'Core Values', `Values: ${dna.values.items.slice(0, 3).join(', ')}`);
         await sleep(DELAY_MS);
 
         if (dna.rationale) {
-            onStreamThought?.(0, 'identity', 'Strategic Insight', dna.rationale);
+            logThought(0, 'identity', 'Strategic Insight', dna.rationale);
             await sleep(DELAY_MS);
         }
 
         // =========================================
         // PHASE 2: COMPETITOR RESEARCH
         // =========================================
-        onStreamThought?.(1, 'competitors', 'Market Research', `Searching for ${dna.industry?.value} competitors...`);
+        logThought(1, 'competitors', 'Market Research', `Searching for ${dna.industry?.value} competitors...`);
         await sleep(DELAY_MS);
 
         const competitors = await this.researchCompetitors(dna);
 
         // Stream each competitor found with delay
         for (const comp of competitors.competitors.slice(0, 5)) {
-            onStreamThought?.(1, 'competitors', 'Found Competitor', `${comp.name} (${comp.domain})`);
+            logThought(1, 'competitors', 'Found Competitor', `${comp.name} (${comp.domain})`);
             await sleep(DELAY_MS);
         }
 
         // Stream the differentiation strategy
         if (competitors.differentiationOpportunity) {
-            onStreamThought?.(1, 'competitors', 'Differentiation Strategy', competitors.differentiationOpportunity.slice(0, 150));
+            logThought(1, 'competitors', 'Differentiation Strategy', competitors.differentiationOpportunity.slice(0, 150));
             await sleep(DELAY_MS);
         }
 
         // =========================================
         // PHASE 3: COLOR GENERATION
         // =========================================
-        onStreamThought?.(2, 'colors', 'Color Strategy', 'Designing palettes that differentiate from competitors...');
+        logThought(2, 'colors', 'Color Strategy', 'Designing palettes that differentiate from competitors...');
         await sleep(DELAY_MS);
 
         const palettes = await this.generateColorPalettes(dna, competitors);
 
         // Stream each palette created with delay
         for (const p of palettes.palettes) {
-            onStreamThought?.(2, 'colors', 'Palette Created', `"${p.name}": ${p.vibe?.slice(0, 80) || 'Unique color harmony'}`);
+            logThought(2, 'colors', 'Palette Created', `"${p.name}": ${p.vibe?.slice(0, 80) || 'Unique color harmony'}`);
             await sleep(DELAY_MS);
         }
 
         if (palettes.rationale) {
-            onStreamThought?.(2, 'colors', 'Color Psychology', palettes.rationale.slice(0, 150));
+            logThought(2, 'colors', 'Color Psychology', palettes.rationale.slice(0, 150));
             await sleep(DELAY_MS);
         }
 
         // =========================================
         // PHASE 4: TYPOGRAPHY SELECTION
         // =========================================
-        onStreamThought?.(3, 'typography', 'Typography Analysis', `Selecting fonts for ${dna.industry?.value} brand voice...`);
+        logThought(3, 'typography', 'Typography Analysis', `Selecting fonts for ${dna.industry?.value} brand voice...`);
         await sleep(DELAY_MS);
 
         const fonts = await this.generateTypography(dna);
 
         // Stream each font pairing with delay
         for (const f of fonts.fonts) {
-            onStreamThought?.(3, 'typography', 'Font Pairing', `${f.name} + ${f.pairing}: ${f.reasoning?.slice(0, 60) || 'Professional pairing'}`);
+            logThought(3, 'typography', 'Font Pairing', `${f.name} + ${f.pairing}: ${f.reasoning || 'Professional pairing'}`);
             await sleep(DELAY_MS);
         }
 
         if (fonts.rationale) {
-            onStreamThought?.(3, 'typography', 'Typography Strategy', fonts.rationale.slice(0, 150));
+            logThought(3, 'typography', 'Typography Strategy', fonts.rationale); // Full rationale
             await sleep(DELAY_MS);
         }
 
         // =========================================
         // PHASE 5: LOGO STRUCTURE GENERATION
         // =========================================
-        onStreamThought?.(4, 'logo', 'Logo Architecture', `Defining logo structure options for ${dna.industry?.value}...`);
+        logThought(4, 'logo', 'Logo Architecture', `Defining logo structure options for ${dna.industry?.value}...`);
         await sleep(DELAY_MS);
 
         const logoStructures = await this.createLogoStructures([], dna.industry?.value || 'Brand', 3);
 
         // Stream each structure created with delay
         for (const ls of logoStructures) {
-            onStreamThought?.(4, 'logo', 'Structure Option', `${ls.type}: ${ls.reasoning?.slice(0, 50)}...`);
+            logThought(4, 'logo', 'Structure Option', `${ls.type}: ${ls.reasoning}`); // Full reasoning
             await sleep(DELAY_MS);
         }
 
         // =========================================
         // PHASE 6: FINALIZATION
         // =========================================
-        onStreamThought?.(5, 'strategy', 'Finalizing', `Compiling brand strategy for ${dna.name.value}...`);
+        logThought(5, 'strategy', 'Finalizing', `Compiling brand strategy for ${dna.name.value}...`);
         await sleep(DELAY_MS);
 
         const result = await this.finalizeResearch(dna, competitors, palettes, fonts, { options: logoStructures });
 
-        onStreamThought?.(5, 'strategy', 'Research Complete', `Brand identity complete: ${dna.name.value}`);
+        logThought(5, 'strategy', 'Research Complete', `Brand identity complete: ${dna.name.value}`);
 
         return result;
     }

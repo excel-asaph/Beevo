@@ -2,17 +2,31 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Type, Check } from 'lucide-react';
 
+/**
+ * Represents a font selection option.
+ */
 export interface FontOption {
+    /** Unique identifier or name of the font. */
     id?: string;
+    /** Display name of the font family. */
     name: string;
+    /** Font category/classification. */
     category?: 'serif' | 'sans-serif' | 'display' | 'monospace' | string;
+    /** Recommended pairing font. */
     pairing?: string;
+    /** Explanation for why this font was chosen. */
     reasoning?: string;
+    /** Whether this font is currently selected. */
     isSelected?: boolean;
 }
 
+/**
+ * Props for the TypographyCard component.
+ */
 interface TypographyCardProps {
+    /** List of font options to display. */
     fonts: FontOption[];
+    /** Callback triggered when a font is clicked. */
     onFontClick?: (fontName: string) => void;
 }
 
@@ -23,6 +37,17 @@ const categoryColors: Record<string, string> = {
     'monospace': 'bg-emerald-100 text-emerald-700',
 };
 
+/**
+ * A card component that displays a list of recommended fonts.
+ * 
+ * Features:
+ * - Font preview text.
+ * - Category badges (Serif, Sans-Serif, etc.).
+ * - Hover effects showing reasoning.
+ * - Selection state.
+ * 
+ * @param {TypographyCardProps} props - The component props.
+ */
 export const TypographyCard: React.FC<TypographyCardProps> = ({ fonts, onFontClick }) => {
     const [hoveredFont, setHoveredFont] = useState<string | null>(null);
     const hasFonts = fonts && fonts.length > 0;

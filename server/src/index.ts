@@ -1,3 +1,9 @@
+/**
+ * Main Server Entry Point
+ * 
+ * Sets up the Express server, WebSocket server, and API endpoints.
+ * Handles workspace management, session management, and routing for various services.
+ */
 import express, { Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -15,6 +21,8 @@ import { InitialLogoGenerator } from './agents/InitialLogoGenerator';
 import { bakeTransparency } from './scripts/transparency_baker';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
+import { ProcessRegistry } from './utils/ProcessRegistry';
+import { WorkspaceManager } from './services/StateManager';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,10 +40,10 @@ const sessionManager = new SessionManager();
 const notificationService = NotificationService.getInstance();
 notificationService.setSocketServer(wss);
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, x-workspace-id');
     next();
 });
@@ -52,6 +60,23 @@ app.use(workspaceMiddleware);
 
 // Helper to get workspaceId
 const getWorkspaceId = (req: Request): string => (req as any).workspaceId;
+
+// Helper to ensure workspace exists (prevents implicit creation)
+const ensureWorkspaceExists = async (workspaceId: string) => {
+    // Default workspace is always allowed/created by system if needed, 
+    // but for specific IDs we want to be strict.
+    if (workspaceId === 'default') return;
+
+    const workspacePath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}`);
+    console.log(`🔍 [Check] Ensuring workspace exists: ${workspaceId} (${workspacePath})`);
+    try {
+        await fs.access(workspacePath);
+        console.log(`✅ [Check] Workspace found: ${workspaceId}`);
+    } catch {
+        console.error(`❌ [Check] Workspace NOT FOUND: ${workspaceId}`);
+        throw new Error('WORKSPACE_NOT_FOUND');
+    }
+};
 
 
 // Health check endpoint
@@ -72,21 +97,35 @@ app.get('/api/workspaces', async (req, res) => {
 
         const workspaces = await Promise.all(dirs.map(async (id) => {
             // Check if it's a directory
-            const stats = await fs.stat(path.join(workspacesDir, id));
+            const workspacePath = path.join(workspacesDir, id);
+            const stats = await fs.stat(workspacePath);
             if (!stats.isDirectory()) return null;
+
+            // Check for thumbnail
+            let thumbnailUrl = null;
+            try {
+                await fs.access(path.join(workspacePath, 'thumbnail.png'));
+                // Create a public URL path (assuming we expose this directory statically or via endpoint)
+                // For now, let's serve it via a direct endpoint or static mount
+                // We'll use a new endpoint /api/workspaces/:id/thumbnail
+                thumbnailUrl = `/api/workspaces/${id}/thumbnail?t=${stats.mtimeMs}`;
+            } catch (e) {
+                // No thumbnail
+            }
 
             // Try to read metadata if it exists, otherwise use ID
             return {
                 id,
                 name: id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Prettier name default
-                lastActive: stats.mtime
+                lastActive: stats.mtime,
+                thumbnailUrl
             };
         }));
 
         res.json(workspaces.filter(Boolean));
     } catch (error) {
         console.error('Failed to list workspaces:', error);
-        res.status(500).json({ error: 'Failed to list workspaces' });
+        res.status(500).json({ error: 'Failed to list workspaces', details: String(error) });
     }
 });
 
@@ -99,13 +138,121 @@ app.get('/api/workspaces/check/:id', async (req, res) => {
         try {
             const stats = await fs.stat(workspacePath);
             if (stats.isDirectory()) {
-                return res.json({ exists: true });
+                // Check if state exists (to determine phase)
+                const stateManager = WorkspaceManager.getStateManager(workspaceId);
+                const latestState = stateManager.loadLatest();
+                return res.json({ exists: true, hasState: !!latestState });
             }
         } catch {
-            return res.json({ exists: false });
+            return res.json({ exists: false, hasState: false });
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to check workspace' });
+    }
+});
+
+// Create a new workspace folder explicitly
+app.post('/api/workspaces', async (req, res) => {
+    try {
+        const { workspaceId } = req.body;
+        console.log(`🛠️ [API] POST /api/workspaces request for: ${workspaceId}`);
+        if (!workspaceId) {
+            return res.status(400).json({ error: 'Workspace ID required' });
+        }
+
+        const workspacePath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}`);
+        // Use fsSync for synchronous check
+        if (!fsSync.existsSync(workspacePath)) {
+            await fs.mkdir(workspacePath, { recursive: true });
+            console.log(`📂 [API] Created new workspace folder: ${workspaceId}`);
+        } else {
+            console.log(`📂 [API] Workspace folder already exists: ${workspaceId}`);
+        }
+
+        res.json({ success: true, workspaceId });
+    } catch (error) {
+        console.error('Failed to create workspace:', error);
+        res.status(500).json({ error: 'Failed to create workspace' });
+    }
+});
+
+// Upload thumbnail
+app.post('/api/workspaces/:id/thumbnail', async (req, res) => {
+    try {
+        const workspaceId = req.params.id;
+        const { image } = req.body; // Base64 string
+        if (!image) return res.status(400).json({ error: 'Image data required' });
+
+        const workspacePath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}`);
+        await ensureWorkspaceExists(workspaceId);
+
+        // Remove header if present (e.g., "data:image/png;base64,")
+        const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        await fs.writeFile(path.join(workspacePath, 'thumbnail.png'), buffer);
+        console.log(`📸 Thumbnail saved for workspace: ${workspaceId}`);
+        res.json({ status: 'ok' });
+    } catch (error) {
+        console.error('Thumbnail Upload Error:', error);
+        res.status(500).json({ error: 'Failed to upload thumbnail' });
+    }
+});
+
+// Serve thumbnail
+app.get('/api/workspaces/:id/thumbnail', async (req, res) => {
+    try {
+        const workspaceId = req.params.id;
+        const workspacePath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}`);
+        const imagePath = path.join(workspacePath, 'thumbnail.png');
+
+        try {
+            await fs.access(imagePath);
+            res.sendFile(imagePath);
+        } catch {
+            res.status(404).send('Thumbnail not found');
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to serve thumbnail' });
+    }
+});
+
+// Delete a workspace
+app.delete('/api/workspaces/:id', async (req, res) => {
+    const workspaceId = req.params.id;
+    if (workspaceId === 'default') {
+        return res.status(400).json({ error: 'Cannot delete the default workspace' });
+    }
+
+    try {
+        console.log(`🗑️  CRITICAL: Deletion request for workspace: ${workspaceId}`);
+
+        // 1. Kick active sessions
+        sessionManager.disconnectWorkspace(workspaceId);
+
+        // 2. Terminate background processes (watchers, initializers)
+        ProcessRegistry.kill(workspaceId);
+
+        // 3. Cleanup Service Instances (Close DBs, clear caches)
+        await DatabaseService.cleanup(workspaceId);
+        SystemConfigFactory.cleanup(workspaceId);
+        MetricsService.cleanup(workspaceId);
+        WorkspaceManager.cleanup(workspaceId);
+
+        // 4. Delete Filesystem Directories
+        const brainPath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}`);
+        const assetPath = path.resolve(__dirname, `../../client/public/workspaces/${workspaceId}`);
+
+        // Recursive deletion with safety check
+        await fs.rm(brainPath, { recursive: true, force: true });
+        await fs.rm(assetPath, { recursive: true, force: true });
+
+        console.log(`✅ Workspace [${workspaceId}] deleted successfully.`);
+        res.json({ status: 'ok', message: `Workspace ${workspaceId} deleted` });
+
+    } catch (error) {
+        console.error(`❌ Failed to delete workspace ${workspaceId}:`, error);
+        res.status(500).json({ error: 'Failed to complete deletion' });
     }
 });
 
@@ -113,10 +260,15 @@ app.get('/api/workspaces/check/:id', async (req, res) => {
 app.post('/api/tracking/event', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const event = req.body;
         await MetricsService.getInstance(workspaceId).trackEvent(event);
         res.json({ status: 'tracked' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
         console.error('Metrics Error:', error);
         res.status(500).json({ error: 'Failed to track event' });
     }
@@ -126,10 +278,15 @@ app.post('/api/tracking/event', async (req, res) => {
 app.post('/api/hitl/request', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const { section, type, message, proposal } = req.body;
         const id = await notificationService.requestApproval(section, type, message, proposal, workspaceId);
         res.json({ id, status: 'PENDING' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
         console.error('HITL Request Error:', error);
         res.status(500).json({ error: 'Failed to request approval' });
     }
@@ -161,37 +318,67 @@ app.post('/api/hitl/resolve', async (req, res) => {
 app.get('/api/config', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const config = await SystemConfigFactory.getInstance(workspaceId).getConfig();
         res.json(config);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
         res.status(500).json({ error: 'Failed to load config' });
     }
 });
 
 // Debug/Bypass Endpoint: Fetch latest research for hydration
+// Debug/Bypass Endpoint: Fetch latest research for hydration
 app.get('/api/debug/research', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
-        // Updated to use workspace path
-        const researchPath = path.resolve(__dirname, `../brain/workspaces/${workspaceId}/research_artifacts/complete_research_latest.json`);
-        const data = await fs.readFile(researchPath, 'utf8');
-        res.json(JSON.parse(data));
+        // Use StateManager for consistent access
+        const stateManager = WorkspaceManager.getStateManager(workspaceId);
+        const data = stateManager.loadLatest();
+
+        if (data) {
+            res.json(data);
+        } else {
+            // Return empty/default object instead of 404 to satisfy "create/handle gracefully" request
+            // This allows the client to init with defaults
+            res.json({});
+        }
     } catch (error) {
-        console.error(`Failed to load research artifact for ${getWorkspaceId(req)}:`, error);
-        res.status(404).json({ error: 'Research artifact not found' });
+        // Quiet failure for fresh workspaces
+        res.json({});
+    }
+});
+
+// Endpoint: Fetch streaming thought history (real-time logs)
+app.get('/api/debug/research/thoughts', async (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        const thoughts = WorkspaceManager.getStateManager(workspaceId).getThoughts();
+        res.json(thoughts);
+    } catch (error) {
+        // No log found (legacy or fresh), return empty
+        res.json([]);
     }
 });
 
 app.post('/api/config/lock', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const { section, isLocked } = req.body;
         const service = SystemConfigFactory.getInstance(workspaceId);
         const config = await service.getConfig();
         (config.locks as any)[section] = isLocked;
         await service.updateConfig(config);
         res.json({ status: 'ok' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
         res.status(500).json({ error: 'Failed to update lock' });
     }
 });
@@ -199,6 +386,8 @@ app.post('/api/config/lock', async (req, res) => {
 app.post('/api/config/feedback', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const { directive, value } = req.body;
         console.log(`📝 DIRECTIVE UPDATE [${workspaceId}]: ${directive} = "${value}"`);
         const service = SystemConfigFactory.getInstance(workspaceId);
@@ -206,28 +395,105 @@ app.post('/api/config/feedback', async (req, res) => {
         (config.feedback as any)[directive] = value;
         await service.updateConfig(config);
         res.json({ status: 'ok' });
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
         res.status(500).json({ error: 'Failed to update feedback' });
+    }
+});
+
+// --- Workspace State Persistence ---
+
+app.get('/api/workspace/state/:id', async (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
+        const stateId = req.params.id; // 'canvas_layout' | 'ui_state'
+        const db = DatabaseService.getInstance(workspaceId);
+        const data = await db.loadWorkspaceState(stateId);
+        res.json({ data });
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
+        console.error('Failed to load workspace state:', error);
+        res.status(500).json({ error: 'Failed', details: String(error) });
+    }
+});
+
+app.post('/api/workspace/state', async (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
+        const { id, data } = req.body;
+        const db = DatabaseService.getInstance(workspaceId);
+        await db.saveWorkspaceState(id, data);
+        res.json({ status: 'ok' });
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
+        console.error('Failed to save workspace state:', error);
+        res.status(500).json({ error: 'Failed', details: String(error) });
+    }
+});
+
+// --- Session History Persistence ---
+
+app.get('/api/workspace/history', async (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
+        const { limit } = req.query;
+        const db = DatabaseService.getInstance(workspaceId);
+        const history = await db.loadHistory(Number(limit) || 50);
+        res.json(history);
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
+        console.error('Failed to load history:', error);
+        res.status(500).json({ error: 'Failed', details: String(error) });
+    }
+});
+
+app.post('/api/workspace/history', async (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
+        const { role, content, metadata } = req.body;
+        const db = DatabaseService.getInstance(workspaceId);
+        await db.saveHistory(role, content, metadata);
+        res.json({ status: 'ok' });
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
+        console.error('Failed to save history:', error);
+        res.status(500).json({ error: 'Failed' });
     }
 });
 
 app.post('/api/config/update_section', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const { section, metric, value } = req.body;
         console.log(`📊 METRIC UPDATE [${workspaceId}]: ${section}.${metric} = ${value}`);
         const service = SystemConfigFactory.getInstance(workspaceId);
-        const config = await service.getConfig();
-
-        // Dynamic update with type safety workaround
-        if ((config.sections as any)[section]) {
-            (config.sections as any)[section][metric] = value;
-            await service.updateConfig(config);
-            res.json({ status: 'ok' });
-        } else {
-            res.status(404).json({ error: 'Section not found' });
+        // Use the service method to handle top-level (hitl) vs nested (sections) updates
+        await service.updateSection(section, { [metric]: value });
+        res.json({ status: 'ok' });
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
         }
-    } catch (error) {
         res.status(500).json({ error: 'Failed to update metric' });
     }
 });
@@ -239,10 +505,73 @@ app.post('/api/logos/generate', async (req, res) => {
         const { context, research } = req.body;
         console.log(`🎨 LOGO REQUEST [${workspaceId}]: Context="${context || 'None'}"`);
 
-        const generator = new InitialLogoGenerator(workspaceId);
+        const generator = new InitialLogoGenerator(workspaceId, (log) => {
+            // 1. Broadcast tool execution logs to this workspace
+            const message = JSON.stringify(log);
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                }
+            });
+
+            // 2. Persist to History (for Page Reloads)
+            // We use 'tool_log' role so we can filter it out of the main chat but show it in the activity feed
+            // FIX: Ensure title exists to prevent SQLITE_CONSTRAINT error
+            const title = log.title || log.toolName || 'System Action';
+            DatabaseService.getInstance(workspaceId).saveHistory('tool_log', title, log)
+                .catch(err => console.error('Failed to persist tool log:', err));
+
+            // 3. Persist to thoughts (for activity history reloads)
+            WorkspaceManager.getStateManager(workspaceId).appendThought({
+                id: log.id || `log-${Date.now()}`,
+                stepIndex: 5,
+                nodeId: log.toolName || 'logo-gen',
+                title: title,
+                content: log.message || '',
+                timestamp: new Date(log.timestamp || Date.now()).toISOString()
+            }).catch(err => console.error('Failed to persist thought log:', err));
+        });
         await generator.generate(context);
 
-        res.json({ status: 'ok', message: 'Logo generation complete' });
+        // AUTOMATIC CHAINING: Run Transparency Baker immediately
+        console.log(`🧼 AUTOMATION: Triggering Transparency Baker for [${workspaceId}]...`);
+        const kit = await bakeTransparency(workspaceId, (log) => {
+            // Reuse same broadcast logic for seamless UI feedback
+            const message = JSON.stringify(log);
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                }
+            });
+            const title = log.title || log.toolName || 'System Action';
+            DatabaseService.getInstance(workspaceId).saveHistory('tool_log', title, log)
+                .catch(err => console.error('Failed to persist tool log:', err));
+
+            // 3. Persist to thoughts (for activity history reloads)
+            WorkspaceManager.getStateManager(workspaceId).appendThought({
+                id: log.id || `log-${Date.now()}`,
+                stepIndex: 5,
+                nodeId: log.toolName || 'baker',
+                title: title,
+                content: log.message || '',
+                timestamp: new Date(log.timestamp || Date.now()).toISOString()
+            }).catch(err => console.error('Failed to persist thought log:', err));
+        });
+
+        // BROADCAST: Signal Assets Ready (Client Soft Refresh)
+        const assetUpdateMsg = JSON.stringify({
+            type: 'ASSET_UPDATE',
+            resource: 'logo_kit',
+            workspaceId: workspaceId,
+            timestamp: Date.now()
+        });
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(assetUpdateMsg);
+            }
+        });
+
+        res.json({ status: 'ok', message: 'Logo generation and transparency complete', kit });
     } catch (error) {
         console.error('Logo Generation Error:', error);
         res.status(500).json({ error: 'Failed to generate logos' });
@@ -253,7 +582,45 @@ app.post('/api/logos/finalize', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
         console.log(`🧼 LOGO FINALIZE REQUEST [${workspaceId}]: Baking transparency...`);
-        const result = await bakeTransparency(workspaceId);
+
+        const result = await bakeTransparency(workspaceId, (log) => {
+            // 1. Broadcast tool execution logs to this workspace
+            const message = JSON.stringify(log);
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                }
+            });
+
+            // 2. Persist to History
+            // FIX: Ensure title exists to prevent SQLITE_CONSTRAINT error
+            const title = log.title || log.toolName || 'System Action';
+            DatabaseService.getInstance(workspaceId).saveHistory('tool_log', title, log)
+                .catch(err => console.error('Failed to persist tool log:', err));
+
+            // 3. Persist to thoughts (for activity history reloads)
+            WorkspaceManager.getStateManager(workspaceId).appendThought({
+                id: log.id || `log-${Date.now()}`,
+                stepIndex: 5,
+                nodeId: log.toolName || 'baker',
+                title: title,
+                content: log.message || '',
+                timestamp: new Date(log.timestamp || Date.now()).toISOString()
+            }).catch(err => console.error('Failed to persist thought log:', err));
+        });
+
+        // BROADCAST: Signal Assets Ready (Client Soft Refresh)
+        const assetUpdateMsg = JSON.stringify({
+            type: 'ASSET_UPDATE',
+            resource: 'logo_kit',
+            workspaceId: workspaceId,
+            timestamp: Date.now()
+        });
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(assetUpdateMsg);
+            }
+        });
 
         res.json({ status: 'ok', kit: result });
     } catch (error) {
@@ -274,10 +641,54 @@ app.post('/api/broadcast/refresh', (req, res) => {
     res.json({ status: 'broadcasted' });
 });
 
+// Broadcast Log Endpoint (For External Processes)
+app.post('/api/broadcast/log', async (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        const log = req.body;
+
+        // 1. Broadcast
+        const message = JSON.stringify(log);
+        wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
+        });
+
+        // 2. Persist to History (Non-blocking)
+        const title = log.title || log.toolName || 'System Action';
+        // Only persist if it looks like a meaningful log (has id/type)
+        if (log.id && log.type) {
+            DatabaseService.getInstance(workspaceId).saveHistory('tool_log', title, log)
+                .catch(err => console.error('Failed to persist external log:', err));
+
+            // 3. Persist to thoughts (for activity history reloads)
+            if (log.type === 'TOOL_EXECUTION_LOG') {
+                WorkspaceManager.getStateManager(workspaceId).appendThought({
+                    id: log.id,
+                    stepIndex: 5, // Strategy/Agent phase for background logs
+                    nodeId: log.toolName || 'system',
+                    title: title,
+                    content: log.message || '',
+                    timestamp: new Date(log.timestamp || Date.now()).toISOString()
+                }).catch(err => console.error('Failed to persist thought log:', err));
+            }
+        }
+
+        res.json({ status: 'ok' });
+    } catch (e) {
+        console.error("Broadcast Log Error:", e);
+        res.status(500).json({ error: 'Failed to broadcast log' });
+    }
+});
+
 // Analytics & State History Endpoints
 app.get('/api/analytics/states', async (req, res) => {
     try {
-        const db = DatabaseService.getInstance(getWorkspaceId(req));
+        const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
+        const db = DatabaseService.getInstance(workspaceId);
         const states = await db.getAllStates() || [];
         const leads = await db.getAllLeads() || [];
 
@@ -287,7 +698,10 @@ app.get('/api/analytics/states', async (req, res) => {
         }));
 
         res.json(stateAnalytics);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message === 'WORKSPACE_NOT_FOUND') {
+            return res.status(404).json({ error: 'Workspace not found' });
+        }
         res.status(500).json({ error: 'Failed to load analytics' });
     }
 });
@@ -295,11 +709,13 @@ app.get('/api/analytics/states', async (req, res) => {
 app.get('/api/analytics/current', async (req, res) => {
     try {
         const workspaceId = getWorkspaceId(req);
+        await ensureWorkspaceExists(workspaceId);
+
         const config = await SystemConfigFactory.getInstance(workspaceId).getConfig();
         const currentStateHash = config.current_state_hash || '';
 
         // Source of Truth: Database (State-Isolated Metrics)
-        const db = DatabaseService.getInstance(getWorkspaceId(req));
+        const db = DatabaseService.getInstance(workspaceId);
 
         // 1. Get State Metrics (Views, Clicks)
         const state = await db.getState(currentStateHash) as any;
@@ -363,7 +779,7 @@ app.get('/api/analytics/leaderboard', async (req, res) => {
             // Extract variant IDs for display
             const variants = Object.entries(snapshot.active_blocks || {}).map(([key, block]: [string, any]) => ({
                 block: key,
-                variant: block.variant_id
+                variant: block.variant_id || "N/A"
             }));
 
             // CR is strictly Sales / Views (High intent conversion)
@@ -457,34 +873,44 @@ app.get('/api/status/logos', async (req, res) => {
 });
 
 // Action: Run Initializer Flow (Init -> Watcher)
-app.post('/api/action/run-initializers', (req, res) => {
+app.post('/api/action/run-initializers', async (req, res) => {
     const workspaceId = getWorkspaceId(req);
     console.log(`🚀 TRIGGER: Starting Full System Initialization for Workspace: ${workspaceId}...`);
 
+    // 🛑 SINGLETON CHECK: Kill any existing orchestrator for this workspace
+    // CRITICAL: We MUST await this kill command. If we don't, the new process spawns and registers
+    // *while* the taskkill is still iterating, causing the new process to be killed immediately (Suicide).
+    if (ProcessRegistry.isTracking(workspaceId)) {
+        console.log(`⚠️ Found existing orchestrator for ${workspaceId}. Terminating before restart...`);
+        await ProcessRegistry.kill(workspaceId);
+    }
+
     const orchestratorPath = path.resolve(__dirname, 'run_watchers.ts');
 
-    // DEBUGGING MODE: Non-detached so output appears in console
-    // WINDOWS FIX: Use node with tsx/register instead of npx
-    // Remove quotes from path - Windows handles them differently
-    const child = spawn('node', [
-        '--import', 'tsx',
-        orchestratorPath,
-        '--init',
-        `--workspace=${workspaceId}`
-    ], {
-        detached: false, // TEMP: Make it attached for debugging
-        stdio: 'inherit', // Output shows in server console
-        cwd: path.resolve(__dirname, '..')
+    // ROBUST SPAWN LOGIC (Hidden Window)
+    // We spawn 'node' directly. On Windows, 'windowsHide: true' + 'detached: true'
+    // correctly hides the window while keeping the process independent.
+    // We avoid 'cmd /c' because it forces a console window to appear despite 'windowsHide'.
+    const safeCommand = 'node';
+    const safeArgs = ['--import', 'tsx', orchestratorPath, '--init', `--workspace=${workspaceId}`];
+
+    const child = spawn(safeCommand, safeArgs, {
+        detached: true, // Detach to prevent parent crash linkage
+        stdio: 'ignore', // Ignore stdio to prevent pipe issues (client relies on completed files, not logs)
+        cwd: path.resolve(__dirname, '..'),
+        windowsHide: true // Run in background (Hidden)
     });
+
+    child.unref(); // Allow parent to exit independently if needed, but mainly to decouple
 
     child.on('error', (error) => {
         console.error(`❌ Spawn Error:`, error);
     });
 
-    // Don't unref() when not detached
-    // child.unref(); // Allow parent to not wait
+    // Register for tracking so it can be killed on deletion or restart
+    ProcessRegistry.register(workspaceId, child);
 
-    res.json({ status: 'ok', message: 'Initialization process started (attached for debugging)' });
+    res.json({ status: 'ok', message: 'Initialization process started' });
 });
 
 app.post('/api/config/revert', async (req, res) => {
@@ -570,6 +996,107 @@ wss.on('connection', (ws: WebSocket, req) => {
         console.error(`❌ WebSocket error for session ${sessionId}:`, error);
         sessionManager.destroySession(sessionId);
     });
+});
+
+
+// ============================
+// TELEGRAM BOT ENDPOINTS
+// ============================
+import { telegramService } from './services/TelegramService.js';
+
+// Telegram webhook (receives updates from Telegram)
+app.post('/api/telegram/webhook', async (req, res) => {
+    try {
+        const update = req.body;
+        console.log('📱 Telegram update received:', JSON.stringify(update).slice(0, 200));
+
+        // Handle /start command (link user to workspace)
+        if (update.message?.text?.startsWith('/start')) {
+            const chatId = update.message.chat.id;
+            const username = update.message.from?.username;
+            const startParam = update.message.text.split(' ')[1]; // workspace ID encoded
+
+            if (startParam) {
+                try {
+                    const workspaceId = Buffer.from(startParam, 'base64url').toString();
+                    await telegramService.linkUser(String(chatId), workspaceId, username);
+                } catch (e) {
+                    await telegramService.sendMessage(String(chatId), '❌ Invalid link. Please use the QR code from your workspace.');
+                }
+            } else {
+                await telegramService.sendMessage(String(chatId), '👋 Welcome to Beevo!\n\nTo receive notifications, please use the "Connect Telegram" button in your workspace.');
+            }
+        }
+
+        // Handle callback queries (button presses)
+        if (update.callback_query) {
+            const result = await telegramService.handleCallback(update.callback_query);
+            if (result) {
+                // Resolve the intervention
+                const notificationService = NotificationService.getInstance();
+                const action = result.action === 'approve' ? 'APPROVED' : 'REJECTED';
+                await notificationService.resolveRequest(result.interventionId, action as any, `Via Telegram`);
+            }
+        }
+
+        res.json({ ok: true });
+    } catch (error) {
+        console.error('❌ Telegram webhook error:', error);
+        res.json({ ok: true }); // Always return 200 to Telegram
+    }
+});
+
+// Get Telegram bot link for a workspace
+app.get('/api/telegram/link', (req, res) => {
+    const workspaceId = getWorkspaceId(req);
+    const link = telegramService.getBotLink(workspaceId);
+    const configured = telegramService.isConfigured();
+    res.json({ link, configured });
+});
+
+
+// ============================
+// WEB PUSH ENDPOINTS
+// ============================
+import { pushService } from './services/PushService.js';
+
+// Get VAPID public key for client subscription
+app.get('/api/push/vapid-key', (req, res) => {
+    const publicKey = pushService.getPublicKey();
+    const configured = pushService.isConfigured();
+    res.json({ publicKey, configured });
+});
+
+// Subscribe to push notifications
+app.post('/api/push/subscribe', (req, res) => {
+    try {
+        const workspaceId = getWorkspaceId(req);
+        const { subscription } = req.body;
+        const userAgent = req.headers['user-agent'];
+
+        if (!subscription || !subscription.endpoint || !subscription.keys) {
+            return res.status(400).json({ error: 'Invalid subscription object' });
+        }
+
+        pushService.subscribe(subscription, workspaceId, userAgent);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('❌ Push subscription error:', error);
+        res.status(500).json({ error: 'Failed to subscribe' });
+    }
+});
+
+// Unsubscribe from push notifications
+app.post('/api/push/unsubscribe', (req, res) => {
+    try {
+        const { endpoint } = req.body;
+        if (endpoint) {
+            pushService.unsubscribe(endpoint);
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to unsubscribe' });
+    }
 });
 
 

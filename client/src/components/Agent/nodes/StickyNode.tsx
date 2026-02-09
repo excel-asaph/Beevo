@@ -3,15 +3,28 @@ import { NodeProps, Handle, Position } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Pencil, Check, Lock } from 'lucide-react';
 
+/**
+ * Available background colors for sticky notes.
+ */
 export type StickyColor = 'yellow' | 'pink' | 'blue' | 'green' | 'purple' | 'orange';
 
+/**
+ * Data structure for the StickyNode.
+ */
 export interface StickyNodeData {
+    /** Label text for the sticky note header. */
     label: string;
+    /** Content of the sticky note. Can be text or an array of items. */
     content: string | string[];
+    /** Background color of the note. Defaults to 'yellow'. */
     color?: StickyColor;
+    /** Current status of the note. */
     status?: 'empty' | 'active' | 'complete' | 'locked';
+    /** Content display mode. 'text' for block text, 'list' for bullets, 'tags' for pills. */
     displayMode?: 'text' | 'list' | 'tags';
+    /** Optional icon to display in the header. */
     icon?: React.ReactNode;
+    /** Callback triggered when the edit button is clicked. */
     onEdit?: () => void;
 }
 
@@ -48,6 +61,18 @@ const colorStyles: Record<StickyColor, { bg: string; border: string; shadow: str
     },
 };
 
+/**
+ * A custom Node component for ReactFlow that simulates a sticky note.
+ * 
+ * Features:
+ * - Color themes (Yellow, Pink, Blue, etc.).
+ * - "Tape" visual effect.
+ * - Supports text, list, and tag content modes.
+ * - Interactive elements (Edit, Lock).
+ * - Animated entrance and hover effects.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const StickyNode: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as StickyNodeData;
     const color = nodeData.color || 'yellow';

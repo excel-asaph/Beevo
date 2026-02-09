@@ -3,24 +3,53 @@ import { NodeProps, Handle, Position } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Check, RefreshCw, Lock } from 'lucide-react';
 
+/**
+ * Represents a color palette option.
+ */
 export interface ColorOption {
+    /** Unique identifier for the palette. */
     id: string;
+    /** Display name of the palette (e.g., "Modern", "Earthy"). */
     name: string;
+    /** Array of hex color codes in the palette. */
     colors: string[];
+    /** Explanation of why this palette was suggested. */
     reasoning?: string;
+    /** Whether this palette is currently selected. */
     isSelected?: boolean;
 }
 
+/**
+ * Data structure for the PaletteNode.
+ */
 export interface PaletteNodeData {
+    /** Label text for the node header. */
     label: string;
+    /** Current state of the palette node. */
     status: 'empty' | 'options' | 'saved' | 'locked';
+    /** List of palette options (when status is 'options'). */
     options?: ColorOption[];
+    /** @deprecated Use selectedPalettes instead. */
     selectedPalette?: ColorOption; // Deprecated but kept for backward compatibility
+    /** List of selected/saved palettes. */
     selectedPalettes?: ColorOption[];
+    /** Callback triggered when a palette is selected. */
     onSelect?: (paletteId: string, context?: ColorOption) => void;
+    /** Callback triggered when the "Regenerate" button is clicked. */
     onRegenerate?: () => void;
 }
 
+/**
+ * A custom Node component for ReactFlow that displays color palette suggestions.
+ * 
+ * Features:
+ * - Empty, Options, Saved, and Locked states.
+ * - Interactive list of palette options with hover previews.
+ * - Visual display of color swatches.
+ * - Selection handling and persistence.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const PaletteNode: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as PaletteNodeData;
     const [hoveredPalette, setHoveredPalette] = useState<string | null>(null);

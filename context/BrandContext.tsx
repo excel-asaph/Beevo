@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { BrandDNA, CampaignAsset, Junction, ThoughtSignature } from '../types';
 
+/**
+ * Context definition for Brand-related state management.
+ */
 interface BrandContextType {
   dna: BrandDNA | null;
   setDna: React.Dispatch<React.SetStateAction<BrandDNA | null>>;
@@ -15,6 +18,10 @@ interface BrandContextType {
 
 const BrandContext = createContext<BrandContextType | undefined>(undefined);
 
+/**
+ * Provider component for the Brand Context.
+ * Manages Brand DNA, navigation junctions, thought streams, and campaign assets.
+ */
 export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [dna, setDna] = useState<BrandDNA | null>(null);
   const [currentJunction, setJunction] = useState<Junction>(Junction.STRATEGIST);

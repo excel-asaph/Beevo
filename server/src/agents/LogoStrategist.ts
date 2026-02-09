@@ -6,7 +6,7 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { Browser, Page } from 'puppeteer';
 import { GoogleGenAI } from '@google/genai';
 import { MODELS } from '@shared/constants';
-import { LogoBlockConfig } from '@shared/types';
+
 
 // Enable stealth mode to bypass bot detection
 puppeteer.use(StealthPlugin());
@@ -42,6 +42,15 @@ export interface ResearchInsights {
 
 export type ProgressCallback = (phase: string, source: string, progress: number, message: string) => void;
 
+/**
+ * LogoStrategist Agent.
+ * 
+ * Responsibilities:
+ * - Performs browser-based research for logo inspiration (Google Images).
+ * - Uses Puppeteer with Stealth mode to bypass bot detection.
+ * - analyzes collected images using Gemini to identify dominant styles and patterns.
+ * - Returns structured insights and logo findings.
+ */
 export class LogoStrategist {
     private browser: Browser | null = null;
     private ai: GoogleGenAI;
@@ -54,6 +63,9 @@ export class LogoStrategist {
         this.ai = new GoogleGenAI({ apiKey });
     }
 
+    /**
+     * Initializes the Puppeteer browser instance in stealth mode.
+     */
     async initialize(): Promise<void> {
         if (!this.browser) {
             console.log('🌐 Launching STEALTH browser for logo research...');
@@ -79,6 +91,16 @@ export class LogoStrategist {
         }
     }
 
+    /**
+     * Conducts comprehensive logo research.
+     * 1. Searches Google Images for industry/style-specific logos.
+     * 2. Captures screenshots and image URLs.
+     * 3. analyzes findings using Gemini to extract design principles.
+     * 
+     * @param {BrandContext} context - The brand context (industry, mission, etc.).
+     * @param {ProgressCallback} onProgress - Callback for progress updates.
+     * @returns {Promise<LogoResearchResult>} The research results and insights.
+     */
     async researchLogos(
         context: BrandContext,
         onProgress: ProgressCallback
@@ -115,8 +137,11 @@ export class LogoStrategist {
     }
 
     /**
-     * Search Google Images for logo inspiration
-     * More reliable than Dribbble/Behance which rate-limit aggressively
+     * Search Google Images for logo inspiration.
+     * More reliable than Dribbble/Behance which rate-limit aggressively.
+     * 
+     * @param {BrandContext} context - The brand context.
+     * @returns {Promise<{ logos: LogoFinding[], screenshot?: string }>} List of found logos and a debug screenshot.
      */
     private async searchGoogleImages(context: BrandContext): Promise<{ logos: LogoFinding[], screenshot?: string }> {
         if (!this.browser) throw new Error('Browser not initialized');
@@ -131,9 +156,24 @@ export class LogoStrategist {
             await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
             // Build search query for logo inspiration
-            // Strict user rule: Query must be based on industry from DNA
+            // PRIORITIZE USER QUERY (context.style) if available, otherwise use Industry
             const industry = context.industry || 'Business';
-            const searchQuery = encodeURIComponent(`${industry} logo design inspiration`);
+            const userQuery = context.style;
+
+            let queryText = '';
+            if (userQuery && userQuery.length > 3) {
+                // If user provided a specific style/query
+                queryText = userQuery;
+                // Append "logo" if not present
+                if (!queryText.toLowerCase().includes('logo')) {
+                    queryText += ' logo';
+                }
+            } else {
+                // Fallback to generic industry search
+                queryText = `${industry} logo design inspiration`;
+            }
+
+            const searchQuery = encodeURIComponent(queryText);
             const url = `https://www.google.com/search?q=${searchQuery}&tbm=isch`;
 
             console.log(`🔍 Google Images: ${url}`);
@@ -195,6 +235,13 @@ export class LogoStrategist {
         return { logos, screenshot };
     }
 
+    /**
+     * Analyzes a list of found logos using Gemini to extract stylistic patterns and recommendations.
+     * 
+     * @param {LogoFinding[]} logos - The list of logos found during research.
+     * @param {BrandContext} context - The brand context.
+     * @returns {Promise<ResearchInsights>} Structured insights about the logos.
+     */
     private async analyzeWithGemini(
         logos: LogoFinding[],
         context: BrandContext

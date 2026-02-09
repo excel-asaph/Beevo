@@ -2,17 +2,21 @@ import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { BrainConnection } from './BrainConnection';
 import { MODELS, SYSTEM_INSTRUCTIONS, AUDIO_CONFIG } from '../../../shared/constants';
 import {
-    ServerMessage,
-    FontSuggestionsMessage,
-    ColorSuggestionsMessage,
-    DNAUpdateMessage
+    ServerMessage
 } from '../../../shared/messages';
-import { BrandDNA, FontSuggestion, ColorPalette } from '../../../shared/types';
+import { FontSuggestion, ColorPalette } from '../../../shared/types';
 import { ToolHandler } from './ToolHandler';
 // Bridge Architecture: Tool declarations have been MOVED to BrainConnection.ts
 // Gemini Live is now VOICE-ONLY - no tools, no hallucinations
 // The Brain (Gemini 3 Pro) handles all tool calls reliably
+import { DatabaseService } from '../services/DatabaseService';
 
+/**
+ * Gemini Live Connection Handler.
+ * 
+ * Manages the WebSocket connection to Gemini Live (Audio/Voice).
+ * Acts as the "Voice" in the Bridge architecture, while delegating tool logic to BrainConnection.
+ */
 export class GeminiLiveConnection {
     private sessionId: string;
     private liveSession: any = null;
@@ -22,7 +26,7 @@ export class GeminiLiveConnection {
     private toolHandler: ToolHandler;
     public getToolHandler(): ToolHandler { return this.toolHandler; }
     private isGreetingPhase: boolean = true;
-
+    private abortConnection: boolean = false;
 
 
     // Bridge Architecture: Brain connection for reliable tool calls
@@ -104,6 +108,22 @@ Acknowledge this change by greeting the user and asking how you can help refine 
     private getPalettes: () => Array<{ name: string; colors: string[]; vibe: string }>;
     private getCanvasMode: () => 'none' | 'fonts' | 'colors';
 
+    /**
+     * Initializes the Gemini Live Connection.
+     * 
+     * @param {string} sessionId - The session identifier.
+     * @param {(message: ServerMessage) => void} sendToClient - Callback to send messages to the client.
+     * @param {(field: string, value: any) => void} updateState - Callback to update application state.
+     * @param {(palettes: any[]) => void} [storePalettes] - Callback to store color palettes.
+     * @param {(fonts: any[]) => void} [storeFonts] - Callback to store fonts.
+     * @param {(mode: 'none' | 'fonts' | 'colors') => void} [setCanvasMode] - Callback to set canvas mode.
+     * @param {() => any} [getDNA] - Callback to get Brand DNA.
+     * @param {() => FontSuggestion[]} [getFonts] - Callback to get fonts.
+     * @param {() => ColorPalette[]} [getPalettes] - Callback to get palettes.
+     * @param {() => 'none' | 'fonts' | 'colors'} [getCanvasMode] - Callback to get canvas mode.
+     * @param {(updates: Record<string, any>) => void} [updateStateBatch] - Callback for batch state updates.
+     * @param {string} [workspaceId='default'] - Workspace identifier.
+     */
     constructor(
         sessionId: string,
         sendToClient: (message: ServerMessage) => void,
@@ -116,7 +136,7 @@ Acknowledge this change by greeting the user and asking how you can help refine 
         getPalettes: () => ColorPalette[],
         getCanvasMode: () => 'none' | 'fonts' | 'colors',
         updateStateBatch: (updates: Record<string, any>) => void = () => { },
-        workspaceId: string = 'default'
+        private workspaceId: string = 'default'
     ) {
         this.sessionId = sessionId;
         this.sendToClient = sendToClient;
@@ -161,9 +181,31 @@ Acknowledge this change by greeting the user and asking how you can help refine 
             workspaceId
         );
         console.log(`🧠 Bridge Architecture: Brain initialized for session ${sessionId}`);
+
+        // --- CRITICAL SAFEGUARD: NEW 3-STATE LOGIC ---
+        // If Brain detected a missing workspace folder, abort immediately.
+        if ((this.brain as any).phase === 'missing_workspace') { // Accessing private prop via any for check
+            console.error(`⛔ [LiveConnection] Aborting connection for invalid workspace: ${workspaceId}`);
+            this.sendToClient({
+                type: 'ERROR',
+                message: 'Workspace not found. Redirecting...',
+                redirect: true
+            } as any);
+            this.abortConnection = true;
+            return; // Stop initialization
+        }
     }
 
+    /**
+     * Establishes the connection to Gemini Live API.
+     * Sets up event listeners for open, message, close, and error.
+     */
     async connect(): Promise<void> {
+        if (this.abortConnection) {
+            console.warn(`🚧 [LiveConnection] Connection aborted for invalid workspace: ${this.workspaceId}`);
+            return;
+        }
+
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             throw new Error('GEMINI_API_KEY is not set');
@@ -266,6 +308,12 @@ Acknowledge this change by greeting the user and asking how you can help refine 
     private audioChunkCount = 0;
     private lastAudioLogTime = 0;
 
+    /**
+     * Sends audio data to Gemini Live.
+     * Also flushes audio to the Brain buffer for analysis.
+     * 
+     * @param {string} base64Audio - Base64 encoded audio data (PCM).
+     */
     async sendAudio(base64Audio: string): Promise<void> {
         // Drop audio if paused (during research)
         if (this.isPaused) {
@@ -424,6 +472,12 @@ Acknowledge this change by greeting the user and asking how you can help refine 
         }
     }
 
+    /**
+     * Sends a file to Gemini Live for multimodal analysis.
+     * 
+     * @param {string} base64Data - Base64 encoded file data.
+     * @param {string} mimeType - Mime type of the file.
+     */
     async sendFile(base64Data: string, mimeType: string): Promise<void> {
         if (!this.liveSession || !this.isConnected) {
             console.warn('⚠️ Cannot send file - Gemini not connected');
@@ -525,6 +579,9 @@ Acknowledge this change by greeting the user and asking how you can help refine 
             // Bridge: Also accumulate for Brain analysis
             this.transcriptBuffer.ai += outputTranscription + ' ';
 
+            // Persistence: Save to session history
+            DatabaseService.getInstance(this.workspaceId).saveHistory('model', outputTranscription).catch(e => console.error('Failed to save history:', e));
+
             // After AI's first response, greeting phase is over
             if (this.isGreetingPhase) {
                 this.isGreetingPhase = false;
@@ -543,6 +600,9 @@ Acknowledge this change by greeting the user and asking how you can help refine 
 
             // Bridge: Also accumulate for Brain analysis
             this.transcriptBuffer.user += inputTranscription + ' ';
+
+            // Persistence: Save to session history
+            DatabaseService.getInstance(this.workspaceId).saveHistory('user', inputTranscription).catch(e => console.error('Failed to save history:', e));
         }
 
         // TURN COMPLETE

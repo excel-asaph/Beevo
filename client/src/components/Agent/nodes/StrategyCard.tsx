@@ -2,9 +2,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Rocket, Heart, Mic2 } from 'lucide-react';
 
+/**
+ * Props for the StrategyCard component.
+ */
 interface StrategyCardProps {
+    /** The brand's mission statement. */
     mission?: string;
+    /** List of core brand value keywords. */
     values?: string[];
+    /** Description of the brand's voice/tone. */
     voice?: string;
 }
 

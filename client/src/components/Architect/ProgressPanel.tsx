@@ -3,12 +3,28 @@ import { Type as TypeIcon, Palette, Target, Edit2, Check, Sparkles, LayoutTempla
 import type { BrandDNA } from '@shared/types';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
+/**
+ * Props for the ProgressPanel component.
+ */
 interface ProgressPanelProps {
+    /** The current state of the brand's DNA. */
     brandDNA: BrandDNA;
+    /** Callback to request editing a specific field. */
     onEditRequest: (field: string) => void;
+    /** The field currently being processed by the AI. */
     processingField?: string;
 }
-
+/**
+ * A side panel displaying the completion status of various brand DNA components.
+ * 
+ * Features:
+ * - Visual progress tracking (checkboxes, completion counts).
+ * - Real-time previews of colors and typography.
+ * - "Thinking" states/animations for active fields.
+ * - Quick edit access for completed fields.
+ * 
+ * @param {ProgressPanelProps} props - The component props.
+ */
 export const ProgressPanel: React.FC<ProgressPanelProps> = ({
     brandDNA,
     onEditRequest,

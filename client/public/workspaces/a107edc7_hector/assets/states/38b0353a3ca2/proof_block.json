@@ -1,0 +1,53 @@
+{
+    "id": "proof_section_v1",
+    "variant_id": "proof_v1770659318947",
+    "meta": {
+        "strategy": "Disruptive Democratization: Bridging high-end EV performance with European mass-market accessibility through forensic transparency.",
+        "tone": "Inclusive, approachable, and visionary.",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "The Soft Urbanist",
+        "layout_strategy": "FORENSIC_GRID"
+    },
+    "content": {
+        "headline": "H-CORE DIAGNOSTIC TELEMETRY",
+        "subhead": "Real-time telemetry and architectural validation for the Hector Series 1 platform.",
+        "graphic_caption": "Comparative Analysis: Series 1 Performance Matrix vs. Urban Standard (2024)",
+        "evidence_items": [
+            {
+                "id": "eff-01",
+                "label": "Charge Efficiency",
+                "value": "0.12",
+                "unit": "€",
+                "visual_type": "data-node"
+            },
+            {
+                "id": "carb-02",
+                "label": "Carbon Displacement",
+                "value": "98",
+                "unit": "%",
+                "visual_type": "data-node"
+            },
+            {
+                "id": "rel-03",
+                "label": "System Reliability",
+                "value": "99.4",
+                "unit": "%",
+                "visual_type": "data-node"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "primary_color": "#E2725B",
+        "accent_color": "#8E443D",
+        "show_labels": true,
+        "animation_duration": 1.5,
+        "visual_code": "<div class='w-full bg-[#FFFBF2] py-24 px-6 font-[\"Montserrat\"] text-[#5D5C61] overflow-hidden'><div class='max-w-7xl mx-auto'><div class='flex flex-col items-center text-center mb-16'><div class='text-[10px] tracking-[0.6em] text-[#E2725B] font-bold mb-4 uppercase'>System Validation: Series 1</div><h2 class='text-5xl font-black tracking-tighter mb-4 text-[#8E443D]'>H-CORE ARCHIVE</h2><div class='w-24 h-px bg-[#E2725B]/40'></div></div><div class='grid grid-cols-12 gap-px bg-[#E2725B]/10 border border-[#E2725B]/20'><div class='col-span-12 lg:col-span-4 bg-[#FFFBF2] p-10 border-b lg:border-b-0 lg:border-r border-[#E2725B]/20 relative group overflow-hidden'><div class='absolute top-2 right-2 text-[8px] font-mono opacity-30'>REF_01_EFF</div><div class='flex flex-col h-full'><div class='text-[10px] font-mono text-[#E2725B] mb-2 uppercase tracking-widest'>Energy Overhead</div><div class='flex items-baseline gap-1 mb-6'><span class='text-7xl font-black text-[#5D5C61]'>0.12</span><span class='text-2xl font-bold text-[#E2725B]'>€</span></div><h3 class='text-xs font-bold uppercase tracking-[0.2em] mb-4'>Charge Efficiency</h3><p class='text-[11px] leading-relaxed opacity-80 font-medium'>Optimized kinetic recovery loops. Verified at 85km/h sustained velocity under standard EU urban thermal profiles.</p><div class='mt-auto pt-8 flex gap-2'><div class='h-1 w-full bg-[#E2725B]/10 overflow-hidden'><div class='h-full bg-[#E2725B] w-[92%] transition-all duration-1000'></div></div></div></div></div><div class='col-span-12 lg:col-span-4 bg-[#F9F6F0] p-10 border-b lg:border-b-0 lg:border-r border-[#E2725B]/20 relative group overflow-hidden'><div class='absolute top-2 right-2 text-[8px] font-mono opacity-30'>REF_02_CARB</div><div class='flex flex-col h-full'><div class='text-[10px] font-mono text-[#E2725B] mb-2 uppercase tracking-widest'>Environmental Impact</div><div class='flex items-baseline gap-1 mb-6'><span class='text-7xl font-black text-[#5D5C61]'>98</span><span class='text-2xl font-bold text-[#E2725B]'>%</span></div><h3 class='text-xs font-bold uppercase tracking-[0.2em] mb-4'>Carbon Displacement</h3><p class='text-[11px] leading-relaxed opacity-80 font-medium'>Net reduction vs. B-segment ICE benchmarks. Validated via H-CORE synthetic testing environment (ISO 14064).</p><div class='mt-auto pt-8 flex gap-2'><div class='h-1 w-full bg-[#E2725B]/10 overflow-hidden'><div class='h-full bg-[#E2725B] w-[98%] transition-all duration-1000'></div></div></div></div></div><div class='col-span-12 lg:col-span-4 bg-[#FFFBF2] p-10 relative group overflow-hidden'><div class='absolute top-2 right-2 text-[8px] font-mono opacity-30'>REF_03_REL</div><div class='flex flex-col h-full'><div class='text-[10px] font-mono text-[#E2725B] mb-2 uppercase tracking-widest'>Uptime Assurance</div><div class='flex items-baseline gap-1 mb-6'><span class='text-7xl font-black text-[#5D5C61]'>99.4</span><span class='text-2xl font-bold text-[#E2725B]'>%</span></div><h3 class='text-xs font-bold uppercase tracking-[0.2em] mb-4'>System Reliability</h3><p class='text-[11px] leading-relaxed opacity-80 font-medium'>Diagnostic success rate across 1.2M simulated kilometers. Triple-redundant logic gates active in all drive modules.</p><div class='mt-auto pt-8 flex gap-2'><div class='h-1 w-full bg-[#E2725B]/10 overflow-hidden'><div class='h-full bg-[#E2725B] w-[99.4%] transition-all duration-1000'></div></div></div></div></div></div><div class='mt-12 flex justify-between items-center'><div class='text-[9px] font-mono tracking-widest opacity-50 uppercase flex items-center gap-4'><span>LOG_ID: HCT-2024-S1</span><span class='w-1 h-1 rounded-full bg-[#E2725B]'></span><span>STAMP: VERIFIED_EU_PROT</span></div><div class='text-[9px] font-mono tracking-widest text-[#E2725B] animate-pulse'>RECEIVING_LIVE_FEED...</div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#FFFBF2",
+        "color": "#5D5C61",
+        "fontFamily": "Montserrat"
+    },
+    "layout_strategy": "FORENSIC_GRID"
+}

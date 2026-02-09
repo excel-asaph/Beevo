@@ -1,50 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, ArrowRight, Sparkles, Search, PlusCircle, History, LayoutDashboard } from 'lucide-react';
-import { useBrandStore } from '../../stores/useBrandStore';
+import { Brain, ArrowRight, Sparkles, Plus, Clock, Trash2, X } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
+/**
+ * Represents a locally cached or recently accessed brand workspace.
+ */
 interface LocalBrand {
+    /** Unique identifier for the workspace. */
+    id: string;
+    /** Friendly display name of the brand. */
     name: string;
+    /** Timestamp of last activity. */
     lastActive: number;
+    /** URL to a thumbnail image for the workspace. */
+    thumbnailUrl?: string;
 }
 
+/**
+ * The entry point / landing page for the application.
+ * 
+ * Allows users to:
+ * - Create a new brand workspace (by entering a name).
+ * - view and resume recently accessed workspaces.
+ * - Manage existing workspaces (delete).
+ */
 export const WorkspaceLanding: React.FC = () => {
-    const { userId, getWorkspaceForBrand, setWorkspaceId } = useWorkspace();
+    const { userId, getWorkspaceForBrand } = useWorkspace();
 
     const [brandName, setBrandName] = useState('');
     const [recentBrands, setRecentBrands] = useState<LocalBrand[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const [error, setError] = useState('');
     const [exists, setExists] = useState<boolean | null>(null);
 
-    const setPhase = useBrandStore(state => state.setPhase);
-    const updateDNA = useBrandStore(state => state.updateDNA);
-    const setProjectName = useBrandStore(state => state.setProjectName);
-
-    // Fetch real workspaces from server on mount
+    // Fetch real workspaces
     useEffect(() => {
         const fetchRecentBrands = async () => {
             try {
                 const response = await fetch('/api/workspaces');
                 if (response.ok) {
                     const data = await response.json();
-                    // Filter by current User ID and map to friendly names
                     const userBrands = data
                         .filter((ws: any) => ws.id.startsWith(userId))
                         .map((ws: any) => {
-                            // Extract name after the first underscore
                             const parts = ws.id.split('_');
                             const slug = parts.length > 1 ? parts.slice(1).join(' ') : ws.id;
                             const friendlyName = slug.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-
                             return {
+                                id: ws.id,
                                 name: friendlyName,
-                                lastActive: new Date(ws.lastActive).getTime()
+                                lastActive: new Date(ws.lastActive).getTime(),
+                                thumbnailUrl: ws.thumbnailUrl
                             };
                         })
                         .sort((a: any, b: any) => b.lastActive - a.lastActive);
-
                     setRecentBrands(userBrands);
                 }
             } catch (err) {
@@ -54,14 +66,13 @@ export const WorkspaceLanding: React.FC = () => {
         fetchRecentBrands();
     }, [userId]);
 
-    // Check for existence whenever name changes
+    // Check existence
     useEffect(() => {
         const checkExistence = async () => {
             if (!brandName.trim() || brandName.length < 2) {
                 setExists(null);
                 return;
             }
-
             const wsId = getWorkspaceForBrand(brandName);
             try {
                 const response = await fetch(`/api/workspaces/check/${wsId}`);
@@ -73,11 +84,9 @@ export const WorkspaceLanding: React.FC = () => {
                 console.error("Check failed:", err);
             }
         };
-
         const timer = setTimeout(checkExistence, 300);
         return () => clearTimeout(timer);
     }, [brandName, getWorkspaceForBrand]);
-
 
     const handleLaunch = async (nameToLaunch: string) => {
         const name = nameToLaunch.trim();
@@ -85,178 +94,271 @@ export const WorkspaceLanding: React.FC = () => {
             setError('Please enter a valid brand name');
             return;
         }
-
         setIsLoading(true);
         setError('');
-
         try {
             const wsId = getWorkspaceForBrand(name);
-            const response = await fetch(`/api/workspaces/check/${wsId}`);
-            const data = await response.json();
+            console.log(`🚀 Launching workspace: ${wsId}`);
 
-            // Set state and navigate
-            setWorkspaceId(wsId);
-            updateDNA({ name: { value: name, isSelected: false } });
-            setProjectName(name);
+            // ALWAYS attempt creation to ensure folder exists
+            // The server handles idempotency (checks if exists internally)
+            console.log(`🛠️ Ensuring workspace exists: ${wsId}`);
+            await fetch('/api/workspaces', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ workspaceId: wsId })
+            });
+            console.log(`✅ Creation/Verification complete for ${wsId}`);
 
-            if (data.exists) {
-                setPhase('canvas');
-            } else {
-                setPhase('onboarding');
-            }
+            // Small delay for checking filesystem consistency
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            window.location.href = `/?workspace=${wsId}`;
         } catch (err) {
-            console.error(err);
+            console.error("Launch failed:", err);
             setError('Connection failed. Is the server running?');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleDelete = async (e: React.MouseEvent, workspaceId: string) => {
+        e.stopPropagation();
+        if (confirmDeleteId !== workspaceId) {
+            setConfirmDeleteId(workspaceId);
+            return;
+        }
+        setDeletingId(workspaceId);
+        try {
+            const response = await fetch(`/api/workspaces/${workspaceId}`, {
+                method: 'DELETE',
+                headers: { 'x-workspace-id': workspaceId }
+            });
+            if (response.ok) {
+                setRecentBrands(prev => prev.filter(b => b.id !== workspaceId));
+                setConfirmDeleteId(null);
+            } else {
+                setError('Failed to delete workspace');
+            }
+        } catch (err) {
+            setError('Connection failed during deletion');
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    const timeAgo = (timestamp: number) => {
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        return `${Math.floor(hours / 24)}d ago`;
+    };
+
     return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-hidden text-slate-200">
-            {/* Ambient Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(79,70,229,0.15),transparent_70%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:48px_48px]" />
+        <div className="min-h-screen bg-black flex flex-col items-center justify-start p-6 relative overflow-hidden text-slate-200 font-sans selection:bg-yellow-500/30">
+            {/* Animated Gradient Background - 'Lovable Style' Mesh */}
+            <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
+                {/* Top Left - Vibrant Yellow */}
+                <motion.div
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.6, 0.5, 0.6],
+                        x: [0, 20, 0]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-yellow-600/30 rounded-full blur-[120px]"
+                />
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-xl w-full relative z-10 space-y-12"
-            >
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-500/20">
-                            <Brain className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-black text-white italic tracking-tighter leading-none">BEEVO</h1>
-                            <p className="text-indigo-400 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">Autonomous CMO</p>
-                        </div>
+                {/* Bottom Right - Deep Amber */}
+                <motion.div
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 0.4, 0.5],
+                        x: [0, -30, 0]
+                    }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[80%] bg-amber-700/20 rounded-full blur-[140px]"
+                />
+
+                {/* Bottom Left - Darker Gold */}
+                <motion.div
+                    animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.4, 0.3, 0.4],
+                        y: [0, -40, 0]
+                    }}
+                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                    className="absolute -bottom-[10%] -left-[10%] w-[60%] h-[60%] bg-yellow-800/20 rounded-full blur-[130px]"
+                />
+
+                {/* Top Right - Subtle slate/blue contrast to pop the yellow */}
+                <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[60%] bg-slate-900/80 rounded-full blur-[100px]" />
+            </div>
+
+            {/* MAIN CONTAINER */}
+            <div className="relative z-10 w-full max-w-5xl flex flex-col items-center mt-20 md:mt-32 space-y-12">
+
+                {/* 1. HERO HEADER */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center space-y-6"
+                >
+                    <div className="inline-flex items-center space-x-2 px-3 py-1 bg-yellow-950/30 rounded-full border border-yellow-500/20 mb-4 backdrop-blur-sm">
+                        <span className="text-xs font-semibold text-yellow-400">Introducing Beevo</span>
                     </div>
-                </div>
 
-                {/* Continue Section (Recents) */}
-                <AnimatePresence>
-                    {recentBrands.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="space-y-4"
-                        >
-                            <div className="flex items-center justify-between px-2">
-                                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                                    <History size={14} /> Continue Creating
-                                </h3>
-                            </div>
-                            <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar">
-                                {recentBrands.map((brand) => (
-                                    <button
-                                        key={brand.name}
-                                        onClick={() => handleLaunch(brand.name)}
-                                        className="flex-shrink-0 group relative bg-slate-900 border border-white/5 hover:border-indigo-500/50 p-5 rounded-3xl transition-all w-[180px] text-left overflow-hidden"
-                                    >
-                                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <LayoutDashboard className="w-5 h-5 text-slate-600 group-hover:text-indigo-400 mb-4 transition-colors" />
-                                        <p className="text-white font-bold truncate text-sm">{brand.name}</p>
-                                        <div className="flex items-center mt-2 group-hover:translate-x-1 transition-transform">
-                                            <span className="text-indigo-400 text-[9px] font-black uppercase tracking-widest">Resume</span>
-                                            <ArrowRight size={10} className="ml-1 text-indigo-400" />
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                    <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight">
+                        <span className="text-yellow-400 inline-block bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">Hey</span>, let's build your brand
+                    </h1>
+                    <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                        Enter a new brand name or resume your existing campaigns.
+                    </p>
+                </motion.div>
 
-                {/* Main Action Section */}
-                <div className="bg-slate-900/40 backdrop-blur-3xl border border-white/5 rounded-[3rem] p-12 shadow-3xl relative overflow-hidden group">
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
-
-                    <div className="mb-12 text-center md:text-left">
-                        <h2 className="text-3xl font-black text-white italic tracking-tight">New Brand</h2>
-                        <p className="text-slate-400 text-sm font-medium mt-1">Initialize your brand identity to begin the discovery.</p>
-                    </div>
+                {/* 2. THE "LOVABLE" INPUT BOX */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="w-full max-w-2xl relative group"
+                >
+                    {/* Glowing Backdrop - Gold/Yellow */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
 
                     <form
                         onSubmit={(e) => { e.preventDefault(); handleLaunch(brandName); }}
-                        className="space-y-8"
+                        className="relative bg-slate-900/80 border border-white/10 rounded-2xl p-2 shadow-2xl flex items-center backdrop-blur-xl"
                     >
-                        <div className="relative group/input">
-                            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors" />
-                            <input
-                                autoFocus
-                                type="text"
-                                value={brandName}
-                                onChange={(e) => setBrandName(e.target.value)}
-                                placeholder="e.g. Acme Corp"
-                                className="w-full bg-slate-950/50 border border-white/5 focus:border-indigo-500/50 rounded-[1.5rem] py-7 pl-16 pr-6 text-white text-2xl font-bold placeholder-slate-800 outline-none transition-all shadow-inner"
-                            />
+                        <div className="pl-4 pr-2 text-slate-500">
+                            {exists ? <Sparkles size={24} className="text-yellow-400 animate-pulse" /> : <Plus size={24} />}
                         </div>
 
-                        {error && (
-                            <p className="text-red-400 text-xs font-bold text-center px-4">{error}</p>
-                        )}
-
-                        <div className="h-6 flex items-center justify-center">
-                            <AnimatePresence mode="wait">
-                                {exists === true && (
-                                    <motion.div
-                                        key="found"
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0 }}
-                                        className="flex items-center space-x-2 text-emerald-400 text-xs font-bold bg-emerald-500/10 px-4 py-1.5 rounded-full"
-                                    >
-                                        <Sparkles size={14} className="animate-pulse" />
-                                        <span>Brand Detected • Straight to Canvas</span>
-                                    </motion.div>
-                                )}
-                                {exists === false && (
-                                    <motion.div
-                                        key="new"
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0 }}
-                                        className="flex items-center space-x-2 text-indigo-400 text-xs font-bold bg-indigo-500/10 px-4 py-1.5 rounded-full"
-                                    >
-                                        <PlusCircle size={14} />
-                                        <span>Ready to Initialize</span>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
+                        <input
+                            autoFocus
+                            type="text"
+                            value={brandName}
+                            onChange={(e) => setBrandName(e.target.value)}
+                            placeholder="Ask Beevo to create a brand..."
+                            className="flex-1 bg-transparent border-none outline-none text-white text-lg placeholder-slate-500 h-14"
+                        />
 
                         <button
-                            disabled={isLoading || !brandName.trim()}
+                            disabled={!brandName.trim() || isLoading}
                             className={`
-                                w-full py-6 rounded-[1.5rem] font-black text-xl tracking-tight
-                                flex items-center justify-center space-x-3 
-                                transition-all active:scale-[0.98] disabled:opacity-10
-                                shadow-2xl
-                                ${exists ? 'bg-indigo-600 text-white shadow-indigo-600/30' : 'bg-white text-slate-950 hover:bg-slate-100'}
+                                h-10 px-4 rounded-xl font-medium text-sm transition-all flex items-center space-x-2 gap-2
+                                ${brandName.trim()
+                                    ? 'bg-yellow-500 text-black hover:bg-yellow-400 shadow-lg shadow-yellow-500/20 font-bold'
+                                    : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                }
                             `}
                         >
-                            {isLoading ? (
-                                <div className="w-7 h-7 border-3 border-current border-t-transparent rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <span>{exists ? 'Enter Workspace' : 'Initialize Brand'}</span>
-                                    <ArrowRight className="w-6 h-6" />
-                                </>
-                            )}
+                            <span>{exists ? 'Resume' : 'Generate'}</span>
+                            {isLoading ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <ArrowRight size={16} />}
                         </button>
                     </form>
-                </div>
 
-                {/* Footer Metadata */}
-                <div className="flex flex-col items-center space-y-4 opacity-40">
-                    <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.3em]">
-                        BEEVO CORE ENGINE v1.2 • {userId}
-                    </p>
-                </div>
-            </motion.div>
+                    {/* Helper / Status Text */}
+                    <div className="absolute top-full left-0 w-full mt-3 text-center h-6">
+                        <AnimatePresence>
+                            {exists === true && (
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-xs font-medium text-emerald-400 flex items-center justify-center gap-1"
+                                >
+                                    <Clock size={12} /> Existing workspace found. Resuming context...
+                                </motion.span>
+                            )}
+                            {error && (
+                                <motion.span
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-xs font-medium text-red-400"
+                                >
+                                    {error}
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </motion.div>
+
+                {/* 3. RECENT WORKSPACES GRID */}
+                {recentBrands.length > 0 && (
+                    <div className="w-full mt-12">
+                        <div className="flex items-center justify-between mb-6 px-1">
+                            <h3 className="text-sm font-semibold text-slate-400 flex items-center gap-2">
+                                <Clock size={16} /> Recently viewed
+                            </h3>
+                            <button className="text-xs text-yellow-500 hover:text-yellow-400 transition-colors font-medium">View all</button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {recentBrands.map((brand) => (
+                                <motion.div
+                                    key={brand.id}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="group relative bg-slate-900/50 border border-white/5 hover:border-yellow-500/30 rounded-2xl overflow-hidden transition-all cursor-pointer flex flex-col h-56 shadow-lg hover:shadow-yellow-900/10 backdrop-blur-sm"
+                                    onClick={() => handleLaunch(brand.name)}
+                                >
+                                    {/* Top: Thumbnail Cover */}
+                                    <div className="h-32 w-full bg-slate-800 relative overflow-hidden border-b border-white/5">
+                                        {brand.thumbnailUrl ? (
+                                            <img
+                                                src={brand.thumbnailUrl}
+                                                alt={brand.name}
+                                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-slate-800 group-hover:bg-slate-700/50 transition-colors">
+                                                <Brain size={32} className="text-slate-600 group-hover:text-yellow-500/50 transition-colors" />
+                                            </div>
+                                        )}
+
+                                        {/* Overlay Actions */}
+                                        <div className="absolute top-2 right-2 flex gap-1 z-10 transition-opacity opacity-0 group-hover:opacity-100">
+                                            {confirmDeleteId === brand.id ? (
+                                                <div className="flex bg-black/80 backdrop-blur-md rounded-lg p-1 gap-1 shadow-md border border-white/10" onClick={e => e.stopPropagation()}>
+                                                    <button onClick={(e) => handleDelete(e, brand.id)} className="p-1.5 hover:bg-red-900/30 text-red-400 rounded-md transition-colors"><Trash2 size={14} /></button>
+                                                    <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); }} className="p-1.5 hover:bg-slate-800 text-slate-400 rounded-md transition-colors"><X size={14} /></button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    onClick={(e) => handleDelete(e, brand.id)}
+                                                    className="p-2 bg-black/60 hover:bg-black/90 backdrop-blur-md rounded-lg text-slate-400 hover:text-red-400 shadow-sm transition-all border border-white/5"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom: Info */}
+                                    <div className="p-4 flex-1 flex flex-col justify-center">
+                                        <h4 className="font-semibold text-slate-200 group-hover:text-yellow-400 transition-colors truncate text-base">
+                                            {brand.name}
+                                        </h4>
+                                        <div className="flex items-center text-xs text-slate-500 mt-1 gap-1">
+                                            <span>Edited {timeAgo(brand.lastActive)}</span>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+
+                            {/* "New Brand" Card Placeholder */}
+
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Footer */}
+
         </div>
     );
 };

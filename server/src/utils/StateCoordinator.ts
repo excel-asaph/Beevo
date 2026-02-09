@@ -4,13 +4,21 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import { DatabaseService } from '../services/DatabaseService.js';
-import { SystemConfigService, SystemConfigFactory } from '../services/SystemConfigService.js';
+import { SystemConfigFactory } from '../services/SystemConfigService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
 
+/**
+ * StateCoordinator - Manages the atomic sealing of page states.
+ * Handles:
+ * - Calculating state hashes based on content.
+ * - Moving files from staging to immutable state folders.
+ * - Archiving states in the database.
+ * - Pruning old states to manage disk space.
+ */
 export class StateCoordinator {
     private static instances: Map<string, StateCoordinator> = new Map();
     private workspaceId: string;
@@ -31,6 +39,12 @@ export class StateCoordinator {
         this.historyDir = path.join(this.assetsDir, 'history');
     }
 
+    /**
+     * Retrieves the singleton instance of StateCoordinator for a workspace.
+     * 
+     * @param {string} [workspaceId='default'] - The workspace identifier.
+     * @returns {StateCoordinator} The StateCoordinator instance.
+     */
     public static getInstance(workspaceId: string = 'default'): StateCoordinator {
         if (!StateCoordinator.instances.has(workspaceId)) {
             StateCoordinator.instances.set(workspaceId, new StateCoordinator(workspaceId));
@@ -48,6 +62,13 @@ export class StateCoordinator {
         return crypto.createHash('sha256').update(hashes.join('')).digest('hex').substring(0, 12);
     }
 
+    /**
+     * Seals the current page state, moving staged changes to a new immutable state folder.
+     * This ensures atomic updates and allows for rollback if needed.
+     * 
+     * @param {string} [message="Sealed by State Coordinator"] - A message describing the state change.
+     * @returns {Promise<string>} The hash of the new state.
+     */
     public async sealState(message: string = "Sealed by State Coordinator") {
         console.log(`\n🛡️ [${this.workspaceId}] State Coordinator: Sealing Page State (Atomic)...`);
 

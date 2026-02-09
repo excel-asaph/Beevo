@@ -1,15 +1,22 @@
 // Shared constants between client and server
 
+/**
+ * Model identifiers used across the Beevo platform.
+ */
 export const MODELS = {
   STRATEGIST: 'gemini-3-pro-preview',
   ARCHITECT_LIVE: 'gemini-2.5-flash-native-audio-preview-12-2025',
   ARCHITECT_TEXT: 'gemini-3-flash-preview', // Brain model
   FORGE_IMAGE: 'gemini-2.5-flash-image',
-  FORGE_VIDEO: 'veo-3.1-fast-generate-preview', // General video
-  FORGE_VIDEO_HQ: 'veo-3.1-fast-generate-preview', // HQ video
+  FORGE_VIDEO: 'veo-3.1-generate-preview', // General video
+  FORGE_VIDEO_HQ: 'veo-3.1-generate-preview', // HQ video
   GUARDIAN: 'gemini-3-pro-preview', // Vision/Reasoning
 };
 
+/**
+ * System instructions for different AI agents.
+ * Defines personas, mandatory behaviors, and response formats.
+ */
 export const SYSTEM_INSTRUCTIONS = {
   STRATEGIST: `You are the SV-CMO Strategist. Your goal is to conduct deep market research using Antigravity (Search). 
   Analyze the user's request, identify competitors, and produce a structured SWOT analysis. 
@@ -243,6 +250,9 @@ After: "Found 5 logo inspirations. They're labeled logo 1 through 5 on your canv
 };
 
 // Audio configuration
+/**
+ * Audio configuration for voice processing.
+ */
 export const AUDIO_CONFIG = {
   INPUT_SAMPLE_RATE: 16000,
   OUTPUT_SAMPLE_RATE: 24000,
@@ -250,6 +260,9 @@ export const AUDIO_CONFIG = {
 };
 
 // WebSocket configuration
+/**
+ * WebSocket configuration for client-server communication.
+ */
 export const WS_CONFIG = {
   SERVER_PORT: 3001,
   CLIENT_PORT: 3000,

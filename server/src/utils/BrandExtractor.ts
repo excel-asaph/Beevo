@@ -8,6 +8,9 @@ import { BrandDNA } from '../../../shared/types';
 import { MODELS } from '../../../shared/constants';
 import { ResearchLogger } from '../utils/ResearchLogger';
 
+/**
+ * Interface representing the result of a brand identity extraction.
+ */
 export interface ExtractionResult {
     name?: string;
     mission?: string;
@@ -23,6 +26,12 @@ const REQUIRED_FIELDS = ['name', 'mission', 'values', 'voice', 'tagline', 'targe
 
 /**
  * Check which required brand identity fields are missing
+ */
+/**
+ * Identifies missing fields in the Brand DNA.
+ * 
+ * @param {Partial<BrandDNA>} dna - The current Brand DNA.
+ * @returns {string[]} An array of missing field names.
  */
 export function identifyGaps(dna: Partial<BrandDNA>): string[] {
     const gaps: string[] = [];
@@ -42,6 +51,14 @@ export function identifyGaps(dna: Partial<BrandDNA>): string[] {
 /**
  * Extract missing brand identity fields from conversation history
  * Uses brand-focused analysis, not tone analysis
+ */
+/**
+ * Extracts missing brand identity fields from conversation history using Google GenAI.
+ * Focuses on filling identified gaps in the Brand DNA.
+ * 
+ * @param {string} conversationHistory - The chat history to analyze.
+ * @param {Partial<BrandDNA>} currentDNA - The current state of the Brand DNA.
+ * @returns {Promise<ExtractionResult>} The extracted fields.
  */
 export async function extractMissingIdentity(
     conversationHistory: string,

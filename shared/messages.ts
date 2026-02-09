@@ -1,3 +1,9 @@
+/**
+ * WebSocket Message Definitions
+ * 
+ * Defines the structure of all messages exchanged between the client and server.
+ * Organized into Client-to-Server and Server-to-Client message types.
+ */
 // WebSocket message types for client-server communication
 
 import { BrandDNA, FontSuggestion, ColorPalette, ResearchPhaseObject } from './types';
@@ -258,6 +264,24 @@ export interface ResearchCompleteMessage {
     dna: ResearchPhaseObject;
 }
 
+export interface ToolExecutionMessage {
+    type: 'TOOL_EXECUTION_LOG';
+    status: 'start' | 'success' | 'error';
+    id: string;
+    toolName: string;
+    args?: any;
+    result?: string;
+    timestamp: number;
+}
+
+export interface InterventionRequiredMessage {
+    type: 'INTERVENTION_REQUIRED';
+    payload: {
+        count: number;
+        requests: any[];
+    };
+}
+
 export type ServerMessage =
     | SessionStartedMessage
     | SessionEndedMessage
@@ -288,11 +312,30 @@ export type ServerMessage =
     | ThoughtSignatureMessage
     | ResearchCompleteMessage
     | FullStateUpdateMessage
-    | UIStateChangeMessage;
+    | ToolExecutionMessage
+    | UIStateChangeMessage
+    | InterventionRequiredMessage
+    | StateUpdateMessage
+    | AssetUpdateMessage;
 
 export interface FullStateUpdateMessage {
     type: 'FULL_STATE_UPDATE';
     state: ResearchPhaseObject;
+}
+
+export interface StateUpdateMessage {
+    type: 'STATE_UPDATE';
+    hash: string;
+    path: string;
+    workspaceId: string;
+    timestamp: number;
+}
+
+export interface AssetUpdateMessage {
+    type: 'ASSET_UPDATE';
+    resource: string;
+    workspaceId: string;
+    timestamp: number;
 }
 
 export interface VaultUpdateMessage {
@@ -357,6 +400,8 @@ export function isServerMessage(msg: any): msg is ServerMessage {
         'LOGO_RESEARCH_PROGRESS', 'LOGO_RESEARCH_RESULT',
         'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS', 'VAULT_UPDATE',
         'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS', 'VAULT_UPDATE',
-        'RESEARCH_UPDATE', 'THOUGHT_SIGNATURE', 'FULL_STATE_UPDATE', 'RESEARCH_COMPLETE'
+        'LOGO_STRUCTURE_OPTIONS', 'IMAGERY_SUGGESTIONS', 'VAULT_UPDATE',
+        'RESEARCH_UPDATE', 'THOUGHT_SIGNATURE', 'FULL_STATE_UPDATE', 'RESEARCH_COMPLETE',
+        'INTERVENTION_REQUIRED', 'STATE_UPDATE', 'ASSET_UPDATE'
     ].includes(msg.type);
 }

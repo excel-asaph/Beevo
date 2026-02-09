@@ -12,9 +12,10 @@ import {
     Wrench,
     Grid,
     Type,
-    Sparkles,
-    ChevronDown
+    Sparkles
 } from 'lucide-react';
+import { useBrandStore } from '../../../stores/useBrandStore';
+import { AIReasoningPopover, ThoughtSignatureData } from './AIReasoningPopover';
 
 // Custom Icons matching the reference images exactly
 const ArrangeIcon = () => (
@@ -89,14 +90,26 @@ const FRAME_ICONS: Record<string, React.FC<{ className?: string }>> = {
     type: Type,
 };
 
+/**
+ * Data structure for the FrameNode.
+ */
 export interface FrameNodeData {
+    /** Title of the frame. */
     title: string;
+    /** Icon key to render in the header (must match keys in FRAME_ICONS). */
     icon?: string; // Key for FRAME_ICONS
+    /** Minimum width of the frame in pixels. */
     minWidth?: number;
+    /** Minimum height of the frame in pixels. */
     minHeight?: number;
+    /** Theme color key. */
     color?: string; // Key for FRAME_THEMES
+    /** Whether the frame is locked (preventing resizing/movement). */
     locked?: boolean; // Whether the frame is locked
+    /** Callback when the "Run" button is clicked (e.g., for Logo Inspiration). */
     onRun?: () => void; // Callback when Run button is clicked (for Logo Inspiration)
+    /** List of AI thought signatures associated with this frame. */
+    thoughtSignatures?: ThoughtSignatureData[]; // AI Reasoning data for this frame (Array)
 }
 
 // Figma-style color themes for frames
@@ -234,18 +247,35 @@ const TooltipButton = ({
     </div>
 );
 
+/**
+ * A custom Node component for ReactFlow that acts as a container "Frame".
+ * 
+ * Features:
+ * - Resizable dimensions.
+ * - Customizable header with icon and title.
+ * - Toolbar with actions (Expand, Lock, Run).
+ * - "AI Reasoning" popover integration for displaying generated thoughts.
+ * - Theming support.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 const FrameNodeComponent: React.FC<NodeProps> = ({ id, data, selected }) => {
     const frameData = data as unknown as FrameNodeData;
-    const { title, icon, minWidth = 300, minHeight = 200, color = 'white', locked = false, onRun } = frameData;
+    const { title, icon, minWidth = 300, minHeight = 200, color = 'white', locked = false, onRun, thoughtSignatures } = frameData;
     const theme = FRAME_THEMES[color] || FRAME_THEMES.white;
     const isInspirationFrame = icon === 'inspiration';
+    const isLogoStudio = title === 'Logo Studio'; // Identify Logo Studio frame
 
     // Color picker state
     const [showColorPicker, setShowColorPicker] = useState(false);
+    // AI Reasoning popover state
+    const [showReasoningPopover, setShowReasoningPopover] = useState(false);
     const { setNodes, fitView, getNodes } = useReactFlow();
 
     // Order of colors in the picker (matching reference image)
     const colorOrder = ['white', 'gray', 'red', 'peach', 'orange', 'yellow', 'green', 'mint', 'cyan', 'blue', 'purple', 'violet'];
+
+    const setLayoutOverride = useBrandStore((state) => state.setLayoutOverride);
 
     // Handle color change
     const handleColorChange = (newColor: string) => {
@@ -256,24 +286,27 @@ const FrameNodeComponent: React.FC<NodeProps> = ({ id, data, selected }) => {
                     : node
             )
         );
+        setLayoutOverride(id, { color: newColor });
         setShowColorPicker(false);
     };
 
     // Handle Lock/Unlock toggle
     const handleLockToggle = () => {
+        const nextLocked = !locked;
         setNodes((nodes) =>
             nodes.map((node) => {
                 // Lock/unlock the frame itself
                 if (node.id === id) {
-                    return { ...node, data: { ...node.data, locked: !locked }, draggable: locked };
+                    return { ...node, data: { ...node.data, locked: nextLocked }, draggable: !nextLocked };
                 }
                 // Lock/unlock children
                 if (node.parentId === id) {
-                    return { ...node, draggable: locked, selectable: locked };
+                    return { ...node, draggable: !nextLocked, selectable: !nextLocked };
                 }
                 return node;
             })
         );
+        setLayoutOverride(id, { locked: nextLocked });
     };
 
     // Store original positions on mount (for Arrange reset)
@@ -350,10 +383,7 @@ const FrameNodeComponent: React.FC<NodeProps> = ({ id, data, selected }) => {
         fitView({ nodes: [{ id }], duration: 800, padding: 0.2 });
     };
 
-    // Handle Export (placeholder)
-    const handleExport = () => {
-        window.alert('Export functionality coming soon!');
-    };
+
 
     // Resolve icon component
     const IconComponent = icon ? FRAME_ICONS[icon] : null;
@@ -432,15 +462,31 @@ const FrameNodeComponent: React.FC<NodeProps> = ({ id, data, selected }) => {
                     transition={{ duration: 0.2 }}
                     className="flex gap-2 items-center"
                 >
-                    {/* AI / Sparkle Button */}
-                    <TooltipButton label="AI Assistant" className="bg-white rounded-xl shadow-lg border border-gray-100 !p-1 hover:!bg-gray-50">
-                        <Sparkles className="w-4 h-4 text-gray-700" strokeWidth={1.75} />
-                    </TooltipButton>
 
-                    {/* Run Button - Only for Logo Inspiration frame */}
-                    {isInspirationFrame && (
+
+                    {/* AI Reasoning Button - Hide on Logo Studio, show only if signatures exist */}
+                    {!isLogoStudio && thoughtSignatures && thoughtSignatures.length > 0 && (
+                        <div className="relative">
+                            <TooltipButton
+                                label="AI Reasoning"
+                                onClick={() => setShowReasoningPopover(!showReasoningPopover)}
+                                className="bg-white rounded-xl shadow-lg border border-gray-100 !p-1 hover:!bg-gray-50"
+                            >
+                                <Sparkles className="w-4 h-4 text-gray-900" strokeWidth={1.75} />
+                            </TooltipButton>
+                            {showReasoningPopover && (
+                                <AIReasoningPopover
+                                    signatures={thoughtSignatures}
+                                    onClose={() => setShowReasoningPopover(false)}
+                                />
+                            )}
+                        </div>
+                    )}
+
+                    {/* Run Button - Context Aware */}
+                    {(isInspirationFrame || isLogoStudio) && (
                         <TooltipButton
-                            label="Run"
+                            label={isLogoStudio ? "Build Landing Page" : "Generate Logos"}
                             onClick={onRun}
                             className="bg-white rounded-xl shadow-lg border border-gray-100 !p-1.5 hover:!bg-gray-50"
                         >
@@ -544,9 +590,6 @@ const FrameNodeComponent: React.FC<NodeProps> = ({ id, data, selected }) => {
                                 </TooltipButton>
                                 <TooltipButton label="Focus (F)" onClick={handleFocus}>
                                     <FocusIcon />
-                                </TooltipButton>
-                                <TooltipButton label="Export" onClick={handleExport}>
-                                    <ExportIcon />
                                 </TooltipButton>
                             </>
                         )}

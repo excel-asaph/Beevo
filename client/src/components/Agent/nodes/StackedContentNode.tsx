@@ -16,16 +16,29 @@ const ICON_MAP: Record<string, LucideIcon> = {
     values: Heart,
 };
 
+/**
+ * Represents a single item of content within the stack.
+ */
 export interface ContentItem {
+    /** Unique identifier for the item. */
     id: string;
+    /** Title of the content section. */
     title: string;
+    /** Content to display (string or array of tags). */
     content: string | string[];
+    /** Icon key to display. */
     icon?: string;
+    /** Display mode for the content. */
     displayMode?: 'text' | 'tags';
 }
 
+/**
+ * Data structure for the StackedContentNode.
+ */
 export interface StackedContentNodeData {
+    /** List of content items to stack. */
     items: ContentItem[];
+    /** Vertical gap between items in pixels. Defaults to 12. */
     gap?: number; // Gap between items in px
 }
 
@@ -131,6 +144,17 @@ const ContentCard = ({ item }: { item: ContentItem }) => {
     );
 };
 
+/**
+ * A custom Node component for ReactFlow that renders a vertical stack of content cards.
+ * 
+ * Features:
+ * - Renders a list of `ContentItem`s as individual cards.
+ * - Configurable spacing (gap).
+ * - Selection styling for the entire stack group.
+ * - Handles different content types via `ContentCard` sub-component.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 const StackedContentNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as StackedContentNodeData;
     const { items = [], gap = 12 } = nodeData;

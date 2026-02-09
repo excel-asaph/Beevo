@@ -1,6 +1,6 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Wifi, WifiOff, Volume2, VolumeX } from 'lucide-react';
+import { Sparkles, Wifi, WifiOff } from 'lucide-react';
 
 // Miro-style cards
 import { FrameNode } from './nodes/FrameNode';
@@ -23,13 +23,22 @@ import { useAudioStream } from '../../hooks/useAudioStream';
 import { useBrandStore } from '../../stores/useBrandStore';
 import { useShallow } from 'zustand/react/shallow';
 
+/**
+ * Props for the MiroCanvas component.
+ */
 interface MiroCanvasProps {
+    /** Callback function to handle the "Back" action. */
     onBack?: () => void;
 }
 
 /**
- * MiroCanvas - Miro-style moodboard layout for brand identity
- * Uses organized frames instead of free-floating ReactFlow nodes
+ * MiroCanvas - Miro-style moodboard layout for brand identity.
+ * 
+ * Unlike the node-based `Canvas`, this component presents brand elements in organized,
+ * board-like frames (Overview, Strategy, Visuals, etc.) similar to a Miro board.
+ * It provides a high-level visual summary of the brand DNA.
+ * 
+ * @param {MiroCanvasProps} props - The component props.
  */
 export const MiroCanvas: React.FC<MiroCanvasProps> = ({ onBack }) => {
     // ========== ZUSTAND STORE SUBSCRIPTIONS ==========

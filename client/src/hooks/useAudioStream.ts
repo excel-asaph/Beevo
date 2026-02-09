@@ -1,24 +1,51 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { AUDIO_CONFIG } from '@shared/constants';
 
+/**
+ * Configuration options for the audio stream hook.
+ */
 interface UseAudioStreamOptions {
+    /** Callback receiving base64 encoded audio chunks. */
     onAudioData?: (base64Audio: string) => void;
-    onSpeechStart?: () => void; // VAD: Called when user starts speaking
-    onSpeechEnd?: () => void; // VAD: Called when user stops speaking
-    silenceThresholdMs?: number; // VAD: How long silence before triggering onSpeechEnd (default 400ms)
+    /** Callback triggered when VAD detects speech start. */
+    onSpeechStart?: () => void;
+    /** Callback triggered when VAD detects silence after speech. */
+    onSpeechEnd?: () => void;
+    /** Duration of silence (in ms) before triggering onSpeechEnd. Default: 400ms. */
+    silenceThresholdMs?: number;
 }
 
+/**
+ * Return type definition for the useAudioStream hook.
+ */
 interface UseAudioStreamReturn {
     isRecording: boolean;
     isMuted: boolean;
-    isSpeaking: boolean; // VAD: True when user is actively speaking
+    /** True when VAD detects active speech. */
+    isSpeaking: boolean;
+    /** Starts microphone recording and processing. */
     startRecording: () => Promise<void>;
+    /** Stops recording and closes audio contexts. */
     stopRecording: () => void;
     toggleMute: () => void;
+    /** Queues and plays a base64 audio chunk. */
     playAudio: (base64Audio: string) => void;
+    /** Immediately stops all audio playback. */
     stopPlayback: () => void;
 }
 
+/**
+ * A hook for handling real-time audio input/output with Voice Activity Detection (VAD).
+ * 
+ * Features:
+ * - MICROPHONE INPUT: Captures, downsamples, and encodes audio to base64.
+ * - VAD (Voice Activity Detection): Detects speech vs. silence based on RMS threshold.
+ * - PLAYBACK: Decodes and plays streaming audio chunks.
+ * - ECHO CANCELLATION: Configures browser audio constraints for clear speech.
+ * 
+ * @param {UseAudioStreamOptions} options - Callbacks and config.
+ * @returns {UseAudioStreamReturn} Controls and state.
+ */
 export function useAudioStream(options: UseAudioStreamOptions = {}): UseAudioStreamReturn {
     const [isRecording, setIsRecording] = useState(false);
     const [isMuted, setIsMuted] = useState(false);

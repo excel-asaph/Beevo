@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react';
 import { SystemConfig } from '../../../shared/types';
 import { useWorkspace } from '../context/WorkspaceContext';
 
+/**
+ * A hook to fetch and manage the system configuration.
+ * 
+ * Features:
+ * - Fetches config from the API based on the active workspace.
+ * - Polling support for real-time updates (every 30s).
+ * - Deep comparison to prevent unnecessary re-renders.
+ * 
+ * @returns {Object} Config state and loading status.
+ */
 export const useConfig = () => {
     const { workspaceId } = useWorkspace();
     const [config, setConfig] = useState<SystemConfig | null>(null);

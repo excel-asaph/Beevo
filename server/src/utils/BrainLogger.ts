@@ -1,10 +1,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Static logger for low-level system activity ("Brain" activity).
+ * Logs to a local file `brain_activity.log`.
+ */
 export class BrainLogger {
     private static logPath = path.join(process.cwd(), 'brain_activity.log');
     private static sessionStart = new Date().toISOString();
 
+    /**
+     * Appends a log entry to the brain activity log.
+     * 
+     * @param {string} category - The category of the log (e.g., 'SYSTEM', 'MEMORY').
+     * @param {string} message - The log message.
+     * @param {any} [data] - Optional data to log details for.
+     */
     static log(category: string, message: string, data?: any) {
         const timestamp = new Date().toISOString();
         const logEntry = `[${timestamp}] [${category.toUpperCase()}] ${message}\n`;
@@ -20,6 +31,9 @@ export class BrainLogger {
         }
     }
 
+    /**
+     * Clears the brain activity log and writes a session start header.
+     */
     static clear() {
         try {
             fs.writeFileSync(this.logPath, `=== Brain Session Started: ${this.sessionStart} ===\n`);

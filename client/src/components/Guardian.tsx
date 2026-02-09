@@ -5,6 +5,16 @@ import { Button } from './ui/Button';
 import { Junction } from '@shared/types';
 import { ShieldCheck, AlertOctagon, CheckCircle, Crosshair } from 'lucide-react';
 
+/**
+ * The Guardian component acts as a quality control and safety layer.
+ * 
+ * Features:
+ * - "Pixel-Precise Audit" for assets using Gemini Vision.
+ * - Visualizes detected issues with overlay bounding boxes.
+ * - Flags content that fails brand or safety guidelines.
+ * 
+ * @returns {JSX.Element} The Guardian interface.
+ */
 export const Guardian: React.FC = () => {
     const { assets, dna, addThought } = useBrand();
     const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);

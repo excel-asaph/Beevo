@@ -1,14 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI } from '@google/genai';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
-import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
+import { WS_CONFIG } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
+import { AgentLogger } from '../utils/AgentLogger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,9 +18,20 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 puppeteer.use(StealthPlugin());
 
+/**
+ * Spec Watcher Agent.
+ * 
+ * Responsibilities:
+ * - Monitors the performance of the Spec/Features section (interaction rate, dwell time).
+ * - Captures snapshots of the live spec block.
+ * - Triggers optimization via NanoBanana to improve engagement.
+ * - Manages HITL approval gates.
+ * - Stages optimized spec blocks.
+ */
 export class SpecWatcher {
     private nanoBanana: NanoBananaService;
     private workspaceId: string;
+    private logger: AgentLogger;
 
     // Dynamic Paths
     private metricsFile: string;
@@ -30,11 +41,12 @@ export class SpecWatcher {
     private decisionPath: string;
     private assetsDir: string;
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set");
         this.nanoBanana = new NanoBananaService(apiKey);
+        this.logger = new AgentLogger('Spec Watcher', workspaceId, onLog);
 
         // Initialize Dynamic Paths
         const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
@@ -48,8 +60,13 @@ export class SpecWatcher {
         this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
+    /**
+     * Captures a screenshot of the live spec block.
+     * 
+     * @returns {Promise<Buffer | null>} The screenshot buffer or null if failed.
+     */
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log(`📸 [${this.workspaceId}] SpecWatcher: Capturing technical schematic snapshot...`);
+        this.logger.info("Snapshot", "Capturing technical schematic snapshot...");
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
@@ -77,15 +94,24 @@ export class SpecWatcher {
 
             return Buffer.from(screenshot);
         } catch (e) {
-            console.error("❌ Snapshot failed:", e);
+            this.logger.error("Snapshot Failed", `Error: ${e}`);
             return null;
         } finally {
             if (browser) await browser.close();
         }
     }
 
+    /**
+     * Analyzes performance metrics and optimizes the Spec section if needed.
+     * 1. Checks lock status and data sufficiency.
+     * 2. Evals interaction rate and dwell time.
+     * 3. Triggers HITL pre-optimization gate.
+     * 4. Calls NanoBanana to refine the schematic and content.
+     * 5. Triggers HITL post-optimization gate.
+     * 6. Stages the new spec block.
+     */
     async analyzeAndOptimize() {
-        console.log(`🕵️ [${this.workspaceId}] SpecWatcher Agent: Waking up...`);
+        this.logger.start("Watcher Active", "Spec Watcher analysis started...");
 
         // 1. Load Data
         // 1. Data Analysis (Get Config First)
@@ -113,34 +139,47 @@ export class SpecWatcher {
         const interactionWeight = (specMetrics.interactions?.length || 0);
 
         if (config.locks.spec) {
-            console.log("🔒 Spec Section is LOCKED.");
+            this.logger.info("Skipping", "Spec Section is LOCKED.");
             return;
         }
 
         // VALIDATION
         if (specMetrics.dwell_count < config.sections.spec.min_data_points) {
-            console.log(`🕵️ SpecWatcher: Low Data (${specMetrics.dwell_count}). Waiting.`);
+            this.logger.info("Skipping", `Low Data (${specMetrics.dwell_count}). Waiting.`);
             return;
         }
 
         const interactionRate = (interactionWeight / (specMetrics.dwell_count || 1));
-        console.log(`📊 PERF: Interaction Rate=${(interactionRate * 100).toFixed(1)}% | Dwell Count=${specMetrics.dwell_count}`);
+        this.logger.info("Metrics Analysis", `Interaction Rate=${(interactionRate * 100).toFixed(1)}% | Dwell Count=${specMetrics.dwell_count}`);
 
         if (interactionRate > config.sections.spec.target_interaction_rate) {
-            console.log("🏆 Spec Section is engaging. No action.");
+            this.logger.success("Optimization Unnecessary", "Spec Section is engaging.");
             return;
         }
 
         // 🟢 GATE 1: PRE-APPROVAL
-        const preCheck = await notificationClient.requestApproval(
-            'Spec Section',
-            'PRE_GENERATION',
-            `Spec Interaction Rate Low (${interactionRate.toFixed(1)}% vs Target ${config.sections.spec.target_interaction_rate}%). Optimize schematic?`,
-            undefined,
-            this.workspaceId
-        );
+        const hitlEnabled = config.hitl.enabled;
+        const requirePre = config.hitl.require_approval_pre;
+        let preCheckFeedback = "";
 
-        if (!preCheck.approved) return;
+        if (hitlEnabled && requirePre) {
+            this.logger.info("HITL Gate", "Triggering Pre-Optimization Approval...");
+            const preCheck = await notificationClient.requestApproval(
+                'Spec Section',
+                'PRE_GENERATION',
+                `Spec Interaction Rate Low (${interactionRate.toFixed(1)}% vs Target ${config.sections.spec.target_interaction_rate}%). Optimize schematic?`,
+                undefined,
+                this.workspaceId
+            );
+
+            if (!preCheck.approved) {
+                this.logger.info("Aborted", "User rejected optimization request.");
+                return;
+            }
+            preCheckFeedback = preCheck.feedback || "";
+        } else {
+            console.log("⏩ HITL Pre-Gate skipped.");
+        }
 
         // 2. Prepare Context
         const selectedPalettes = researchCtx.colorPalettes?.palettes?.filter((p: any) => p.isSelected) || [];
@@ -158,56 +197,85 @@ export class SpecWatcher {
         // 3. Vision Audit & Refinement
         const snapshot = await this.captureSnapshot();
 
-        console.log("🧠 Mutating Technical Schematic...");
+        this.logger.info("Reasoning", "Mutating Technical Schematic based on low interaction...");
         try {
             const performance = {
                 avgDwell: specMetrics.dwell_sum_ms / (specMetrics.dwell_count || 1),
                 interactions: specMetrics.interactions || []
             };
 
-            const combinedFeedback = [config.feedback.spec_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const combinedFeedback = [config.feedback.spec_directive, preCheckFeedback].filter(Boolean).join('. ');
             const result = await this.nanoBanana.refineVisual(currentSpec, performance, context, snapshot || undefined, combinedFeedback, 'spec');
 
             // 4. Apply Fix
             if (result.confidence > config.sections.spec.watcher_confidence_min) {
 
                 // 🟢 GATE 2: POST-APPROVAL
-                const postCheck = await notificationClient.requestApproval(
-                    'Spec Section',
-                    'POST_GENERATION',
-                    `New Schematic Ready (Confidence: ${result.confidence}%). Deploy?`,
-                    result,
-                    this.workspaceId
-                );
+                const requirePost = config.hitl.require_approval_post;
 
-                if (!postCheck.approved) return;
+                if (hitlEnabled && requirePost) {
+                    this.logger.info("HITL Gate", "Triggering Post-Optimization Approval...");
+                    const postCheck = await notificationClient.requestApproval(
+                        'Spec Section',
+                        'POST_GENERATION',
+                        `New Schematic Ready (Confidence: ${result.confidence}%). Deploy?`,
+                        result,
+                        this.workspaceId
+                    );
+
+                    if (!postCheck.approved) {
+                        this.logger.info("Aborted", "User rejected deployment.");
+                        return;
+                    }
+                } else {
+                    console.log("⏩ HITL Post-Gate skipped.");
+                }
+                // CRITICAL FIX: Do NOT partial merge.
+                // Reconstruct the full object from the AI's complete schema in `result.changes`
+                // while preserving system metadata.
                 const newSpec = {
-                    ...currentSpec,
+                    ...currentSpec, // Keep foundational ID/Metadata structure
+                    ...result.changes, // OVERWRITE all content with full AI schema
+                    id: currentSpec.id,
                     variant_id: `spec_v${Date.now()}`,
-                    content: {
-                        ...currentSpec.content,
-                        headline: result.changes.headline || currentSpec.content.headline,
-                        subhead: result.changes.subhead || currentSpec.content.subhead,
-                        nodes: result.changes.nodes || currentSpec.content.nodes
-                    },
-                    graphic_config: {
-                        ...currentSpec.graphic_config,
-                        visual_code: result.changes.visual_code
+                    meta: { // Fix: Access layout_strategy from result.changes, not (optimization as any)
+                        ...currentSpec.meta,
+                        layout_strategy: result.changes.layout_strategy || currentSpec.meta.layout_strategy
                     }
                 };
+
+                // Map flat AI schema back to nested store structure
+                // AI Schema: layout_strategy, headline, subhead, visual_code, nodes
+                // Store Structure: content: { headline, subhead, nodes ... }, graphic_config: { ... }
+
+                newSpec.content = {
+                    headline: result.changes.headline,
+                    subhead: result.changes.subhead,
+                    nodes: result.changes.nodes
+                };
+
+                newSpec.graphic_config = {
+                    ...currentSpec.graphic_config,
+                    visual_code: result.changes.visual_code
+                };
+
+                // Cleanup flat fields
+                delete newSpec.headline;
+                delete newSpec.subhead;
+                delete newSpec.nodes;
+                delete newSpec.visual_code;
 
                 await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
                 await fs.writeFile(this.stagingFile, JSON.stringify(newSpec, null, 4));
                 await fs.writeFile(this.decisionPath, JSON.stringify(result, null, 4));
 
-                console.log("🚀 Staged forensic fix! Technical Blueprint Evolved in staging.");
-                console.log("\n🧠 WATCHER THOUGHTS:\n", result.thoughts);
+                this.logger.success("Staged", "Technical Blueprint Evolved in staging.");
             } else {
-                console.log("⚠️ Confidence too low. No changes made.");
+                this.logger.info("No Change", "Confidence too low.");
             }
 
         } catch (error) {
-            console.error("❌ SpecWatcher Error:", error);
+            this.logger.error("Watcher Error", `critical: ${error}`);
         }
     }
 }

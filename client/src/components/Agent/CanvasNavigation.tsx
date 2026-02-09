@@ -2,6 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useReactFlow, useViewport, useStore } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * Floating navigation controls for the ReactFlow canvas.
+ * 
+ * Provides:
+ * - Zoom controls (In, Out, Fit View).
+ * - Zoom to selection.
+ * - Keyboard shortcuts (Ctrl/Cmd +/-, D, F).
+ * - A dropdown menu for zoom options.
+ * 
+ * This component uses `reactflow` hooks to manipulate the viewport.
+ */
 export const CanvasNavigation: React.FC = () => {
     const { zoomIn, zoomOut, fitView, getNodes } = useReactFlow();
     const { zoom } = useViewport();

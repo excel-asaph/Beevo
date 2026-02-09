@@ -1,0 +1,78 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_v1770630826997",
+    "meta": {
+        "strategy": "The 'Stitch' offer strategy focuses on bridging medical-grade diagnostic utility with home wellness integration. By using a tiered one-time purchase model with varying levels of sensor complexity, we move the user from a single-point solution to a holistic ergonomic ecosystem, leveraging high-trust clinical authority.",
+        "offer_type": "one-time",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Empathetic, expert, and restorative.",
+        "industry": "Mattress & Sleep Health"
+    },
+    "content": {
+        "headline": "Clinical Precision. Restorative Comfort.",
+        "subhead": "Select the ergonomic architecture that aligns with your health objectives.",
+        "tiers": [
+            {
+                "id": "essential-align",
+                "name": "Essential Align",
+                "price": "$249",
+                "description": "Foundational ergonomic support for targeted relief and posture stabilization.",
+                "features": [
+                    "Medical-grade lumbar support",
+                    "Breathable microbial-resistant weave",
+                    "3-point adjustable alignment",
+                    "Digital setup guide"
+                ],
+                "cta_text": "Select Essential",
+                "badge": "Entry",
+                "interval": "one-time",
+                "is_highlighted": false
+            },
+            {
+                "id": "stitch-system",
+                "name": "Stitch System",
+                "price": "$499",
+                "description": "Our most popular configuration featuring integrated biometric sensors and real-time feedback.",
+                "features": [
+                    "Advanced biometric pressure mapping",
+                    "Haptic posture correction alerts",
+                    "iOS/Android App Synchronization",
+                    "2-Year clinical warranty",
+                    "Priority health concierge access"
+                ],
+                "cta_text": "Upgrade to System",
+                "badge": "Most Popular",
+                "interval": "one-time",
+                "is_highlighted": true
+            },
+            {
+                "id": "professional-integrated",
+                "name": "Professional Integrated",
+                "price": "$899",
+                "description": "The complete diagnostic suite designed for maximum therapeutic intervention and recovery.",
+                "features": [
+                    "Full-body ergonomic telemetry",
+                    "Automated thermal regulation",
+                    "Monthly orthopedic data reviews",
+                    "White-glove home installation",
+                    "Lifetime hardware replacement"
+                ],
+                "cta_text": "Secure Full Suite",
+                "badge": "Ultimate",
+                "interval": "one-time",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "GUARANTEE: 100-Day Clinical Alignment Trial • HSA/FSA Eligible • Zero-Interest Financing Available"
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class=\"bg-[#F2F0E9] py-20 px-6 font-sans text-[#4A5D23]\"><div class=\"max-w-7xl mx-auto\"><div class=\"text-center mb-16\"><h2 class=\"text-4xl md:text-5xl font-light mb-4 tracking-tight\">Clinical Precision. Restorative Comfort.</h2><p class=\"text-lg opacity-80 max-w-2xl mx-auto\">Select the ergonomic architecture that aligns with your health objectives.</p></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch\"><div data-tier-id=\"essential-align\" class=\"flex flex-col p-8 rounded-xl border border-[#BDBB99] bg-[#E8E4D9]/50 transition-all hover:shadow-lg\"><div class=\"mb-8\"><span class=\"text-xs uppercase tracking-widest font-bold opacity-60\">Entry</span><h3 class=\"text-2xl font-semibold mt-2\">Essential Align</h3><div class=\"mt-4 flex items-baseline gap-1\"><span class=\"text-4xl font-light\">$249</span></div><p class=\"mt-4 text-sm leading-relaxed opacity-70\">Foundational ergonomic support for targeted relief and posture stabilization.</p></div><ul class=\"space-y-4 mb-10 flex-grow text-sm\"> <li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>Medical-grade lumbar support</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>Breathable microbial-resistant weave</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text=\"#8A9A5B\" shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>3-point adjustable alignment</li></ul><button data-cta-id=\"essential-align-cta\" onclick=\"window.track('offer_cta_click', { tierId: 'essential-align', actionId: 'essential-align-cta' })\" class=\"w-full py-4 border border-[#4A5D23] font-bold uppercase tracking-widest text-xs hover:bg-[#4A5D23] hover:text-white transition-colors\">Select Essential</button></div><div data-tier-id=\"stitch-system\" class=\"flex flex-col p-8 rounded-xl border-2 border-[#4A5D23] bg-white shadow-2xl relative scale-105 z-10\"><div class=\"absolute -top-4 left-1/2 -translate-x-1/2 bg-[#4A5D23] text-[#F2F0E9] px-4 py-1 text-[10px] uppercase font-bold tracking-widest\">Most Popular</div><div class=\"mb-8\"><span class=\"text-xs uppercase tracking-widest font-bold text-[#8A9A5B]\">Recommended</span><h3 class=\"text-2xl font-semibold mt-2\">Stitch System</h3><div class=\"mt-4 flex items-baseline gap-1\"><span class=\"text-4xl font-light\">$499</span></div><p class=\"mt-4 text-sm leading-relaxed opacity-70\">Our most popular configuration featuring integrated biometric sensors and real-time feedback.</p></div><ul class=\"space-y-4 mb-10 flex-grow text-sm\"><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>Advanced biometric pressure mapping</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>Haptic posture correction alerts</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>iOS/Android App Synchronization</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>2-Year clinical warranty</li></ul><button data-cta-id=\"stitch-system-cta\" onclick=\"window.track('offer_cta_click', { tierId: 'stitch-system', actionId: 'stitch-system-cta' })\" class=\"w-full py-4 bg-[#4A5D23] text-white font-bold uppercase tracking-widest text-xs hover:bg-[#8A9A5B] transition-colors shadow-lg shadow-[#4A5D23]/20\">Upgrade to System</button></div><div data-tier-id=\"professional-integrated\" class=\"flex flex-col p-8 rounded-xl border border-[#BDBB99] bg-[#E8E4D9]/50 transition-all hover:shadow-lg\"><div class=\"mb-8\"><span class=\"text-xs uppercase tracking-widest font-bold opacity-60\">Ultimate</span><h3 class=\"text-2xl font-semibold mt-2\">Professional Integrated</h3><div class=\"mt-4 flex items-baseline gap-1\"><span class=\"text-4xl font-light\">$899</span></div><p class=\"mt-4 text-sm leading-relaxed opacity-70\">The complete diagnostic suite designed for maximum therapeutic intervention and recovery.</p></div><ul class=\"space-y-4 mb-10 flex-grow text-sm\"><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>Full-body ergonomic telemetry</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text=\"#8A9A5B\" shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>White-glove home installation</li><li class=\"flex items-start gap-3\"><svg class=\"w-5 h-5 text-[#8A9A5B] shrink-0\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path></svg>Lifetime hardware replacement</li></ul><button data-cta-id=\"pro-integrated-cta\" onclick=\"window.track('offer_cta_click', { tierId: 'professional-integrated', actionId: 'pro-integrated-cta' })\" class=\"w-full py-4 border border-[#4A5D23] font-bold uppercase tracking-widest text-xs hover:bg-[#4A5D23] hover:text-white transition-colors\">Secure Full Suite</button></div></div><div class=\"mt-12 text-center text-sm opacity-60 font-medium tracking-wide\">GUARANTEE: 100-Day Clinical Alignment Trial • HSA/FSA Eligible • Zero-Interest Financing Available</div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#F2F0E9",
+        "color": "#4A5D23",
+        "fontFamily": "Montserrat",
+        "accentColor": "#8A9A5B"
+    }
+}

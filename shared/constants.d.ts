@@ -4,6 +4,7 @@ export declare const MODELS: {
     ARCHITECT_TEXT: string;
     FORGE_IMAGE: string;
     FORGE_VIDEO: string;
+    FORGE_VIDEO_HQ: string;
     GUARDIAN: string;
 };
 export declare const SYSTEM_INSTRUCTIONS: {

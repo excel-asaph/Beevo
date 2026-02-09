@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { StateAnalytics } from './Analytics/StateAnalytics';
 import { Settings, BarChart2 } from 'lucide-react';
 import { useWorkspace } from '../context/WorkspaceContext';
 
+/**
+ * Configuration schema for the Human-in-the-Loop system.
+ */
 interface SystemConfig {
     sections: Record<string, any>;
     client_tracking: any;
@@ -28,6 +31,9 @@ const updateConfigValue = (config: SystemConfig, path: string[], value: any): Sy
     return newConfig;
 };
 
+/**
+ * Represents a pending intervention request from an agent.
+ */
 interface InterventionRequest {
     id: string;
     section: string;
@@ -55,6 +61,18 @@ const SaveButton: React.FC<{ onClick: () => void; isSaving: boolean }> = ({ onCl
     </button>
 );
 
+/**
+ * The HITL (Human-in-the-Loop) Control Center.
+ * 
+ * Features:
+ * - Real-time intervention queue for approving/rejecting agent actions.
+ * - System configuration controls (Traffic Light system).
+ * - Section-specific locks and manual directives.
+ * - Threshold and metric tuning.
+ * - Analytics monitoring.
+ * 
+ * @returns {JSX.Element} The Control Center interface.
+ */
 export const HITLControlCenter: React.FC = () => {
     const { workspaceId } = useWorkspace();
     const [config, setConfig] = useState<SystemConfig | null>(null);
@@ -75,8 +93,14 @@ export const HITLControlCenter: React.FC = () => {
     const loadConfig = () => {
         fetch(`${API_URL}/api/config`, { headers: { 'x-workspace-id': workspaceId } })
             .then(res => res.json())
-            .then(setConfig)
-            .catch(console.error);
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                setConfig(data);
+            })
+            .catch(err => {
+                console.error("Failed to load config:", err);
+                // Optional: set error state to show in UI
+            });
     };
 
     const loadPendingRequests = () => {

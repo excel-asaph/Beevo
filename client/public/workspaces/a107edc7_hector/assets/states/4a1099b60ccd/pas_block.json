@@ -1,0 +1,43 @@
+{
+    "id": "pas_section_v1",
+    "variant_id": "pas_v1770654505259",
+    "meta": {
+        "strategy": "The 'Great Equalizer' PAS approach. It highlights the economic exclusion of the current EV market, agitates the frustration of the financial and environmental cost of inaction, and positions HECTOR as the disruptive, democratic solution that breaks the luxury barrier.",
+        "tone": "Inclusive, approachable, and visionary.",
+        "active_variant": "challenger",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "Clean Transit Shouldn’t Be a Luxury Privilege.",
+        "steps": [
+            {
+                "id": "pas-1",
+                "phase": "PROBLEM",
+                "title": "The Price of Progress",
+                "description": "Sustainable urban mobility has become an exclusive club. While the world demands a shift to clean energy, high-end electric bikes remain priced for the elite, leaving the vast majority of Europeans stuck with outdated, polluting, and expensive transit options."
+            },
+            {
+                "id": "pas-2",
+                "phase": "AGITATION",
+                "title": "The Financial Friction",
+                "description": "Rising fuel costs and increasing city congestion charges aren't just inconveniences—they are systemic drains on your wallet. Every day spent waiting for 'affordable' technology to arrive is a day lost to inefficiency and environmental guilt. The gap is widening."
+            },
+            {
+                "id": "pas-3",
+                "phase": "SOLUTION",
+                "title": "The Great Equalizer",
+                "description": "HECTOR bridges the gap. We have engineered a disruptive electric bike that delivers premium EV technology at a price the mass market can actually afford. No compromises, no luxury tax—just efficient, democratic energy for every street in Europe."
+            }
+        ],
+        "closing_statement": "Democratizing the future of European mobility starts here."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"max-w-7xl mx-auto px-6 py-24 bg-[#FFFBF2] font-['Montserrat'] text-[#5D5C61]\"><div class=\"text-center mb-20\"><h2 class=\"text-4xl md:text-5xl font-black tracking-tighter text-[#8E443D] uppercase mb-4\">Clean Transit Shouldn’t Be a Luxury Privilege.</h2><div class=\"w-24 h-2 bg-[#E2725B] mx-auto\"></div></div><div class=\"grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12\"><div class=\"md:col-span-4 p-8 bg-[#F2E9E1] border-l-4 border-[#E2725B]\"><span class=\"text-xs font-bold tracking-widest text-[#E2725B] uppercase block mb-4\">The Problem</span><h3 class=\"text-2xl font-bold mb-4 text-[#8E443D]\">The Price of Progress</h3><p class=\"text-base leading-relaxed opacity-90\">Sustainable urban mobility has become an exclusive club. While the world demands a shift to clean energy, high-end electric bikes remain priced for the elite, leaving the vast majority of Europeans stuck with outdated, polluting, and expensive transit options.</p></div><div class=\"md:col-span-4 p-8 bg-[#F2E9E1] border-l-4 border-[#E2725B]\"><span class=\"text-xs font-bold tracking-widest text-[#E2725B] uppercase block mb-4\">The Agitation</span><h3 class=\"text-2xl font-bold mb-4 text-[#8E443D]\">The Financial Friction</h3><p class=\"text-base leading-relaxed opacity-90\">Rising fuel costs and increasing city congestion charges aren't just inconveniences—they are systemic drains on your wallet. Every day spent waiting for 'affordable' technology to arrive is a day lost to inefficiency and environmental guilt. The gap is widening.</p></div><div class=\"md:col-span-4 p-8 bg-[#8E443D] text-[#FFFBF2]\"><span class=\"text-xs font-bold tracking-widest text-[#E2725B] uppercase block mb-4\">The Solution</span><h3 class=\"text-2xl font-bold mb-4\">The Great Equalizer</h3><p class=\"text-base leading-relaxed opacity-90\">HECTOR bridges the gap. We have engineered a disruptive electric bike that delivers premium EV technology at a price the mass market can actually afford. No compromises, no luxury tax—just efficient, democratic energy for every street in Europe.</p></div></div><div class=\"mt-16 text-center\"><p class=\"text-xl font-bold italic text-[#8E443D]\">\"Democratizing the future of European mobility starts here.\"</p></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#FFFBF2",
+        "color": "#5D5C61",
+        "fontFamily": "Montserrat"
+    }
+}

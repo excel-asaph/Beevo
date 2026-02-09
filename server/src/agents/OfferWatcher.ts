@@ -5,10 +5,11 @@ import { GoogleGenAI } from '@google/genai';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import dotenv from 'dotenv';
-import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
+import { WS_CONFIG } from '../../../shared/constants.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
+import { AgentLogger } from '../utils/AgentLogger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,10 +19,22 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 puppeteer.use(StealthPlugin());
 
+/**
+ * Offer Watcher Agent.
+ * 
+ * Responsibilities:
+ * - Monitors the performance of the Offer section (conversion rate, dwell time).
+ * - Captures snapshots of the live offer block.
+ * - analyzes metrics against thresholds.
+ * - Triggers optimization via NanoBanana if performance is low.
+ * - Manages HITL (Human-In-The-Loop) approval gates.
+ * - Stages optimized offer blocks.
+ */
 export class OfferWatcher {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
     private workspaceId: string;
+    private logger: AgentLogger;
 
     // Dynamic Paths
     private metricsFile: string;
@@ -31,11 +44,12 @@ export class OfferWatcher {
     private decisionPath: string;
     private assetsDir: string;
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY || '';
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+        this.logger = new AgentLogger('Offer Watcher', workspaceId, onLog);
 
         // Initialize Dynamic Paths
         const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
@@ -49,8 +63,13 @@ export class OfferWatcher {
         this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
+    /**
+     * Captures a screenshot of the live offer block using Puppeteer.
+     * 
+     * @returns {Promise<Buffer | null>} The screenshot buffer or null if failed.
+     */
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log(`📸 [${this.workspaceId}] OfferWatcher: Capturing order block snapshot...`);
+        this.logger.info("Snapshot", "Capturing live order block snapshot...");
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
@@ -75,15 +94,24 @@ export class OfferWatcher {
 
             return Buffer.from(screenshot);
         } catch (e) {
-            console.error("❌ Offer Snapshot failed:", e);
+            this.logger.error("Snapshot Failed", `Error: ${e}`);
             return null;
         } finally {
             if (browser) await browser.close();
         }
     }
 
+    /**
+     * Analyzes performance metrics and optimizes the Offer section if needed.
+     * 1. Checks lock status and data sufficiency.
+     * 2. Evals conversion rate and dwell time.
+     * 3. Triggers HITL pre-optimization gate if configured.
+     * 4. Calls NanoBanana to refine the offer visual and content.
+     * 5. Triggers HITL post-optimization gate if configured.
+     * 6. Stages the new offer block.
+     */
     async analyzeAndOptimize() {
-        console.log(`🕵️ [${this.workspaceId}] OfferWatcher Agent: Waking up...`);
+        this.logger.start("Watcher Active", "Offer Watcher analysis started...");
 
         const config = await SystemConfigFactory.getInstance(this.workspaceId).getConfig();
         const notificationClient = NotificationClient.getInstance();
@@ -108,39 +136,52 @@ export class OfferWatcher {
         const data = metricsInfo[variantId];
 
         if (config.locks.offer) {
-            console.log("🔒 Offer Section is LOCKED.");
+            this.logger.info("Skipping", "Offer Section is LOCKED.");
             return;
         }
 
         // 1. Data Threshold Check
         if (!data || (data.views || 0) < config.sections.offer.min_views_data) {
-            console.log(`🕵️ OfferWatcher: Not enough data. Views: ${data?.views || 0}`);
+            this.logger.info("Skipping", `Insufficient data (Views: ${data?.views || 0})`);
             return;
         }
 
         const conversionRate = (data.clicks / data.views);
         const avgDwell = data.dwell_count ? (data.dwell_sum_ms / data.dwell_count) : 0;
 
-        console.log(`📊 PERF: CR=${(conversionRate * 100).toFixed(1)}% | Avg Dwell=${avgDwell.toFixed(0)}ms`);
+        this.logger.info("Metrics Analysis", `CR=${(conversionRate * 100).toFixed(1)}% | Avg Dwell=${avgDwell.toFixed(0)}ms`);
 
         // 2. Forensic Decision
         if (conversionRate > config.sections.offer.target_conversion_rate) {
-            console.log("🏆 STATUS: CHAMPION. Conversion rate is healthy.");
+            this.logger.success("Optimization Unnecessary", "Conversion rate is healthy.");
             return;
         }
 
         // 🟢 GATE 1: PRE-APPROVAL
-        const preCheck = await notificationClient.requestApproval(
-            'Offer Section',
-            'PRE_GENERATION',
-            `Offer Conversion Low (${conversionRate.toFixed(1)}% vs Target ${config.sections.offer.target_conversion_rate}%). Optimize deal structure?`,
-            undefined,
-            this.workspaceId
-        );
+        const hitlEnabled = config.hitl.enabled;
+        const requirePre = config.hitl.require_approval_pre;
+        let preCheckFeedback = "";
 
-        if (!preCheck.approved) return;
+        if (hitlEnabled && requirePre) {
+            this.logger.info("HITL Gate", "Triggering Pre-Optimization Approval...");
+            const preCheck = await notificationClient.requestApproval(
+                'Offer Section',
+                'PRE_GENERATION',
+                `Offer Conversion Low (${conversionRate.toFixed(1)}% vs Target ${config.sections.offer.target_conversion_rate}%). Optimize deal structure?`,
+                undefined,
+                this.workspaceId
+            );
 
-        console.log("📉 STATUS: LOW CONVERSION. Initiating Offer Mutation...");
+            if (!preCheck.approved) {
+                this.logger.info("Aborted", "User rejected optimization request.");
+                return;
+            }
+            preCheckFeedback = preCheck.feedback || "";
+        } else {
+            console.log("⏩ HITL Pre-Gate skipped.");
+        }
+
+        this.logger.info("Reasoning", "Low Conversion detected. Initiating Offer Mutation...");
 
         // 3. Vision Audit
         const snapshot = await this.captureSnapshot();
@@ -158,7 +199,7 @@ export class OfferWatcher {
                 brandDNA: researchCtx.brandDNA
             };
 
-            const combinedFeedback = [config.feedback.offer_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const combinedFeedback = [config.feedback.offer_directive, preCheckFeedback].filter(Boolean).join('. ');
             const optimization = await this.nanoBanana.refineVisual(currentOffer, performance, nanoContext, snapshot || undefined, combinedFeedback, 'offer');
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
@@ -166,41 +207,69 @@ export class OfferWatcher {
             if ((optimization as any).confidence > config.sections.offer.watcher_confidence_min) {
 
                 // 🟢 GATE 2: POST-APPROVAL
-                const postCheck = await notificationClient.requestApproval(
-                    'Offer Section',
-                    'POST_GENERATION',
-                    `New Offer Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
-                    optimization,
-                    this.workspaceId
-                );
+                const requirePost = config.hitl.require_approval_post;
 
-                if (!postCheck.approved) return;
+                if (hitlEnabled && requirePost) {
+                    this.logger.info("HITL Gate", "Triggering Post-Optimization Approval...");
+                    const postCheck = await notificationClient.requestApproval(
+                        'Offer Section',
+                        'POST_GENERATION',
+                        `New Offer Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
+                        optimization,
+                        this.workspaceId
+                    );
+
+                    if (!postCheck.approved) {
+                        this.logger.info("Aborted", "User rejected deployment.");
+                        return;
+                    }
+                } else {
+                    console.log("⏩ HITL Post-Gate skipped.");
+                }
+                // CRITICAL FIX: Do NOT partial merge.
+                // Reconstruct the full object from the AI's complete schema in `optimization.changes`
+                // while preserving system metadata.
                 const newOffer = {
-                    ...currentOffer,
+                    ...currentOffer, // Keep foundational ID/Metadata structure
+                    ...optimization.changes, // OVERWRITE all content with full AI schema
+                    id: currentOffer.id,
                     variant_id: `offer_v${Date.now()}`,
                     meta: {
                         ...currentOffer.meta,
-                        layout_strategy: (optimization as any).changes.layout_strategy || currentOffer.meta.layout_strategy
-                    },
-                    content: {
-                        ...currentOffer.content,
-                        headline: (optimization as any).changes.headline || currentOffer.content.headline,
-                        subhead: (optimization as any).changes.subhead || currentOffer.content.subhead,
-                        tiers: (optimization as any).changes.tiers || currentOffer.content.tiers
-                    },
-                    graphic_config: {
-                        ...currentOffer.graphic_config,
-                        visual_code: (optimization as any).changes.visual_code || currentOffer.graphic_config.visual_code
+                        layout_strategy: optimization.changes.layout_strategy || currentOffer.meta.layout_strategy
                     }
                 };
+
+                // Map flat AI schema back to nested store structure
+                // AI Schema: layout_strategy, headline, subhead, visual_code, tiers
+                // Store Structure: content: { headline, subhead, tiers ... }, graphic_config: { ... }
+
+                newOffer.content = {
+                    headline: optimization.changes.headline,
+                    subhead: optimization.changes.subhead,
+                    tiers: optimization.changes.tiers
+                };
+
+                newOffer.graphic_config = {
+                    ...currentOffer.graphic_config,
+                    visual_code: optimization.changes.visual_code
+                };
+
+                // Cleanup flat fields
+                delete newOffer.headline;
+                delete newOffer.subhead;
+                delete newOffer.tiers;
+                delete newOffer.visual_code;
 
                 await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
                 await fs.writeFile(this.stagingFile, JSON.stringify(newOffer, null, 4));
                 await fs.writeFile(this.decisionPath, JSON.stringify(optimization, null, 4));
-                console.log("🚀 Optimization Staged! Offer Evolved in staging.");
+                this.logger.success("Staged", "Offer Evolved in staging.");
+            } else {
+                this.logger.info("No Change", "Confidence too low.");
             }
         } catch (error) {
-            console.error("❌ OfferWatcher Error:", error);
+            this.logger.error("Watcher Error", `critical: ${error}`);
         }
     }
 }

@@ -1,14 +1,29 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { NodeProps, Node } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { ImagerySuggestion } from '../../../../../shared/types';
 
+/**
+ * Data structure for the ImageryNode.
+ */
 interface ImageryNodeData extends Record<string, unknown> {
+    /** List of imagery suggestions/concepts to display. */
     options: ImagerySuggestion[];
+    /** Callback triggered when a suggestion is selected. */
     onSelect?: (id: string) => void;
 }
 
+/**
+ * A custom Node component for ReactFlow that displays a grid of selectable imagery concepts.
+ * 
+ * Features:
+ * - Displays imagery suggestions with titles and descriptions.
+ * - Interactive selection with visual feedback (borders, shadows, checkmark).
+ * - Mood-based gradient backgrounds.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const ImageryNode = memo(({ data }: NodeProps<Node<ImageryNodeData>>) => {
     const { options, onSelect } = data;
 

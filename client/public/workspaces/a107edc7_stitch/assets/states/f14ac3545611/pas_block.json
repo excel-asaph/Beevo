@@ -1,0 +1,43 @@
+{
+    "id": "pas_section_v1",
+    "variant_id": "pas_v1770630782272",
+    "meta": {
+        "strategy": "The PAS strategy focuses on the physiological cost of spinal misalignment, agitating the long-term musculoskeletal consequences of generic surfaces, and positioning Stitch as the clinical-grade restorative intervention.",
+        "tone": "Empathetic, expert, and restorative.",
+        "active_variant": "challenger",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "Restoring Equilibrium Through Ergonomic Precision",
+        "steps": [
+            {
+                "id": "pas-1",
+                "phase": "PROBLEM",
+                "title": "The Alignment Deficit",
+                "description": "Conventional sleeping surfaces offer uniform resistance, failing to accommodate the complex curvature of the human anatomy. This structural mismatch forces the spine into a state of nocturnal tension."
+            },
+            {
+                "id": "pas-2",
+                "phase": "AGITATION",
+                "title": "Systemic Degradation",
+                "description": "Continuous micro-trauma to the musculoskeletal system leads to cumulative fatigue, chronic nerve compression, and the acceleration of degenerative joint conditions that persist long after you wake."
+            },
+            {
+                "id": "pas-3",
+                "phase": "SOLUTION",
+                "title": "The Stitch Protocol",
+                "description": "Our health-focused mattress architecture utilizes zone-specific ergonomic support to neutralize pressure points, ensuring precise spinal calibration and profound physiological restoration."
+            }
+        ],
+        "closing_statement": "Experience the clinical intersection of structural integrity and profound relaxation."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"max-w-7xl mx-auto py-24 px-8\" style=\"background-color: #F2F0E9; font-family: 'Montserrat', sans-serif; color: #4A5D23;\"><div class=\"text-center mb-20\"><h2 class=\"text-4xl md:text-5xl font-light tracking-tight mb-4\">Restoring Equilibrium Through Ergonomic Precision</h2><div class=\"h-1 w-24 mx-auto\" style=\"background-color: #8A9A5B;\"></div></div><div class=\"grid grid-cols-12 gap-8\"><div class=\"col-span-12 md:col-span-4 p-8 border-t-2\" style=\"border-color: #BDBB99; background-color: #E8E4D9;\"><span class=\"text-xs font-bold tracking-widest uppercase mb-4 block\" style=\"color: #8A9A5B;\">Phase 01 — Problem</span><h3 class=\"text-2xl font-semibold mb-6\">The Alignment Deficit</h3><p class=\"text-lg leading-relaxed opacity-90\">Conventional sleeping surfaces offer uniform resistance, failing to accommodate the complex curvature of the human anatomy. This structural mismatch forces the spine into a state of nocturnal tension.</p></div><div class=\"col-span-12 md:col-span-4 p-8 border-t-2\" style=\"border-color: #8A9A5B; background-color: #F2F0E9;\"><span class=\"text-xs font-bold tracking-widest uppercase mb-4 block\" style=\"color: #4A5D23;\">Phase 02 — Agitation</span><h3 class=\"text-2xl font-semibold mb-6\">Systemic Degradation</h3><p class=\"text-lg leading-relaxed opacity-90\">Continuous micro-trauma to the musculoskeletal system leads to cumulative fatigue, chronic nerve compression, and the acceleration of degenerative joint conditions that persist long after you wake.</p></div><div class=\"col-span-12 md:col-span-4 p-8 text-white\" style=\"background-color: #4A5D23;\"><span class=\"text-xs font-bold tracking-widest uppercase mb-4 block\" style=\"color: #BDBB99;\">Phase 03 — Solution</span><h3 class=\"text-2xl font-semibold mb-6\">The Stitch Protocol</h3><p class=\"text-lg leading-relaxed opacity-90\">Our health-focused mattress architecture utilizes zone-specific ergonomic support to neutralize pressure points, ensuring precise spinal calibration and profound physiological restoration.</p></div></div><div class=\"mt-20 text-center\"><p class=\"text-xl italic font-medium\">Experience the clinical intersection of structural integrity and profound relaxation.</p></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#F2F0E9",
+        "color": "#4A5D23",
+        "fontFamily": "Montserrat"
+    }
+}

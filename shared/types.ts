@@ -1,3 +1,9 @@
+/**
+ * Shared Type Definitions
+ * 
+ * Contains all interfaces, enums, and types shared between the frontend and backend.
+ * This includes Brand DNA, Research results, Block configurations, and system settings.
+ */
 // Shared types between client and server
 
 export enum Junction {

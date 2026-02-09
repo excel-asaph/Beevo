@@ -9,55 +9,113 @@ import { useWorkspace } from '../context/WorkspaceContext';
 // WebSocket connection states
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
+/**
+ * Callback options for WebSocket events.
+ */
 interface UseWebSocketOptions {
+    /** Received audio chunk (base64). */
     onAudioReceived?: (base64Audio: string) => void;
+    /** Received transcription text. */
     onTranscription?: (role: 'user' | 'model', text: string) => void;
+    /** Received font suggestions. */
     onFontSuggestions?: (fonts: FontSuggestion[], previewText: string) => void;
+    /** Received color palette suggestions. */
     onColorSuggestions?: (palettes: ColorPalette[]) => void;
+    /** Received updated Brand DNA. */
     onDNAUpdate?: (dna: BrandDNA) => void;
+    /** Received full state update (legacy). */
     onFullStateUpdate?: (state: ResearchPhaseObject) => void;
+    /** Received an AI thought log. */
     onThought?: (logic: string) => void;
-    onError?: (message: string) => void;
+    /** Received an error message. */
+    onError?: (message: string, code?: string, redirect?: boolean) => void;
+    /** Session started successfully. */
     onSessionStarted?: (sessionId: string) => void;
+    /** Session ended. */
     onSessionEnded?: () => void;
+    /** Received interrupt signal. */
     onInterrupt?: () => void;
+    /** Tool processing started (e.g., 'analyzing'). */
     onToolProcessingStart?: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration' | 'display_logo_structure_options' | 'display_imagery_suggestions', targetField?: string) => void;
+    /** Tool processing ended. */
     onToolProcessingEnd?: () => void;
+    /** Detailed tool execution log. */
+    onToolExecution?: (message: any) => void;
+    /** Received generated logo concepts. */
     onLogoConcepts?: (concepts: Array<{ id: string; url: string; source: string; style: string; mood: string; reasoning: string; alt_text: string }>) => void;
+    /** Received logo structure options. */
     onLogoStructureOptions?: (options: LogoStructureOption[]) => void;
+    /** Received imagery suggestions. */
     onImagerySuggestions?: (suggestions: ImagerySuggestion[]) => void;
-    // Logo research progress for browser automation
+    /** Logo research progress update. */
     onLogoResearchProgress?: (phase: 'starting' | 'browsing' | 'analyzing' | 'complete', source: string, progress: number, message: string) => void;
+    /** Logo research results complete. */
     onLogoResearchResult?: (logos: any[], insights: any, screenshots: string[]) => void;
+    /** Vault status update. */
     onVaultUpdate?: (stats: { fileCount: number; totalTokens: number; isIngesting: boolean }) => void;
-    // Thinking levels for hackathon
+    /** Thinking process started. */
     onThinkingStart?: (timestamp: number) => void;
+    /** Thinking process stream update. */
     onThinkingStream?: (thought: string, phase: 'classify' | 'analyze' | 'decide' | 'execute') => void;
+    /** Thinking process ended. */
     onThinkingEnd?: (duration: number, toolDecided: string | null, thoughtSummary: string[]) => void;
-    // Agentic Brand Discovery
+    /** Agent research status update. */
     onResearchUpdate?: (status: 'started' | 'searching' | 'analyzing' | 'generating' | 'complete', message: string, step: number, totalSteps: number, competitors?: string[], thoughts?: Array<{ id: string; text: string; status: 'pending' | 'active' | 'complete' }>) => void;
+    /** Received a formal thought signature (for UI cards). */
     onThoughtSignature?: (nodeId: string, title: string, reasoning: string, confidence?: number) => void;
-    // Research complete signal - all data is ready
+    /** Research phase complete. */
     onResearchComplete?: (summary: { brandName: string; colorsGenerated: number; fontsGenerated: number; competitorsFound: number }) => void;
+    /** Human intervention required. */
+    onInterventionRequired?: (count: number, requests: any[]) => void;
+    /** Signal-driven architecture: State hash update. */
+    onStateUpdate?: (hash: string, path: string) => void;
+    /** Signal-driven architecture: Asset resource update. */
+    onAssetUpdate?: (resource: string) => void;
 }
 
+/**
+ * Return type definition for useWebSocket hook.
+ */
 interface UseWebSocketReturn {
     status: ConnectionStatus;
     sessionId: string | null;
     isGeminiConnected: boolean;
+    /** Connects to the WebSocket server. */
     connect: () => void;
+    /** Disconnects from the WebSocket server. */
     disconnect: () => void;
+    /** Starts a Gemini session. */
     startSession: () => void;
+    /** Ends the current Gemini session. */
     endSession: () => void;
+    /** Sends audio chunk to server. */
     sendAudio: (base64Audio: string) => boolean;
+    /** Sends text input to server. */
     sendText: (text: string) => boolean;
+    /** Sends a UI selection event to server. */
     sendSelection: (selectionType: 'font' | 'color' | 'logo' | 'structure' | 'imagery', value: string, context?: any) => boolean;
+    /** Sends an interrupt signal to stop current generation. */
     sendInterrupt: () => boolean;
+    /** Signals end of user activity (e.g. speech end). */
     sendActivityEnd: () => boolean;
+    /** Signals start of user activity (e.g. speech start). */
     sendActivityStart: () => boolean;
+    /** Uploads a file to the server. */
     sendFile: (file: File, base64Data: string, target?: 'extraction' | 'vault') => boolean;
 }
 
+/**
+ * A powerful hook for managing WebSocket communication with the Beevo backend and Gemini Agent.
+ * 
+ * Features:
+ * - Manages connection lifecycle (connect, disconnect, reconnect).
+ * - routes incoming server messages to appropriate callbacks.
+ * - Provides methods for sending various data types (audio, text, files, selections).
+ * - Handles session management.
+ * 
+ * @param {UseWebSocketOptions} options - Event handlers for server messages.
+ * @returns {UseWebSocketReturn} Connection state and send methods.
+ */
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
     const { workspaceId } = useWorkspace();
     const wsRef = useRef<WebSocket | null>(null);
@@ -140,6 +198,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
                     opts.onToolProcessingEnd?.();
                     break;
 
+                case 'TOOL_EXECUTION_LOG':
+                    opts.onToolExecution?.(message);
+                    break;
+
                 case 'LOGO_CONCEPTS':
                     opts.onLogoConcepts?.(message.concepts);
                     break;
@@ -192,9 +254,23 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
                     opts.onResearchComplete?.(message.summary);
                     break;
 
+                case 'INTERVENTION_REQUIRED':
+                    opts.onInterventionRequired?.(message.payload.count, message.payload.requests);
+                    break;
+
+                case 'STATE_UPDATE':
+                    console.log('📡 WS: Received STATE_UPDATE', message.hash);
+                    opts.onStateUpdate?.(message.hash, message.path);
+                    break;
+
+                case 'ASSET_UPDATE':
+                    console.log('📡 WS: Received ASSET_UPDATE', message.resource);
+                    opts.onAssetUpdate?.(message.resource);
+                    break;
+
                 case 'ERROR':
                     console.error('WebSocket error:', message.message);
-                    opts.onError?.(message.message);
+                    opts.onError?.(message.message, (message as any).code, (message as any).redirect);
                     break;
             }
         } catch (error) {
@@ -227,6 +303,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         };
 
         ws.onclose = () => {
+            if (wsRef.current !== ws) return; // Stale socket closed, ignore it
+
             console.log('WebSocket closed');
             setStatus('disconnected');
             setSessionId(null);
@@ -271,7 +349,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }, [sendMessage]);
 
     // VAD: Signal that user has finished speaking
-    const sendActivityEnd = useCallback(( ) => {
+    const sendActivityEnd = useCallback(() => {
         return sendMessage({ type: 'ACTIVITY_END' });
     }, [sendMessage]);
 

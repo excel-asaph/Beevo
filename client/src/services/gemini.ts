@@ -5,6 +5,13 @@ import { MODELS, SYSTEM_INSTRUCTIONS } from "@shared/constants";
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // --- Strategist Service ---
+/**
+ * Strategist Service: Runs a SWOT analysis based on a brand name and query.
+ * 
+ * @param {string} brandName - The name of the brand to analyze.
+ * @param {string} query - The specific context or query for the analysis.
+ * @returns {Promise<any>} The SWOT analysis result (strengths, weaknesses, etc.).
+ */
 export const runStrategyAnalysis = async (brandName: string, query: string): Promise<any> => {
   const ai = getAI();
 
@@ -35,6 +42,12 @@ export const runStrategyAnalysis = async (brandName: string, query: string): Pro
 };
 
 // --- Architect Service (Text Fallback / Analysis) ---
+/**
+ * Architect Service: Extracts Brand DNA from a transcript using text analysis.
+ * 
+ * @param {string} transcript - The interview transcript or text to analyze.
+ * @returns {Promise<any>} The extracted Brand DNA object.
+ */
 export const analyzeBrandDNA = async (transcript: string): Promise<any> => {
   const ai = getAI();
   const dnaSchema: Schema = {
@@ -63,6 +76,13 @@ export const analyzeBrandDNA = async (transcript: string): Promise<any> => {
 };
 
 // --- Forge Service ---
+/**
+ * Forge Service: Generates a campaign image based on a prompt and brand context.
+ * 
+ * @param {string} prompt - The specific image generation prompt.
+ * @param {string} brandContext - Contextual information about the brand.
+ * @returns {Promise<string | null>} The generated image as a base64 data URI, or null if failed.
+ */
 export const generateCampaignImage = async (prompt: string, brandContext: string): Promise<string | null> => {
   const ai = getAI();
   const fullPrompt = `Create a high-quality advertising image. 
@@ -88,6 +108,12 @@ export const generateCampaignImage = async (prompt: string, brandContext: string
   return null;
 };
 
+/**
+ * Forge Service: Generates a video using the Veo model.
+ * 
+ * @param {string} prompt - The video generation prompt.
+ * @returns {Promise<{ videoUri: string | undefined, operation: any }>} The video URI (if immediate) and the operation handle.
+ */
 export const generateCampaignVideo = async (prompt: string): Promise<{ videoUri: string | undefined, operation: any }> => {
   // Always create new instance for Veo to ensure fresh key if needed (though key is injected in env)
   // For Veo, we rely on the injected key after selection.
@@ -113,6 +139,13 @@ export const checkVideoStatus = async (operation: any): Promise<any> => {
 
 
 // --- Guardian Service ---
+/**
+ * Guardian Service: Audits an asset against the Brand DNA.
+ * 
+ * @param {string} assetBase64 - The asset to audit (image) in base64 format.
+ * @param {string} brandContext - The Brand DNA rules to check against.
+ * @returns {Promise<any>} The audit result (pass/fail, issues).
+ */
 export const auditAsset = async (assetBase64: string, brandContext: string): Promise<any> => {
   const ai = getAI();
 
@@ -143,6 +176,14 @@ export const auditAsset = async (assetBase64: string, brandContext: string): Pro
 };
 
 // --- Logo Studio Service ---
+/**
+ * Logo Studio Service: Generates a complete logo kit (primary, icon, wordmark, etc.).
+ * 
+ * @param {any} dna - The Brand DNA.
+ * @param {any} palette - The selected color palette.
+ * @param {string} refinement - Optional user refinement instructions.
+ * @returns {Promise<Object | null>} An object containing data URIs for the generated assets.
+ */
 export const generateLogoKit = async (dna: any, palette: any, refinement: string): Promise<{
   primary: string;
   primaryInverted: string;

@@ -1,0 +1,33 @@
+{
+    "thoughts": "The current dwell time (1368ms) indicates users are likely skimming the grid without absorbing the technical weight of the data. I am transitioning the layout from a dense FORENSIC_GRID to a TRIPTYCH structure. This creates a more cinematic, high-impact presentation that demands a linear, thoughtful scan. By isolating the three core metrics into distinct vertical pillars, we enhance readability and elevate the perceived value of each 'truth'. I am also refining the typography to improve contrast and ensuring the header remains center-aligned to maintain the visual flow from the Hero section, avoiding the 'left-heavy' cognitive load common in technical dashboards.",
+    "changes": {
+        "layout_strategy": "TRIPTYCH",
+        "headline": "ENGINEERING TRUTH",
+        "visual_code": "<div class='w-full bg-[#FFFBF2] py-32 px-6 font-[\"Montserrat\"] text-[#5D5C61]'><div class='max-w-7xl mx-auto'><div class='flex flex-col items-center text-center mb-24'><div class='px-4 py-1.5 border border-[#E2725B]/30 text-[10px] tracking-[0.6em] text-[#E2725B] font-extrabold mb-6 uppercase'>S1_TECHNICAL_VALIDATION</div><h2 class='text-6xl font-black tracking-tighter mb-6 text-[#8E443D] uppercase'>The H-Core Audit</h2><p class='max-w-2xl text-lg font-medium opacity-70 leading-relaxed'>No marketing rhetoric. Only the quantifiable reality of Hector engineering, verified through rigorous technical validation protocols.</p></div><div class='grid grid-cols-1 md:grid-cols-3 gap-12'><div class='group flex flex-col items-center text-center p-8 border-t border-[#E2725B]/20 transition-all duration-500 hover:border-[#E2725B]'><span class='text-[10px] font-mono text-[#E2725B] uppercase tracking-widest mb-12'>001 / ENERGY_COST</span><div class='mb-8'><div class='flex items-baseline justify-center'><span class='text-[80px] font-black text-[#8E443D] leading-none tracking-tighter'>0.12</span><span class='text-3xl font-bold text-[#E2725B] ml-1'>€</span></div><div class='w-16 h-1 bg-[#E2725B]/20 mx-auto mt-4 group-hover:w-full transition-all duration-700'></div></div><h3 class='text-sm font-bold uppercase tracking-[0.2em] mb-4'>Charge Efficiency</h3><p class='text-xs leading-relaxed opacity-50 font-medium'>Standardized cost-per-km metric. Calculated against EU 27 average residential energy tariffs (Q3 2024).</p></div><div class='group flex flex-col items-center text-center p-8 border-t border-[#E2725B]/20 transition-all duration-500 hover:border-[#E2725B]'><span class='text-[10px] font-mono text-[#E2725B] uppercase tracking-widest mb-12'>002 / LIFE_CYCLE</span><div class='mb-8'><div class='flex items-baseline justify-center'><span class='text-[80px] font-black text-[#8E443D] leading-none tracking-tighter'>98</span><span class='text-3xl font-bold text-[#E2725B] ml-1'>%</span></div><div class='w-16 h-1 bg-[#E2725B]/20 mx-auto mt-4 group-hover:w-full transition-all duration-700'></div></div><h3 class='text-sm font-bold uppercase tracking-[0.2em] mb-4'>Carbon Displacement</h3><p class='text-xs leading-relaxed opacity-50 font-medium'>Net reduction in lifecycle CO2e emissions vs. internal combustion benchmark. ISO 14064 verified.</p></div><div class='group flex flex-col items-center text-center p-8 border-t border-[#E2725B]/20 transition-all duration-500 hover:border-[#E2725B]'><span class='text-[10px] font-mono text-[#E2725B] uppercase tracking-widest mb-12'>003 / UPTIME_LOGS</span><div class='mb-8'><div class='flex items-baseline justify-center'><span class='text-[80px] font-black text-[#8E443D] leading-none tracking-tighter'>99.4</span><span class='text-3xl font-bold text-[#E2725B] ml-1'>%</span></div><div class='w-16 h-1 bg-[#E2725B]/20 mx-auto mt-4 group-hover:w-full transition-all duration-700'></div></div><h3 class='text-sm font-bold uppercase tracking-[0.2em] mb-4'>System Reliability</h3><p class='text-xs leading-relaxed opacity-50 font-medium'>Observed uptime across H-CORE logic gates during 1.2M km of synthetic urban stress modeling.</p></div></div><div class='mt-24 pt-8 border-t border-[#E2725B]/10 flex flex-col md:flex-row justify-between items-center text-[9px] font-mono uppercase tracking-[0.4em] opacity-40 gap-4'><p>Certified by Hector Engineering Labs (Berlin)</p><div class='flex gap-6'><span>Status: Operational</span><span>Sync: 0.00ms</span></div></div></div></div>",
+        "evidence_items": [
+            {
+                "id": "eff-01",
+                "label": "Charge Efficiency",
+                "value": "0.12",
+                "unit": "€",
+                "visual_type": "stat-pillar"
+            },
+            {
+                "id": "carb-02",
+                "label": "Carbon Displacement",
+                "value": "98",
+                "unit": "%",
+                "visual_type": "stat-pillar"
+            },
+            {
+                "id": "rel-03",
+                "label": "System Reliability",
+                "value": "99.4",
+                "unit": "%",
+                "visual_type": "stat-pillar"
+            }
+        ],
+        "subhead": "The quantifiable reality of Hector engineering, verified through rigorous technical validation protocols."
+    },
+    "confidence": 1
+}

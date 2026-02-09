@@ -2,11 +2,26 @@ import React, { useState } from 'react';
 import { Button } from '../ui/Button';
 import { Play, Sparkles, Loader2, Wand2 } from 'lucide-react';
 
+/**
+ * Props for the PipelineControl component.
+ */
 interface PipelineControlProps {
+    /** Callback to trigger a new logo generation batch. */
     onGenerate: (context: string) => Promise<void>;
+    /** Callback to finalize and bake the selected logos. */
     onFinalize: () => Promise<void>;
 }
 
+/**
+ * Controls for the logo generation pipeline.
+ * 
+ * Features:
+ * - Text area for providing context/override instructions.
+ * - Buttons to trigger generation and finalization.
+ * - Status indicators for current pipeline state.
+ * 
+ * @param {PipelineControlProps} props - The component props.
+ */
 export const PipelineControl: React.FC<PipelineControlProps> = ({ onGenerate, onFinalize }) => {
     const [context, setContext] = useState('');
     const [status, setStatus] = useState<'IDLE' | 'GENERATING' | 'BAKING'>('IDLE');

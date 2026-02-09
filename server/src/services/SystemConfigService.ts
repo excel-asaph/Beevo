@@ -6,6 +6,10 @@ import { SystemConfig } from '../../../shared/types.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Service for managing system-wide configuration, including HITL settings, locks, and feedback.
+ * Handles persistence to `system_config.json` within the workspace.
+ */
 export class SystemConfigService {
     private cache: SystemConfig | null = null;
     private workspaceId: string;
@@ -16,6 +20,12 @@ export class SystemConfigService {
         this.configPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}/system_config.json`);
     }
 
+    /**
+     * Retrieves the current system configuration.
+     * Always reads from disk to ensure synchronization with external updates.
+     * 
+     * @returns {Promise<SystemConfig>} The current configuration.
+     */
     async getConfig(): Promise<SystemConfig> {
         // PERMANENT FIX: Always read from disk to sync with external "cli" updates (Atomic Deployment)
         // if (this.cache) return this.cache; 
@@ -40,9 +50,10 @@ export class SystemConfigService {
         } catch {
             // Config missing. Create default or copy global template?
             // Let's create a basic default structure if missing
-            if (this.workspaceId === 'default') {
-                throw new Error("SystemConfig missing for 'default' workspace (Creation skipped)");
-            }
+            // Allow default workspace config creation
+            // if (this.workspaceId === 'default') {
+            //    throw new Error("SystemConfig missing for 'default' workspace (Creation skipped)");
+            // }
             const dir = path.dirname(this.configPath);
             await fs.mkdir(dir, { recursive: true });
 
@@ -67,6 +78,13 @@ export class SystemConfigService {
         }
     }
 
+    /**
+     * Updates the system configuration with partial data.
+     * Merges with existing config and persists to disk.
+     * 
+     * @param {Partial<SystemConfig>} partial - The partial configuration to update.
+     * @returns {Promise<SystemConfig>} The updated configuration.
+     */
     async updateConfig(partial: Partial<SystemConfig>): Promise<SystemConfig> {
         const current = await this.getConfig();
         const updated = { ...current, ...partial };
@@ -78,18 +96,50 @@ export class SystemConfigService {
     }
 
     // Helper to update a single section specifically (avoiding full overwrite risks)
-    async updateSection(sectionName: keyof SystemConfig['sections'], values: any) {
+    /**
+     * Updates a specific section of the configuration (or top-level properties like 'hitl').
+     * 
+     * @param {string} sectionName - The name of the section or property to update.
+     * @param {any} values - The values to merge into the section.
+     * @returns {Promise<SystemConfig>} The updated configuration.
+     */
+    async updateSection(sectionName: string, values: any) {
         const current = await this.getConfig();
-        current.sections[sectionName] = { ...current.sections[sectionName], ...values };
+
+        // Handle 'hitl' or 'client_tracking' which are top-level
+        if (sectionName === 'hitl' || sectionName === 'client_tracking') {
+            (current as any)[sectionName] = { ...(current as any)[sectionName], ...values };
+        } else if ((current.sections as any)[sectionName]) {
+            // Handle standard canvas sections
+            (current.sections as any)[sectionName] = { ...(current.sections as any)[sectionName], ...values };
+        } else {
+            // Fallback or init
+            (current.sections as any)[sectionName] = values;
+        }
+
         return this.updateConfig(current);
     }
 
+    /**
+     * Updates a specific feedback directive.
+     * 
+     * @param {keyof SystemConfig['feedback']} directive - The feedback directive key.
+     * @param {string} value - The feedback value.
+     * @returns {Promise<SystemConfig>} The updated configuration.
+     */
     async updateFeedback(directive: keyof SystemConfig['feedback'], value: string) {
         const current = await this.getConfig();
         current.feedback[directive] = value;
         return this.updateConfig(current);
     }
 
+    /**
+     * Sets the lock status for a specific section.
+     * 
+     * @param {keyof SystemConfig['locks']} section - The section to lock/unlock.
+     * @param {boolean} isLocked - The lock status.
+     * @returns {Promise<SystemConfig>} The updated configuration.
+     */
     async setLock(section: keyof SystemConfig['locks'], isLocked: boolean) {
         const current = await this.getConfig();
         current.locks[section] = isLocked;
@@ -106,6 +156,13 @@ export class SystemConfigFactory {
             this.instances.set(workspaceId, new SystemConfigService(workspaceId));
         }
         return this.instances.get(workspaceId)!;
+    }
+
+    /**
+     * Remove the configuration instance for a workspace
+     */
+    static cleanup(workspaceId: string): void {
+        this.instances.delete(workspaceId);
     }
 }
 

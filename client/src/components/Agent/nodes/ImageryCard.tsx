@@ -3,12 +3,29 @@ import { motion } from 'framer-motion';
 import { ImageIcon } from 'lucide-react';
 import { useWorkspace } from '../../../context/WorkspaceContext';
 
+/**
+ * Props for the ImageryCard component.
+ */
 export interface ImageryCardProps {
+    /** Array of image objects to display. */
     images: { url: string; label?: string }[];
+    /** Title of the card. Defaults to 'Imagery'. */
     title?: string;
+    /** Callback triggered when an image is clicked. */
     onImageClick?: (url: string) => void;
 }
 
+/**
+ * A reusable card component for displaying a grid of inspirational images.
+ * 
+ * Features:
+ * - Grid layout for multiple images.
+ * - Handles image loading errors with a fallback.
+ * - "Show more" indicator if there are more than 6 images.
+ * - Click-to-view interaction.
+ * 
+ * @param {ImageryCardProps} props - The component props.
+ */
 export const ImageryCard: React.FC<ImageryCardProps> = ({
     images,
     title = 'Imagery',

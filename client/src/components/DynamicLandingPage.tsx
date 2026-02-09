@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useBrand } from '../context/BrandContext';
 import { HeroBlock } from './Blocks/HeroBlock';
 import { ProofBlock } from './Blocks/ProofBlock';
@@ -8,15 +9,80 @@ import { SocialBlock } from './Blocks/SocialBlock';
 import { OfferBlock } from './Blocks/OfferBlock';
 import { NavigationBar } from './Navigation/NavigationBar';
 import { FormOrchestrator } from './Forms/FormOrchestrator';
-
 import { useConfig } from '../hooks/useConfig';
-
 import { useWorkspace } from '../context/WorkspaceContext';
+import { useWebSocket } from '../hooks/useWebSocket';
 
-export const DynamicLandingPage: React.FC = () => {
+/**
+ * Props for the DynamicLandingPage component.
+ */
+export interface DynamicLandingPageProps {
+    /** Whether the page is being viewed in preview mode (e.g., inside an iframe). */
+    isPreview?: boolean;
+}
+
+const SkeletonBlock = ({ height = "400px", className = "" }) => (
+    <div className={`w-full ${className} relative overflow-hidden bg-white/40 backdrop-blur-md border border-white/60 shadow-sm`} style={{ height }}>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+        <div className="max-w-7xl mx-auto px-6 py-20 flex flex-col gap-6">
+            <div className="h-12 w-2/3 bg-white/50 rounded-lg border border-white/30" />
+            <div className="h-6 w-1/2 bg-white/50 rounded-lg border border-white/30" />
+            <div className="h-40 w-full bg-white/30 rounded-xl mt-8 border border-white/40" />
+        </div>
+    </div>
+);
+
+const SkeletonLoader = () => (
+    <div className="min-h-screen bg-gray-50/50">
+        <div className="h-16 w-full border-b border-white/40 flex items-center px-6 gap-4 bg-white/60 backdrop-blur-xl sticky top-0 z-10 shadow-sm">
+            <div className="h-8 w-8 bg-white/50 rounded-md border border-white/30" />
+            <div className="h-4 w-32 bg-white/50 rounded border border-white/30" />
+        </div>
+        <SkeletonBlock height="600px" />
+        <SkeletonBlock height="400px" className="bg-white/20" />
+        <SkeletonBlock height="500px" />
+    </div>
+);
+
+/**
+ * The main container for the dynamically generated landing page.
+ * 
+ * Features:
+ * - Fetches and renders all page blocks (Hero, Proof, PAS, Spec, Social, Offer) based on JSON config.
+ * - Handles Real-time updates via WebSocket (Signal-Driven Refresh).
+ * - Manages global state for forms and dynamic interactions.
+ * - Implements a Skeleton Loader for initial data fetching.
+ * - Tracks page view events for analytics.
+ * 
+ * @param {DynamicLandingPageProps} props - The component props.
+ */
+export const DynamicLandingPage: React.FC<DynamicLandingPageProps> = ({ isPreview: isPreviewProp }) => {
+    // Detect isPreview from URL if not provided via prop (for iframe support)
+    const isPreview = isPreviewProp || new URLSearchParams(window.location.search).get('isPreview') === 'true';
     const { setDna } = useBrand();
-    const { config } = useConfig();
+    const { config, loading: configLoading } = useConfig();
     const { workspaceId } = useWorkspace();
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    // SIGNAL-DRIVEN REFRESH
+    const { connect } = useWebSocket({
+        onStateUpdate: () => {
+            console.log("♻️ Dynamic Page: State Update Signal -> Refreshing...");
+            setLoading(true); // Show skeleton immediately
+            setRefreshKey(prev => prev + 1);
+        },
+        onAssetUpdate: () => {
+            console.log("🖼️ Dynamic Page: Asset Update Signal -> Refreshing assets...");
+            // Optional: Don't show full skeleton for assets, but we do for safety
+            setRefreshKey(prev => prev + 1);
+        }
+    });
+
+    // Establish WebSocket connection for standalone mode
+    useEffect(() => {
+        connect();
+    }, [connect]);
+
     const [configs, setConfigs] = useState<{ hero: any, proof: any, pas: any, spec: any, social: any, offer: any }>({
         hero: null, proof: null, pas: null, spec: null, social: null, offer: null
     });
@@ -54,7 +120,9 @@ export const DynamicLandingPage: React.FC = () => {
                             ]
                         } : {}),
                         tiers: (isOffer && configs.offer?.content?.tiers) ? configs.offer.content.tiers : undefined
-                    }
+                    },
+                    // NEW: Inject Styles
+                    styles: isOffer ? configs.offer?.styles : configs.hero?.styles
                 };
                 setActiveForm(detail);
             }
@@ -64,35 +132,29 @@ export const DynamicLandingPage: React.FC = () => {
     }, [configs]);
 
     useEffect(() => {
-        // Wait for System Config to know WHERE to fetch assets from
-        if (!config) return;
+        if (configLoading) return;
+
+        if (!config) {
+            console.error("System Config failed to load");
+            setError("Unable to connect to Optimization Engine. Ensure server is running.");
+            setLoading(false);
+            return;
+        }
 
         const fetchConfigs = async () => {
             try {
-                // Determine base path (e.g., "states/v_123456" or default to root if missing)
                 const basePath = config.active_assets_path ? `/${config.active_assets_path}` : '';
-
-                // Workspace Isolation: If workspaceId is present, try to fetch from workspace folder.
-                // However, Vite serving logic for 'public' is straightforward.
-                // If the backend generated paths relative to 'workspaces/{id}/assets', we need to match that.
-                // The 'getLiveState' script suggests files are in 'client/public/workspaces/{id}/assets/{subpath}'.
-                // So the URL should be `/workspaces/${workspaceId}/assets${basePath}`.
-
                 let assetRoot = `/assets${basePath}`;
                 if (workspaceId && workspaceId !== 'default') {
                     assetRoot = `/workspaces/${workspaceId}/assets${basePath}`;
                 }
 
-                console.log(`[Loader] Fetching page assets from: ${assetRoot}`);
-
                 const fetchJson = async (url: string, label: string) => {
                     const res = await fetch(url);
                     const type = res.headers.get('content-type');
                     if (!res.ok || (type && type.includes('text/html'))) {
-                        console.error(`❌ [${label}] Failed: ${url}`, { status: res.status, type });
                         throw new Error(`Invalid JSON response for ${label}`);
                     }
-                    console.log(`✅ [${label}] Loaded: ${url}`);
                     return res.json();
                 };
 
@@ -100,19 +162,22 @@ export const DynamicLandingPage: React.FC = () => {
                     ? `/workspaces/${workspaceId}/assets/logo_kit_challenger.json`
                     : `/assets/logo_kit_challenger.json`;
 
+                const cacheBuster = `?t=${Date.now()}`;
                 const [heroData, proofData, pasData, specData, socialData, offerData, logoData] = await Promise.all([
-                    fetchJson(`${assetRoot}/hero_block.json`, 'Hero'),
-                    fetchJson(`${assetRoot}/proof_block.json`, 'Proof'),
-                    fetchJson(`${assetRoot}/pas_block.json`, 'PAS'),
-                    fetchJson(`${assetRoot}/spec_block.json`, 'Spec'),
-                    fetchJson(`${assetRoot}/social_block.json`, 'Social'),
-                    fetchJson(`${assetRoot}/offer_block.json`, 'Offer'),
-                    fetchJson(logoPath, 'Logo')
+                    fetchJson(`${assetRoot}/hero_block.json${cacheBuster}`, 'Hero'),
+                    fetchJson(`${assetRoot}/proof_block.json${cacheBuster}`, 'Proof'),
+                    fetchJson(`${assetRoot}/pas_block.json${cacheBuster}`, 'PAS'),
+                    fetchJson(`${assetRoot}/spec_block.json${cacheBuster}`, 'Spec'),
+                    fetchJson(`${assetRoot}/social_block.json${cacheBuster}`, 'Social'),
+                    fetchJson(`${assetRoot}/offer_block.json${cacheBuster}`, 'Offer'),
+                    fetchJson(`${logoPath}${cacheBuster}`, 'Logo')
                 ]);
+
+                // Minimum load time for premium shimmer effect
+                await new Promise(r => setTimeout(r, 800));
 
                 setConfigs({ hero: heroData, proof: proofData, pas: pasData, spec: specData, social: socialData, offer: offerData });
 
-                // Hydrate Brand Context with Logo
                 if (logoData && logoData.brandDNA) {
                     setDna({
                         ...logoData.brandDNA,
@@ -123,83 +188,116 @@ export const DynamicLandingPage: React.FC = () => {
                         }
                     });
                 }
+                setLoading(false); // Only set loading to false on SUCCESS
             } catch (err) {
-                console.error("Failed to load Landing Page Configs:", err);
-                setError("Failed to load page content.");
-            } finally {
-                setLoading(false);
+                console.error("Failed to load Landing Page Configs (likely generating):", err);
+                // DO NOT set error here.
+                // DO NOT set loading(false).
+                // We keep the skeleton on screen.
+                // The WebSocket 'STATE_UPDATE' or 'ASSET_UPDATE' will trigger a re-fetch.
+
+                // Optional: We can set a soft error if it takes too long, but for now PERISTENCE is requested.
             }
         };
 
         fetchConfigs();
-    }, [config, setDna, workspaceId]); // Re-run when config or workspace changes
+    }, [config, configLoading, setDna, workspaceId, refreshKey]);
 
-    const hasTrackedPage = useState(false); // Using state ref pattern or just ref to guard
+    const [hasTracked, setHasTracked] = useState(false);
 
     useEffect(() => {
-        // Guard: Only track if we have a config, a hash, and haven't tracked yet
-        if (!loading && configs.hero && config?.current_state_hash && !hasTrackedPage[0]) {
-            setTimeout(() => {
-                const stateHash = config.current_state_hash || 'unknown';
-                fetch('http://localhost:3001/api/tracking/event', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-workspace-id': workspaceId
-                    },
-                    body: JSON.stringify({
-                        sessionId: 'manual_session',
-                        componentId: 'page_root',
-                        eventType: 'view_page',
-                        timestamp: Date.now(),
-                        stateHash
-                    })
-                }).then(() => {
-                    console.log(`%c 🎯 PAGE VIEW TRACKED [${stateHash}]`, 'color: cyan');
-                    hasTrackedPage[1](true); // Mark as tracked
-                }).catch(console.error);
-            }, 500);
+        if (!loading && configs.hero && config?.current_state_hash && !hasTracked && !isPreview) {
+            const stateHash = config.current_state_hash || 'unknown';
+            fetch('http://localhost:3001/api/tracking/event', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-workspace-id': workspaceId || 'default'
+                },
+                body: JSON.stringify({
+                    sessionId: 'manual_session',
+                    componentId: 'page_root',
+                    eventType: 'view_page',
+                    timestamp: Date.now(),
+                    stateHash
+                })
+            }).then(() => {
+                setHasTracked(true);
+            }).catch(console.error);
         }
-    }, [loading, configs, config, hasTrackedPage, workspaceId]);
+    }, [loading, configs, config, hasTracked, workspaceId, isPreview]);
 
-    if (loading) return <div className="h-screen flex items-center justify-center bg-black text-white">Loading Optimization Engine...</div>;
-    if (error) return <div className="h-screen flex items-center justify-center bg-red-900 text-white">{error}</div>;
+    if (loading) return <SkeletonLoader />;
+    if (error) return <div className="h-screen flex items-center justify-center bg-zinc-950 text-white p-10 text-center">{error}</div>;
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                stiffness: 70,
+                damping: 20
+            } as any
+        }
+    };
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-blue-500 selection:text-white">
+        <motion.div
+            className="min-h-screen bg-zinc-950 text-white selection:bg-blue-500 selection:text-white"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            <style>{`
+                @keyframes shimmer {
+                    100% { transform: translateX(100%); }
+                }
+                
+                /* Super Glass Scrollbar - Custom Dark Track */
+                ::-webkit-scrollbar {
+                    width: 16px;
+                }
+                ::-webkit-scrollbar-track {
+                    background: #525252; /* Custom Dark Gray Track */
+                    border-left: 1px solid rgba(255, 255, 255, 0.05); /* Subtle light border */
+                }
+                ::-webkit-scrollbar-thumb {
+                    background-color: rgba(255, 255, 255, 0.25); /* Glossy light thumb for contrast */
+                    border: 4px solid transparent; 
+                    background-clip: content-box;
+                    border-radius: 99px;
+                    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.1);
+                }
+                ::-webkit-scrollbar-thumb:hover {
+                    background-color: rgba(255, 255, 255, 0.4);
+                }
+                ::-webkit-scrollbar-corner {
+                    background: transparent;
+                }
+            `}</style>
+
             {configs.hero && <NavigationBar config={configs.hero.navigation} brandId={configs.hero.id} />}
 
-            {/* Block 1: The Hook (Hero) */}
-            <div id="hero-block">
-                {configs.hero && <HeroBlock config={configs.hero} />}
-            </div>
+            <motion.div variants={itemVariants}>{configs.hero && <HeroBlock config={configs.hero} />}</motion.div>
+            <motion.div variants={itemVariants}>{configs.proof && <ProofBlock config={configs.proof} />}</motion.div>
+            <motion.div variants={itemVariants}>{configs.pas && <PASBlock config={configs.pas} />}</motion.div>
+            <motion.div variants={itemVariants}>{configs.spec && <SpecBlock config={configs.spec} />}</motion.div>
+            <motion.div variants={itemVariants}>{configs.social && <SocialBlock config={configs.social} />}</motion.div>
+            <motion.div variants={itemVariants}>{configs.offer && <OfferBlock config={configs.offer} />}</motion.div>
 
-            {/* Block 2: The Proof (DataGraphic) */}
-            <div id="proof-block">
-                {configs.proof && <ProofBlock config={configs.proof} />}
-            </div>
-
-            {/* Block 3: The Story (PAS) */}
-            <div id="pas-block">
-                {configs.pas && <PASBlock config={configs.pas} />}
-            </div>
-
-            {/* Block 4: The Tech (Spec) */}
-            <div id="spec-block">
-                {configs.spec && <SpecBlock config={configs.spec} />}
-            </div>
-
-            {/* Block 5: The Truth (Social) */}
-            <div id="social-block">
-                {configs.social && <SocialBlock config={configs.social} />}
-            </div>
-
-            {/* Block 6: The Closer (Offer) */}
-            <div id="offer-block">
-                {configs.offer && <OfferBlock config={configs.offer} />}
-            </div>
-
-            {/* Modal Layer */}
             {activeForm && (
                 <FormOrchestrator
                     type={activeForm.type}
@@ -207,6 +305,6 @@ export const DynamicLandingPage: React.FC = () => {
                     onClose={() => setActiveForm(null)}
                 />
             )}
-        </div>
+        </motion.div>
     );
 };

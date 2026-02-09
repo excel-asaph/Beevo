@@ -1,20 +1,14 @@
 import {
     ServerMessage,
-    FontSuggestionsMessage,
-    ColorSuggestionsMessage,
-    DNAUpdateMessage,
     LogoResearchProgressMessage,
     LogoResearchResultMessage,
-    LogoConceptsMessage
 } from '../../../shared/messages';
-import { FontSuggestion, ColorPalette, BrandDNA, LogoStructureOption, ImagerySuggestion, LogoInspiration } from '../../../shared/types';
-import { GoogleGenAI } from '@google/genai';
+import { FontSuggestion, ColorPalette, BrandDNA, LogoStructureOption, LogoInspiration } from '../../../shared/types';
 import { SearchGroundingService } from './SearchGroundingService';
 import { getLogoStrategist, BrandContext } from '../agents/LogoStrategist';
-import { BrainLogger } from '../utils/BrainLogger';
-import { ResearchLogger } from '../utils/ResearchLogger';
 import { ExecutionEngine } from '../services/ExecutionEngine';
 import { WorkspaceManager } from '../services/StateManager';
+import { DatabaseService } from '../services/DatabaseService';
 
 interface FunctionCall {
     id: string;
@@ -28,6 +22,10 @@ interface FunctionResponse {
     response: { result: string };
 }
 
+/**
+ * Handles the execution and orchestration of all Gemini tools.
+ * Bridges the gap between the Brain's decisions and the actual service executions.
+ */
 export class ToolHandler {
     private sendToClient: (message: ServerMessage) => void;
     private updateState: (field: string, value: any) => void;
@@ -45,6 +43,21 @@ export class ToolHandler {
     private onResumeVoice: () => void;
     private workspaceId: string;
 
+    /**
+     * Initializes the ToolHandler.
+     * 
+     * @param {(message: ServerMessage) => void} sendToClient - Callback to send messages to the client.
+     * @param {(field: string, value: any) => void} updateState - Callback to update application state.
+     * @param {(palettes: ColorPalette[]) => void} [storePalettes] - Callback to store color palettes.
+     * @param {(fonts: FontSuggestion[]) => void} [storeFonts] - Callback to store fonts.
+     * @param {(mode: 'none' | 'fonts' | 'colors') => void} [setCanvasMode] - Callback to set canvas mode.
+     * @param {() => BrandDNA} [getDNA] - Callback to get Brand DNA.
+     * @param {(updates: Record<string, any>) => void} [updateBatch] - Callback for batch updates.
+     * @param {() => void} [onPauseVoice] - Callback to pause voice input.
+     * @param {() => void} [onResumeVoice] - Callback to resume voice input.
+     * @param {(phase: 'discovery' | 'execution' | 'modification') => void} [onPhaseChange] - Callback to handle phase changes.
+     * @param {string} [workspaceId='default'] - Workspace identifier.
+     */
     constructor(
         sendToClient: (message: ServerMessage) => void,
         updateState: (field: string, value: any) => void,
@@ -84,17 +97,55 @@ export class ToolHandler {
         this.executionEngine = new ExecutionEngine(workspaceId);
     }
 
+    /**
+     * Sets the conversation history for context awareness.
+     * 
+     * @param {string} history - The conversation history string.
+     */
     public setConversationHistory(history: string): void {
         this.conversationHistory = history;
         console.log(`📝 ToolHandler received ${history.length} chars of conversation history`);
     }
 
+    /**
+     * Handles a batch of function calls from Gemini.
+     * Executes the appropriate tools and matches them to handlers.
+     * 
+     * @param {FunctionCall[]} functionCalls - List of function calls to execute.
+     * @returns {Promise<FunctionResponse[]>} List of results.
+     */
     async handleToolCalls(functionCalls: FunctionCall[]): Promise<FunctionResponse[]> {
         const responses: FunctionResponse[] = [];
 
         for (const fc of functionCalls) {
             console.log(`🔧 Processing tool: ${fc.name}`, JSON.stringify(fc.args || {}));
             let contextSummary = "Action completed.";
+
+            // EMIT START EVENT
+            this.sendToClient({
+                type: 'TOOL_EXECUTION_LOG',
+                status: 'start',
+                id: fc.id,
+                toolName: fc.name,
+                args: fc.args,
+                timestamp: Date.now()
+            });
+
+            // UNIFIED THOUGHT LOGGING: Log every tool execution as a "thought" step
+            // This ensures Canvas Phase (and others) are captured in research_thoughts.json
+            try {
+                const manager = WorkspaceManager.getStateManager(this.workspaceId);
+                manager.appendThought({
+                    id: `tool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    stepIndex: 5, // 5 = Canvas/Modification Phase
+                    nodeId: 'canvas-interaction',
+                    title: `Executing Tool: ${fc.name}`,
+                    content: `Arguments: ${JSON.stringify(fc.args)}`,
+                    timestamp: new Date().toISOString()
+                });
+            } catch (e) {
+                console.warn('Failed to log tool execution thought', e);
+            }
 
             try {
                 // START RESEARCH HANDLER
@@ -139,11 +190,19 @@ export class ToolHandler {
                                 // Also send RESEARCH_UPDATE for step progress
                                 this.sendToClient({
                                     type: 'RESEARCH_UPDATE',
-                                    status: stepIndex < 4 ? 'searching' : 'complete',
+                                    status: stepIndex < 2 ? 'searching' : 'generating',
                                     message: title,
                                     step: stepIndex,  // 0-indexed to match thought IDs (step0-, step1-, etc.)
-                                    totalSteps: 5
+                                    totalSteps: 5,
+                                    thoughts: [{
+                                        id: `step${stepIndex}-${Date.now()}`,
+                                        text: reasoning,
+                                        status: 'complete'
+                                    }]
                                 });
+
+                                // Persistence: Save Thinking Step
+                                DatabaseService.getInstance(this.workspaceId).saveHistory('thinking', reasoning, { nodeId, title, confidence: 0.9 }).catch(e => console.error('Failed to save thinking step:', e));
                             }
                         );
 
@@ -292,8 +351,29 @@ export class ToolHandler {
                     response: { result: contextSummary }
                 });
 
+                // EMIT SUCCESS EVENT
+                this.sendToClient({
+                    type: 'TOOL_EXECUTION_LOG',
+                    status: 'success',
+                    id: fc.id,
+                    toolName: fc.name,
+                    result: contextSummary,
+                    timestamp: Date.now()
+                });
+
             } catch (error) {
                 console.error(`❌ Error in tool ${fc.name}:`, error);
+
+                // EMIT ERROR EVENT
+                this.sendToClient({
+                    type: 'TOOL_EXECUTION_LOG',
+                    status: 'error',
+                    id: fc.id,
+                    toolName: fc.name,
+                    result: error instanceof Error ? error.message : String(error),
+                    timestamp: Date.now()
+                });
+
                 responses.push({
                     id: fc.id,
                     name: fc.name,

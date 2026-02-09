@@ -1,0 +1,83 @@
+{
+    "metadata": {
+        "generated_at": "2026-02-09T16:08:03.572Z",
+        "brand_name": "HECTOR",
+        "palette_used": "Adobe Sunset"
+    },
+    "kit": {
+        "primary": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_primary_transparent.png?v=1770653286456",
+        "inverted": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_inverted_transparent.png?v=1770653286456",
+        "icon": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_icon_transparent.png?v=1770653286456",
+        "icon_inverted": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_icon_inverted_transparent.png?v=1770653286456",
+        "wordmark": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770653286456",
+        "wordmark_inverted": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png?v=1770653286456",
+        "social": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_social_transparent.png?v=1770653286456",
+        "social_inverted": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_social_inverted_transparent.png?v=1770653286456"
+    },
+    "palette": {
+        "name": "Adobe Sunset",
+        "colors": [
+            "#E2725B",
+            "#FFFBF2",
+            "#8E443D",
+            "#F2E9E1",
+            "#5D5C61"
+        ],
+        "vibe": "Utilizing Terracotta as a primary hero color, this palette feels energetic and tactile. The warm cream background ensures the brand remains democratic and approachable, suggesting the warmth of a sunset and the reliability of earth-baked clay rather than the cold efficiency of industrial steel.",
+        "id": "2",
+        "isSelected": true
+    },
+    "brandDNA": {
+        "name": {
+            "value": "HECTOR",
+            "isSelected": true
+        },
+        "mission": {
+            "value": "To provide affordable electric bikes for the vast majority of people in Europe, enabling cleaner energy and competing with brands like Tesla.",
+            "isSelected": true
+        },
+        "voice": {
+            "value": "Inclusive, approachable, and visionary.",
+            "isSelected": true
+        },
+        "values": {
+            "items": [
+                "Sustainability",
+                "Affordability",
+                "Accessibility",
+                "Innovation"
+            ],
+            "isSelected": true
+        },
+        "tagline": {
+            "value": "Clean energy for the many, not the few.",
+            "isSelected": true
+        },
+        "industry": {
+            "value": "Electric Vehicles (E-bikes)",
+            "isSelected": true
+        },
+        "targetAudience": {
+            "items": [
+                "European commuters",
+                "Eco-conscious urban residents",
+                "Value-seeking tech enthusiasts",
+                "Daily travelers looking for cost-effective alternatives"
+            ],
+            "isSelected": true
+        },
+        "mood": {
+            "items": [
+                "clean",
+                "modern",
+                "efficient",
+                "democratic"
+            ],
+            "isSelected": true
+        },
+        "rationale": "HECTOR positions itself as a disruptive force by democratizing sustainable transportation, bridging the gap between high-end EV technology and everyday affordability for the European mass market.",
+        "logoUrl": {
+            "value": "/workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770653286456"
+        }
+    }
+}

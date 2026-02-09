@@ -2,26 +2,54 @@ import { useState, useCallback } from 'react';
 import { Node } from '@xyflow/react';
 
 // Simplified node structure for history (only track position/id)
+/**
+ * Simplified node structure for history tracking.
+ * Only tracks position and ID to save memory.
+ */
 type HistoryNode = {
     id: string;
     position: { x: number; y: number };
 };
 
+/**
+ * A snapshot of the canvas state at a specific point in time.
+ */
 type HistorySnapshot = HistoryNode[];
 
+/**
+ * Return type definition for the useCanvasHistory hook.
+ */
 interface UseCanvasHistoryReturn {
+    /** Stack of past states (undo source). */
     past: HistorySnapshot[];
+    /** Stack of future states (redo source). */
     future: HistorySnapshot[];
+    /** Captures the current state of nodes into the 'past' stack. */
     takeSnapshot: (nodes: Node[]) => void;
+    /** Reverts to the previous state. Returns the restored nodes or null. */
     undo: (currentNodes: Node[]) => Node[] | null;
+    /** Reapplies a reverted state. Returns the restored nodes or null. */
     redo: (currentNodes: Node[]) => Node[] | null;
+    /** Whether undo is available. */
     canUndo: boolean;
+    /** Whether redo is available. */
     canRedo: boolean;
+    /** Clears both undo and redo stacks. */
     clearHistory: () => void;
 }
 
 const MAX_HISTORY = 50;
 
+/**
+ * A hook for managing undo/redo history for canvas nodes.
+ * 
+ * Features:
+ * - Tracks position changes for nodes.
+ * - Supports Undo and Redo operations.
+ * - Caps history size to MAX_HISTORY (50) to prevent memory issues.
+ * 
+ * @returns {UseCanvasHistoryReturn} History management controls.
+ */
 export const useCanvasHistory = (): UseCanvasHistoryReturn => {
     const [past, setPast] = useState<HistorySnapshot[]>([]);
     const [future, setFuture] = useState<HistorySnapshot[]>([]);

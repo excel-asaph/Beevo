@@ -3,24 +3,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     X,
     Brain,
-    Check,
-    Loader,
-    AlertCircle,
-    Eye,
     MessageSquare,
     Settings2,
     Sparkles,
     Bot,
     Mic,
-    MicOff
+    MicOff,
+    History
 } from 'lucide-react';
 import { ThinkingStep, ThinkingPhase } from './ThinkingPanel';
-import { WatcherSettings } from '../Architect/WatcherSettings';
 
-// Tab types
-type ControlCenterTab = 'assistant' | 'thinking' | 'studio' | 'watcher' | 'settings';
+import { useBrandStore } from '../../stores/useBrandStore';
+import { useActivityStore } from '../../stores/useActivityStore';
+import { ActivityItem } from '../ControlCenter/ActivityItem';
 
-// Custom Scrollbar Styles
+/**
+ * Defined tabs available in the Control Center.
+ */
+type ControlCenterTab = 'assistant' | 'thinking' | 'studio' | 'settings';
+
+/**
+ * Custom Scrollbar Styles injected into the component.
+ */
 const scrollbarStyles = `
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
@@ -37,21 +41,36 @@ const scrollbarStyles = `
   }
 `;
 
+/**
+ * Props for the ControlCenter component.
+ */
 interface ControlCenterProps {
+    /** Whether the control center panel is currently visible. */
     isOpen: boolean;
+    /** Callback to close the panel. */
     onClose: () => void;
     // AI Thinking
+    /** Current phase of the AI's reasoning process. */
     thinkingPhase: ThinkingPhase;
+    /** List of steps taken by the AI during its reasoning. */
     thinkingSteps: ThinkingStep[];
     // Mic control
+    /** Whether the microphone is currently muted. */
     isMuted?: boolean;
+    /** Callback to toggle microphone mute state. */
     onToggleMute?: () => void;
     // AI Voice State (from store - matches VoiceOrb)
+    /** Current voice interaction state of the AI. */
     aiVoiceState?: 'idle' | 'listening' | 'thinking' | 'speaking';
     // Connection
+    /** WebSocket connection status. */
     connectionStatus?: 'connected' | 'disconnected' | 'connecting';
     // Transcript
+    /** Conversation transcript history. */
     transcript?: Array<{ role: 'user' | 'ai'; text: string; timestamp?: Date }>;
+    // Actions
+    /** Callback to run initial system setup/initializers. */
+    onRunInitializers?: () => void;
 }
 
 // Inject styles
@@ -73,11 +92,16 @@ const tabs: { id: ControlCenterTab; icon: React.ElementType; label: string }[] =
     { id: 'assistant', icon: Bot, label: 'AI Assistant' },
     { id: 'thinking', icon: Brain, label: 'AI Thinking' },
     { id: 'studio', icon: Sparkles, label: 'Logo Studio' },
-    { id: 'watcher', icon: Eye, label: 'Watcher Config' },
     { id: 'settings', icon: Settings2, label: 'Settings' },
 ];
 
 // Animated AI Eyes Component
+/**
+ * Animated AI Eyes component that blinks and reacts to voice state.
+ * 
+ * @param {Object} props
+ * @param {'idle' | 'listening' | 'speaking'} props.voiceState - The current voice state.
+ */
 const AIEyes: React.FC<{ voiceState: 'idle' | 'listening' | 'speaking' }> = ({ voiceState }) => {
     const [isBlinking, setIsBlinking] = useState(false);
 
@@ -119,6 +143,13 @@ const AIEyes: React.FC<{ voiceState: 'idle' | 'listening' | 'speaking' }> = ({ v
 };
 
 // Voice Waveform Component
+/**
+ * Animated Voice Waveform component.
+ * Displays a set of bars that animate based on the current voice state.
+ * 
+ * @param {Object} props
+ * @param {'idle' | 'listening' | 'speaking'} props.state - The animation state.
+ */
 const VoiceWaveform: React.FC<{ state: 'idle' | 'listening' | 'speaking' }> = ({ state }) => {
     const barCount = 5;
 
@@ -157,6 +188,10 @@ const VoiceWaveform: React.FC<{ state: 'idle' | 'listening' | 'speaking' }> = ({
 };
 
 // AI Assistant Page
+/**
+ * Sub-page: AI Assistant.
+ * Displays the main AI interface with eyes, voice controls, and status.
+ */
 const AIAssistantPage: React.FC<{
     isMuted: boolean;
     onToggleMute: () => void;
@@ -234,79 +269,119 @@ const AIAssistantPage: React.FC<{
     );
 };
 
-// AI Thinking Page
-const AIThinkingPage: React.FC<{
-    phase: ThinkingPhase;
-    steps: ThinkingStep[];
-}> = ({ phase, steps }) => {
-    const isActive = phase !== 'idle';
-    const isComplete = phase === 'complete';
+// AI Thinking Page - Updated to use Activity Store and Grouping (Synced with ThinkingPanel)
+/**
+ * Sub-page: AI Thinking.
+ * Displays a feed of the AI's rigorous reasoning process (activity feed).
+ * Auto-scrolls and groups related activities.
+ */
+const AIThinkingPage: React.FC = () => {
+    const { activities, hydrateActivities } = useActivityStore();
+    const { activeWorkspaceId } = useBrandStore();
+    const [expandedIds, setExpandedIds] = useState<string[]>([]);
+    const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+    // Hydrate logic
+    useEffect(() => {
+        if (activeWorkspaceId) {
+            hydrateActivities(activeWorkspaceId);
+        }
+    }, [activeWorkspaceId, hydrateActivities]);
+
+    // Grouping Logic (Duplicated from ThinkingPanel for now to avoid circular deps or complex refactor)
+    const groupedActivities = React.useMemo(() => {
+        const result: any[] = [];
+        let currentGroup: any | null = null; // Using any to avoid complex type surgery in this file for now
+
+        for (const item of activities) {
+            if (currentGroup && item.title === currentGroup.title) {
+                currentGroup.children = [...(currentGroup.children || []), item];
+                currentGroup.timestamp = item.timestamp;
+                if (item.status === 'running') currentGroup.status = 'running';
+            } else {
+                if (currentGroup) result.push(currentGroup);
+                currentGroup = {
+                    ...item,
+                    children: [item],
+                    isGroup: false
+                };
+            }
+        }
+        if (currentGroup) result.push(currentGroup);
+
+        return result.map(g => {
+            if (g.children && g.children.length > 1) {
+                return { ...g, isGroup: true, id: `group-${g.children[0].id}` };
+            }
+            return g.children ? g.children[0] : g;
+        });
+    }, [activities]);
+
+    // Auto-expand new running items AND Auto-Scroll
+    useEffect(() => {
+        const runningItems = groupedActivities.filter((a: any) => a.status === 'running' || a.status === 'pending');
+        if (runningItems.length > 0) {
+            const latest = runningItems[runningItems.length - 1];
+            if (!expandedIds.includes(latest.id)) {
+                setExpandedIds(prev => [...prev, latest.id]);
+            }
+        }
+        // Auto-scroll to bottom on activity change
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [groupedActivities.length, expandedIds.length]);
+
+    const toggleItem = (id: string) => {
+        setExpandedIds(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
 
     return (
-        <div className="flex-1 flex flex-col p-4">
+        <div className="flex-1 flex flex-col h-full bg-slate-50/50">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold text-gray-700">AI Reasoning</span>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${isActive && !isComplete
-                    ? 'bg-amber-100 text-amber-600'
-                    : isComplete
-                        ? 'bg-emerald-100 text-emerald-600'
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
-                    {phaseLabels[phase]}
-                </span>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white">
+                <div className="flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-indigo-600" />
+                    <span className="text-sm font-semibold text-gray-800">Activity Feed</span>
+                </div>
+                <div className="text-[10px] text-gray-400 font-mono">
+                    {activities.length} Events
+                </div>
             </div>
 
             {/* Steps */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                {steps.length === 0 ? (
-                    <p className="text-xs text-gray-400 text-center py-8">
-                        AI reasoning steps will appear here...
-                    </p>
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {groupedActivities.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
+                        <History className="w-8 h-8 opacity-20" />
+                        <p className="text-xs">No activity history yet.</p>
+                    </div>
                 ) : (
-                    <ul className="space-y-2">
-                        {steps.map((step, i) => (
-                            <motion.li
-                                key={step.id || i}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.03 }}
-                                className="flex items-start gap-2"
-                            >
-                                {step.status === 'active' && (
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                    >
-                                        <Loader className="w-3.5 h-3.5 text-indigo-500 mt-0.5 shrink-0" />
-                                    </motion.div>
-                                )}
-                                {step.status === 'complete' && (
-                                    <Check className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" />
-                                )}
-                                {step.status === 'error' && (
-                                    <AlertCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
-                                )}
-                                {step.status === 'pending' && (
-                                    <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300 mt-0.5 shrink-0" />
-                                )}
-                                <span className={`text-xs leading-relaxed ${step.status === 'active' ? 'text-gray-700' :
-                                    step.status === 'complete' ? 'text-gray-500' :
-                                        step.status === 'error' ? 'text-red-600' :
-                                            'text-gray-400'
-                                    }`}>
-                                    {step.text}
-                                </span>
-                            </motion.li>
+                    <div className="flex flex-col justify-start min-h-0 py-2">
+                        {groupedActivities.map((item: any) => (
+                            <ActivityItem
+                                key={item.id}
+                                item={item}
+                                isExpanded={expandedIds.includes(item.id)}
+                                onToggle={() => toggleItem(item.id)}
+                            />
                         ))}
-                    </ul>
+                        <div ref={messagesEndRef} />
+                    </div>
                 )}
+            </div>
+            {/* Status Bar */}
+            <div className="px-3 py-2 border-t border-gray-100 bg-white text-[10px] text-center text-gray-400 uppercase tracking-wider font-medium">
+                Real-time Connection Active
             </div>
         </div>
     );
 };
 
 // Transcript Modal
+/**
+ * Modal to display the full conversation transcript.
+ */
 const TranscriptModal: React.FC<{
     isOpen: boolean;
     onClose: () => void;
@@ -371,7 +446,9 @@ export const ControlCenter: React.FC<ControlCenterProps> = ({
     onToggleMute = () => { },
     aiVoiceState = 'idle',
     connectionStatus = 'connected',
+
     transcript = [],
+    onRunInitializers,
 }) => {
     const [activeTab, setActiveTab] = useState<ControlCenterTab>('assistant');
     const [showTranscript, setShowTranscript] = useState(false);
@@ -431,10 +508,7 @@ export const ControlCenter: React.FC<ControlCenterProps> = ({
 
                         {/* AI Thinking Page */}
                         {activeTab === 'thinking' && (
-                            <AIThinkingPage
-                                phase={thinkingPhase}
-                                steps={thinkingSteps}
-                            />
+                            <AIThinkingPage />
                         )}
 
                         {/* Logo Studio Page */}
@@ -446,12 +520,7 @@ export const ControlCenter: React.FC<ControlCenterProps> = ({
                             </div>
                         )}
 
-                        {/* Watcher Config Page */}
-                        {activeTab === 'watcher' && (
-                            <div className="flex-1 flex flex-col items-center justify-center p-4">
-                                <WatcherSettings />
-                            </div>
-                        )}
+
 
                         {/* Settings Page */}
                         {activeTab === 'settings' && (

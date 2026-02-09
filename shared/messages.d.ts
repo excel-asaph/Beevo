@@ -30,12 +30,15 @@ export interface InterruptRequestMessage {
 export interface ActivityEndMessage {
     type: 'ACTIVITY_END';
 }
+export interface ActivityStartMessage {
+    type: 'ACTIVITY_START';
+}
 export interface UIStateChangeMessage {
     type: 'UI_STATE_CHANGE';
     mode: 'chat' | 'thinking' | 'canvas';
     overlayVisible: boolean;
 }
-export type ClientMessage = StartSessionMessage | EndSessionMessage | AudioChunkMessage | TextInputMessage | SelectionEventMessage | UpdateDNAMessage | InterruptRequestMessage | ActivityEndMessage | FileUploadMessage;
+export type ClientMessage = StartSessionMessage | EndSessionMessage | AudioChunkMessage | TextInputMessage | SelectionEventMessage | UpdateDNAMessage | InterruptRequestMessage | ActivityEndMessage | ActivityStartMessage | FileUploadMessage;
 export interface FileUploadMessage {
     type: 'FILE_UPLOAD';
     base64: string;
@@ -193,10 +196,39 @@ export interface ResearchCompleteMessage {
     };
     dna: ResearchPhaseObject;
 }
-export type ServerMessage = SessionStartedMessage | SessionEndedMessage | ServerAudioChunkMessage | TranscriptionMessage | FontSuggestionsMessage | ColorSuggestionsMessage | DNAUpdateMessage | InterruptMessage | ToolProcessingStartMessage | ToolProcessingEndMessage | ProgressUpdateMessage | ThoughtMessage | ThinkingStartMessage | ThinkingStreamMessage | ThinkingEndMessage | ErrorMessage | ConnectionStatusMessage | CompetitiveAnalysisMessage | LogoConceptsMessage | AuditResultMessage | LogoResearchProgressMessage | LogoResearchResultMessage | LogoStructureOptionsMessage | ImagerySuggestionsMessage | VaultUpdateMessage | ResearchUpdateMessage | ThoughtSignatureMessage | ResearchCompleteMessage | FullStateUpdateMessage | UIStateChangeMessage;
+export interface ToolExecutionMessage {
+    type: 'TOOL_EXECUTION_LOG';
+    status: 'start' | 'success' | 'error';
+    id: string;
+    toolName: string;
+    args?: any;
+    result?: string;
+    timestamp: number;
+}
+export interface InterventionRequiredMessage {
+    type: 'INTERVENTION_REQUIRED';
+    payload: {
+        count: number;
+        requests: any[];
+    };
+}
+export type ServerMessage = SessionStartedMessage | SessionEndedMessage | ServerAudioChunkMessage | TranscriptionMessage | FontSuggestionsMessage | ColorSuggestionsMessage | DNAUpdateMessage | InterruptMessage | ToolProcessingStartMessage | ToolProcessingEndMessage | ProgressUpdateMessage | ThoughtMessage | ThinkingStartMessage | ThinkingStreamMessage | ThinkingEndMessage | ErrorMessage | ConnectionStatusMessage | CompetitiveAnalysisMessage | LogoConceptsMessage | AuditResultMessage | LogoResearchProgressMessage | LogoResearchResultMessage | LogoStructureOptionsMessage | ImagerySuggestionsMessage | VaultUpdateMessage | ResearchUpdateMessage | ThoughtSignatureMessage | ResearchCompleteMessage | FullStateUpdateMessage | ToolExecutionMessage | UIStateChangeMessage | InterventionRequiredMessage | StateUpdateMessage | AssetUpdateMessage;
 export interface FullStateUpdateMessage {
     type: 'FULL_STATE_UPDATE';
     state: ResearchPhaseObject;
+}
+export interface StateUpdateMessage {
+    type: 'STATE_UPDATE';
+    hash: string;
+    path: string;
+    workspaceId: string;
+    timestamp: number;
+}
+export interface AssetUpdateMessage {
+    type: 'ASSET_UPDATE';
+    resource: string;
+    workspaceId: string;
+    timestamp: number;
 }
 export interface VaultUpdateMessage {
     type: 'VAULT_UPDATE';

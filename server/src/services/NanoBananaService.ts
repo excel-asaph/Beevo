@@ -35,10 +35,19 @@ export interface NanoBananaResult {
     visual_code: string; // The full Tailwind/Grid layout logic
 }
 
+/**
+ * Service for generating high-fidelity visual components using the "Nano Banana" design system.
+ * Orchestrates calls to Gemini to create JSON configurations for various section types (Proof, PAS, Spec, etc.).
+ */
 export class NanoBananaService {
     private client: GoogleGenAI;
     private textModel = MODELS.ARCHITECT_TEXT;
 
+    /**
+     * Initializes the NanoBananaService.
+     * 
+     * @param {string} apiKey - The API key for Google GenAI.
+     */
     constructor(apiKey: string) {
         this.client = new GoogleGenAI({ apiKey });
     }
@@ -56,6 +65,12 @@ export class NanoBananaService {
         `;
     }
 
+    /**
+     * Generates a "Proof" visual section (e.g., statistics, executive dashboard).
+     * 
+     * @param {NanoBananaContext} context - The brand and design context.
+     * @returns {Promise<NanoBananaResult>} The generated visual configuration.
+     */
     async generateProofVisual(context: NanoBananaContext): Promise<NanoBananaResult> {
         const prompt = `
             You are a 'Data Visualization Architect' specializing in high-fidelity "Nano Banana" style Trust Graphics.
@@ -159,6 +174,12 @@ export class NanoBananaService {
         return result;
     }
 
+    /**
+     * Generates a "PAS" (Problem-Agitation-Solution) visual section.
+     * 
+     * @param {NanoBananaContext} context - The brand and design context.
+     * @returns {Promise<any>} The generated visual configuration.
+     */
     async generatePASVisual(context: NanoBananaContext): Promise<any> {
         const prompt = `
             You are a 'Conversion Copywriter' and 'Layout Architect'.
@@ -229,7 +250,19 @@ export class NanoBananaService {
         return JSON.parse(text);
     }
 
-    async refineVisual(current: any, performance: any, context: NanoBananaContext, snapshotBuffer?: Buffer, userFeedback?: string, componentType: string = 'generic'): Promise<any> {
+    /**
+     * Refines an existing visual component based on performance data or user feedback.
+     * 
+     * @param {any} current - The current component configuration.
+     * @param {any} performance - Performance metrics (e.g., dwell time).
+     * @param {NanoBananaContext} context - The brand and design context.
+     * @param {Buffer} [snapshotBuffer] - Optional snapshot of the current component.
+     * @param {string} [userFeedback] - Optional direct user feedback.
+     * @param {string} [componentType='generic'] - The type of component being refined.
+     * @param {Buffer} [videoBuffer] - Optional video buffer for analysis.
+     * @returns {Promise<any>} The refined component configuration.
+     */
+    async refineVisual(current: any, performance: any, context: NanoBananaContext, snapshotBuffer?: Buffer, userFeedback?: string, componentType: string = 'generic', videoBuffer?: Buffer): Promise<any> {
         const parts: any[] = [];
 
         if (snapshotBuffer) {
@@ -237,6 +270,15 @@ export class NanoBananaService {
                 inlineData: {
                     data: snapshotBuffer.toString('base64'),
                     mimeType: 'image/png'
+                }
+            });
+        }
+
+        if (videoBuffer) {
+            parts.push({
+                inlineData: {
+                    data: videoBuffer.toString('base64'),
+                    mimeType: 'video/mp4'
                 }
             });
         }
@@ -273,82 +315,215 @@ export class NanoBananaService {
 
         parts.push({ text: prompt });
 
-        // Build dynamic schema based on componentType
-        const schemaProperties: any = {
-            layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH', 'FORENSIC_GRID', 'MASONRY', 'GRID', 'STACK', 'BLUEPRINT', 'NODES'] },
-            headline: { type: Type.STRING },
-            subhead: { type: Type.STRING },
-            visual_code: { type: Type.STRING }
-        };
+        // Build STRICT full schema based on componentType to prevent partial JSON loss
+        let componentSchema: any = {};
+        let requiredComponentFields: string[] = [];
 
-        const requiredFields = ["layout_strategy", "headline", "subhead", "visual_code"];
+        switch (componentType) {
+            case 'hero':
+                componentSchema = {
+                    variant_id: { type: Type.STRING },
+                    overlay_content: {
+                        type: Type.OBJECT,
+                        properties: {
+                            headline: {
+                                type: Type.OBJECT,
+                                properties: { text: { type: Type.STRING }, styles: { type: Type.OBJECT, properties: { color: { type: Type.STRING } } } },
+                                required: ["text"]
+                            },
+                            subhead: {
+                                type: Type.OBJECT,
+                                properties: { text: { type: Type.STRING }, styles: { type: Type.OBJECT, properties: { color: { type: Type.STRING } } } },
+                                required: ["text"]
+                            },
+                            cta: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    text: { type: Type.STRING },
+                                    action_id: { type: Type.STRING },
+                                    styles: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            backgroundColor: { type: Type.STRING },
+                                            color: { type: Type.STRING }
+                                        }
+                                    }
+                                },
+                                required: ["text", "action_id"]
+                            }
+                        },
+                        required: ["headline", "subhead", "cta"]
+                    },
+                    layout_config: {
+                        type: Type.OBJECT,
+                        properties: {
+                            container_styles: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    justifyContent: { type: Type.STRING },
+                                    alignItems: { type: Type.STRING },
+                                    textAlign: { type: Type.STRING },
+                                    padding: { type: Type.STRING },
+                                    backdropFilter: { type: Type.STRING }
+                                },
+                                required: ["justifyContent", "backdropFilter"]
+                            },
+                            overlay_gradient: { type: Type.STRING }
+                        },
+                        required: ["container_styles", "overlay_gradient"]
+                    },
+                    visual_asset: {
+                        type: Type.OBJECT,
+                        properties: {
+                            prompt_signature: { type: Type.STRING },
+                            attributes: {
+                                type: Type.OBJECT,
+                                properties: {
+                                    lighting: { type: Type.STRING },
+                                    camera_movement: { type: Type.STRING },
+                                    subject_focus: { type: Type.STRING },
+                                    color_grade: { type: Type.STRING }
+                                }
+                            }
+                        },
+                        required: ["prompt_signature"]
+                    }
+                };
+                requiredComponentFields = ["overlay_content", "layout_config", "visual_asset"];
+                break;
 
-        if (componentType === 'proof') {
-            schemaProperties.evidence_items = {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        id: { type: Type.STRING },
-                        label: { type: Type.STRING },
-                        value: { type: Type.STRING },
-                        unit: { type: Type.STRING },
-                        description: { type: Type.STRING },
-                        icon: { type: Type.STRING },
-                        visual_type: { type: Type.STRING }
+            case 'proof':
+                componentSchema = {
+                    layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH', 'FORENSIC_GRID'] },
+                    headline: { type: Type.STRING },
+                    subhead: { type: Type.STRING },
+                    visual_code: { type: Type.STRING },
+                    evidence_items: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                label: { type: Type.STRING },
+                                value: { type: Type.STRING },
+                                unit: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                icon: { type: Type.STRING },
+                                visual_type: { type: Type.STRING }
+                            },
+                            required: ["id", "label", "value"]
+                        }
+                    }
+                };
+                requiredComponentFields = ["layout_strategy", "headline", "visual_code", "evidence_items"];
+                break;
+
+            case 'pas':
+                componentSchema = {
+                    layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH'] },
+                    headline: { type: Type.STRING },
+                    visual_code: { type: Type.STRING },
+                    steps: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                phase: { type: Type.STRING, enum: ['PROBLEM', 'AGITATION', 'SOLUTION'] },
+                                title: { type: Type.STRING },
+                                description: { type: Type.STRING }
+                            },
+                            required: ["id", "phase", "title", "description"]
+                        }
                     },
-                    required: ["id", "label", "value"]
-                }
-            };
-        } else if (componentType === 'social') {
-            schemaProperties.testimonials = {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        id: { type: Type.STRING },
-                        name: { type: Type.STRING },
-                        title: { type: Type.STRING },
-                        company: { type: Type.STRING },
-                        quote: { type: Type.STRING },
-                        image_prompt: { type: Type.STRING }
-                    },
-                    required: ["id", "name", "title", "company", "quote", "image_prompt"]
-                }
-            };
-        } else if (componentType === 'spec') {
-            schemaProperties.nodes = {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        id: { type: Type.STRING },
-                        label: { type: Type.STRING },
-                        description: { type: Type.STRING },
-                        icon: { type: Type.STRING }
-                    },
-                    required: ["id", "label", "description"]
-                }
-            };
-        } else if (componentType === 'offer') {
-            schemaProperties.tiers = {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        id: { type: Type.STRING },
-                        name: { type: Type.STRING },
-                        price: { type: Type.STRING },
-                        interval: { type: Type.STRING },
-                        description: { type: Type.STRING },
-                        features: { type: Type.ARRAY, items: { type: Type.STRING } },
-                        cta_text: { type: Type.STRING },
-                        is_highlighted: { type: Type.BOOLEAN },
-                        badge: { type: Type.STRING }
-                    },
-                    required: ["id", "name", "price", "description", "features", "cta_text"]
-                }
-            };
+                    closing_statement: { type: Type.STRING }
+                };
+                requiredComponentFields = ["layout_strategy", "headline", "visual_code", "steps"];
+                break;
+
+            case 'spec':
+                componentSchema = {
+                    layout_strategy: { type: Type.STRING, enum: ['BLUEPRINT', 'NODES', 'TRIPTYCH'] },
+                    headline: { type: Type.STRING },
+                    subhead: { type: Type.STRING },
+                    visual_code: { type: Type.STRING },
+                    nodes: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                label: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                icon: { type: Type.STRING }
+                            },
+                            required: ["id", "label", "description"]
+                        }
+                    }
+                };
+                requiredComponentFields = ["layout_strategy", "headline", "visual_code", "nodes"];
+                break;
+
+            case 'social':
+                componentSchema = {
+                    layout_strategy: { type: Type.STRING, enum: ['MASONRY', 'GRID', 'STACK'] },
+                    headline: { type: Type.STRING },
+                    subhead: { type: Type.STRING },
+                    visual_code: { type: Type.STRING },
+                    testimonials: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                name: { type: Type.STRING },
+                                title: { type: Type.STRING },
+                                company: { type: Type.STRING },
+                                quote: { type: Type.STRING },
+                                image_prompt: { type: Type.STRING }
+                            },
+                            required: ["id", "name", "title", "company", "quote", "image_prompt"]
+                        }
+                    }
+                };
+                requiredComponentFields = ["layout_strategy", "headline", "visual_code", "testimonials"];
+                break;
+
+            case 'offer':
+                componentSchema = {
+                    layout_strategy: { type: Type.STRING, enum: ['SPLIT', 'CLOUDS', 'TRIPTYCH'] },
+                    headline: { type: Type.STRING },
+                    subhead: { type: Type.STRING },
+                    visual_code: { type: Type.STRING },
+                    tiers: {
+                        type: Type.ARRAY,
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                id: { type: Type.STRING },
+                                name: { type: Type.STRING },
+                                price: { type: Type.STRING },
+                                interval: { type: Type.STRING },
+                                description: { type: Type.STRING },
+                                features: { type: Type.ARRAY, items: { type: Type.STRING } },
+                                cta_text: { type: Type.STRING },
+                                is_highlighted: { type: Type.BOOLEAN },
+                                badge: { type: Type.STRING }
+                            },
+                            required: ["id", "name", "price", "description", "features", "cta_text"]
+                        }
+                    }
+                };
+                requiredComponentFields = ["layout_strategy", "headline", "subhead", "visual_code", "tiers"];
+                break;
+
+            default:
+                // Fallback for generic
+                componentSchema = {
+                    visual_code: { type: Type.STRING },
+                    headline: { type: Type.STRING }
+                };
+                requiredComponentFields = ["visual_code"];
         }
 
         const response = await this.client.models.generateContent({
@@ -362,8 +537,8 @@ export class NanoBananaService {
                         thoughts: { type: Type.STRING },
                         changes: {
                             type: Type.OBJECT,
-                            properties: schemaProperties,
-                            required: requiredFields
+                            properties: componentSchema,
+                            required: requiredComponentFields
                         },
                         confidence: { type: Type.NUMBER }
                     },
@@ -389,6 +564,12 @@ export class NanoBananaService {
         }
     }
 
+    /**
+     * Generates a "Spec" visual section (technical blueprint/features).
+     * 
+     * @param {NanoBananaContext} context - The brand and design context.
+     * @returns {Promise<any>} The generated visual configuration.
+     */
     async generateSpecVisual(context: NanoBananaContext): Promise<any> {
         const prompt = `
             You are a 'Technical Product Architect' and 'Interaction Designer'.
@@ -468,6 +649,12 @@ export class NanoBananaService {
         return JSON.parse(text);
     }
 
+    /**
+     * Generates a "Social" visual section (testimonials, social proof).
+     * 
+     * @param {NanoBananaContext} context - The brand and design context.
+     * @returns {Promise<any>} The generated visual configuration.
+     */
     async generateSocialVisual(context: NanoBananaContext): Promise<any> {
         const prompt = `
             You are a 'Social Proof Architect'.
@@ -489,6 +676,12 @@ export class NanoBananaService {
                - Use the chosen layout strategy.
                - Ensure high contrast and professional executive look.
                - Center-align the section headline.
+            
+               - **CRITICAL**: Return valid HTML string (e.g. <div class="...">...</div>). DO NOT return CSS rules, style blocks, or markdown.
+               - **IMAGES**: You MUST use an <img> tag for the testimonial persona. 
+                 - Src Format: src="{id}_url" (e.g. src="testimonial_001_url"). 
+                 - Class: rounded-full or similar.
+                 - DO NOT use background-image on a div. DO NOT use empty divs for avatars.
             
             **DESIGN GUARDRAILS**:
             - NO underscores in names or titles.
@@ -539,6 +732,12 @@ export class NanoBananaService {
         return JSON.parse(text);
     }
 
+    /**
+     * Generates an "Offer" visual section (pricing tiers, CTA).
+     * 
+     * @param {NanoBananaContext} context - The brand and design context.
+     * @returns {Promise<any>} The generated visual configuration.
+     */
     async generateOfferVisual(context: NanoBananaContext): Promise<any> {
         const prompt = `
             You are a 'Conversion Rate Optimization (CRO) Expert' and 'Venture Strategist'.

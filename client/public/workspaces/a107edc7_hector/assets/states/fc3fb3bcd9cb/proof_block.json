@@ -1,0 +1,53 @@
+{
+    "id": "proof_section_v1",
+    "variant_id": "proof_v1770659948858",
+    "meta": {
+        "strategy": "Disruptive Democratization: Bridging high-end EV performance with European mass-market accessibility through forensic transparency.",
+        "tone": "Inclusive, approachable, and visionary.",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "The Soft Urbanist",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "ARCHITECTURAL BENCHMARKS",
+        "subhead": "The quantifiable reality of Hector engineering, verified through rigorous technical validation.",
+        "graphic_caption": "Comparative Analysis: Series 1 Performance Matrix vs. Urban Standard (2024)",
+        "evidence_items": [
+            {
+                "id": "eff-01",
+                "label": "Charge Efficiency",
+                "value": "0.12",
+                "unit": "€",
+                "visual_type": "data-node"
+            },
+            {
+                "id": "carb-02",
+                "label": "Carbon Displacement",
+                "value": "98",
+                "unit": "%",
+                "visual_type": "data-node"
+            },
+            {
+                "id": "rel-03",
+                "label": "System Reliability",
+                "value": "99.4",
+                "unit": "%",
+                "visual_type": "data-node"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "primary_color": "#E2725B",
+        "accent_color": "#8E443D",
+        "show_labels": true,
+        "animation_duration": 1.5,
+        "visual_code": "<div class='w-full bg-[#FFFBF2] py-32 px-6 font-[\"Montserrat\"] text-[#5D5C61]'><div class='max-w-7xl mx-auto'><div class='flex flex-col items-center text-center mb-24'><div class='inline-block px-4 py-1 border border-[#E2725B]/30 text-[10px] tracking-[0.4em] text-[#E2725B] font-bold mb-6 uppercase rounded-full'>Validation Protocol 24.1</div><h2 class='text-6xl font-black tracking-tighter mb-6 text-[#8E443D] uppercase italic'>Performance Core</h2><p class='max-w-2xl text-sm leading-relaxed opacity-70'>Standardized technical telemetry from the Series 1 H-CORE environment. Precision metrics validated through 1.2M kilometers of synthetic urban stress testing.</p></div><div class='grid grid-cols-1 md:grid-cols-3 gap-12'><div class='relative p-8 border-l border-[#E2725B]/20 flex flex-col justify-between group hover:border-[#E2725B] transition-colors duration-500'><span class='absolute top-0 left-0 w-2 h-px bg-[#E2725B]'></span><div class='mb-12'><div class='text-[10px] font-mono text-[#E2725B] mb-8 uppercase tracking-[0.3em]'>Energy Matrix</div><div class='flex items-baseline gap-2 mb-2'><span class='text-8xl font-black text-[#5D5C61] tracking-tighter'>0.12</span><span class='text-3xl font-bold text-[#E2725B]'>€</span></div><div class='text-xs font-bold uppercase tracking-widest text-[#8E443D]'>Charge Efficiency</div></div><p class='text-xs leading-relaxed opacity-60 mb-8 font-medium'>Calculated cost-per-kilometer based on average EU energy tariffs. Represents 88% improvement over B-segment internal combustion engines.</p><div class='h-1 w-full bg-[#E2725B]/5 overflow-hidden'><div class='h-full bg-[#E2725B] w-[94%]'></div></div></div><div class='relative p-8 border-l border-[#E2725B]/20 flex flex-col justify-between group hover:border-[#E2725B] transition-colors duration-500'><span class='absolute top-0 left-0 w-2 h-px bg-[#E2725B]'></span><div class='mb-12'><div class='text-[10px] font-mono text-[#E2725B] mb-8 uppercase tracking-[0.3em]'>Eco Displacement</div><div class='flex items-baseline gap-2 mb-2'><span class='text-8xl font-black text-[#5D5C61] tracking-tighter'>98</span><span class='text-3xl font-bold text-[#E2725B]'>%</span></div><div class='text-xs font-bold uppercase tracking-widest text-[#8E443D]'>Carbon Reduction</div></div><p class='text-xs leading-relaxed opacity-60 mb-8 font-medium'>Net reduction in tailpipe emissions and manufacturing friction vs. urban standard (2024). Lifecycle analysis via ISO 14064 methodology.</p><div class='h-1 w-full bg-[#E2725B]/5 overflow-hidden'><div class='h-full bg-[#E2725B] w-[98%]'></div></div></div><div class='relative p-8 border-l border-[#E2725B]/20 flex flex-col justify-between group hover:border-[#E2725B] transition-colors duration-500'><span class='absolute top-0 left-0 w-2 h-px bg-[#E2725B]'></span><div class='mb-12'><div class='text-[10px] font-mono text-[#E2725B] mb-8 uppercase tracking-[0.3em]'>Logic Reliability</div><div class='flex items-baseline gap-2 mb-2'><span class='text-8xl font-black text-[#5D5C61] tracking-tighter'>99.4</span><span class='text-3xl font-bold text-[#E2725B]'>%</span></div><div class='text-xs font-bold uppercase tracking-widest text-[#8E443D]'>System Integrity</div></div><p class='text-xs leading-relaxed opacity-60 mb-8 font-medium'>Diagnostic uptime across triple-redundant logic gates. Continuous H-CORE telemetry monitoring ensures zero-latency safety intervention.</p><div class='h-1 w-full bg-[#E2725B]/5 overflow-hidden'><div class='h-full bg-[#E2725B] w-[99.4%]'></div></div></div></div><div class='mt-24 pt-8 border-t border-[#E2725B]/10 flex justify-between items-center'><div class='text-[8px] font-mono uppercase tracking-[0.4em] opacity-40'>System Status: Operational // All modules nominal</div><div class='flex gap-4'><div class='w-1 h-1 rounded-full bg-[#E2725B] animate-ping'></div><div class='text-[8px] font-mono uppercase tracking-[0.4em] text-[#E2725B]'>Receiving Live Telemetry</div></div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#FFFBF2",
+        "color": "#5D5C61",
+        "fontFamily": "Montserrat"
+    },
+    "layout_strategy": "TRIPTYCH"
+}

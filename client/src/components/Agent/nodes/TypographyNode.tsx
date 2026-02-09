@@ -3,22 +3,41 @@ import { NodeProps, Handle, Position } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Type, Check, RefreshCw, Lock } from 'lucide-react';
 
+/**
+ * Represents a font option within the TypographyNode.
+ */
 export interface FontOption {
+    /** Unique identifier. */
     id: string;
+    /** Font family name. */
     name: string;
+    /** Font category. */
     category: 'serif' | 'sans-serif' | 'display' | 'monospace';
+    /** Recommended pairing font. */
     pairing?: string;
+    /** Custom preview text (optional). */
     preview?: string;
+    /** AI reasoning for the suggestion. */
     reasoning?: string;
+    /** Selection state. */
     isSelected?: boolean;
 }
 
+/**
+ * Data structure for the TypographyNode.
+ */
 export interface TypographyNodeData {
+    /** Label text for the node header. */
     label: string;
+    /** Current state of the node. */
     status: 'empty' | 'options' | 'saved' | 'locked';
+    /** List of font options (when status is 'options'). */
     options?: FontOption[];
+    /** List of selected/saved fonts. */
     selectedFonts?: FontOption[];
+    /** Callback triggered when a font is selected. */
     onSelect?: (fontId: string, context?: FontOption) => void;
+    /** Callback triggered when the "Regenerate" button is clicked. */
     onRegenerate?: () => void;
 }
 
@@ -29,6 +48,16 @@ const categoryColors: Record<string, string> = {
     'monospace': 'bg-emerald-100 text-emerald-700',
 };
 
+/**
+ * A custom Node component for ReactFlow that handles font recommendations.
+ * 
+ * Features:
+ * - Dynamic font loading from Google Fonts.
+ * - Preview text rendering.
+ * - Selection management.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const TypographyNode: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as TypographyNodeData;
     const [hoveredFont, setHoveredFont] = useState<string | null>(null);

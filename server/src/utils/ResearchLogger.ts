@@ -5,10 +5,21 @@ import * as path from 'path';
  * ResearchLogger - Detailed logging for research phases
  * Captures: Inputs, Tool Calls, Outputs, UI Messages
  */
+/**
+ * ResearchLogger - Detailed logging for research phases
+ * Captures: Inputs, Tool Calls, Outputs, UI Messages
+ * Logs are written to `research_debug.log` in the current working directory.
+ */
 export class ResearchLogger {
     private static logPath = path.join(process.cwd(), 'research_debug.log');
     private static sessionId = Date.now().toString(36);
 
+    /**
+     * Starts a new research logging session with a header.
+     * 
+     * @param {string} brandName - The name of the brand.
+     * @param {string} industry - The industry of the brand.
+     */
     static startSession(brandName: string, industry: string) {
         const header = `
 ╔════════════════════════════════════════════════════════════════════╗
@@ -22,6 +33,12 @@ export class ResearchLogger {
         fs.writeFileSync(this.logPath, header);
     }
 
+    /**
+     * Logs the start of a new phase.
+     * 
+     * @param {number} phaseIndex - The index of the phase.
+     * @param {string} phaseName - The name of the phase.
+     */
     static phase(phaseIndex: number, phaseName: string) {
         const divider = `
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -32,42 +49,96 @@ export class ResearchLogger {
         this.append(divider);
     }
 
+    /**
+     * Logs input data.
+     * 
+     * @param {string} label - Label for the input.
+     * @param {any} value - The input value.
+     */
     static input(label: string, value: any) {
         const formatted = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
         this.append(`📥 INPUT [${label}]:\n${formatted}\n`);
     }
 
+    /**
+     * Logs a tool call.
+     * 
+     * @param {string} toolName - The name of the tool.
+     * @param {any} args - The arguments passed to the tool.
+     */
     static toolCall(toolName: string, args: any) {
         this.append(`🔧 TOOL CALL: ${toolName}`);
         this.append(`   Arguments: ${JSON.stringify(args, null, 2)}\n`);
     }
 
+    /**
+     * Logs a tool result.
+     * 
+     * @param {string} toolName - The name of the tool.
+     * @param {any} result - The result returned by the tool.
+     */
     static toolResult(toolName: string, result: any) {
         const formatted = typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result);
         this.append(`✅ TOOL RESULT [${toolName}]:\n${formatted.slice(0, 2000)}${formatted.length > 2000 ? '...[TRUNCATED]' : ''}\n`);
     }
 
+    /**
+     * Logs an AI prompt.
+     * 
+     * @param {string} purpose - The purpose of the prompt.
+     * @param {string} prompt - The prompt text.
+     */
     static aiPrompt(purpose: string, prompt: string) {
         this.append(`🤖 AI PROMPT [${purpose}]:\n${prompt.slice(0, 1500)}${prompt.length > 1500 ? '...[TRUNCATED]' : ''}\n`);
     }
 
+    /**
+     * Logs an AI response.
+     * 
+     * @param {string} purpose - The purpose of the response.
+     * @param {string} response - The response text.
+     */
     static aiResponse(purpose: string, response: string) {
         this.append(`🤖 AI RESPONSE [${purpose}]:\n${response.slice(0, 2000)}${response.length > 2000 ? '...[TRUNCATED]' : ''}\n`);
     }
 
+    /**
+     * Logs a UI message.
+     * 
+     * @param {string} type - The type of UI message.
+     * @param {any} data - The message data.
+     */
     static uiMessage(type: string, data: any) {
         this.append(`📤 UI MESSAGE [${type}]:\n${JSON.stringify(data, null, 2)}\n`);
     }
 
+    /**
+     * Logs output data.
+     * 
+     * @param {string} label - Label for the output.
+     * @param {any} value - The output value.
+     */
     static output(label: string, value: any) {
         const formatted = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
         this.append(`📦 OUTPUT [${label}]:\n${formatted}\n`);
     }
 
+    /**
+     * Logs a thought step.
+     * 
+     * @param {number} stepIndex - The step index.
+     * @param {string} text - The thought text.
+     */
     static thought(stepIndex: number, text: string) {
         this.append(`💭 THOUGHT [Step ${stepIndex}]: ${text}`);
     }
 
+    /**
+     * Logs an error.
+     * 
+     * @param {string} context - The context where the error occurred.
+     * @param {any} error - The error object or message.
+     */
     static error(context: string, error: any) {
         this.append(`❌ ERROR [${context}]: ${error?.message || error}\n${error?.stack || ''}\n`);
     }

@@ -10,6 +10,9 @@ import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
 import { MediaService } from '../services/MediaService.js';
+import { AgentLogger } from '../utils/AgentLogger.js';
+
+import { NanoBananaService } from '../services/NanoBananaService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,9 +24,22 @@ const WATCHER_MODEL = MODELS.ARCHITECT_TEXT;
 
 puppeteer.use(StealthPlugin());
 
+/**
+ * HeroWatcher Agent
+ * 
+ * Responsibilities:
+ * - Monitors the performance of the Hero Section (Views, CTR, Retention).
+ * - Takes snapshots of the live landing page for visual analysis.
+ * - analyzes performance data against configured thresholds.
+ * - Proposes optimizations (Copy, Visuals, Video) using AI reasoning.
+ * - Interacts with Human-In-The-Loop (HITL) for approval if configured.
+ * - Stages approved changes and triggers asset baking (Veo) if needed.
+ */
 export class HeroWatcher {
     private client: GoogleGenAI;
     private workspaceId: string;
+    private nanoBanana: NanoBananaService;
+    private logger: AgentLogger;
 
     // Dynamic Paths
     private metricsFile: string;
@@ -34,9 +50,12 @@ export class HeroWatcher {
     private assetsDir: string;
     // activePath and liveFile are determined at runtime via config
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
-        this.client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+        const apiKey = process.env.GEMINI_API_KEY || '';
+        this.client = new GoogleGenAI({ apiKey });
+        this.nanoBanana = new NanoBananaService(apiKey);
+        this.logger = new AgentLogger('Hero Watcher', workspaceId, onLog);
 
         const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
         const baseClientPath = path.resolve(__dirname, `../../../client/public/workspaces/${workspaceId}`);
@@ -49,8 +68,12 @@ export class HeroWatcher {
         this.assetsDir = path.join(baseClientPath, 'assets');
     }
 
+    /**
+     * Captures a visual snapshot of the current live landing page using Puppeteer.
+     * @returns {Promise<Buffer | null>} The screenshot buffer or null if failed.
+     */
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log(`📸 [${this.workspaceId}] Hero Watcher: Capturing live snapshot...`);
+        this.logger.info("Snapshot", "Capturing live landing page snapshot...");
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
@@ -69,15 +92,25 @@ export class HeroWatcher {
 
             return Buffer.from(screenshot);
         } catch (e) {
-            console.error("❌ Snapshot failed (Is Client Running?):", e);
+            this.logger.error("Snapshot Failed", `Error: ${e}`);
             return null;
         } finally {
             if (browser) await browser.close();
         }
     }
 
+    /**
+     * Main execution loop for the Watcher.
+     * 1. Loads configuration and live data.
+     * 2. Checks performace thresholds.
+     * 3. Triggers HITL pre-approval if enabled.
+     * 4. Analyses visual and performance context using AI.
+     * 5. Generates optimization proposals.
+     * 6. Triggers HITL post-approval if enabled.
+     * 7. Stages changes and bakes assets (Veo) if required.
+     */
     async analyzeAndOptimize() {
-        console.log(`🕵️ [${this.workspaceId}] Hero Watcher Agent: Waking up...`);
+        this.logger.start("Watcher Active", "Hero Watcher analysis started.");
 
         // 1. Load Data
         const configService = SystemConfigFactory.getInstance(this.workspaceId);
@@ -120,7 +153,7 @@ export class HeroWatcher {
             }
 
             videoBuffer = await fs.readFile(videoPath).catch(() => null);
-            if (videoBuffer) console.log("📺 HeroWatcher: Contextual Video Loaded.");
+            if (videoBuffer) this.logger.info("Context Loaded", "Current video asset loaded for analysis.");
         }
 
         const activeVariantId = currentHero.id || 'hero_section_v1';
@@ -128,13 +161,13 @@ export class HeroWatcher {
 
         // 0. Check Lock
         if (config.locks.hero) {
-            console.log("🔒 Hero Section is LOCKED. Skipping optimization.");
+            this.logger.info("Skipping", "Hero Section is LOCKED.");
             return;
         }
 
         // 1. Data Analysis (Threshold Check)
         if (!data || (data.views || 0) < config.sections.hero.min_views_data) {
-            console.log(`🕵️ Hero Watcher: Not enough data for ${activeVariantId}. Views: ${data?.views || 0}`);
+            this.logger.info("Skipping", `Insufficient data (Views: ${data?.views || 0})`);
             return;
         }
 
@@ -144,27 +177,37 @@ export class HeroWatcher {
         const ctr = (clicks / views);
         const retentionRate = (retention / views);
 
-        console.log(`📊 PERF: CTR=${(ctr * 100).toFixed(1)}% | RET=${(retentionRate * 100).toFixed(1)}%`);
+        this.logger.info("Metrics Analysis", `CTR: ${(ctr * 100).toFixed(1)}% | Retention: ${(retentionRate * 100).toFixed(1)}%`);
 
         // 2.5 CHECK THRESHOLDS
         if (ctr >= config.sections.hero.target_ctr && retentionRate >= config.sections.hero.target_retention) {
-            console.log("🏆 Hero is performing above targets. No action needed.");
+            this.logger.success("Optimization Unnecessary", "Hero is performing above targets.");
             return;
         }
 
         // 🟢 GATE 1: PRE-APPROVAL
-        console.log("🚦 Triggering Pre-Optimization Gate...");
-        const preCheck = await notificationClient.requestApproval(
-            'Hero Section',
-            'PRE_GENERATION',
-            `Hero metrics are low (CTR: ${ctr.toFixed(1)}% vs Target ${config.sections.hero.target_ctr}%). Attempt optimization?`,
-            undefined, // No proposal yet
-            this.workspaceId
-        );
+        // CHECK MASTER SWITCH & PRE-GATE
+        const hitlEnabled = config.hitl.enabled;
+        const requirePre = config.hitl.require_approval_pre;
+        let preCheckFeedback = "";
 
-        if (!preCheck.approved) {
-            console.log("🛑 User rejected optimization. Aborting.");
-            return;
+        if (hitlEnabled && requirePre) {
+            this.logger.info("HITL Gate", "Triggering Pre-Optimization Approval...");
+            const preCheck = await notificationClient.requestApproval(
+                'Hero Section',
+                'PRE_GENERATION',
+                `Hero metrics are low (CTR: ${ctr.toFixed(1)}% vs Target ${config.sections.hero.target_ctr}%). Attempt optimization?`,
+                undefined, // No proposal yet
+                this.workspaceId
+            );
+
+            if (!preCheck.approved) {
+                this.logger.info("Aborted", "User rejected optimization request.");
+                return;
+            }
+            preCheckFeedback = preCheck.feedback || "";
+        } else {
+            console.log("⏩ HITL Pre-Gate skipped (Auto-Pilot active).");
         }
 
         // 3. Prepare Visuals (Multi-Modal)
@@ -204,10 +247,10 @@ export class HeroWatcher {
                - **FORENSIC AUDIT**: Describe what you see in the snapshot.
                - **READABILITY**: Does the text blend into the background? Check contrast (Target: 4.5:1).
                - **RETAIN**: Why are users failing to click or stay based on the video?
-            3. **Diagnose**: 
+            2. **Diagnose**: 
                - If Contrast < 4.5:1: Use a lighter/darker color from palette OR add backdrop blur.
                - If Retention < 40%: Refine the video movement/subject.
-            4. **Mutate**: Propose a Specific Fix.
+            3. **Mutate**: Propose a Specific Fix.
             
             **OUTPUT JSON**:
             {
@@ -233,18 +276,33 @@ export class HeroWatcher {
         parts.push({ text: prompt });
 
         // 5. Generate
-        console.log(`🧠 Thinking with ${WATCHER_MODEL}...`);
+        this.logger.info("Reasoning", `Thinking with ${WATCHER_MODEL}...`);
         try {
-            const result = await this.client.models.generateContent({
-                model: WATCHER_MODEL,
-                contents: [{ role: 'user', parts }],
-                config: {
-                    responseMimeType: "application/json"
-                }
-            });
+            // REMOVED: Redundant "Zombie" API Call that caused Rate Limiting.
+            // We now pass content directly to NanoBananaService.
 
-            const combinedFeedback = [config.feedback.hero_directive, preCheck.feedback].filter(Boolean).join('. ');
-            const optimization = await this.nanoBanana.refineVisual(currentHero, performance, context, snapshotBuffer || undefined, combinedFeedback, 'hero');
+            // Construct Context Objects for NanoBanana
+            const performance = { ctr, retentionRate, views };
+
+            const context = {
+                brandName: researchCtx.brandDNA?.name?.value || "Our Brand",
+                mission: researchCtx.brandDNA?.mission?.value || "",
+                rationale: researchCtx.brandDNA?.rationale?.value || researchCtx.brandDNA?.rationale || "",
+                mood: researchCtx.brandDNA?.mood?.items || [],
+                colors: researchCtx.colorPalettes?.palettes?.filter((p: any) => p.isSelected).flatMap((p: any) => p.colors) || [],
+                fonts: researchCtx.typographyPairings?.fonts?.filter((f: any) => f.isSelected).map((f: any) => f.name) || [],
+                imagery: researchCtx.imagery?.suggestions?.filter((i: any) => i.isSelected).map((i: any) => ({
+                    concept: i.concept,
+                    description: i.description,
+                    visualStyle: i.visualStyle
+                })) || []
+            };
+
+            const combinedFeedback = [config.feedback.hero_directive, preCheckFeedback].filter(Boolean).join('. ');
+
+            // Pass videoBuffer as the last argument
+            const optimization = await this.nanoBanana.refineVisual(currentHero, performance, context, snapshotBuffer || undefined, combinedFeedback, 'hero', videoBuffer || undefined);
+
             console.log("\n🧠 WATCHER DIAGNOSIS:\n", optimization.thoughts);
             console.log("\n💡 PROPOSED FIX:", optimization.changes);
 
@@ -252,82 +310,93 @@ export class HeroWatcher {
             if (optimization.confidence > config.sections.hero.watcher_confidence_min) {
 
                 // 🟢 GATE 2: POST-APPROVAL
-                console.log("🚦 Triggering Post-Optimization Gate...");
-                const postCheck = await notificationClient.requestApproval(
-                    'Hero Section',
-                    'POST_GENERATION',
-                    `New Hero Strategy Ready (Confidence: ${optimization.confidence}%). Deploy to Challenger & Bake Video?`,
-                    optimization,
-                    this.workspaceId
-                );
+                const requirePost = config.hitl.require_approval_post;
 
-                if (!postCheck.approved) {
-                    console.log("🛑 User rejected deployment. Aborting.");
-                    return;
+                if (hitlEnabled && requirePost) {
+                    this.logger.info("HITL Gate", "Triggering Post-Optimization Approval...");
+                    const postCheck = await notificationClient.requestApproval(
+                        'Hero Section',
+                        'POST_GENERATION',
+                        `New Hero Strategy Ready (Confidence: ${optimization.confidence}%). Deploy to Challenger & Bake Video?`,
+                        optimization,
+                        this.workspaceId
+                    );
+
+                    if (!postCheck.approved) {
+                        this.logger.info("Aborted", "User rejected deployment.");
+                        return;
+                    }
+                } else {
+                    console.log("⏩ HITL Post-Gate skipped (Auto-Pilot active).");
                 }
 
+                const newVariantId = `hero_v${Date.now()}`;
+
+                // CRITICAL FIX: Do NOT partial merge. Use the FULL schema from AI.
+                // The AI now returns the ENTIRE component structure in `optimization.changes`
                 const newHero = {
-                    ...currentHero,
-                    variant_id: `hero_v${Date.now()}`,
-                    overlay_content: {
-                        ...currentHero.overlay_content,
-                        headline: {
-                            ...(currentHero.overlay_content?.headline || {}),
-                            text: optimization.changes.headline,
-                            styles: {
-                                ...(currentHero.overlay_content?.headline?.styles || {}),
-                                color: optimization.changes.visual_fixes?.headline_color || currentHero.overlay_content?.headline?.styles?.color || '#ffffff'
-                            }
-                        },
-                        subhead: {
-                            ...(currentHero.overlay_content?.subhead || {}),
-                            text: optimization.changes.subhead,
-                            styles: {
-                                ...(currentHero.overlay_content?.subhead?.styles || {}),
-                                color: optimization.changes.visual_fixes?.subhead_color || currentHero.overlay_content?.subhead?.styles?.color || '#ffffff'
-                            }
-                        },
-                        cta: {
-                            ...currentHero.overlay_content.cta,
-                            text: optimization.changes.cta_text
-                        }
-                    },
-                    layout_config: {
-                        ...currentHero.layout_config,
-                        overlay_gradient: optimization.changes.visual_fixes?.overlay_gradient || currentHero.layout_config.overlay_gradient,
-                        container_styles: {
-                            ...currentHero.layout_config.container_styles,
-                            backdropFilter: optimization.changes.visual_fixes?.container_blur || currentHero.layout_config.container_styles.backdropFilter
-                        }
-                    },
-                    visual_asset: {
-                        ...currentHero.visual_asset,
-                        prompt_signature: optimization.changes.video_prompt
-                    }
+                    ...currentHero,          // PRESERVE navigation, forms, styles, etc.
+                    ...optimization.changes, // OVERWRITE with full AI-generated content
+                    id: currentHero.id,      // Preserve System ID
+                    variant_id: newVariantId, // New Variant ID
+                    meta: currentHero.meta   // Preserve Meta
                 };
+
+                // Ensure visual_asset has the source_url from the previous state (initially)
+                // The AI returns 'prompt_signature' and 'attributes' but not the file path
+                if (!newHero.visual_asset) newHero.visual_asset = {};
+                newHero.visual_asset.source_url = currentHero.visual_asset?.source_url;
+                newHero.visual_asset.source_id = currentHero.visual_asset?.source_id;
+
+                // Map the video prompt correctly if the AI put it in visual_code (fallback)
+                const finalPrompt = newHero.visual_asset.prompt_signature || optimization.changes.visual_code;
+                newHero.visual_asset.prompt_signature = finalPrompt;
 
                 // NEW: Write to STAGING instead of Live. 
                 // The Coordinator (run_watchers.ts) will "Seal" this change.
+                const newHeroWithPrompt = newHero;
+
                 await fs.mkdir(path.dirname(this.stagingFile), { recursive: true });
-                await fs.writeFile(this.stagingFile, JSON.stringify(newHero, null, 4));
+                await fs.writeFile(this.stagingFile, JSON.stringify(newHeroWithPrompt, null, 4));
                 await fs.writeFile(this.decisionPath, JSON.stringify(optimization, null, 4));
-                console.log("🚀 Proposed changes written to STAGING. Pending Sealing.");
+                this.logger.success("Staged", "Proposed changes written to STAGING. Pending Sealing.");
 
                 // NEW: Automatic "Bake" Loop
-                if (optimization.fix_type === 'VIDEO' || optimization.fix_type === 'VISUAL') {
-                    console.log("🔥 Fix type is VIDEO/VISUAL. Triggering Asset Bake (Veo)...");
-                    await this.bakeVideo(newHero, newHero.variant_id);
+                let fixType = optimization.fix_type;
+                if (!fixType && finalPrompt) {
+                    fixType = 'VISUAL';
+                    console.log("⚠️ Fix Type missing but visual prompt present. Inferring VISUAL mode.");
+                }
+                console.log(`🔎 Optimization Fix Type: ${fixType}`);
+
+                if (fixType === 'VIDEO' || fixType === 'VISUAL') {
+                    this.logger.info("Baking Asset", "Fix type is VIDEO/VISUAL. Triggering Asset Bake (Veo)...");
+                    // Pass the NEW variant ID to bakeVideo so assets are stored in the correct history folder
+                    try {
+                        await this.bakeVideo(newHeroWithPrompt, newVariantId);
+                    } catch (bakeErr) {
+                        this.logger.error("Bake Failed", `Critical: ${bakeErr}`);
+                    }
+                } else {
+                    this.logger.info("Text Only", "Running in TEXT-ONLY mode (no video bake).");
                 }
 
             } else {
-                console.log("⚠️ Confidence too low. No changes made.");
+                this.logger.info("No Change", "Confidence too low.");
             }
 
         } catch (error) {
-            console.error("❌ Watcher Error:", error);
+            this.logger.error("Watcher Error", `Critical: ${error}`);
         }
     }
 
+    /**
+     * Bakes a video asset using Veo based on the generate configuration.
+     * Archives the result and updates the staging file.
+     * 
+     * @param {any} config - The staged hero block configuration.
+     * @param {string} variantId - The ID of the new variant.
+     */
     private async bakeVideo(config: any, variantId: string) {
         const attrs = config.visual_asset?.attributes || {};
         const prompt = config.visual_asset?.prompt_signature;
@@ -342,7 +411,7 @@ export class HeroWatcher {
         `;
 
         try {
-            console.log("🎥 Connecting to Veo...");
+            this.logger.info("Veo Connectivity", "Connecting to Veo...");
             // @ts-ignore
             let operation = await this.client.models.generateVideos({
                 model: MODELS.FORGE_VIDEO_HQ,
@@ -351,7 +420,7 @@ export class HeroWatcher {
             });
 
             while (!operation.done) {
-                console.log("...Generating Asset (Waiting 5s)...")
+                this.logger.info("Generative Process", "Generating Asset (Waiting 5s)...");
                 await new Promise((resolve) => setTimeout(resolve, 5000));
                 // @ts-ignore
                 operation = await this.client.operations.getVideosOperation({ operation });
@@ -374,13 +443,17 @@ export class HeroWatcher {
             const currentStaging = JSON.parse(stagingRaw);
             currentStaging.visual_asset = {
                 ...currentStaging.visual_asset,
-                source_url: browserPath
+                source_url: browserPath, // Use the new path returned by MediaService
+                source_id: `veo_asset_${variantId}`,
+                attributes: attrs,
+                prompt_signature: prompt
             };
-            await fs.writeFile(this.stagingFile, JSON.stringify(currentStaging, null, 4));
 
-            console.log(`✅ Success! Video baked and staging updated: ${browserPath}`);
+            await fs.writeFile(this.stagingFile, JSON.stringify(currentStaging, null, 4));
+            this.logger.success("Bake Complete", `Staging updated with new video: ${browserPath}`);
+
         } catch (error) {
-            console.error("❌ Video Bake Failed:", error);
+            this.logger.error("Bake Failed", `Error: ${error}`);
         }
     }
 }

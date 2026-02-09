@@ -3,20 +3,31 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { AgentLogger } from '../utils/AgentLogger.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
+/**
+ * Initial Offer Generator Agent
+ * 
+ * Responsibilities:
+ * - Generates the initial Offer Section based on Brand Research.
+ * - Crafts pricing tiers, guarantees, and headlines.
+ * - Uses NanoBanana service for high-level strategy and visual coding.
+ * - Stages the generated offer block.
+ */
 export class InitialOfferGenerator {
     private nanoBanana: NanoBananaService;
     private workspaceId: string;
 
     private researchPath: string;
     private outputPath: string;
+    private logger: AgentLogger;
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY is missing");
@@ -26,10 +37,19 @@ export class InitialOfferGenerator {
         const baseBrainPath = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
         this.researchPath = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
         this.outputPath = path.join(baseBrainPath, 'staging/offer_block_staging.json');
+        this.logger = new AgentLogger('Offer Generator', workspaceId, onLog);
     }
 
+    /**
+     * Main execution method.
+     * 1. Loads research data.
+     * 2. Calls NanoBanana to generate offer strategy and visuals.
+     * 3. Assembles the offer component.
+     * 4. Stages the result.
+     */
     async generate() {
-        console.log(`🚀 [${this.workspaceId}] InitialOfferGenerator: Basking in the Brand DNA...`);
+        this.logger.start("Generating Offers", "Analyzing brand value proposition and crafting core offers...");
+        this.logger.info("Reading Research", "Parsing brand DNA for industry-specific conversion triggers...");
 
         const researchRaw = await fs.readFile(this.researchPath, 'utf-8');
         const researchCtx = JSON.parse(researchRaw);
@@ -42,10 +62,9 @@ export class InitialOfferGenerator {
             colors: researchCtx.colorPalettes?.palettes?.filter((p: any) => p.isSelected).flatMap((p: any) => p.colors) || [],
             fonts: researchCtx.typographyPairings?.fonts?.filter((f: any) => f.isSelected).map((f: any) => f.name) || [],
             imagery: researchCtx.imagery?.suggestions?.filter((i: any) => i.isSelected) || [],
-            brandDNA: researchCtx.brandDNA // Pass the full DNA for industry detection
         };
 
-        console.log("🧠 Generating High-Conversion Offer Section...");
+        this.logger.info("Drafting Offer", "Requesting high-conversion pricing tiers and strategy from NanoBanana...");
         const result = await this.nanoBanana.generateOfferVisual(context);
 
         const variantId = `offer_v${Date.now()}`;
@@ -77,17 +96,25 @@ export class InitialOfferGenerator {
             }
         };
 
-        console.log("Saving Staged Offer Block...");
+        this.logger.info("Saving", "Writing staged offer block to file...");
         await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
         await fs.writeFile(this.outputPath, JSON.stringify(config, null, 4));
-
-        console.log(`✅ Staged Offer Block Saved: ${this.outputPath}`);
+        this.logger.success("Offer Generation Complete", "Final offer tiers and guarantees staged.");
     }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // Default workspace for manual CLI run
     const workspaceId = process.argv.find(a => a.startsWith('--workspace='))?.split('=')[1] || 'default';
-    new InitialOfferGenerator(workspaceId).generate().catch(console.error);
+    const generator = new InitialOfferGenerator(workspaceId);
+    generator.generate()
+        .then(() => {
+            console.log("✅ Offer Generation Process Finished.");
+            process.exit(0);
+        })
+        .catch(err => {
+            console.error("❌ Offer Generation Failed:", err);
+            process.exit(1);
+        });
 }
 

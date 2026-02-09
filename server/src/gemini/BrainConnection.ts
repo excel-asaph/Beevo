@@ -12,6 +12,12 @@ import { ServerMessage } from '../../../shared/messages';
 import { ToolHandler } from './ToolHandler';
 import { BrandDNA } from '../../../shared/types';
 import { WorkspaceManager } from '../services/StateManager';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Tool declarations for the Brain (same as before, but ONLY here)
 const brainToolDeclarations: FunctionDeclaration[] = [
@@ -401,7 +407,8 @@ export class BrainConnection {
     // - 'discovery': Listener Brain - waits for handshake to start research
     // - 'execution': Builder Brain - one-time chain to populate canvas
     // - 'modification': Modifier Brain - handles user's post-canvas changes
-    private phase: 'discovery' | 'execution' | 'modification' = 'discovery';
+    // - 'missing_workspace': Error State - folder not found
+    private phase: 'discovery' | 'execution' | 'modification' | 'missing_workspace' = 'discovery';
 
     // Flag to track if extract_brand_identity was ever DECIDED (not just executed)
     // This prevents parallel Brain analyses from making duplicate decisions
@@ -410,7 +417,12 @@ export class BrainConnection {
     // Track when the current phase started to isolate history for Modification phase
     private phaseStartTime: number = Date.now();
 
-    public setPhase(phase: 'discovery' | 'execution' | 'modification') {
+    /**
+     * Sets the current phase of the Brain.
+     * 
+     * @param {'discovery' | 'execution' | 'modification' | 'missing_workspace'} phase - The new phase.
+     */
+    public async setPhase(phase: 'discovery' | 'execution' | 'modification' | 'missing_workspace') {
         if (this.phase !== phase) {
             this.phase = phase;
             this.phaseStartTime = Date.now();
@@ -424,6 +436,16 @@ export class BrainConnection {
         console.log('🧠 [BrainConnection] start_brand_research marked as DECIDED - removing from future tool lists');
     }
 
+    /**
+     * initializes the BrainConnection.
+     * 
+     * @param {string} sessionId - The unique session identifier.
+     * @param {(msg: ServerMessage) => void} sendToClient - Callback to send messages to the client.
+     * @param {ToolHandler} toolHandler - Instance of the ToolHandler.
+     * @param {() => void} interruptLive - Callback to interrupt the Live session.
+     * @param {() => Partial<BrandDNA>} getBrandDNA - Callback to retrieve current Brand DNA.
+     * @param {string} [workspaceId='default'] - The workspace identifier.
+     */
     constructor(
         private sessionId: string,
         private sendToClient: (msg: ServerMessage) => void,
@@ -438,11 +460,44 @@ export class BrainConnection {
 
         console.log(`🧠 Brain initialized for session: ${sessionId}`);
         this.phaseStartTime = Date.now();
+
+        // --- STATE HYDRATION (The Fix) ---
+        // 1. Strict Folder Check (Prevent Ghost Workspaces)
+        // Fixed Path: Brain folder is at SERVER ROOT, not SRC ROOT.
+        // Current File: server/src/gemini/BrainConnection.ts
+        // Target: server/brain/workspaces
+        const workspaceDir = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        if (!fs.existsSync(workspaceDir) && workspaceId !== 'default') {
+            console.error(`⛔ [BrainConnection] Workspace Folder Missing: ${workspaceId} -> Setting Phase: MISSING_WORKSPACE`);
+            this.phase = 'missing_workspace';
+        } else {
+            // 2. Logic: Research Exists ? Modification : Discovery
+            const stateManager = WorkspaceManager.getStateManager(workspaceId);
+            const latestState = stateManager.loadLatest();
+
+            if (latestState) {
+                console.log(`🧠 [BrainConnection] Found existing research for ${workspaceId}. Hydrating to MODIFICATION phase.`);
+                this.phase = 'modification';
+                // Mark research as done so we don't suggest it again
+                this.markStartResearchDecided();
+            } else {
+                console.log(`🧠 [BrainConnection] No research found for ${workspaceId}. Starting in DISCOVERY phase.`);
+                this.phase = 'discovery';
+            }
+        }
     }
 
     /**
      * Analyze a conversation window and decide if tools are needed
      * Called every 3 seconds with accumulated audio/transcript
+     */
+    /**
+     * Analyze a conversation window and decide if tools are needed.
+     * Called every 3 seconds with accumulated audio/transcript.
+     * 
+     * @param {string} userTranscript - The accumulated user transcript.
+     * @param {string} aiTranscript - The accumulated AI transcript.
+     * @returns {Promise<void>}
      */
     async analyzeConversation(
         userTranscript: string,

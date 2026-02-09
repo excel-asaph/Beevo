@@ -2,10 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { ProofBlockConfig } from '../../../../shared/types';
 
+/**
+ * Props for the ProofBlock component.
+ */
 interface ProofBlockProps {
+    /** Configuration data for the Proof section. */
     config: ProofBlockConfig;
 }
 
+/**
+ * Renders the Social Proof section of the landing page.
+ * 
+ * Features:
+ * - Intersection tracking for visibility and dwell time.
+ * - Minimum dwell threshold (500ms) for meaningful engagement metrics.
+ * - Dynamic HTML content rendering.
+ * 
+ * @param {ProofBlockProps} props - The component props.
+ */
 export const ProofBlock: React.FC<ProofBlockProps> = ({ config }) => {
     const { track } = useTracking(config.id);
     const containerRef = useRef<HTMLDivElement>(null);

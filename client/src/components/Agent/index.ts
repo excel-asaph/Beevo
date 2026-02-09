@@ -1,3 +1,9 @@
+/**
+ * Agent Component Exports.
+ * 
+ * This module exports all high-level components related to the AI Agent interface,
+ * including the core `AgentCanvas`, `Canvas`, and interaction overlays like `VoiceOrb`.
+ */
 // Agent Canvas components
 export { AgentCanvas } from './AgentCanvas';
 export { Canvas } from './Canvas';

@@ -2,8 +2,12 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, Loader2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react';
 
+/** Valid phases for the thinking process. */
 export type ThinkingPhase = 'idle' | 'analyzing' | 'researching' | 'generating' | 'complete' | 'error';
 
+/**
+ * Represents a single step in the thought process.
+ */
 interface ThinkingStep {
     id: string;
     text: string;
@@ -11,10 +15,17 @@ interface ThinkingStep {
     timestamp?: number;
 }
 
+/**
+ * Props for the ThinkingCard component.
+ */
 interface ThinkingCardProps {
+    /** The current high-level phase of the operation. */
     phase: ThinkingPhase;
+    /** The list of individual steps to display. */
     steps: ThinkingStep[];
+    /** A text description of the specific action currently being performed (footer). */
     currentAction?: string;
+    /** Additional CSS classes. */
     className?: string;
 }
 
@@ -36,6 +47,17 @@ const phaseColors: Record<ThinkingPhase, string> = {
     error: 'text-red-400'
 };
 
+/**
+ * A sleek card component that visualizes the AI's "thinking" process.
+ * 
+ * Displays:
+ * - A pulsing brain icon during active states.
+ * - A list of steps with status indicators (pending, active spinner, checkmark, error).
+ * - A specific "current action" footer.
+ * - Completion state feedback.
+ * 
+ * @param {ThinkingCardProps} props - The component props.
+ */
 export const ThinkingCard: React.FC<ThinkingCardProps> = ({
     phase,
     steps,
@@ -121,10 +143,10 @@ export const ThinkingCard: React.FC<ThinkingCardProps> = ({
 
                             {/* Step text */}
                             <span className={`text-xs leading-relaxed ${step.status === 'active'
-                                    ? 'text-slate-200'
-                                    : step.status === 'complete'
-                                        ? 'text-slate-400'
-                                        : 'text-slate-500'
+                                ? 'text-slate-200'
+                                : step.status === 'complete'
+                                    ? 'text-slate-400'
+                                    : 'text-slate-500'
                                 }`}>
                                 {step.text}
                             </span>

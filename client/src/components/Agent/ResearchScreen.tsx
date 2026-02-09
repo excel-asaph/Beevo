@@ -3,12 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Palette, Type, Target, Sparkles, MicOff, CheckCircle2, Loader2, ChevronDown, XCircle } from 'lucide-react';
 
 // Type for streaming thoughts
+/**
+ * Represents a single thought streamed from the AI during the research process.
+ */
 interface ThoughtItem {
     id: string;
     text: string;
     status: 'pending' | 'active' | 'complete' | 'error';
 }
 
+/**
+ * Represents a high-level step in the research workflow (e.g., "Analyzing vision").
+ */
 interface ResearchStep {
     id: string;
     label: string;
@@ -16,13 +22,23 @@ interface ResearchStep {
     status: 'pending' | 'active' | 'complete' | 'error';
 }
 
+/**
+ * Props for the ResearchScreen component.
+ */
 interface ResearchScreenProps {
+    /** Whether the research screen is currently visible. */
     isVisible: boolean;
+    /** The index of the current active step in the research process. */
     currentStep: number;
+    /** The main status message displayed to the user. */
     message: string;
+    /** List of competitor names found during analysis. */
     competitors: string[];
+    /** Stream of thought logs from the AI. */
     thoughts: ThoughtItem[];
+    /** The name of the brand being researched. */
     brandName?: string;
+    /** The identified industry of the brand. */
     industry?: string;
 }
 
@@ -232,7 +248,17 @@ const AnimatedBee: React.FC = () => (
     </motion.div>
 );
 
-// Main ResearchScreen
+/**
+ * A dedicated screen component for the "Research" phase of the brand creation process.
+ * 
+ * Displays:
+ * - A step-by-step progress tracker for the AI's analysis.
+ * - Real-time "Thought Stream" logs.
+ * - Identified competitors with logos (via Clearbit/Google Favicons).
+ * - Brand and Industry summary cards.
+ * 
+ * @param {ResearchScreenProps} props - The component props.
+ */
 export const ResearchScreen: React.FC<ResearchScreenProps> = ({
     isVisible,
     currentStep,
@@ -240,6 +266,7 @@ export const ResearchScreen: React.FC<ResearchScreenProps> = ({
     competitors,
     thoughts,
     brandName,
+    industry
 }) => {
     const [elapsedTime, setElapsedTime] = useState(0);
 

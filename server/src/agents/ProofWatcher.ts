@@ -9,7 +9,7 @@ import { NanoBananaService } from '../services/NanoBananaService.js';
 import { WS_CONFIG, MODELS } from '../../../shared/constants.js';
 import { SystemConfigFactory } from '../services/SystemConfigService.js';
 import { NotificationClient } from '../utils/NotificationClient.js';
-import { MediaService } from '../services/MediaService.js';
+import { AgentLogger } from '../utils/AgentLogger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,10 +19,22 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
 puppeteer.use(StealthPlugin());
 
+/**
+ * Proof Watcher Agent.
+ * 
+ * Responsibilities:
+ * - Monitors the performance of the Proof section (dwell time).
+ * - Captures snapshots of the live proof block.
+ * - analyzes metrics against thresholds.
+ * - Triggers optimization via NanoBanana to improve trust signaling.
+ * - Manages HITL approval gates.
+ * - Stages optimized proof blocks.
+ */
 export class ProofWatcher {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
     private workspaceId: string;
+    private logger: AgentLogger;
     private paths: {
         metrics: string;
         staging: string;
@@ -32,11 +44,12 @@ export class ProofWatcher {
         assetsDir: string;
     };
 
-    constructor(workspaceId: string = 'default') {
+    constructor(workspaceId: string = 'default', onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY || '';
         this.client = new GoogleGenAI({ apiKey });
         this.nanoBanana = new NanoBananaService(apiKey);
+        this.logger = new AgentLogger('Proof Watcher', workspaceId, onLog);
 
         // Initialize Dynamic Paths
         const baseBrain = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
@@ -52,8 +65,13 @@ export class ProofWatcher {
         };
     }
 
+    /**
+     * Captures a screenshot of the live proof block.
+     * 
+     * @returns {Promise<Buffer | null>} The screenshot buffer or null if failed.
+     */
     async captureSnapshot(): Promise<Buffer | null> {
-        console.log(`📸 ProofWatcher [${this.workspaceId}]: Capturing block snapshot...`);
+        this.logger.info("Snapshot", "Capturing block snapshot...");
         let browser;
         try {
             browser = await puppeteer.launch({ headless: true });
@@ -80,15 +98,24 @@ export class ProofWatcher {
 
             return Buffer.from(screenshot);
         } catch (e) {
-            console.error("❌ Proof Snapshot failed:", e);
+            this.logger.error("Snapshot Failed", `Error: ${e}`);
             return null;
         } finally {
             if (browser) await browser.close();
         }
     }
 
+    /**
+     * Analyzes performance metrics and optimizes the Proof section if needed.
+     * 1. Checks lock status and data sufficiency.
+     * 2. Evals dwell time.
+     * 3. Triggers HITL pre-optimization gate.
+     * 4. Calls NanoBanana to refine the proof visual.
+     * 5. Triggers HITL post-optimization gate.
+     * 6. Stages the new proof block.
+     */
     async analyzeAndOptimize() {
-        console.log(`🕵️ Proof Watcher [${this.workspaceId}]: Waking up...`);
+        this.logger.start("Watcher Active", "Proof Watcher waking up...");
 
         // 1. Data Analysis (Get Config First)
         // Use Factory for workspace-specific config
@@ -113,7 +140,7 @@ export class ProofWatcher {
         const researchCtx = JSON.parse(researchRaw);
 
         if (!currentProof.id) {
-            console.error("❌ No valid live proof block found. Aborting.");
+            this.logger.error("Error", "No valid live proof block found. Aborting.");
             return;
         }
 
@@ -122,46 +149,55 @@ export class ProofWatcher {
 
         // 0. Check Lock
         if (config.locks.proof) {
-            console.log("🔒 Proof Section is LOCKED. Skipping optimization.");
+            this.logger.info("Skipping", "Proof Section is LOCKED.");
             return;
         }
 
         // 2. Validate Data
         if (!data || (data.views || 0) < config.sections.proof.min_views_data) {
-            console.log(`🕵️ Proof Watcher: Not enough data for ${variantId}. Views: ${data?.views || 0}`);
+            this.logger.info("Skipping", `Not enough data for ${variantId}. Views: ${data?.views || 0}`);
             return;
         }
 
         const avgDwell = data.dwell_sum_ms / data.dwell_count;
-        console.log(`📊 PERF: Avg Dwell Time = ${avgDwell.toFixed(0)}ms (Target: ${config.sections.proof.target_dwell_ms}ms+)`);
+        this.logger.info("Metrics Analysis", `Avg Dwell Time = ${avgDwell.toFixed(0)}ms (Target: ${config.sections.proof.target_dwell_ms}ms+)`);
 
         if (avgDwell > config.sections.proof.target_dwell_ms) {
-            console.log("🏆 STATUS: CHAMPION. Dwell time is optimal. No action.");
+            this.logger.success("Optimization Unnecessary", "Dwell time is optimal.");
             return;
         }
 
         // 🟢 GATE 1: PRE-APPROVAL
-        console.log("🚦 Triggering Pre-Optimization Gate...");
-        const preCheck = await notificationClient.requestApproval(
-            'Proof Section',
-            'PRE_GENERATION',
-            `Proof Dwell Time is low (${avgDwell.toFixed(0)}ms vs Target ${config.sections.proof.target_dwell_ms}ms). Optimize?`,
-            undefined,
-            this.workspaceId
-        );
+        const hitlEnabled = config.hitl.enabled;
+        const requirePre = config.hitl.require_approval_pre;
+        let preCheckFeedback = "";
 
-        if (!preCheck.approved) {
-            console.log("🛑 User rejected optimization. Aborting.");
-            return;
+        if (hitlEnabled && requirePre) {
+            this.logger.info("HITL Gate", "Triggering Pre-Optimization Gate...");
+            const preCheck = await notificationClient.requestApproval(
+                'Proof Section',
+                'PRE_GENERATION',
+                `Proof Dwell Time is low (${avgDwell.toFixed(0)}ms vs Target ${config.sections.proof.target_dwell_ms}ms). Optimize?`,
+                undefined,
+                this.workspaceId
+            );
+
+            if (!preCheck.approved) {
+                this.logger.info("Aborted", "User rejected optimization request.");
+                return;
+            }
+            preCheckFeedback = preCheck.feedback || "";
+        } else {
+            console.log("⏩ HITL Pre-Gate skipped.");
         }
 
-        console.log("📉 STATUS: DWELL TIME LOW. Initiating Strategic Mutation...");
+        this.logger.info("Reasoning", "Dwell Time Low. Initiating Strategic Mutation...");
 
         // 3. Prepare Visuals
         const snapshotBuffer = await this.captureSnapshot();
 
         // 4. Strategic Refinement (Service Call)
-        console.log(`🧠 Proof Watcher: Requesting refined visual from NanoBananaService...`);
+        this.logger.info("Analysis", "Requesting refined visual from NanoBananaService...");
 
         try {
             // Mapping research context for service
@@ -180,7 +216,7 @@ export class ProofWatcher {
             };
 
             const performance = { avgDwell };
-            const combinedFeedback = [config.feedback.proof_directive, preCheck.feedback].filter(Boolean).join('. ');
+            const combinedFeedback = [config.feedback.proof_directive, preCheckFeedback].filter(Boolean).join('. ');
             const optimization = await this.nanoBanana.refineVisual(currentProof, performance, nanoContext, snapshotBuffer || undefined, combinedFeedback, 'proof');
 
             console.log("\n🕵️ WATCHER ANALYSIS:\n", (optimization as any).thoughts);
@@ -188,46 +224,69 @@ export class ProofWatcher {
             if ((optimization as any).confidence > config.sections.proof.watcher_confidence_min) {
 
                 // 🟢 GATE 2: POST-APPROVAL
-                const postCheck = await notificationClient.requestApproval(
-                    'Proof Section',
-                    'POST_GENERATION',
-                    `New Proof Strategy Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
-                    optimization,
-                    this.workspaceId
-                );
+                const requirePost = config.hitl.require_approval_post;
 
-                if (!postCheck.approved) {
-                    console.log("🛑 User rejected deployment. Aborting.");
-                    return;
+                if (hitlEnabled && requirePost) {
+                    this.logger.info("HITL Gate", "Triggering Post-Optimization Approval...");
+                    const postCheck = await notificationClient.requestApproval(
+                        'Proof Section',
+                        'POST_GENERATION',
+                        `New Proof Strategy Ready (Confidence: ${(optimization as any).confidence}%). Deploy?`,
+                        optimization,
+                        this.workspaceId
+                    );
+
+                    if (!postCheck.approved) {
+                        this.logger.info("Aborted", "User rejected deployment.");
+                        return;
+                    }
+                } else {
+                    console.log("⏩ HITL Post-Gate skipped.");
                 }
+                // CRITICAL FIX: Do NOT partial merge.
+                // Reconstruct the full object from the AI's complete schema in `optimization.changes`
+                // while preserving system metadata.
                 const newProof = {
-                    ...currentProof,
+                    ...currentProof, // Keep foundational ID/Metadata structure
+                    ...optimization.changes, // OVERWRITE all content with full AI schema
+                    id: currentProof.id,
                     variant_id: `proof_v${Date.now()}`,
                     meta: {
                         ...currentProof.meta,
-                        layout_strategy: (optimization as any).changes.layout_strategy || currentProof.meta.layout_strategy
-                    },
-                    content: {
-                        ...currentProof.content,
-                        headline: (optimization as any).changes.headline || currentProof.content.headline,
-                        subhead: (optimization as any).changes.subhead || currentProof.content.subhead,
-                        graphic_caption: (optimization as any).changes.graphic_caption || currentProof.content.graphic_caption,
-                        evidence_items: (optimization as any).changes.evidence_items || currentProof.content.evidence_items
-                    },
-                    graphic_config: {
-                        ...currentProof.graphic_config,
-                        type: 'generative',
-                        visual_code: (optimization as any).changes.visual_code || currentProof.graphic_config.visual_code
+                        layout_strategy: optimization.changes.layout_strategy || currentProof.meta.layout_strategy
                     }
                 };
+
+                // Map flat AI schema back to nested store structure
+                // AI Schema: layout_strategy, headline, subhead, visual_code, evidence_items
+                // Store Structure: content: { headline, subhead, evidence_items ... }, graphic_config: { ... }
+
+                newProof.content = {
+                    headline: optimization.changes.headline,
+                    subhead: optimization.changes.subhead,
+                    graphic_caption: currentProof.content.graphic_caption, // AI doesn't generate this yet, preserve old
+                    evidence_items: optimization.changes.evidence_items
+                };
+
+                newProof.graphic_config = {
+                    ...currentProof.graphic_config,
+                    type: 'generative',
+                    visual_code: optimization.changes.visual_code
+                };
+
+                // Cleanup flat fields
+                delete newProof.headline;
+                delete newProof.subhead;
+                delete newProof.evidence_items;
+                delete newProof.visual_code;
 
                 await fs.mkdir(path.dirname(this.paths.staging), { recursive: true });
                 await fs.writeFile(this.paths.staging, JSON.stringify(newProof, null, 4));
                 await fs.writeFile(this.paths.decision, JSON.stringify(optimization, null, 4));
-                console.log("🚀 Optimization Staged! Proof Section Mutated in staging.");
+                this.logger.success("Staged", "Proof Section Mutated in staging.");
             }
         } catch (error) {
-            console.error("❌ Proof Watcher Failed:", error);
+            this.logger.error("Watcher Error", `Critical: ${error}`);
         }
     }
 }

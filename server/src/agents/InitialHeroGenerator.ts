@@ -5,6 +5,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { MODELS } from '../../../shared/constants.js';
 import { MediaService } from '../services/MediaService.js';
 import dotenv from 'dotenv';
+import { AgentLogger } from '../utils/AgentLogger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +30,16 @@ interface BrandResearch {
     };
 }
 
+/**
+ * Initial Hero Generator Agent
+ * 
+ * Responsibilities:
+ * - Generates the initial Hero Section based on Research Data.
+ * - Synthesizes Veo video prompts from brand mood and voice.
+ * - Generates high-impact copy and form configurations.
+ * - Bakes the initial video asset using Veo.
+ * - Stages the generated component for deployment.
+ */
 export class InitialHeroGenerator {
     private client: GoogleGenAI;
     private modelName = MODELS.ARCHITECT_TEXT; // Corrected typo from instruction
@@ -40,8 +51,9 @@ export class InitialHeroGenerator {
     private archiveDir: string;
     private videosDir: string;
     private researchPath: string;
+    private logger: AgentLogger;
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY is required");
@@ -56,13 +68,23 @@ export class InitialHeroGenerator {
         this.activePath = path.join(baseClient, 'assets');
         this.archiveDir = path.join(this.activePath, 'history');
         this.videosDir = path.join(baseClient, 'assets/videos');
+        this.logger = new AgentLogger('Hero Generator', workspaceId, onLog);
     }
 
+    /**
+     * Main execution method.
+     * Orchestrates the generation of the Hero Section:
+     * 1. Loads research data.
+     * 2. Generates video attributes and asset via Veo.
+     * 3. Generates overlay copy and form configurations.
+     * 4. Assembles the component structure.
+     * 5. Stages the result.
+     */
     async generate() {
-        console.log(`🚀 ${this.workspaceId} Initial Hero Generator: Starting...`);
+        this.logger.start("Generating Hero Section", "Analyzing brand DNA and starting asset generation...");
 
         // 1. Load Research Data
-        console.log("[Step 1] Loading Brand Research...");
+        this.logger.info("Loading Research", "Reading complete_research_latest.json...");
         const researchData = await fs.readFile(this.researchPath, 'utf-8');
         const research: BrandResearch = JSON.parse(researchData);
 
@@ -106,15 +128,15 @@ export class InitialHeroGenerator {
             overlay_content: {},
             layout_config: {}
         };
-        console.log(`[Step 1] Meta Attributes Injected. Variant ID: ${variantId}`);
+        this.logger.info("Meta Injected", `Variant ID: ${variantId}`);
 
 
         // === STEP 2: VIDEO GENERATION (Real AI Call) ===
-        console.log("[Step 2] Thinking about Video Attributes...");
+        this.logger.info("Directing Video", "Synthesizing cinematic attributes for Veo AI...");
         const videoAttributes = await this.generateVideoAttributes(context);
 
         // === STEP 2.5: GENERATE ACTUAL VIDEO FILE (Veo) ===
-        console.log("[Step 2.5] Requesting Video from Veo AI...");
+        this.logger.info("Generating Video", "Requesting 4K cinematic video from Veo (this may take a minute)...");
         // Pass variantId to generateVideoAsset
         const videoSourceId = await this.generateVideoAsset(videoAttributes, variantId);
 
@@ -133,7 +155,7 @@ export class InitialHeroGenerator {
 
 
         // === STEP 3: OVERLAY CONTENT (Real AI Call) ===
-        console.log("[Step 3] Drafting Overlay Content, Navigation, and Forms...");
+        this.logger.info("Drafting Copy", "Generating high-impact headlines and lead-gen forms...");
         const contentData = await this.generateOverlayAndForms(context);
 
         challenger.overlay_content = {
@@ -192,20 +214,36 @@ export class InitialHeroGenerator {
             },
             overlay_gradient: "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))"
         };
-        console.log("[Step 4] Layout Template Injected.");
+        this.logger.info("Layout Configured", "Standard centering template applied.");
+
+        // NEW: Inject Global Styles for Form Orchestrator
+        challenger.styles = {
+            backgroundColor: context.colors[0] || "#000000", // Fallback
+            color: "#FFFFFF",
+            accentColor: contentData.cta?.styles?.backgroundColor || context.colors[1] || "#3b82f6",
+            fontFamily: context.fonts[0] || "serif"
+        };
 
 
         // === OUTPUT ===
-        console.log("Saving Staged Hero Block...");
+        this.logger.info("Saving", "Writing staged hero block to file...");
         const OUTPUT_PATH = path.join(this.stagingPath, 'hero_block_staging.json');
         await fs.mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
         await fs.writeFile(OUTPUT_PATH, JSON.stringify(challenger, null, 4));
-        console.log("Done.");
+        this.logger.success("Hero Generation Complete", "Staged challenger saved successfully.");
     }
 
 
+    /**
+     * Generates a video asset using Veo.
+     * Handles prompting, polling, downloading, and archiving.
+     * 
+     * @param {any} attributes - Video attributes (prompt, lighting, etc.).
+     * @param {string} variantId - The variant ID for file organization.
+     * @returns {Promise<string>} The relative path to the archived asset.
+     */
     private async generateVideoAsset(attributes: any, variantId: string) {
-        console.log("🎥 Connecting to Veo...");
+        this.logger.info("Connecting to Veo", "Initializing generation parameters...");
 
         const veoPrompt = `
         Cinematic 4K video.
@@ -217,7 +255,7 @@ export class InitialHeroGenerator {
         `;
 
         try {
-            console.log("...Submitting Operation");
+            this.logger.info("Submitting", "Sending prompt to Veo model...");
             // 1. Submit Generation Request
             // @ts-ignore - The SDK types might lag behind the bleeding edge methods
             let operation = await this.client.models.generateVideos({
@@ -228,11 +266,11 @@ export class InitialHeroGenerator {
                 }
             });
 
-            console.log(`...Operation Started: ${operation.name || 'Unknown ID'}`);
+            this.logger.info("Operation Started", `ID: ${operation.name || 'Unknown'}`);
 
             // 2. Poll for Completion
             while (!operation.done) {
-                console.log("...Generating (Waiting 5s)...")
+                this.logger.info("Generating", "Waiting for video processing (5s)...");
                 await new Promise((resolve) => setTimeout(resolve, 5000));
 
                 // @ts-ignore
@@ -241,7 +279,7 @@ export class InitialHeroGenerator {
                 });
             }
 
-            console.log("...Generation Complete. Downloading...");
+            this.logger.info("Download", "Video generation complete. Downloading asset...");
 
             // 3. Download Result
             const videos = operation.response?.generatedVideos;
@@ -262,10 +300,11 @@ export class InitialHeroGenerator {
                 variantId // PASS VARIANT ID
             );
 
-            console.log(`✅ Video Archived via MediaService: ${relativePath}`);
+            this.logger.success("Video Captured", `Asset archived to history: ${relativePath}`);
             return relativePath; // Returns /assets/history/[variant_id]/hero_video_timestamp.mp4
 
         } catch (error) {
+            this.logger.error("Veo Failed", "Using fallback placeholder video.");
             console.error("❌ Veo Generation Failed:", error);
             console.warn("Using placeholder video due to generation error.");
             return "/assets/placeholders/hero_placeholder.mp4"; // Ensure fallback exists or use a robust default
@@ -510,5 +549,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     };
     const workspaceId = getWorkspaceId();
     const generator = new InitialHeroGenerator(workspaceId);
-    generator.generate().catch(console.error);
+    generator.generate()
+        .then(() => {
+            console.log("✅ Hero Generation Process Finished.");
+            process.exit(0);
+        })
+        .catch(err => {
+            console.error("❌ Hero Generation Failed:", err);
+            process.exit(1);
+        });
 }

@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Timer, Save, Clock, PlayCircle, Activity } from 'lucide-react';
+import { Timer, Save, Clock, Activity } from 'lucide-react';
 
-export const WatcherSettings: React.FC = () => {
+/**
+ * Props for the WatcherSettings component.
+ */
+interface WatcherSettingsProps {
+    /** Callback to run initializers from the parent component. */
+    onRunInitializers?: () => void;
+}
+
+/**
+ * A configuration panel for the "Watcher" system that monitors generation status.
+ * 
+ * Features:
+ * - Configurable polling intervals and startup buffers.
+ * - System reliability status checks.
+ * - Manual trigger for system initialization.
+ * 
+ * @param {WatcherSettingsProps} props - The component props.
+ */
+export const WatcherSettings: React.FC<WatcherSettingsProps> = ({ onRunInitializers }) => {
     const { workspaceId } = useWorkspace();
     const [config, setConfig] = useState({ bufferMinutes: 5, intervalMinutes: 5 });
     const [status, setStatus] = useState<{ ready: boolean, hasGenerated: boolean }>({ ready: false, hasGenerated: false });
@@ -51,13 +69,20 @@ export const WatcherSettings: React.FC = () => {
         if (!confirm("This will RESET history and start the full initialization flow. Continue?")) return;
 
         setIsRunningDate(Date.now());
-        try {
-            await fetch('http://localhost:3000/api/action/run-initializers', {
-                method: 'POST',
-                headers: { 'x-workspace-id': workspaceId }
-            });
-        } catch (e) {
-            console.error("Failed to trigger init", e);
+
+        if (onRunInitializers) {
+            console.log("Triggering initialization via parent prop...");
+            onRunInitializers();
+        } else {
+            // Fallback for standalone usage (though it should always be passed in ControlCenter)
+            try {
+                await fetch('http://localhost:3000/api/action/run-initializers', {
+                    method: 'POST',
+                    headers: { 'x-workspace-id': workspaceId }
+                });
+            } catch (e) {
+                console.error("Failed to trigger init", e);
+            }
         }
     };
 

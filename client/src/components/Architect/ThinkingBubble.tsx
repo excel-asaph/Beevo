@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Brain, Sparkles, Target, Zap } from 'lucide-react';
 
+/**
+ * Props for the ThinkingBubble component.
+ */
 interface ThinkingBubbleProps {
+    /** Whether the AI is currently thinking. */
     isThinking: boolean;
+    /** Timestamp when thinking started. */
     startTime: number | null;
+    /** Total duration of the thought process. */
     duration: number | null;
+    /** Array of internal thought strings. */
     thoughts: string[];
+    /** The tool/action that was decided upon. */
     toolDecided: string | null;
+    /** The current phase of the thinking process. */
     phase: 'classify' | 'analyze' | 'decide' | 'execute' | null;
 }
 
@@ -24,6 +33,16 @@ const phaseLabels = {
     execute: 'Executing'
 };
 
+/**
+ * A UI component that visualizes the AI's internal reasoning process.
+ * 
+ * Features:
+ * - Expandable/collapsible view of thoughts.
+ * - Real-time timer and phase indicators.
+ * - Distinction between active thinking and completed thoughts.
+ * 
+ * @param {ThinkingBubbleProps} props - The component props.
+ */
 export const ThinkingBubble: React.FC<ThinkingBubbleProps> = ({
     isThinking,
     startTime,

@@ -1,0 +1,61 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1770654458800",
+    "meta": {
+        "strategy": "Social Proof based on Brand Voice",
+        "tone": "Inclusive, approachable, and visionary.",
+        "active_variant": "challenger",
+        "layout_strategy": "GRID"
+    },
+    "content": {
+        "headline": "The People Powering the Shift",
+        "subhead": "HECTOR is more than a bike; it is the new standard for European urban mobility, trusted by the leaders of the green transition.",
+        "testimonials": [
+            {
+                "id": "testimonial_001",
+                "name": "Julianne Moreau",
+                "title": "Logistics Lead",
+                "company": "Paris Direct",
+                "quote": "HECTOR didn't just give us a bike; they gave our fleet a sustainable pulse that actually fits our operational budget without sacrifice.",
+                "image_prompt": "High-end professional business portrait of a woman in her 40s, logistics executive, natural lighting, blurred Paris modern office background, soft shadows, 85mm lens, corporate style.",
+                "image_url": "/workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654465987_1770654466001.png"
+            },
+            {
+                "id": "testimonial_002",
+                "name": "Erik Sorenson",
+                "title": "Urban Planner",
+                "company": "City of Copenhagen",
+                "quote": "Finally, an electric bike that performs like a premium EV without the exclusionary price tag. It is the missing link in modern city transit.",
+                "image_prompt": "Professional portrait of a middle-aged man with glasses, sophisticated urban planner, minimalist clean light grey background, sharp focus, high-end photography, cinematic lighting.",
+                "image_url": "/workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654474518_1770654474519.png"
+            },
+            {
+                "id": "testimonial_003",
+                "name": "Matteo Rossi",
+                "title": "Founder",
+                "company": "Green Route Milan",
+                "quote": "We've swapped our short-range vans for HECTOR bikes, and the efficiency gains in dense city traffic have been absolutely staggering.",
+                "image_prompt": "Confident Italian entrepreneur in his 30s, candid professional look, blurred Milan street background with warm sunlight, high resolution, commercial lifestyle photography.",
+                "image_url": "/workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654481880_1770654481889.png"
+            },
+            {
+                "id": "testimonial_004",
+                "name": "Elena Fischer",
+                "title": "Sustainability Consultant",
+                "company": "Berlin Eco-Group",
+                "quote": "The HECTOR mission is clear: clean energy is no longer a luxury reserved for the few, it is a standard that everyone in Europe can now afford.",
+                "image_prompt": "Close-up portrait of a professional woman, modern tech environment, soft bokeh, intelligent expression, high-end executive headshot, neutral color palette.",
+                "image_url": "/workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654489047_1770654489048.png"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class=\"verified-testimonials-section\" style=\"background-color:#FFFBF2;padding:100px 20px;font-family:'Montserrat',sans-serif;\"><div class=\"container\" style=\"max-width:1200px;margin:0 auto;\"><div class=\"header\" style=\"text-align:center;margin-bottom:80px;\"><h2 style=\"color:#8E443D;font-size:42px;font-weight:700;margin:0 0 20px 0;text-transform:uppercase;letter-spacing:1px;\">The People Powering the Shift</h2><p style=\"color:#5D5C61;font-size:18px;max-width:700px;margin:0 auto;line-height:1.6;\">HECTOR is more than a bike; it is the new standard for European urban mobility, trusted by the leaders of the green transition.</p></div><div class=\"testimonial-grid\" style=\"display:grid;grid-template-columns:repeat(auto-fit,minmax(450px,1fr));gap:40px;\"><div class=\"testimonial-card\" style=\"background-color:#F2E9E1;padding:50px;border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;border-left:8px solid #E2725B;\"><p style=\"font-size:20px;line-height:1.6;color:#5D5C61;margin-bottom:40px;font-style:italic;\">\"HECTOR didn't just give us a bike; they gave our fleet a sustainable pulse that actually fits our operational budget without sacrifice.\"</p><div class=\"profile\" style=\"display:flex;align-items:center;\"><img src=\"testimonial_001_url\" alt=\"Julianne Moreau\" class=\"rounded-full\" style=\"width:70px;height:70px;border-radius:50%;margin-right:20px;object-fit:cover;\"/><div class=\"info\"><h4 style=\"margin:0;font-size:18px;color:#8E443D;font-weight:700;\">Julianne Moreau</h4><p style=\"margin:0;font-size:14px;color:#5D5C61;text-transform:uppercase;letter-spacing:1px;\">Logistics Lead, Paris Direct</p></div></div></div><div class=\"testimonial-card\" style=\"background-color:#F2E9E1;padding:50px;border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;border-left:8px solid #E2725B;\"><p style=\"font-size:20px;line-height:1.6;color:#5D5C61;margin-bottom:40px;font-style:italic;\">\"Finally, an electric bike that performs like a premium EV without the exclusionary price tag. It is the missing link in modern city transit.\"</p><div class=\"profile\" style=\"display:flex;align-items:center;\"><img src=\"testimonial_002_url\" alt=\"Erik Sorenson\" class=\"rounded-full\" style=\"width:70px;height:70px;border-radius:50%;margin-right:20px;object-fit:cover;\"/><div class=\"info\"><h4 style=\"margin:0;font-size:18px;color:#8E443D;font-weight:700;\">Erik Sorenson</h4><p style=\"margin:0;font-size:14px;color:#5D5C61;text-transform:uppercase;letter-spacing:1px;\">Urban Planner, City of Copenhagen</p></div></div></div><div class=\"testimonial-card\" style=\"background-color:#F2E9E1;padding:50px;border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;border-left:8px solid #E2725B;\"><p style=\"font-size:20px;line-height:1.6;color:#5D5C61;margin-bottom:40px;font-style:italic;\">\"We've swapped our short-range vans for HECTOR bikes, and the efficiency gains in dense city traffic have been absolutely staggering.\"</p><div class=\"profile\" style=\"display:flex;align-items:center;\"><img src=\"testimonial_003_url\" alt=\"Matteo Rossi\" class=\"rounded-full\" style=\"width:70px;height:70px;border-radius:50%;margin-right:20px;object-fit:cover;\"/><div class=\"info\"><h4 style=\"margin:0;font-size:18px;color:#8E443D;font-weight:700;\">Matteo Rossi</h4><p style=\"margin:0;font-size:14px;color:#5D5C61;text-transform:uppercase;letter-spacing:1px;\">Founder, Green Route Milan</p></div></div></div><div class=\"testimonial-card\" style=\"background-color:#F2E9E1;padding:50px;border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;border-left:8px solid #E2725B;\"><p style=\"font-size:20px;line-height:1.6;color:#5D5C61;margin-bottom:40px;font-style:italic;\">\"The HECTOR mission is clear: clean energy is no longer a luxury reserved for the few, it is a standard that everyone in Europe can now afford.\"</p><div class=\"profile\" style=\"display:flex;align-items:center;\"><img src=\"testimonial_004_url\" alt=\"Elena Fischer\" class=\"rounded-full\" style=\"width:70px;height:70px;border-radius:50%;margin-right:20px;object-fit:cover;\"/><div class=\"info\"><h4 style=\"margin:0;font-size:18px;color:#8E443D;font-weight:700;\">Elena Fischer</h4><p style=\"margin:0;font-size:14px;color:#5D5C61;text-transform:uppercase;letter-spacing:1px;\">Sustainability Consultant, Berlin Eco-Group</p></div></div></div></div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#FFFBF2",
+        "color": "#5D5C61",
+        "fontFamily": "Montserrat"
+    }
+}

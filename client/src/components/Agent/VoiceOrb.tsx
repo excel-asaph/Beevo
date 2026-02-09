@@ -2,15 +2,34 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 
+/** Possible states for the voice interaction orb. */
 export type OrbState = 'idle' | 'listening' | 'processing' | 'speaking';
 
+/**
+ * Props for the VoiceOrb component.
+ */
 interface VoiceOrbProps {
+    /** Current state of the orb. */
     state: OrbState;
+    /** Callback triggered when the orb is clicked in 'idle' state. */
     onActivate: () => void;
+    /** Callback triggered when the orb is clicked while active. */
     onDeactivate: () => void;
+    /** Additional CSS classes. */
     className?: string;
 }
 
+/**
+ * An interactive, animated orb component that visualizes the current voice interaction state.
+ * 
+ * Visualizes:
+ * - **Idle**: Passive state, ready to listen.
+ * - **Listening**: Reacts to audio input (pulsing).
+ * - **Processing**: Thinking/Loading animation.
+ * - **Speaking**: Visual feedback while the AI is talking.
+ * 
+ * @param {VoiceOrbProps} props - The component props.
+ */
 export const VoiceOrb: React.FC<VoiceOrbProps> = ({
     state,
     onActivate,

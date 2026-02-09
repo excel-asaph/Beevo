@@ -5,6 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Service to manage media assets, serving history mechanisms and archiving.
+ */
 export class MediaService {
     private static instances: Map<string, MediaService> = new Map();
     private workspaceId: string;
@@ -19,6 +22,12 @@ export class MediaService {
         this.publicPathPrefix = `/workspaces/${workspaceId}/assets/history`;
     }
 
+    /**
+     * Retrieves the singleton instance of the MediaService.
+     * 
+     * @param {string} [workspaceId='default'] - The workspace identifier.
+     * @returns {MediaService} The MediaService instance.
+     */
     public static getInstance(workspaceId: string = 'default'): MediaService {
         if (!MediaService.instances.has(workspaceId)) {
             MediaService.instances.set(workspaceId, new MediaService(workspaceId));
@@ -56,6 +65,14 @@ export class MediaService {
 
     /**
      * Specialized helper for Gemini file downloads.
+     * Downloads a file from Gemini URI, saves it, and returns the public path.
+     * 
+     * @param {any} client - The Gemini client instance.
+     * @param {string} fileUri - The URI of the file to download.
+     * @param {string} filenamePrefix - Prefix for the saved filename.
+     * @param {string} extension - The file extension.
+     * @param {string} [variantId] - Optional variant ID for organization.
+     * @returns {Promise<string>} The public relative path to the archived file.
      */
     public async archiveGeminiFile(client: any, fileUri: string, filenamePrefix: string, extension: string, variantId?: string): Promise<string> {
         const targetDir = variantId ? path.join(this.historyDir, variantId) : this.historyDir;

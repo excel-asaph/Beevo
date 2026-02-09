@@ -6,6 +6,17 @@ import { Download, Hexagon } from 'lucide-react';
 import { PipelineControl } from './PipelineControl';
 import { apiGenerateLogos, apiFinalizeLogos } from '../../api';
 
+/**
+ * A sidebar component for the Logo Studio offering generation and asset management tools.
+ * 
+ * Features:
+ * - Controls for logo pipeline (Generation, Finalization).
+ * - Displays generated logo assets (Primary, Icon, Wordmark, Social).
+ * - Handles auto-fetching of baked logo kits.
+ * - Provides download links for assets.
+ * 
+ * @param {{ isOpen: boolean; onClose: () => void }} props - The component props.
+ */
 export const LogoStudioSidebar: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
     const { dna, setDna, addThought } = useBrand();
     const { workspaceId, resolveAssetUrl } = useWorkspace();

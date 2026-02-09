@@ -2,7 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Pencil, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 
+/**
+ * Status of the brand card, determining its visual state and interactivity.
+ * - 'empty': Placeholder state waiting for input.
+ * - 'active': Currently being edited or generated.
+ * - 'complete': Data is populated and finalized.
+ * - 'locked': Read-only state.
+ */
 export type CardStatus = 'empty' | 'active' | 'complete' | 'locked';
+
+/**
+ * The specific type of brand content this card represents.
+ * Determines the color scheme and icon used.
+ */
 export type CardType =
     | 'brandName'
     | 'mission'
@@ -14,17 +26,31 @@ export type CardType =
     | 'values'
     | 'custom';
 
+/**
+ * Props for the BrandCard component.
+ */
 interface BrandCardProps {
+    /** The type of card, determining styling and iconography. */
     type: CardType;
+    /** The title displayed in the card header. */
     title: string;
+    /** The icon displayed next to the title. */
     icon: React.ReactNode;
+    /** The current status of the card. */
     status: CardStatus;
+    /** Custom content to render inside the card (overrides `value`). */
     content?: React.ReactNode;
+    /** The value(s) to display if `content` is not provided. Can be a string or array of strings. */
     value?: string | string[];
+    /** Callback triggered when the edit button is clicked. */
     onEdit?: () => void;
+    /** Callback triggered when the expand button is clicked. */
     onExpand?: () => void;
+    /** Whether the card shows its expanded content area. */
     isExpanded?: boolean;
+    /** Animation delay index (for staggered entrance). */
     delay?: number;
+    /** Additional CSS classes. */
     className?: string;
 }
 
@@ -41,6 +67,14 @@ const cardColors: Record<CardType, { bg: string; border: string; icon: string }>
     custom: { bg: 'from-slate-500/10', border: 'border-slate-500/30', icon: 'text-slate-400' },
 };
 
+/**
+ * A standardized card component for displaying brand identity elements.
+ * 
+ * Used within the `BrandBoard` to show individual pieces of the brand DNA (e.g., Mission, Colors).
+ * Supports different statuses, types for theming, and expandable content areas.
+ * 
+ * @param {BrandCardProps} props - The component props.
+ */
 export const BrandCard: React.FC<BrandCardProps> = ({
     type,
     title,

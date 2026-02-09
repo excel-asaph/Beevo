@@ -3,11 +3,26 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { LogoStructureOption } from '@shared/types';
 
+/**
+ * Props for the LogoStructureCard component.
+ */
 export interface LogoStructureCardProps {
+    /** List of logo structure options to display. */
     options: LogoStructureOption[];
+    /** Callback triggered when an option is selected. */
     onSelect?: (id: string) => void;
 }
 
+/**
+ * A reusable card component for displaying and selecting logo structure types (e.g., Wordmark, Icon).
+ * 
+ * Features:
+ * - Dynamic icons based on structure type.
+ * - Detailed descriptions and suitability badges.
+ * - Selection state styling.
+ * 
+ * @param {LogoStructureCardProps} props - The component props.
+ */
 export const LogoStructureCard: React.FC<LogoStructureCardProps> = ({ options, onSelect }) => {
     // Helper to get icon based on type
     const getStructureIcon = (type: string) => {

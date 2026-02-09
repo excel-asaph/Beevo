@@ -1,17 +1,35 @@
 import React, { useCallback, useState } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
-import { motion } from 'framer-motion';
-import { Database, FileText, UploadCloud, Shield, Lock } from 'lucide-react';
+import { Database, FileText, UploadCloud, Lock } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 
+/**
+ * Data structure for the VaultNode.
+ */
 export interface VaultNodeData {
+    /** Label text for the node. */
     label: string;
+    /** Number of files ingested. */
     fileCount?: number;
+    /** Total number of tokens processed. */
     totalTokens?: number;
+    /** Whether ingestion is currently in progress. */
     isIngesting?: boolean;
+    /** Callback triggered when files are uploaded/dropped. */
     onUpload?: (files: File[]) => void;
 }
 
+/**
+ * A custom Node component for ReactFlow that acts as a file dropzone for RAG ingestion.
+ * 
+ * Features:
+ * - Drag and drop file upload.
+ * - Visual feedback for drag states.
+ * - Progress/Ingestion status indicators.
+ * - Token usage statistics.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const VaultNode: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as VaultNodeData;
     const [isDragActive, setIsDragActive] = useState(false);

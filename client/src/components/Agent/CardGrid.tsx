@@ -5,17 +5,31 @@ import {
     Tag, Target, Palette, Type, Volume2, Image, FileText, Heart
 } from 'lucide-react';
 
+/**
+ * Data structure representing a single card in the grid.
+ */
 export interface CardData {
+    /** Unique identifier for the card. */
     id: string;
+    /** The type of content the card displays (determines styling/icon). */
     type: CardType;
+    /** valid title for the card. */
     title: string;
+    /** The current state of the card. */
     status: CardStatus;
+    /** The content value(s) to display. */
     value?: string | string[];
 }
 
+/**
+ * Props for the CardGrid component.
+ */
 interface CardGridProps {
+    /** Array of card data objects to render. */
     cards: CardData[];
+    /** Callback triggered when a card is clicked for editing. */
     onEditCard?: (cardId: string) => void;
+    /** Additional CSS classes. */
     className?: string;
 }
 
@@ -45,6 +59,13 @@ const cardTitles: Record<CardType, string> = {
     custom: 'Custom',
 };
 
+/**
+ * A responsive grid layout for displaying multiple `BrandCard` components.
+ * 
+ * Handles the staggered animation entrance of cards and responsive column sizing.
+ * 
+ * @param {CardGridProps} props - The component props.
+ */
 export const CardGrid: React.FC<CardGridProps> = ({
     cards,
     onEditCard,
@@ -87,7 +108,11 @@ export const CardGrid: React.FC<CardGridProps> = ({
     );
 };
 
-// Utility function to create initial empty cards
+/**
+ * Utility function to generate the initial set of empty cards for a new brand.
+ * 
+ * @returns {CardData[]} An array of initialized, empty CardData objects.
+ */
 export const createInitialCards = (): CardData[] => [
     { id: 'brandName', type: 'brandName', title: 'Brand Name', status: 'empty' },
     { id: 'mission', type: 'mission', title: 'Mission Statement', status: 'empty' },

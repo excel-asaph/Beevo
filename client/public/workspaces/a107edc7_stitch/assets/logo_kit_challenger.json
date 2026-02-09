@@ -1,0 +1,82 @@
+{
+    "metadata": {
+        "generated_at": "2026-02-09T07:36:50.139Z",
+        "brand_name": "Stitch",
+        "palette_used": "Organic Vitality"
+    },
+    "kit": {
+        "primary": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_primary_transparent.png?v=1770622616020",
+        "inverted": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_inverted_transparent.png?v=1770622616020",
+        "icon": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_icon_transparent.png?v=1770622616020",
+        "icon_inverted": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_icon_inverted_transparent.png?v=1770622616020",
+        "wordmark": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770622616020",
+        "wordmark_inverted": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png?v=1770622616020",
+        "social": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_social_transparent.png?v=1770622616020",
+        "social_inverted": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_social_inverted_transparent.png?v=1770622616020"
+    },
+    "palette": {
+        "name": "Organic Vitality",
+        "colors": [
+            "#8A9A5B",
+            "#F2F0E9",
+            "#BDBB99",
+            "#4A5D23",
+            "#E8E4D9"
+        ],
+        "vibe": "Focused on the Sage Green anchor, this palette emphasizes health and tranquility. It uses desaturated moss and linen tones to maintain a clinical sense of cleanliness without the harshness of traditional hospital whites, positioning the brand as a holistic, plant-inspired wellness partner.",
+        "id": "2",
+        "isSelected": true
+    },
+    "brandDNA": {
+        "name": {
+            "value": "Stitch",
+            "isSelected": true
+        },
+        "mission": {
+            "value": "To provide ergonomic support and health-focused mattress solutions that enhance the physical well-being and sleep quality of every customer.",
+            "isSelected": true
+        },
+        "voice": {
+            "value": "Empathetic, expert, and restorative.",
+            "isSelected": true
+        },
+        "values": {
+            "items": [
+                "Ergonomic Innovation",
+                "Holistic Wellness",
+                "Evidence-Based Comfort"
+            ],
+            "isSelected": true
+        },
+        "tagline": {
+            "value": "Stitching Health into Every Night's Sleep.",
+            "isSelected": true
+        },
+        "industry": {
+            "value": "Mattress & Sleep Health",
+            "isSelected": true
+        },
+        "targetAudience": {
+            "items": [
+                "Health-conscious consumers in North America",
+                "Wellness-seeking professionals in Europe",
+                "Individuals requiring specialized ergonomic support",
+                "Active lifestyle enthusiasts prioritizing recovery"
+            ],
+            "isSelected": true
+        },
+        "mood": {
+            "items": [
+                "Relaxing",
+                "Innovative",
+                "Serene",
+                "Clinical"
+            ],
+            "isSelected": true
+        },
+        "rationale": "The brand's focus on ergonomic precision and health innovation necessitates a voice that is both authoritative and soothing, bridging the gap between medical utility and home relaxation.",
+        "logoUrl": {
+            "value": "/workspaces/a107edc7_stitch/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770622616020"
+        }
+    }
+}

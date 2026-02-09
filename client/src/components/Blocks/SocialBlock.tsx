@@ -3,10 +3,25 @@ import { useTracking } from '../../hooks/useTracking';
 import { SocialBlockConfig } from '../../../../shared/types';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
+/**
+ * Props for the SocialBlock component.
+ */
 interface SocialBlockProps {
+    /** Configuration data for the Social section. */
     config: SocialBlockConfig;
 }
 
+/**
+ * Renders the Social Feed/Testimonials section.
+ * 
+ * Features:
+ * - Complex engagement tracking (Dwell + Scroll Velocity).
+ * - 3s retention milestone tracking.
+ * - Automatic image hydration (resolving placeholders to actual URLs).
+ * - Dynamic HTML content rendering with testimonial injection.
+ * 
+ * @param {SocialBlockProps} props - The component props.
+ */
 export const SocialBlock: React.FC<SocialBlockProps> = ({ config }) => {
     const { track } = useTracking(config.id);
     const { resolveAssetUrl } = useWorkspace();

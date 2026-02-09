@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import {
     ReactFlow,
     Background,
@@ -13,17 +13,17 @@ import {
     Edge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, Wifi, WifiOff } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft } from 'lucide-react';
 import type { ReactFlowInstance } from '@xyflow/react';
+import html2canvas from 'html2canvas';
 
 // Custom nodes
 import { StickyNode } from './nodes/StickyNode';
 import { PaletteNode } from './nodes/PaletteNode';
 import { TypographyNode } from './nodes/TypographyNode';
-import { VoiceOrbNode } from './nodes/VoiceOrbNode';
+
 import { InspirationNode } from './nodes/InspirationNode';
-import { VaultNode } from './nodes/VaultNode';
 import { FrameNode } from './nodes/FrameNode';
 import { ThoughtSignatureNode } from './nodes';
 import { LogoStructureNode } from './nodes/LogoStructureNode';
@@ -32,17 +32,20 @@ import { TextNode } from './nodes/TextNode';
 import { InfoCardNode } from './nodes/InfoCardNode';
 import { StackedContentNode } from './nodes/StackedContentNode';
 import { LogoStudioFrame } from './nodes/LogoStudioFrame';
+import { LandingPageFrame } from './nodes/LandingPageFrame';
 
 // UI Components
-import { ThinkingPanel, ThinkingPhase, ThinkingStep } from './ThinkingPanel';
 import { ResearchScreen } from './ResearchScreen';
-import { DropZone } from './DropZone';
+import { LoadingOverlay } from './LoadingOverlay';
 // No WatcherSettings needed here
 import { ControlHud, InteractionMode } from './ControlHud';
 import { CanvasNavigation } from './CanvasNavigation';
 import { CanvasHeader } from './CanvasHeader';
+
 import { ControlCenter } from './ControlCenter';
+import { CommandCenterModal } from './CommandCenter/CommandCenterModal';
 import { WorkspaceLanding } from './WorkspaceLanding';
+import { SnackbarContainer } from './SnackbarContainer';
 
 // Hooks & Store
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -51,11 +54,16 @@ import { useAudioStream } from '../../hooks/useAudioStream';
 import { useBrandStore } from '../../stores/useBrandStore';
 import { useShallow } from 'zustand/react/shallow';
 import { useCanvasHistory } from '../../hooks/useCanvasHistory';
-import type { LogoInspiration, LogoStructureOption } from '@shared/types';
-import { apiGenerateLogos, apiFinalizeLogos } from '../../api';
-
+import { useActivityStore } from '../../stores/useActivityStore';
+import { apiGenerateLogos } from '../../api';
 // React Flow node with proper typing
-// Helper to fetch kit from backend
+/**
+ * Fetches the logo styling kit from the backend for the current workspace.
+ * Uses a timestamp to bust caching for fresh assets.
+ * 
+ * @param {string} workspaceId - The ID of the current workspace.
+ * @returns {Promise<any | null>} The logo kit JSON object or null if failed.
+ */
 const fetchLogoKit = async (workspaceId: string) => {
     try {
         // Cache-busting with timestamp
@@ -80,9 +88,7 @@ const nodeTypes: NodeTypes = {
     sticky: StickyNode,
     palette: PaletteNode,
     typography: TypographyNode,
-    voiceOrb: VoiceOrbNode,
     inspiration: InspirationNode,
-    vault: VaultNode,
     frame: FrameNode,
     thoughtSignature: ThoughtSignatureNode,
     logoStructure: LogoStructureNode,
@@ -90,12 +96,18 @@ const nodeTypes: NodeTypes = {
     text: TextNode,
     infoCard: InfoCardNode,
     stackedContent: StackedContentNode,
-    logoStudio: LogoStudioFrame,
+    'logo-studio': LogoStudioFrame,
+    'landing-page': LandingPageFrame,
 };
 
+/** Represents the high-level phase of the canvas experience. */
 export type CanvasPhase = 'onboarding' | 'loading' | 'canvas';
 
+/**
+ * Props for the Canvas component.
+ */
 interface CanvasProps {
+    /** Callback function to handle returning to the previous screen. */
     onBack?: () => void;
 }
 
@@ -116,13 +128,13 @@ const FRAME_WIDTHS = {
     logoStructure: 700, // Matches Visuals width
     logoInspiration: 700, // Matches Structure width
     imagery: 360,     // Fits imagery cards
-    tools: 280,
+    landingPage: 800, // New landing page frame width
 };
 
 // Calculate X positions sequentially
 // Note: All frames are now arranged horizontally
 const getFrameX = (index: number) => {
-    const order = ['identity', 'overview', 'strategy', 'visuals', 'logoStructure', 'logoInspiration', 'imagery', 'tools'] as const;
+    const order = ['identity', 'overview', 'strategy', 'visuals', 'logoStructure', 'logoInspiration', 'imagery', 'landingPage'] as const;
     let x = FRAME_START_X;
     for (let i = 0; i < index; i++) {
         x += FRAME_WIDTHS[order[i]] + FRAME_GAP;
@@ -132,18 +144,18 @@ const getFrameX = (index: number) => {
 
 const FRAMES = {
     identity: { id: 'frame-identity', title: 'Brand Name', icon: 'identity', x: getFrameX(0), y: 80, minWidth: FRAME_WIDTHS.identity, minHeight: 180, color: 'gray' as const },
-    overview: { id: 'frame-overview', title: 'Overview', icon: 'dashboard', x: getFrameX(1), y: 80, minWidth: FRAME_WIDTHS.overview, minHeight: 400, color: 'gray' as const },
-    strategy: { id: 'frame-strategy', title: 'Brand Strategy', icon: 'strategy', x: getFrameX(2), y: 80, minWidth: FRAME_WIDTHS.strategy, minHeight: 450, color: 'gray' as const },
-    visuals: { id: 'frame-visuals', title: 'Visual Identity', icon: 'visuals', x: getFrameX(3), y: 80, minWidth: FRAME_WIDTHS.visuals, minHeight: 550, color: 'gray' as const },
+    overview: { id: 'frame-overview', title: 'Overview', icon: 'dashboard', x: getFrameX(1), y: 80, minWidth: FRAME_WIDTHS.overview, minHeight: 400, color: 'green' as const },
+    strategy: { id: 'frame-strategy', title: 'Brand Strategy', icon: 'strategy', x: getFrameX(2), y: 80, minWidth: FRAME_WIDTHS.strategy, minHeight: 450, color: 'blue' as const },
+    visuals: { id: 'frame-visuals', title: 'Visual Identity', icon: 'visuals', x: getFrameX(3), y: 80, minWidth: FRAME_WIDTHS.visuals, minHeight: 550, color: 'red' as const },
 
     // Split Logo Frames
-    logoStructure: { id: 'frame-logo-structure', title: 'Logo Structure', icon: 'structure', x: getFrameX(4), y: 80, minWidth: FRAME_WIDTHS.logoStructure, minHeight: 400, color: 'gray' as const },
+    logoStructure: { id: 'frame-logo-structure', title: 'Logo Structure', icon: 'structure', x: getFrameX(4), y: 80, minWidth: FRAME_WIDTHS.logoStructure, minHeight: 400, color: 'yellow' as const },
     logoInspiration: { id: 'frame-logo-inspiration', title: 'Logo Inspiration', icon: 'inspiration', x: getFrameX(5), y: 80, minWidth: FRAME_WIDTHS.logoInspiration, minHeight: 400, color: 'gray' as const },
 
     // New Imagery Frame
     imagery: { id: 'frame-imagery', title: 'Imagery Concepts', icon: 'imagery', x: getFrameX(6), y: 80, minWidth: FRAME_WIDTHS.imagery, minHeight: 550, color: 'gray' as const },
 
-    tools: { id: 'frame-tools', title: 'Tools', icon: 'tools', x: getFrameX(7), y: 80, minWidth: FRAME_WIDTHS.tools, minHeight: 450, color: 'gray' as const },
+    landingPage: { id: 'frame-landing-page', title: 'Landing Page', icon: 'landing', x: getFrameX(7), y: 80, minWidth: FRAME_WIDTHS.landingPage, minHeight: 600, color: 'gray' as const },
 };
 
 // HELPER: Estimate node height for initial positioning
@@ -164,32 +176,70 @@ const estimateHeight = (content: string | any[], type: 'text' | 'tags' = 'text')
     return BASE_HEIGHT + (lines * LINE_HEIGHT);
 };
 
+/**
+ * The core Canvas component that orchestrates the brand creation experience.
+ * 
+ * This complex component manages:
+ * - **State Management**: Subscribes to `useBrandStore` for all brand data (DNA, colors, logos, etc.).
+ * - **Real-time Updates**: Connects to WebSockets for live collaboration and AI stream updates.
+ * - **Interactive Graph**: Renders the ReactFlow graph with custom nodes (`StickyNode`, `PaletteNode`, etc.).
+ * - **Phase Control**: Transitions between 'onboarding', 'loading' (research), and 'canvas' modes.
+ * - **UI Overlays**: Manages the `CommandCenter`, `ThinkingPanel`, `LogoStudio`, and `Snackbar` notifications.
+ * 
+ * It acts as the central hub for the "Agent" mode of the application.
+ * 
+ * @param {CanvasProps} props - The component props.
+ */
 export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
 
 
-    const { workspaceId } = useWorkspace();
+    const { workspaceId, setWorkspaceId } = useWorkspace();
     // ========== ZUSTAND STORE - SPLIT SUBSCRIPTIONS FOR STABILITY ==========
 
-    // Brand data slice - uses shallow comparison to prevent re-renders when values haven't changed
-    const { dna, colorOptions, fontOptions, logoInspirations, logoOptions, imageryOptions, vaultStats, thoughtSignatures, researchStatus, phase, loadingMessage } = useBrandStore(
+    // Brand data slice
+    const {
+        dna, colorOptions, fontOptions, logoInspirations, logoOptions, imageryOptions, generatedLogos,
+        vaultStats, thoughtSignatures, researchStatus, phase, loadingMessage,
+        canvasLayoutOverrides, uiStateOverrides, history, isHydrated, setLayoutOverride, setUiOverride,
+        hydratePersistence, hydrateHistory, hydrateResearch, setActiveWorkspaceId, activeWorkspaceId,
+        isCommandCenterOpen, setIsCommandCenterOpen, setPendingInterventions
+    } = useBrandStore(
         useShallow((state) => ({
             dna: state.dna,
             colorOptions: state.colorOptions,
             fontOptions: state.fontOptions,
-
             logoInspirations: state.logoInspirations,
             logoOptions: state.logoOptions,
             imageryOptions: state.imageryOptions,
+            generatedLogos: state.generatedLogos,
             vaultStats: state.vaultStats,
             thoughtSignatures: state.thoughtSignatures,
             researchStatus: state.researchStatus,
             phase: state.phase,
             loadingMessage: state.loadingMessage,
+            canvasLayoutOverrides: state.canvasLayoutOverrides,
+            uiStateOverrides: state.uiStateOverrides,
+            history: state.history,
+            isHydrated: state.isHydrated,
+            setLayoutOverride: state.setLayoutOverride,
+            setUiOverride: state.setUiOverride,
+            hydratePersistence: state.hydratePersistence,
+            hydrateHistory: state.hydrateHistory,
+            hydrateResearch: state.hydrateResearch,
+            setActiveWorkspaceId: state.setActiveWorkspaceId,
+            activeWorkspaceId: state.activeWorkspaceId,
+            isCommandCenterOpen: state.isCommandCenterOpen,
+            setIsCommandCenterOpen: state.setIsCommandCenterOpen,
+            setPendingInterventions: state.setPendingInterventions
         }))
     );
 
-    // Voice state slice - separate subscription so voice changes don't trigger full node rebuild
+    // Refs to break hook circular dependency
+    const wsRef = useRef<any>(null);
+    const audioRef = useRef<any>(null);
+
+    // Voice state slice
     const { voiceState, aiMessage } = useBrandStore(
         useShallow((state) => ({
             voiceState: state.voiceState,
@@ -197,15 +247,15 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         }))
     );
 
-    // Actions - these are stable references (Zustand guarantees this)
+    // Actions
     const updateDNA = useBrandStore((state) => state.updateDNA);
     const setColorOptions = useBrandStore((state) => state.setColorOptions);
     const setFontOptions = useBrandStore((state) => state.setFontOptions);
-
     const setLogoInspirations = useBrandStore((state) => state.setLogoInspirations);
     const setLogoOptions = useBrandStore((state) => state.setLogoOptions);
     const setImageryOptions = useBrandStore((state) => state.setImageryOptions);
-    const setVaultStats = useBrandStore((state) => state.setVaultStats); // New
+
+    const setGeneratedLogos = useBrandStore((state) => state.setGeneratedLogos);
     const setPhase = useBrandStore((state) => state.setPhase);
     const setLoadingMessage = useBrandStore((state) => state.setLoadingMessage);
     const setVoiceState = useBrandStore((state) => state.setVoiceState);
@@ -214,20 +264,95 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     const selectFont = useBrandStore((state) => state.selectFont);
     const addThoughtSignature = useBrandStore((state) => state.addThoughtSignature);
     const setResearchStatus = useBrandStore((state) => state.setResearchStatus);
+    const appendResearchThoughts = useBrandStore((state) => state.appendResearchThoughts);
 
-    // Canvas-specific local state (not shared)
+    const resetStore = useBrandStore((state) => state.resetStore);
+    const triggerStateUpdate = useBrandStore((state) => state.triggerStateUpdate);
+    const triggerAssetUpdate = useBrandStore((state) => state.triggerAssetUpdate);
+    const addSnackbar = useBrandStore((state) => state.addSnackbar);
+
+    // ACTIVITY STORE
+    const { addActivity, completeActivity } = useActivityStore();
+
+    // Canvas-specific local state
     const [isDragOver, setIsDragOver] = useState(false);
 
-    // Thinking panel state (local, not needed in store)
-    const [thinkingPhase, setThinkingPhase] = useState<ThinkingPhase>('idle');
-    const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([]);
-    const [thinkingCollapsed, setThinkingCollapsed] = useState(false);
+    // Thinking panel state (Legacy local state REMOVED - using store now for persistence)
+    // const [thinkingPhase, setThinkingPhase] = useState<ThinkingPhase>('idle');
+    // const [thinkingCollapsed, setThinkingCollapsed] = useState(false);
 
-    // UNSTABLE: Logo Studio State (Debug Features)
-    const [showLogoStudio, setShowLogoStudio] = useState(false);
+    // State for Logo Studio
+    // SYNCED: Logo Studio State
+    const showLogoStudio = !!uiStateOverrides.showLogoStudio;
+    const setShowLogoStudio = (val: boolean) => setUiOverride('showLogoStudio', val);
     const [isLogoGenerating, setIsLogoGenerating] = useState(false);
-    const [generatedLogos, setGeneratedLogos] = useState<any[]>([]); // Relaxed type for mapping
+
+
+    // SYNCED: Landing Page State
+    const showLandingPage = !!uiStateOverrides.showLandingPage;
+    const setShowLandingPage = (val: boolean) => setUiOverride('showLandingPage', val);
+    const [isLandingPageGenerating, setIsLandingPageGenerating] = useState(false);
+
+    const { fitView, getNodes } = useReactFlow();
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
+
+    // Hydrate Persistence on Mount
+    useEffect(() => {
+        if (workspaceId) {
+            console.log(`🧹 Resetting Store for Workspace Switch: ${workspaceId}`);
+            resetStore(true); // Preserve phase/auth, but clear data (dna, nodes, overrides)
+
+            setActiveWorkspaceId(workspaceId);
+            hydratePersistence(workspaceId);
+            hydrateHistory(workspaceId);
+            hydrateResearch(workspaceId);
+
+            // Initial fetch for interventions
+            fetch(`/api/hitl/pending`, { headers: { 'x-workspace-id': workspaceId } })
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) setPendingInterventions(data);
+                })
+                .catch(err => console.error('Failed to load initial interventions', err));
+        } else {
+            setActiveWorkspaceId(null);
+        }
+    }, [workspaceId, phase, hydratePersistence, hydrateHistory, hydrateResearch, setActiveWorkspaceId, resetStore]);
+
+    // url-sync: Force Context to match URL on mount (Fixes navigation from Dashboard)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const urlWorkspaceId = params.get('workspace');
+        if (urlWorkspaceId && urlWorkspaceId !== workspaceId) {
+            console.log(`🔄 Force-Syncing Context to URL: ${urlWorkspaceId}`);
+            setWorkspaceId(urlWorkspaceId);
+        }
+    }, [setWorkspaceId, workspaceId]);
+
+    // auto-resume: Check workspace state to determine initial phase
+    useEffect(() => {
+        if (phase === 'entry' && workspaceId && workspaceId !== 'default') {
+            const determinePhase = async () => {
+                try {
+                    console.log(` Checking workspace status for: ${workspaceId}`);
+                    const res = await fetch(`/api/workspaces/check/${workspaceId}`);
+                    const data = await res.json();
+
+                    if (data.exists && data.hasState) {
+                        console.log("✅ State found via API -> Starting in CANVAS mode");
+                        setPhase('canvas');
+                    } else {
+                        console.log("🆕 No state found -> Starting in ONBOARDING mode");
+                        setPhase('onboarding');
+                    }
+                } catch (e) {
+                    console.error("Failed to check workspace status, defaulting to onboarding:", e);
+                    setPhase('onboarding');
+                }
+            };
+            determinePhase();
+        }
+    }, [phase, workspaceId, setPhase]);
 
     // Auto-skip discovery/research if flag is present (Development/Testing Convenience)
     useEffect(() => {
@@ -238,8 +363,42 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         }
     }, [setPhase]);
 
+    // AUTO-HYDRATE LOGOS on Entry
+    useEffect(() => {
+        const hydrateLogos = async () => {
+            if (showLogoStudio && workspaceId && generatedLogos.length === 0) {
+                console.log("🔍 Auto-hydrating logo kit...");
+                const existingKit = await fetchLogoKit(workspaceId);
+                if (existingKit && Object.keys(existingKit).length > 0) {
+                    const mapping = [
+                        { id: 'primary', title: 'Primary Logo' },
+                        { id: 'inverted', title: 'Inverted Logo' },
+                        { id: 'icon', title: 'Brand Icon' },
+                        { id: 'icon_inverted', title: 'Icon (Inverted)' },
+                        { id: 'wordmark', title: 'Wordmark' },
+                        { id: 'wordmark_inverted', title: 'Wordmark (Inverted)' },
+                        { id: 'social', title: 'Social Asset' },
+                        { id: 'social_inverted', title: 'Social (Inverted)' },
+                    ];
+                    const mappedLogos = mapping.map(m => ({
+                        id: m.id,
+                        title: m.title,
+                        url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${m.id}.png?v=${Date.now()}`,
+                        displayName: m.title
+                    }));
+                    setGeneratedLogos(mappedLogos);
+                }
+            }
+        };
+        hydrateLogos();
+    }, [showLogoStudio, workspaceId, generatedLogos.length, setGeneratedLogos]);
+
     // Handler for running logo generation
-    const handleRunLogoGeneration = useCallback(async () => {
+    const handleRunLogoGeneration = useCallback(async (e?: React.MouseEvent) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         console.log("▶️ Run button clicked!");
 
         // Validation: Ensure research is complete
@@ -259,7 +418,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             if (rfInstance) {
                 setTimeout(() => {
                     rfInstance.fitView({
-                        nodes: [{ id: 'frame-logo-studio' }],
+                        nodes: [{ id: 'logo-studio-frame' }],
                         padding: 0.2,
                         duration: 1200
                     });
@@ -300,7 +459,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     return; // EXIT EARLY
                 }
 
-                setAiMessage("Generating logo concepts based on your research... This may take up to 20 seconds.");
+                setAiMessage("Generating logo concepts & baking transparency... This may take up to 45 seconds.");
 
                 // 2. IF NO EXISTING LOGOS, RUN GENERATION
                 await apiGenerateLogos(workspaceId);
@@ -325,13 +484,17 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     id: m.id,
                     title: m.title,
                     // Use timestamp to force refresh image in browser
-                    url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${m.id}.png?v=${Date.now()}`,
+                    // UPDATE: Point to transparent_logos instead of generated_logos
+                    url: `/workspaces/${workspaceId}/assets/transparent_logos/logo_variant_${m.id}_transparent.png?v=${Date.now()}`,
                     displayName: m.title
                 }));
 
                 setGeneratedLogos(mappedLogos);
                 setIsLogoGenerating(false);
-                setAiMessage("Logo concepts generated! Review them in the Logo Studio.");
+                setAiMessage("Logo concepts generated and processed! Review them in the Logo Studio.");
+
+                // SIGNAL REFRESH: Tell other components (Landing Page Frame) to reload
+                useBrandStore.getState().triggerAssetUpdate();
 
             } catch (error) {
                 console.error("Generation error:", error);
@@ -343,7 +506,9 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
     // HUD Interaction State
     const [interactionMode, setInteractionMode] = useState<InteractionMode>('select');
-    const [isControlCenterOpen, setIsControlCenterOpen] = useState(false);
+    // State
+    const [isActivityFeedOpen, setIsActivityFeedOpen] = useState(true); // Activty Feed State - Default Open for Discovery
+
     const [isLocked, setIsLocked] = useState(false);
     const [manuallyMovedNodes, setManuallyMovedNodes] = useState<Set<string>>(new Set());
     // Voice session control - when true, Gemini session is ended (full mute)
@@ -352,7 +517,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     const [transcript, setTranscript] = useState<Array<{ role: 'user' | 'ai'; text: string; timestamp: Date }>>([]);
 
     // React Flow instance for zoom/fit controls
-    useReactFlow();
+    // useReactFlow(); // Already destructured above
 
     // React Flow integration - sync store nodes to ReactFlow
     const [nodes, setNodes, onNodesChange] = useNodesState<CanvasNode>([]);
@@ -367,12 +532,12 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     // Ref to store nodes state for drag start (to avoid snapshotting if no move happened)
     const dragStartNodesRef = useRef<CanvasNode[]>([]);
 
-    // Helper to add thinking step
+    // Helper to add thinking step - NOW UPDATES STORE directly
     const addThinkingStep = useCallback((text: string, status: 'pending' | 'active' | 'complete' = 'active') => {
-        const step: ThinkingStep = { id: `step-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`, text, status };
-        setThinkingSteps(prev => [...prev, step]);
-        return step.id;
-    }, []);
+        const id = `step-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        appendResearchThoughts([{ id, text, status }]);
+        return id;
+    }, [appendResearchThoughts]);
 
     // Handle Undo/Redo Actions
     const handleUndo = useCallback(() => {
@@ -391,9 +556,16 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         }
     }, [redo, nodes]);
 
-    // Keyboard Shortcuts for Undo/Redo
+    // Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if typing in an input
+            const target = e.target as HTMLElement;
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable) {
+                return;
+            }
+
+            // Undo/Redo
             if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
                 e.preventDefault();
                 handleUndo();
@@ -402,11 +574,19 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 e.preventDefault();
                 handleRedo();
             }
+
+            // Tool Shortcuts
+            if (e.key.toLowerCase() === 'v' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                setInteractionMode('select');
+            }
+            if (e.key.toLowerCase() === 'h' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                setInteractionMode('pan');
+            }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [handleUndo, handleRedo]);
+    }, [handleUndo, handleRedo, setInteractionMode]);
 
     // Capture state BEFORE drag starts
     const onNodeDragStart = useCallback((event: any, node: CanvasNode) => {
@@ -416,16 +596,72 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
     // Capture state AFTER drag ends
     const onNodeDragStop = useCallback((event: any, node: CanvasNode) => {
         takeSnapshot(dragStartNodesRef.current);
-    }, [takeSnapshot]);
+
+        // Sync to persistence
+        if (node.id) {
+            setLayoutOverride(node.id, {
+                x: node.position.x,
+                y: node.position.y
+            });
+        }
+    }, [takeSnapshot, setLayoutOverride]);
+
+    // ========== HANDLER: Snapshot & Back ==========
+
+    // Reusable Snapshot Function
+    const captureSnapshot = useCallback(async (silent = false) => {
+        if (!workspaceId || workspaceId === 'default' || !isHydrated) return;
+
+        try {
+            const element = document.querySelector('.react-flow') as HTMLElement;
+            if (!element) return;
+
+            if (!silent) console.log('📸 Capturing canvas snapshot...');
+
+            const canvas = await html2canvas(element, {
+                scale: 0.3, // Low res (30%) for thumbnails - highly optimized
+                useCORS: true,
+                logging: false,
+                ignoreElements: (el) => el.classList.contains('dont-snapshot')
+            });
+
+            const image = canvas.toDataURL('image/png');
+
+            // Upload via beacon strategy if on unmount, otherwise standard fetch
+            await fetch(`/api/workspaces/${workspaceId}/thumbnail`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image })
+            });
+
+            if (!silent) console.log('📸 Snapshot saved.');
+        } catch (e) {
+            if (!silent) console.error("Snapshot failed", e);
+        }
+    }, [workspaceId, isHydrated]);
+
+    // Autosave Effect
+    useEffect(() => {
+        if (!workspaceId || workspaceId === 'default') return;
+
+        const intervalId = setInterval(() => {
+            // Only autosave if tab is visible to save resources
+            if (!document.hidden) {
+                captureSnapshot(true);
+            }
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(intervalId);
+    }, [workspaceId, captureSnapshot]);
 
     // WebSocket handlers - NOW USING ZUSTAND STORE
-    const ws = useWebSocket({
-        onSessionStarted: (sessionId) => {
+    const wsOptions = useMemo(() => ({
+        onSessionStarted: (sessionId: string) => {
             console.log('🎨 Canvas connected:', sessionId);
             setAiMessage("Connected! Tell me about your brand.");
         },
 
-        onTranscription: (role, text) => {
+        onTranscription: (role: 'user' | 'model', text: string) => {
             // Update transcript - merge consecutive messages from same role
             setTranscript(prev => {
                 const lastMsg = prev[prev.length - 1];
@@ -454,16 +690,18 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             }
         },
 
-        onAudioReceived: (base64Audio) => {
+        onAudioReceived: (base64Audio: string) => {
             // Only play audio if session is active
             if (!isVoiceSessionEnded) {
-                audio.playAudio(base64Audio);
+                audioRef.current?.playAudio(base64Audio);
             }
         },
 
+        onDNAUpdate: (dna: any) => {
+            updateDNA(dna);
+        },
 
-
-        onFullStateUpdate: (state) => {
+        onFullStateUpdate: (state: any) => {
             console.log('📦 FULL_STATE_UPDATE received:', state);
 
             // 1. Update DNA
@@ -471,8 +709,8 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
             // 2. Update Colors (with mapping)
             if (state.colorPalettes?.palettes) {
-                // @ts-ignore - Assuming ColorOption handles isSelected is added to store type
-                const options = state.colorPalettes.palettes.map((p, i) => ({
+                // @ts-ignore
+                const options = state.colorPalettes.palettes.map((p: any, i: number) => ({
                     id: p.id || `palette-${i}`,
                     name: p.name || `Palette ${i + 1}`,
                     colors: p.colors,
@@ -486,7 +724,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             // 3. Update Fonts (with mapping)
             if (state.typographyPairings?.fonts) {
                 // @ts-ignore
-                const options = state.typographyPairings.fonts.map((f, i) => ({
+                const options = state.typographyPairings.fonts.map((f: any, i: number) => ({
                     id: f.id || `font-${i}`,
                     name: f.name,
                     category: f.category || 'sans-serif',
@@ -500,12 +738,12 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             // 4. Update Logos
             if (state.logoInspirations?.inspirations) {
                 const inspirations = state.logoInspirations.inspirations.map((l: any, i: number) => ({
-                    id: l.id || `logo-${i}`,
+                    id: l.id || `logo-${Date.now()}-${i}`,
                     url: l.url || l.imageUrl,
-                    displayName: l.brandName || l.source || 'Logo', // Map brandName/source to displayName
+                    displayName: l.brandName ? `Logo ${i + 1} - ${l.brandName}` : `Logo ${i + 1}`,
                     isSelected: l.isSelected || false,
-                    brandName: l.brandName, // Keep original brandName if needed
-                    source: l.source, // Keep original source if needed
+                    brandName: l.brandName,
+                    source: l.source,
                     description: l.description,
                 }));
                 setLogoInspirations(inspirations);
@@ -513,118 +751,205 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
             // 5. Update Logo Options
             if (state.logoStructures?.options) {
-                console.log('📦 Setting logo options from FULL_STATE:', state.logoStructures.options.length);
                 setLogoOptions(state.logoStructures.options);
             }
 
             // 6. Update Imagery Suggestions
             if (state.imagery?.suggestions) {
-                console.log('📦 Setting imagery options from FULL_STATE:', state.imagery.suggestions.length);
                 setImageryOptions(state.imagery.suggestions);
             }
 
+            // 7. Update Thoughts (Unified Log)
+            if (state.thoughts && Array.isArray(state.thoughts) && state.thoughts.length > 0) {
+                console.log(`🧠 [Canvas] Hydrating ${state.thoughts.length} thoughts from server.`);
+                const mappedThoughts = state.thoughts.map((t: any) => ({
+                    id: t.id,
+                    // Format: "Title: Content" or just Content if no title
+                    text: t.title ? `${t.title}: ${t.content}` : t.content || t.text,
+                    status: 'complete'
+                }));
+
+                setResearchStatus({
+                    thoughts: mappedThoughts,
+                    // Ensure status reflects completion if we are loading history
+                    status: 'complete',
+                    isResearching: false
+                });
+
+                // ALSO: Populate Activity Store (Control Center)
+                state.thoughts.forEach((t: any) => {
+                    addActivity({
+                        id: t.id,
+                        type: 'thought',
+                        title: t.title || 'Reasoning',
+                        content: t.content || t.text || '',
+                        status: 'success',
+                        timestamp: new Date(t.timestamp || Date.now()),
+                        duration: 0
+                    });
+                });
+            }
+
             // Force phase to canvas now that data is loaded
-            console.log('🎨 Data loaded, switching phase to CANVAS');
-            setPhase('canvas');
+            // Fix: Do NOT force phase change if we are currently in LOADING phase (research in progress)
+            // This prevents the premature jump to canvas. Let onResearchUpdate handle the transition.
+            if (phase !== 'loading') {
+                setPhase('canvas');
+            }
         },
 
-        onLogoStructureOptions: (options) => {
-            console.log('🏗️ Logo Structure Options received via WS:', options);
+        onLogoStructureOptions: (options: any[]) => {
             if (options && options.length > 0) {
                 setLogoOptions(options);
             }
         },
 
-        onImagerySuggestions: (suggestions) => {
-            console.log('🎨 Imagery Suggestions received via WS:', suggestions);
+        onImagerySuggestions: (suggestions: any[]) => {
             if (suggestions && suggestions.length > 0) {
                 setImageryOptions(suggestions);
                 addThinkingStep(`Created ${suggestions.length} imagery concepts`, 'complete');
             }
         },
 
-
-
-        onLogoResearchResult: (logos, insights, screenshots) => {
-            console.log('🖼️ Received logo research results:', logos.length);
-            // Map to LogoInspiration[]
-            const inspirations: LogoInspiration[] = logos.map((l: any, i: number) => ({
+        onLogoResearchResult: (logos: any[], insights: any, screenshots: string[]) => {
+            const inspirations = logos.map((l: any, i: number) => ({
                 id: l.id || `logo-${Date.now()}-${i}`,
                 url: l.url || l.imageUrl,
-                displayName: l.brandName || l.name || l.source || 'Competitor', // Map brandName/name/source to displayName
+                displayName: l.brandName || l.name ? `Logo ${i + 1} - ${l.brandName || l.name}` : `Logo ${i + 1}`,
                 isSelected: false,
                 brandName: l.brandName,
                 source: l.source,
                 description: l.description
             }));
-            setLogoInspirations(inspirations); // This will trigger node render via store
+            setLogoInspirations(inspirations);
             addThinkingStep(`Found ${inspirations.length} logo inspirations`, 'complete');
         },
 
-        onToolProcessingStart: (toolType) => {
-            setThinkingPhase('analyzing');
-            addThinkingStep(`Processing: ${toolType}`, 'active');
+        onToolProcessingStart: (toolType?: 'display_fonts' | 'display_colors' | 'update_dna' | 'search_logo_inspiration' | 'display_logo_structure_options' | 'display_imagery_suggestions', targetField?: string) => {
+            // setThinkingPhase('analyzing'); // REMOVED
+            addThinkingStep(`Processing: ${toolType || 'Tool'}`, 'active');
         },
 
         onToolProcessingEnd: () => {
-            setThinkingSteps(prev => prev.map(s =>
-                s.status === 'active' ? { ...s, status: 'complete' as const } : s
-            ));
+            // Bulk update status to complete for active
+            // Note: Current store implementation is simple, for now just leave as is since append handles add
+            // If we need to update status of existing items, we'd need a specific action.
+            // For safety, we can just rely on stream updates or ignore this local-only optimization
+            // as stream usually sends completion event anyway.
         },
 
-        onThought: (logic) => {
+        onToolExecution: (msg: any) => {
+            const content = msg.message || (msg.args ? JSON.stringify(msg.args, null, 2) : '');
+            const title = msg.title || msg.toolName || 'Tool Execution';
+            const toolName = msg.toolName;
+
+            // 1. Handle "Start" -> Create new running activity
+            if (msg.status === 'start') {
+                addActivity({
+                    id: msg.id,
+                    type: 'tool',
+                    title: title,
+                    content: content,
+                    status: 'running',
+                    timestamp: new Date(msg.timestamp),
+                    meta: { toolName } // Store toolName for correlation
+                });
+            }
+            // 2. Handle "Info" -> Create instantaneous log
+            else if (msg.status === 'info') {
+                addActivity({
+                    id: msg.id,
+                    type: 'tool',
+                    title: title,
+                    content: content,
+                    status: 'success', // Info logs are "done"
+                    timestamp: new Date(msg.timestamp),
+                    meta: { toolName }
+                });
+            }
+            // 3. Handle "Success" / "Error" -> Log it AND close pending tool activities of same type
+            else if (msg.status === 'success' || msg.status === 'error') {
+                // Add the completion log itself
+                addActivity({
+                    id: msg.id,
+                    type: 'tool',
+                    title: title, // e.g. "Transparency Complete"
+                    content: content || msg.result || '',
+                    status: msg.status,
+                    timestamp: new Date(msg.timestamp),
+                    meta: { toolName }
+                });
+
+                // Heuristic: If this is a success/error for a tool, find any "running" activity 
+                // with the same toolName and mark it complete.
+                // This handles the "Start" -> ... -> "Success" flow where IDs differ.
+                useActivityStore.getState().activities.forEach(a => {
+                    if (a.status === 'running' && a.meta?.toolName === toolName) {
+                        completeActivity(a.id, msg.status, 'Completed');
+                    }
+                });
+            }
+        },
+
+        onThought: (logic: string) => {
             addThinkingStep(logic, 'complete');
         },
 
-        onVaultUpdate: (stats) => {
-            console.log('🏦 Vault Stats Update:', stats);
-            setVaultStats(stats);
-            addThinkingStep('Brand Vault updated', 'complete');
+
+
+        onThinkingStart: (timestamp: number) => {
+            // setThinkingPhase('analyzing'); // REMOVED
+            appendResearchThoughts([{ id: `think-${timestamp}`, text: 'Analyzing...', status: 'active' }]);
         },
 
-        // Thinking Handlers
-        onThinkingStart: (timestamp) => {
-            setThinkingPhase('analyzing');
-            setThinkingSteps(prev => [...prev, { id: `think-${timestamp}`, text: 'Analyzing...', status: 'active' }]);
+        // onThinkingStream: REMOVED (Legacy UI logic)
+
+        // onThinkingEnd: REMOVED (Legacy UI logic)
+
+
+        onInterventionRequired: (count: number, requests: any[]) => {
+            console.log(`🚥 [Canvas] Received ${count} intervention requests via WS.`);
+            setPendingInterventions(requests);
+
+            // Add snackbar notifications for new interventions
+            requests.forEach((req: any) => {
+                addSnackbar({
+                    id: `snackbar-${req.id}`,
+                    title: 'Approval Required',
+                    message: req.message || 'An AI agent needs your input before proceeding.',
+                    section: req.section,
+                    type: 'intervention',
+                    interventionId: req.id,
+                    duration: 10000 // 10 seconds for interventions
+                });
+            });
         },
 
-        onThinkingStream: (thought, phase) => {
-            const phaseMap: Record<string, ThinkingPhase> = {
-                'classify': 'analyzing',
-                'analyze': 'researching',
-                'decide': 'generating',
-                'execute': 'generating'
-            };
-            setThinkingPhase(prev => phaseMap[phase] || prev);
+        // Signal-Driven Architecture
+        onStateUpdate: (hash: string, path: string) => {
+            console.log(`🔄 [Canvas] Signal: STATE_UPDATE (Hash: ${hash})`);
+            triggerStateUpdate();
         },
 
-        onThinkingEnd: (duration, toolDecided, thoughtSummary) => {
-            setThinkingPhase('complete');
-            setTimeout(() => setThinkingPhase('idle'), 3000);
+        onAssetUpdate: (resource: string) => {
+            console.log(`🖼️ [Canvas] Signal: ASSET_UPDATE (Resource: ${resource})`);
+            triggerAssetUpdate();
         },
 
-        // Agentic Brand Discovery handlers
-        onResearchUpdate: (status, message, step, totalSteps, competitors, thoughts) => {
-            console.log('🔍 Research Update:', status, message, `Step ${step}/${totalSteps}`, `Thoughts: ${thoughts?.length || 0}`);
-
-            // Only switch to loading if we're NOT already in canvas phase
-            // This prevents the race condition where colors arrive before research completes
+        onResearchUpdate: (status: 'started' | 'searching' | 'analyzing' | 'generating' | 'complete', message: string, step: number, totalSteps: number, competitors?: string[], thoughts?: any[]) => {
             if (status === 'started' || status === 'searching' || status === 'analyzing' || status === 'generating') {
                 if (phase !== 'canvas') {
                     setPhase('loading');
                     setLoadingMessage(message);
                 }
             } else if (status === 'complete') {
-                // Research complete - ensure we're in canvas
-                if (phase !== 'canvas') {
-                    setPhase('canvas');
-                }
+                if (phase !== 'canvas') setPhase('canvas');
                 setLoadingMessage('Research complete!');
             }
 
             setResearchStatus({
                 isResearching: status !== 'complete',
-                status,
+                status: status as any,
                 message,
                 step: step || 0,
                 totalSteps: totalSteps || 5,
@@ -632,79 +957,87 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 thoughts: thoughts || []
             });
 
-            // Sync thinkingPhase with research status
-            const phaseMap: Record<string, ThinkingPhase> = {
-                'started': 'analyzing',
-                'searching': 'researching',
-                'analyzing': 'analyzing',
-                'generating': 'generating',
-                'complete': 'complete'
-            };
-            setThinkingPhase(phaseMap[status] || 'analyzing');
+            // setThinkingPhase(phaseMap[status] as any || 'analyzing'); // REMOVED
 
-            // Use server thoughts directly for ThinkingPanel during research
-            // This prevents duplicates by replacing local state with server state
             if (thoughts && thoughts.length > 0) {
-                setThinkingSteps(thoughts);
+                // Prefix thoughts with step index for ResearchScreen filtering
+                const prefixedThoughts = thoughts.map(t => ({
+                    ...t,
+                    id: t.id.startsWith('step') ? t.id : `step${step || 0}-${t.id}`
+                }));
+
+                // USE STORE ACTION
+                appendResearchThoughts(prefixedThoughts);
             }
 
-            // When complete, ensure ALL thoughts are marked complete
             if (status === 'complete') {
-                setThinkingSteps(prev => prev.map(t => ({ ...t, status: 'complete' as const })));
+                // Optional: mark all as complete in store if improved logic needed
             }
         },
 
-        onThoughtSignature: (nodeId, title, reasoning, confidence) => {
-            console.log('💡 Thought Signature:', nodeId, title);
+        onThoughtSignature: (nodeId: string, title: string, reasoning: string, confidence?: number) => {
+            // FIX: Pass as a single object as expected by the store
             addThoughtSignature({ nodeId, title, reasoning, confidence });
 
-            // Map phase ID to step index for ResearchScreen visibility
-            const stepMap: Record<string, number> = {
-                'identity': 0,
-                'competitors': 1,
-                'colors': 2,
-                'typography': 3,
-                'strategy': 4
-            };
-            const stepIndex = stepMap[nodeId] ?? 0;
-            const stepId = `step${stepIndex}-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
-
-            // Add directly to thinking steps with correct ID and reasoning text
-            setThinkingSteps(prev => [...prev, {
-                id: stepId,
-                text: reasoning || title,
-                status: 'complete'
-            }]);
+            // Update Activity Feed
+            addActivity({
+                id: `thought-${Date.now()
+                    }-${Math.random().toString(36).substr(2, 9)} `,
+                type: 'thought',
+                title: title || 'Reasoning',
+                content: reasoning,
+                status: 'success',
+                timestamp: new Date()
+            });
         },
 
-        onError: (message) => {
-            console.error('Canvas error:', message);
-            setAiMessage(`Error: ${message}`);
-            setVoiceState('idle');
+        onError: (message: string, code?: string, redirect?: boolean) => {
+            console.error(`Canvas error: ${message} (Code: ${code})`);
+
+            if (redirect) {
+                console.warn('🔄 Critical Error - Redirecting to Landing Page...');
+                setAiMessage(`Error: ${message} `);
+                // Short delay to let user see connection failed
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                setAiMessage(`Error: ${message} `);
+                setVoiceState('idle');
+            }
         },
 
         onInterrupt: () => {
-            audio.stopPlayback();
+            audioRef.current?.stopPlayback();
         }
-    });
+    }), [
+        workspaceId, phase, isVoiceSessionEnded, updateDNA, setColorOptions, setFontOptions,
+        setLogoInspirations, setLogoOptions, setImageryOptions, addThinkingStep,
+        addThoughtSignature, setPhase, setLoadingMessage, setResearchStatus,
+        addActivity, completeActivity, appendResearchThoughts
+    ]);
+
+    const ws = useWebSocket(wsOptions);
+    wsRef.current = ws;
 
     // Audio stream with VAD
     const audio = useAudioStream({
         onAudioData: (base64Audio) => {
-            ws.sendAudio(base64Audio);
+            wsRef.current?.sendAudio(base64Audio);
         },
         // VAD: Signal activity start when user begins speaking
         onSpeechStart: () => {
             console.log('🎙️ VAD: User started speaking, signaling activity start');
-            ws.sendActivityStart();
+            wsRef.current?.sendActivityStart();
         },
         // VAD: Signal activity end when user stops speaking
         onSpeechEnd: () => {
             console.log('🎤 VAD: User finished speaking, signaling activity end');
-            ws.sendActivityEnd();
+            wsRef.current?.sendActivityEnd();
         },
         silenceThresholdMs: 1500 // 1.5s of silence triggers speech end (increased for natural pauses)
     });
+    audioRef.current = audio;
 
     // Connect when phase is not entry, but prevent disconnect on phase change
     useEffect(() => {
@@ -785,7 +1118,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         if (selected) {
             selectColor(paletteId); // Store handles DNA update + clear options
             ws.sendSelection('color', selected.colors.join(','));
-            addThinkingStep(`Selected: ${selected.name}`, 'complete');
+            addThinkingStep(`Selected: ${selected.name} `, 'complete');
         }
     }, [colorOptions, selectColor, ws, addThinkingStep]);
 
@@ -794,7 +1127,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         if (selected) {
             selectFont(fontId); // Store handles DNA update + remove from options
             ws.sendSelection('font', selected.name);
-            addThinkingStep(`Selected font: ${selected.name}`, 'complete');
+            addThinkingStep(`Selected font: ${selected.name} `, 'complete');
         }
     }, [fontOptions, selectFont, ws, addThinkingStep]);
 
@@ -803,7 +1136,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         if (option) {
             ws.sendSelection('structure', option.id);
             console.log('Selected logo structure:', option.type, option.id);
-            addThinkingStep(`Selected logo structure: ${option.type}`, 'complete');
+            addThinkingStep(`Selected logo structure: ${option.type} `, 'complete');
         }
     }, [logoOptions, ws, addThinkingStep]);
 
@@ -812,27 +1145,93 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         if (option) {
             ws.sendSelection('imagery', option.id);
             console.log('Selected imagery:', option.concept, option.id);
-            addThinkingStep(`Selected imagery concept: ${option.concept}`, 'complete');
+            addThinkingStep(`Selected imagery concept: ${option.concept} `, 'complete');
         }
     }, [imageryOptions, ws, addThinkingStep]);
 
-    // Vault Upload Handler
-    const handleVaultUpload = useCallback((files: File[]) => {
-        if (files.length === 0) return;
-        const file = files[0];
 
-        console.log('🏦 Uploading to Vault:', file.name);
-        setVaultStats({ isIngesting: true }); // Optimistic update
-        addThinkingStep(`Ingesting ${file.name} to Brand Vault...`, 'active');
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            const base64 = (reader.result as string).split(',')[1];
-            // Send with 'vault' target
-            ws.sendFile(file, base64, 'vault');
-        };
-        reader.readAsDataURL(file);
-    }, [ws, setVaultStats, addThinkingStep]);
+    const handleRunLandingPage = useCallback(async () => {
+        // 1. Activate Frame
+        setShowLandingPage(true);
+        setIsLandingPageGenerating(true);
+
+        // 2. Position & Focus Logic
+        // Calculate position relative to Logo Studio (or Inspiration if Studio not active)
+        const referenceFrame = showLogoStudio ? 'logo-studio-frame' : FRAMES.logoInspiration.id;
+        const refNode = getNodes().find(n => n.id === referenceFrame);
+
+        // Default position if ref not found (far right)
+        let targetX = FRAMES.landingPage.x;
+        let targetY = FRAMES.landingPage.y;
+
+        if (refNode) {
+            const refWidth = refNode.measured?.width ?? refNode.width ?? 680;
+            targetX = refNode.position.x + refWidth + 100; // 100px gap
+            targetY = refNode.position.y;
+        }
+
+        // Store this calculated position in layout overrides so it persists
+        const layoutUpdate = { x: targetX, y: targetY };
+        useBrandStore.getState().setLayoutOverride(FRAMES.landingPage.id, layoutUpdate);
+
+        // Pan to the new frame location comfortably
+        setTimeout(() => {
+            fitView({
+                nodes: [{ id: FRAMES.landingPage.id }],
+                duration: 1000,
+                padding: 0.2,
+                minZoom: 0.3
+            });
+        }, 100);
+
+        // 3. Trigger Backend
+        try {
+            await fetch('/api/action/run-initializers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-workspace-id': workspaceId
+                },
+                body: JSON.stringify({
+                    init: true,  // Flag to run initializers
+                    workspaceId
+                })
+            });
+            // 4. Success Handling
+            setIsLandingPageGenerating(false);
+            // Refresh storage to get new state (Silent update)
+            hydratePersistence(workspaceId, true);
+        } catch (error) {
+            console.error("Failed to generate landing page:", error);
+            setIsLandingPageGenerating(false);
+        }
+    }, [workspaceId, showLogoStudio, getNodes, fitView, hydratePersistence]);
+
+    // Helper for Logo Studio generation (extracted from handleRunLogoGeneration)
+    const handleLogoStudioGenerate = useCallback(async (ctx: string) => {
+        console.log('Generating with context:', ctx);
+        setIsLogoGenerating(true);
+        setAiMessage("Refining designs...");
+        try {
+            await apiGenerateLogos(workspaceId, ctx);
+            // Refresh logic (duplicated for now, could be extracted)
+            const mapping = ['primary', 'inverted', 'icon', 'icon_inverted', 'wordmark', 'wordmark_inverted', 'social', 'social_inverted'];
+            const mappedLogos = mapping.map(id => ({
+                id,
+                title: id.charAt(0).toUpperCase() + id.slice(1).replace('_', ' '),
+                url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${id}.png?v=${Date.now()}`
+            }));
+            setGeneratedLogos(mappedLogos);
+            setIsLogoGenerating(false);
+            setAiMessage("Designs refreshed!");
+        } catch (e) {
+            console.error(e);
+            setIsLogoGenerating(false);
+            setAiMessage("Refinement failed.");
+        }
+    }, [workspaceId, setAiMessage, setGeneratedLogos]);
+
 
     // ========== EFFECT 1: Derive brand data nodes ==========
     // Only runs when brand DNA or options change - NOT on every voice state change
@@ -850,6 +1249,13 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
             // Helper to get layout position (preserves manual moves)
             const getLayoutPosition = (id: string, autoX: number, autoY: number) => {
+                // 1. Check Store Overrides (Persistent)
+                const override = canvasLayoutOverrides[id];
+                if (override && override.x !== undefined && override.y !== undefined) {
+                    return { x: override.x, y: override.y };
+                }
+
+                // 2. Check local session moves
                 if (manuallyMovedNodes.has(id)) {
                     const existing = existingNodesMap.get(id);
                     if (existing) return existing.position;
@@ -882,19 +1288,69 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
 
             // ========== STEP 1: Generate Frame Nodes FIRST ==========
             // Frames must exist before their children
+
+            // Map frame IDs to thought signature lists
+            const frameSignatures: Record<string, typeof thoughtSignatures> = {
+                'frame-identity': [],
+                'frame-overview': [],
+                'frame-strategy': [],
+                'frame-visuals': [],
+                'frame-logo-structure': [],
+                'frame-logo-inspiration': [],
+            };
+
+            // Aggregate signatures by logic
+            thoughtSignatures.forEach(sig => {
+                const nodeId = sig.nodeId;
+                const title = sig.title.toLowerCase();
+
+                // 1. Identity
+                if (nodeId === 'identity') {
+                    frameSignatures['frame-identity'].push(sig);
+                }
+                // 2. Overview (Competitors OR 'Research Complete')
+                else if (nodeId === 'competitors' || title.includes('research complete')) {
+                    frameSignatures['frame-overview'].push(sig);
+                }
+                // 3. Strategy (Differentiation) - Exclude 'Research Complete' if it was caught above
+                else if (nodeId === 'strategy' && !title.includes('research complete')) {
+                    frameSignatures['frame-strategy'].push(sig);
+                }
+                // 4. Visuals (Colors OR Typography)
+                else if (nodeId === 'colors' || nodeId === 'typography') {
+                    frameSignatures['frame-visuals'].push(sig);
+                }
+                // 5. Logo Structure
+                else if (nodeId === 'logo') {
+                    frameSignatures['frame-logo-structure'].push(sig);
+                }
+                // 6. Logo Inspiration
+                else if (nodeId === 'inspiration') {
+                    frameSignatures['frame-logo-inspiration'].push(sig);
+                }
+            });
+
             Object.values(FRAMES).forEach((frame) => {
+                // Skip landing page frame here to avoid duplicate node ID 'frame-landing-page'
+                // This frame is rendered separately with type 'landing-page' below.
+                if (frame.id === 'frame-landing-page') return;
+
+                const override = canvasLayoutOverrides[frame.id];
+
                 derivedNodes.push({
                     id: frame.id,
                     type: 'frame',
-                    position: existingPositions.get(frame.id) || { x: frame.x, y: frame.y },
-                    draggable: true,
+                    position: (override && override.x !== undefined) ? { x: override.x, y: override.y } : (existingPositions.get(frame.id) || { x: frame.x, y: frame.y }),
+                    draggable: !(override?.locked),
                     data: {
                         title: frame.title,
-                        minWidth: frame.minWidth,
-                        minHeight: frame.minHeight,
-                        color: frame.color,
+                        minWidth: override?.width || frame.minWidth,
+                        minHeight: override?.height || frame.minHeight,
+                        color: override?.color || frame.color,
+                        locked: override?.locked || false,
                         icon: frame.icon,
                         onRun: frame.icon === 'inspiration' ? handleRunLogoGeneration : undefined,
+                        thoughtSignatures: frameSignatures[frame.id], // Pass array
                     },
                 });
             });
@@ -1064,9 +1520,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             const COL_WIDTH = 320; // Width for side-by-side columns (matched to max-w-[320px] of nodes)
             const COL_GAP = NODE_GAP;
 
-            // Track heights to push down subsequent nodes (Imagery)
-            let leftColHeight = 0;
-            let rightColHeight = 0;
+
 
             // 1. COLORS (Left Column)
             const colorsStatus = colorOptions.length > 0 ? 'options' : (dna.colors?.items && dna.colors.items.length > 0 ? 'saved' : 'empty');
@@ -1074,11 +1528,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             const PALETTE_ITEM_HEIGHT = 100; // Approx height per palette card
             const PALETTE_BASE_HEIGHT = 80;  // Header + padding
 
-            let colorsHeight = 120;
-            if (colorsStatus === 'saved') colorsHeight = 150;
-            if (colorsStatus === 'options') {
-                colorsHeight = PALETTE_BASE_HEIGHT + (colorOptions.length * PALETTE_ITEM_HEIGHT);
-            }
+
 
             if (colorOptions.length > 0 || (dna.colors?.items && dna.colors.items.length > 0)) {
                 const colorsAutoPos = { x: 20, y: currentY };
@@ -1102,7 +1552,6 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         originalPosition: getOriginalPosition('colors', colorsAutoPos.x, colorsAutoPos.y),
                     },
                 });
-                leftColHeight = getMeasuredHeight('colors', colorsHeight);
             }
 
 
@@ -1112,11 +1561,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             const FONT_ITEM_HEIGHT = 120; // Approx height per font card
             const FONT_BASE_HEIGHT = 80;
 
-            let typographyHeight = 120;
-            if (typographyStatus === 'saved') typographyHeight = 150;
-            if (typographyStatus === 'options') {
-                typographyHeight = FONT_BASE_HEIGHT + (fontOptions.length * FONT_ITEM_HEIGHT);
-            }
+
 
             if (fontOptions.length > 0 || (dna.typography?.items && dna.typography.items.length > 0)) {
                 const typoAutoPos = { x: 20 + COL_WIDTH + COL_GAP, y: currentY };
@@ -1132,7 +1577,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         status: typographyStatus,
                         options: fontOptions,
                         selectedFonts: typographyStatus === 'saved' && dna.typography?.items ? dna.typography.items.map((name: string, i: number) => ({
-                            id: `font-${i}`,
+                            id: `font - ${i} `,
                             name,
                             category: 'sans-serif' as const,
                         })) : undefined,
@@ -1140,7 +1585,6 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         originalPosition: getOriginalPosition('typography', typoAutoPos.x, typoAutoPos.y),
                     },
                 });
-                rightColHeight = getMeasuredHeight('typography', typographyHeight);
             }
 
             // IMAGERY removed from visual frame
@@ -1186,6 +1630,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         status: inspirationStatus,
                         options: logoInspirations,
                         saved: dna.logoAssets,
+                        onRun: handleRunLogoGeneration,
                         originalPosition: getOriginalPosition('inspiration', inspAutoPos.x, inspAutoPos.y),
                     },
                 });
@@ -1210,166 +1655,94 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 });
             }
 
-            // --- FRAME: Tools (Vault, Voice Orb) ---
-            // Voice Orb
-            {
-                const orbAutoPos = { x: 40, y: 50 };
-                derivedNodes.push({
-                    id: 'voiceOrb',
-                    type: 'voiceOrb',
-                    parentId: FRAMES.tools.id,
-                    extent: 'parent',
-                    position: getLayoutPosition('voiceOrb', orbAutoPos.x, orbAutoPos.y),
-                    draggable: true,
-                    data: {
-                        state: voiceState,
-                        message: aiMessage,
-                        onActivate: handleVoiceActivate,
-                        onDeactivate: handleVoiceDeactivate,
-                        originalPosition: getOriginalPosition('voiceOrb', orbAutoPos.x, orbAutoPos.y),
-                    },
-                });
-            }
-
-            // Brand Vault
-            {
-                const vaultAutoPos = { x: 20, y: 280 };
-                derivedNodes.push({
-                    id: 'vault',
-                    type: 'vault',
-                    parentId: FRAMES.tools.id,
-                    extent: 'parent',
-                    position: getLayoutPosition('vault', vaultAutoPos.x, vaultAutoPos.y),
-                    draggable: true,
-                    data: {
-                        label: 'Brand Vault',
-                        fileCount: vaultStats.fileCount,
-                        totalTokens: vaultStats.totalTokens,
-                        isIngesting: vaultStats.isIngesting,
-                        onUpload: handleVaultUpload,
-                        originalPosition: getOriginalPosition('vault', vaultAutoPos.x, vaultAutoPos.y),
-                    },
-                });
-            }
 
 
-            // --- FRAME: Logo Studio (Move to end to calc max height) ---
+
+            // REMOVED: Thought signatures are now inside the AI Reasoning tool in the Frame HUD
+            // No longer generating sticky notes for them.
+
+            // ========== STEP 5: Logo Studio Frame (Optional) ==========
             if (showLogoStudio) {
-                // Calculate max bottom Y of the first row dynamically
-                let maxBottomY = 800; // Reasonable min start
+                const lsOverride = canvasLayoutOverrides['logo-studio-frame'];
 
-                // Iterate all current derived nodes to find bottom-most edge
-                derivedNodes.forEach(node => {
-                    // Only consider nodes relevant to the main flow (ignore existing logo studio if present to avoid loop)
-                    if (node.id === 'frame-logo-studio') return;
+                // Dynamic Positioning Calculation
+                // Logo Structure Frame is at FRAMES.logoStructure (x, y)
+                // Content is a 2-column grid of cards. Approx height calculation:
+                // Card Height ~220px. Rows = Math.ceil(logoOptions.length / 2).
+                // Frame Header ~60px. Padding ~40px.
+                const cardsCount = logoOptions.length || 3; // Default 3 if empty
+                const rows = Math.ceil(cardsCount / 2); // 2 columns
+                const cardHeight = 240; // Safe estimate
+                const gap = 20;
+                const logoStructureHeight = 80 + (rows * cardHeight) + ((rows - 1) * gap) + 40;
 
-                    let y = node.position.y;
-                    // If child, add parent Y
-                    if (node.parentId) {
-                        const parent = derivedNodes.find(p => p.id === node.parentId);
-                        if (parent) y += parent.position.y;
-                    }
-
-                    // Estimate height: prioritized measured > data.minHeight > fallback
-                    // We use generous fallbacks to ensure clearance
-                    let h = 300;
-                    if (node.type === 'frame') h = (node.data as any)?.minHeight || 400;
-                    if (node.type === 'text') h = 100;
-                    if (node.type === 'infoCard') h = 150;
-
-                    // Use actual measured if available
-                    const measured = getMeasuredHeight(node.id, 0);
-                    if (measured > 0) h = measured;
-
-                    if (y + h > maxBottomY) maxBottomY = y + h;
-                });
-
-                const startX = FRAMES.identity.x;
-                const newRowY = maxBottomY + 80; // Buffer
+                // Position logic: If override exists, use it. Else, place below Logo Structure.
+                const defaultX = FRAMES.logoStructure.x;
+                const defaultY = FRAMES.logoStructure.y + logoStructureHeight + 80; // 80px gap between frames
 
                 derivedNodes.push({
-                    id: 'frame-logo-studio',
-                    type: 'logoStudio',
-                    position: { x: startX, y: newRowY },
-                    draggable: true,
+                    id: 'logo-studio-frame',
+                    type: 'logo-studio',
+                    position: (lsOverride && lsOverride.x !== undefined)
+                        ? { x: lsOverride.x, y: lsOverride.y }
+                        : { x: defaultX, y: defaultY },
                     data: {
                         title: 'Logo Studio',
                         isGenerating: isLogoGenerating,
-                        logos: generatedLogos,
-                        onGenerate: async (ctx: string) => {
-                            console.log('Generating with context:', ctx);
-                            setIsLogoGenerating(true);
-                            setAiMessage("Refining designs...");
-                            try {
-                                await apiGenerateLogos(workspaceId, ctx);
-                                // Refresh logic (duplicated for now, could be extracted)
-                                const mapping = ['primary', 'inverted', 'icon', 'icon_inverted', 'wordmark', 'wordmark_inverted', 'social', 'social_inverted'];
-                                const mappedLogos = mapping.map(id => ({
-                                    id,
-                                    title: id.charAt(0).toUpperCase() + id.slice(1).replace('_', ' '),
-                                    url: `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${id}.png?v=${Date.now()}`
-                                }));
-                                setGeneratedLogos(mappedLogos);
-                                setIsLogoGenerating(false);
-                                setAiMessage("Designs refreshed!");
-                            } catch (e) {
-                                console.error(e);
-                                setIsLogoGenerating(false);
-                                setAiMessage("Refinement failed.");
-                            }
-                        },
-                        onExport: () => {
-                            console.log('Export clicked');
-                            window.window.alert("Exporting Kit...");
-                        },
-                        onFinalize: async () => {
-                            console.log('Finalizing (Baking Transparency)...');
-                            setAiMessage("Making logos transparent...");
-                            try {
-                                await apiFinalizeLogos(workspaceId);
-                                setAiMessage("Transparency baked! Check /workspaces/" + workspaceId + "/assets/transparent_logos/ folder.");
-                                window.alert("Transparency baked successfully!");
-                            } catch (e) {
-                                console.error(e);
-                                setAiMessage("Transparency baking failed.");
-                            }
-                        }
+                        logos: generatedLogos || [],
+                        onGenerate: handleLogoStudioGenerate,
+                        onExport: () => console.log('Export logos'),
+                        onRun: handleRunLandingPage, // Connect the trigger
+                        color: lsOverride?.color || 'cyan', // Default to Cyan
+                        locked: lsOverride?.locked || false
                     },
+                    draggable: !(lsOverride?.locked),
                 });
             }
 
-            // Create thought signature nodes for each stored signature
-            // Position them relative to their parent nodes
-            const nodeOffsets: Record<string, { x: number; y: number }> = {
-                'colors': { x: 320, y: 40 },      // Right of palette node
-                'typography': { x: 320, y: 230 }, // Right of typography node
-                'inspiration': { x: 320, y: 410 }, // Right of inspiration node
-            };
-
-            thoughtSignatures.forEach((sig) => {
-                const offset = nodeOffsets[sig.nodeId] || { x: 350, y: 0 };
+            // ========== STEP 6: Landing Page Frame (Optional) ==========
+            if (showLandingPage) {
+                const lpOverride = canvasLayoutOverrides[FRAMES.landingPage.id];
                 derivedNodes.push({
-                    id: `thought-${sig.nodeId}`,
-                    type: 'thoughtSignature',
-                    parentId: FRAMES.visuals.id, // Place in visuals frame
-                    extent: 'parent',
-                    position: existingPositions.get(`thought-${sig.nodeId}`) || offset,
-                    draggable: true,
+                    id: FRAMES.landingPage.id,
+                    type: 'landing-page',
+                    position: (lpOverride && lpOverride.x !== undefined)
+                        ? { x: lpOverride.x, y: lpOverride.y }
+                        : { x: FRAMES.landingPage.x, y: FRAMES.landingPage.y },
                     data: {
-                        parentNodeId: sig.nodeId,
-                        title: sig.title,
-                        reasoning: sig.reasoning,
-                        confidence: sig.confidence,
+                        title: 'Landing Page',
+                        isGenerating: isLandingPageGenerating,
+                        color: lpOverride?.color || 'white',
+                        locked: lpOverride?.locked || false
                     },
+                    draggable: !(lpOverride?.locked),
                 });
-            });
+            }
 
             return derivedNodes;
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dna, colorOptions, fontOptions, logoInspirations, logoOptions, imageryOptions, vaultStats, thoughtSignatures, phase, FRAMES, showLogoStudio, isLogoGenerating, generatedLogos]);
+    }, [dna, colorOptions, fontOptions, logoInspirations, logoOptions, imageryOptions, vaultStats, thoughtSignatures, phase, FRAMES, showLogoStudio, isLogoGenerating, generatedLogos, canvasLayoutOverrides, showLandingPage, isLandingPageGenerating]);
 
-    // ========== EFFECT 2: Update voice orb state only ==========
+    // ========== EFFECT 2: Auto-Focus on Logo Studio ==========
+    // ========== EFFECT 2: Auto-Focus on Logo Studio ==========
+    useEffect(() => {
+        if (showLogoStudio && rfInstance) {
+            // Wait for render cycle to place the node
+            setTimeout(() => {
+                const node = rfInstance.getNode('logo-studio-frame');
+                if (node) {
+                    rfInstance.fitView({
+                        nodes: [{ id: 'logo-studio-frame' }],
+                        padding: 0.2,
+                        duration: 800,
+                    });
+                }
+            }, 100);
+        }
+    }, [showLogoStudio, isLogoGenerating, rfInstance]);
+
+    // ========== EFFECT 3: Update voice orb state only ==========
     // Runs frequently during conversation, but only updates the voiceOrb node data
     useEffect(() => {
         if (phase !== 'canvas') return;
@@ -1456,8 +1829,9 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
             frameOrderRef.current.forEach((frameId) => {
                 const frameNode = frameNodes.find(f => f.id === frameId);
                 if (frameNode) {
-                    // Only auto-position if frame hasn't been manually moved
-                    if (!manuallyMovedFrames.has(frameId)) {
+                    // Only auto-position if frame hasn't been manually moved (check local session OR database overrides)
+                    const hasDatabaseOverride = canvasLayoutOverrides[frameId] && canvasLayoutOverrides[frameId].x !== undefined;
+                    if (!manuallyMovedFrames.has(frameId) && !hasDatabaseOverride) {
                         const newX = currentX;
                         // Only mark as changed if position differs significantly
                         if (Math.abs(frameNode.position.x - newX) > 2) {
@@ -1508,61 +1882,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
         }
     }, [phase, nodes.length, rfInstance]);
 
-    // File upload handlers
-    const handleDragOver = useCallback((e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragOver(true);
-    }, []);
 
-    const handleDragLeave = useCallback(() => {
-        setIsDragOver(false);
-    }, []);
-
-    const handleDrop = useCallback((e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragOver(false);
-        const files = Array.from(e.dataTransfer.files);
-        if (files.length > 0) {
-            handleFileUpload(files);
-        }
-    }, []);
-
-    const handleFileUpload = useCallback((files: File[]) => {
-        const file = files[0];
-        if (!file) return;
-
-        // Show loading phase with analysis message
-        setLoadingMessage(`Analyzing ${file.name}...`);
-        setPhase('loading');
-        addThinkingStep(`Uploading ${file.name}...`, 'active');
-
-        // Convert file to base64 and send to backend
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const rawBase64 = (reader.result as string).split(',')[1];
-
-
-            addThinkingStep('Processing file content...', 'active');
-            setLoadingMessage('Extracting brand identity...');
-
-            // Send file to backend via WebSocket for analysis
-            // The backend will process and send DNA_UPDATE events
-            const sent = ws.sendFile(file, rawBase64);
-
-            if (!sent) {
-                console.warn('WebSocket not connected, skipping file upload');
-                setLoadingMessage('Connection lost. Please try again.');
-                setTimeout(() => {
-                    setPhase('onboarding');
-                    setLoadingMessage('Extracting brand identity...');
-                }, 2000);
-            }
-
-            // The backend will process and send DNA_UPDATE events which will trigger the phase change
-            // via the onDNAUpdate callback
-        };
-        reader.readAsDataURL(file);
-    }, [ws, addThinkingStep]);
 
     // Render entry phase (Brand Name Entry)
     if (phase === 'entry') {
@@ -1585,15 +1905,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                         <ArrowLeft size={20} />
                         <span className="text-sm font-medium">Back</span>
                     </button>
-                    <div className="flex items-center space-x-2">
-                        {ws.status === 'connected' ? (
-                            <Wifi className="w-4 h-4 text-emerald-400" />
-                        ) : (
-                            <WifiOff className="w-4 h-4 text-slate-500" />
-                        )}
-                        <Sparkles className="w-5 h-5 text-indigo-400" />
-                        <span className="text-sm font-semibold text-white">Agent Canvas</span>
-                    </div>
+
                 </header>
 
                 {/* Voice Orb */}
@@ -1602,16 +1914,18 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={`
-                        w-20 h-20 rounded-full 
-                        ${voiceState === 'listening' ? 'bg-emerald-600 ring-emerald-400' :
-                            voiceState === 'speaking' ? 'bg-indigo-600 ring-indigo-400' :
-                                'bg-slate-800 ring-slate-600'}
-                        ring-4 shadow-2xl
+w-[200px] h-[200px] rounded-full
+                        ${voiceState === 'listening' ? 'bg-emerald-600/20 ring-4 ring-emerald-500/50 shadow-[0_0_80px_rgba(16,185,129,0.3)]' :
+                            voiceState === 'speaking' ? 'bg-indigo-600/20 ring-4 ring-indigo-500/50 shadow-[0_0_80px_rgba(99,102,241,0.3)] animate-pulse' :
+                                'bg-slate-800/50 ring-2 ring-slate-700 hover:bg-slate-800'
+                        }
+                        backdrop-blur-xl
                         flex items-center justify-center
-                        transition-all duration-300
-                    `}
+                        transition-all duration-500 ease-out
+                        group
+    `}
                 >
-                    <div className="w-6 h-6 rounded-full bg-white/20" />
+                    <div className={`w-24 h-24 rounded-full transition-all duration-500 ${voiceState === 'speaking' ? 'bg-indigo-400/80 shadow-lg shadow-indigo-500/50' : voiceState === 'listening' ? 'bg-emerald-400/80 shadow-lg shadow-emerald-500/50' : 'bg-white/10 group-hover:bg-white/20'}`} />
                 </motion.button>
 
                 <p className="mt-4 text-slate-400 text-sm">
@@ -1630,35 +1944,18 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     </motion.p>
                 )}
 
-                {audio.isRecording && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-2 text-red-400">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-xs">Recording</span>
-                    </div>
-                )}
 
-                {/* File upload drop zone */}
-                <div className="mt-12">
-                    {ws.sessionId ? (
-                        <DropZone
-                            isDragOver={isDragOver}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                            onFileSelect={handleFileUpload}
-                        />
-                    ) : (
-                        <div className="flex flex-col items-center space-y-4 p-8 border-2 border-dashed border-slate-700 rounded-2xl bg-slate-800/50">
-                            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-                            <p className="text-slate-400 text-sm font-medium">Connecting to Brain...</p>
-                        </div>
-                    )}
-                </div>
+
+
             </div>
         );
     }
 
     // Render loading phase - Premium Research Screen
+    if (!isHydrated) {
+        return <LoadingOverlay />;
+    }
+
     if (phase === 'loading') {
         return (
             <ResearchScreen
@@ -1666,22 +1963,33 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                 currentStep={researchStatus.step || 0}
                 message={researchStatus.message || loadingMessage}
                 competitors={researchStatus.competitors || []}
-                thoughts={thinkingSteps}
+                thoughts={researchStatus.thoughts || []}
                 brandName={dna.name.value}
-                industry={dna.industry.value}
+                industry={dna.industry?.value || ''}
             />
         );
     }
+
+    // ========== HANDLER: Snapshot & Back ==========
+
+    const handleBack = async () => {
+        // 1. Capture Snapshot
+        await captureSnapshot();
+
+        // 2. Call original onBack
+        if (onBack) onBack();
+    };
+
 
     // Render canvas phase
     return (
         <div className="w-full h-screen flex flex-col bg-white overflow-hidden">
             {/* Global Header */}
             <CanvasHeader
-                onBack={onBack}
+                onBack={handleBack}
                 connectionStatus={ws.status === 'connected' ? 'connected' : 'disconnected'}
-                isControlCenterOpen={isControlCenterOpen}
-                onToggleControlCenter={() => setIsControlCenterOpen(!isControlCenterOpen)}
+                isControlCenterOpen={isActivityFeedOpen}
+                onOpenActivityFeed={() => setIsActivityFeedOpen(!isActivityFeedOpen)}
             />
 
             <div className="flex-1 relative">
@@ -1713,7 +2021,7 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     {/* Controls and MiniMap removed - using custom ControlHud instead */}
 
                     {/* Control HUD */}
-                    <Panel position="bottom-left" style={{ top: '50%', left: '24px', transform: 'translateY(-50%)', margin: 0 }} className="z-50">
+                    <Panel position="bottom-left" style={{ top: '50%', left: '24px', transform: 'translateY(-50%)', margin: 0 }} className="z-50 dont-snapshot">
                         <ControlHud
                             mode={interactionMode}
                             setMode={setInteractionMode}
@@ -1746,36 +2054,42 @@ export const Canvas: React.FC<CanvasProps> = ({ onBack }) => {
                     </Panel>
 
                     {/* Thinking Panel & Navigation - Bottom Right */}
-                    <Panel position="bottom-right" className="mr-4 mb-4 flex flex-col items-end space-y-4 pointer-events-none">
-                        <AnimatePresence>
-                            {(thinkingPhase !== 'idle' || thinkingSteps.length > 0) && (
-                                <div className="pointer-events-auto">
-                                    <ThinkingPanel
-                                        phase={thinkingPhase}
-                                        steps={thinkingSteps}
-                                        isCollapsed={thinkingCollapsed}
-                                        onToggleCollapse={() => setThinkingCollapsed(!thinkingCollapsed)}
-                                    />
-                                </div>
-                            )}
-                        </AnimatePresence>
+                    <Panel position="bottom-right" className="mr-4 mb-4 flex flex-col items-end space-y-4 pointer-events-none dont-snapshot">
+
 
                         {/* Navigation Controls */}
                         <CanvasNavigation />
                     </Panel>
                 </ReactFlow>
 
-                {/* Control Center - Right Side Panel */}
+                {/* Command Center Modal (Settings) */}
+                <CommandCenterModal />
+
+                {/* Snackbar Notifications (Top Right) */}
+                <SnackbarContainer />
+
+                {/* Control Center (Activity Feed) */}
                 <ControlCenter
-                    isOpen={isControlCenterOpen}
-                    onClose={() => setIsControlCenterOpen(false)}
-                    thinkingPhase={thinkingPhase}
-                    thinkingSteps={thinkingSteps}
-                    isMuted={audio.isMuted}
-                    onToggleMute={audio.toggleMute}
+                    isOpen={isActivityFeedOpen}
+                    onClose={() => setIsActivityFeedOpen(false)}
+                    thinkingPhase={'idle'} // Unused prop, set to default
+                    thinkingSteps={[]} // Unused prop
+                    isMuted={isVoiceSessionEnded}
+                    onToggleMute={() => {
+                        // Simple toggle logic mirroring the HUD
+                        if (isVoiceSessionEnded) {
+                            setIsVoiceSessionEnded(false);
+                            wsRef.current?.startSession();
+                        } else {
+                            setIsVoiceSessionEnded(true);
+                            audioRef.current?.stopRecording();
+                            wsRef.current?.endSession();
+                        }
+                    }}
                     aiVoiceState={voiceState}
-                    connectionStatus={ws.status === 'connected' ? 'connected' : ws.status === 'connecting' ? 'connecting' : 'disconnected'}
+                    connectionStatus={wsRef.current?.status === 'connected' ? 'connected' : 'disconnected'}
                     transcript={transcript}
+                    onRunInitializers={handleRunLandingPage}
                 />
             </div>
 

@@ -1,0 +1,83 @@
+{
+    "metadata": {
+        "generated_at": "2026-02-09T15:12:35.347Z",
+        "brand_name": "Ginger",
+        "palette_used": "Ginger Horizon"
+    },
+    "kit": {
+        "primary": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_primary_transparent.png?v=1770649958216",
+        "inverted": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_inverted_transparent.png?v=1770649958216",
+        "icon": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_icon_transparent.png?v=1770649958216",
+        "icon_inverted": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_icon_inverted_transparent.png?v=1770649958216",
+        "wordmark": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770649958216",
+        "wordmark_inverted": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png?v=1770649958216",
+        "social": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_social_transparent.png?v=1770649958216",
+        "social_inverted": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_social_inverted_transparent.png?v=1770649958216"
+    },
+    "palette": {
+        "name": "Ginger Horizon",
+        "colors": [
+            "#2D3A3A",
+            "#D97706",
+            "#ECF3F0",
+            "#081C15"
+        ],
+        "vibe": "A play on the brand's name, utilizing a burnt 'Ginger' orange instead of a yellow-amber. This palette feels more 'Urban Explorer' and premium lifestyle-oriented. The desaturated Sage and Deep Evergreen provide a sophisticated, muted backdrop that makes the warm accent pop without feeling like a utility vehicle.",
+        "id": "2",
+        "isSelected": true
+    },
+    "brandDNA": {
+        "name": {
+            "value": "Ginger",
+            "isSelected": true
+        },
+        "mission": {
+            "value": "To democratize eco-friendly transit by providing affordable, clean EV bike solutions that benefit both the general public and the environment.",
+            "isSelected": true
+        },
+        "voice": {
+            "value": "Energetic, accessible, friendly, and forward-thinking.",
+            "isSelected": true
+        },
+        "values": {
+            "items": [
+                "Sustainability",
+                "Affordability",
+                "Accessibility",
+                "Innovation"
+            ],
+            "isSelected": true
+        },
+        "tagline": {
+            "value": "Move Greener, Ride Smarter.",
+            "isSelected": true
+        },
+        "industry": {
+            "value": "EV Transportation / Micro-mobility",
+            "isSelected": true
+        },
+        "targetAudience": {
+            "items": [
+                "Eco-conscious urban commuters",
+                "Budget-focused students",
+                "City dwellers seeking transit flexibility",
+                "Environmentally aware young professionals"
+            ],
+            "isSelected": true
+        },
+        "mood": {
+            "items": [
+                "Modern",
+                "Vibrant",
+                "Eco-friendly",
+                "Minimalist",
+                "Reliable"
+            ],
+            "isSelected": true
+        },
+        "rationale": "The brand bridges the gap between high-tech sustainability and mass-market affordability, requiring a voice that is both professional and highly approachable. These elements emphasize Ginger's commitment to making green transit a universal reality rather than a luxury.",
+        "logoUrl": {
+            "value": "/workspaces/a107edc7_ginger/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770649958216"
+        }
+    }
+}

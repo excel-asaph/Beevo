@@ -1,3 +1,10 @@
+/**
+ * Triggers logo generation (Agentic Pipeline) for a workspace.
+ * 
+ * @param {string} workspaceId - The target workspace.
+ * @param {string} context - Optional user context/overrides.
+ * @returns {Promise<any>} Response from the generation endpoint.
+ */
 export const apiGenerateLogos = async (workspaceId: string, context?: string) => {
     const res = await fetch('/api/logos/generate', {
         method: 'POST',
@@ -11,6 +18,12 @@ export const apiGenerateLogos = async (workspaceId: string, context?: string) =>
     return res.json();
 };
 
+/**
+ * Finalizes the logo selection and packages the assets.
+ * 
+ * @param {string} workspaceId - The target workspace.
+ * @returns {Promise<any>} Response from the finalization endpoint.
+ */
 export const apiFinalizeLogos = async (workspaceId: string) => {
     const res = await fetch('/api/logos/finalize', {
         method: 'POST',

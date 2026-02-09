@@ -3,33 +3,46 @@ import { motion } from 'framer-motion';
 import {
     MousePointer2,
     Hand,
-    Square,
-    Type,
-    Pencil,
-    Lock,
-    Unlock,
     Mic,
     Loader,
     Volume2,
     Undo2,
-    Redo2
+    Redo2,
+    Settings,
+    Unlock
 } from 'lucide-react';
+import { useBrandStore } from '../../stores/useBrandStore';
 
+/** Available interaction modes for the canvas. */
 export type InteractionMode = 'select' | 'pan' | 'add' | 'text' | 'draw';
+/** Possible states for the voice interface. */
 export type VoiceState = 'idle' | 'listening' | 'thinking' | 'speaking';
 
+/**
+ * Props for the ControlHud component.
+ */
 interface ControlHudProps {
+    /** Current interaction mode of the canvas. */
     mode: InteractionMode;
+    /** Callback to set the interaction mode. */
     setMode: (mode: InteractionMode) => void;
+    /** Whether the canvas is currently locked. */
     isLocked: boolean;
+    /** Callback to toggle the canvas lock state. */
     onToggleLock: () => void;
     // Voice Orb Props
+    /** Current state of the voice interface. */
     voiceState?: VoiceState;
+    /** Callback to toggle voice listening. */
     onVoiceToggle?: () => void;
     // History
+    /** Callback to trigger undo action. */
     onUndo?: () => void;
+    /** Callback to trigger redo action. */
     onRedo?: () => void;
+    /** Whether undo is currently available. */
     canUndo?: boolean;
+    /** Whether redo is currently available. */
     canRedo?: boolean;
 }
 
@@ -48,6 +61,17 @@ const voiceStateTooltips: Record<VoiceState, string> = {
     speaking: 'AI Speaking...',
 };
 
+/**
+ * The floating Heads-Up Display (HUD) for canvas controls.
+ * 
+ * Contains:
+ * - **Voice Orb**: Interactive orb for voice commands (Listening, Thinking, Speaking).
+ * - **Tool Palette**: Buttons for switching interaction modes (Select, Pan).
+ * - **History Controls**: Undo/Redo buttons.
+ * - **System Controls**: Command Center toggle and Canvas Lock.
+ * 
+ * @param {ControlHudProps} props - The component props.
+ */
 export const ControlHud: React.FC<ControlHudProps> = ({
     mode,
     setMode,
@@ -60,6 +84,7 @@ export const ControlHud: React.FC<ControlHudProps> = ({
     canUndo = false,
     canRedo = false
 }) => {
+    const pendingInterventions = useBrandStore(state => state.pendingInterventions);
     const ToolButton = ({
         icon: Icon,
         active,
@@ -194,65 +219,7 @@ export const ControlHud: React.FC<ControlHudProps> = ({
                     label="Pan (H)"
                 />
 
-                {/* Add to Canvas - Consolidated with hover popover */}
-                <div className="relative group">
-                    <button
-                        className={`
-                            relative p-2.5 rounded-xl transition-all duration-200
-                            ${(mode === 'add' || mode === 'text' || mode === 'draw')
-                                ? 'bg-gray-950 text-white'
-                                : 'text-gray-500 hover:bg-gray-200 hover:text-gray-900'
-                            }
-                        `}
-                    >
-                        {/* Plus icon with box */}
-                        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <rect x="2" y="2" width="14" height="14" rx="3" />
-                            <line x1="9" y1="5.5" x2="9" y2="12.5" />
-                            <line x1="5.5" y1="9" x2="12.5" y2="9" />
-                        </svg>
-                        {/* Dot indicator */}
-                        {!(mode === 'add' || mode === 'text' || mode === 'draw') && (
-                            <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                        )}
-                    </button>
 
-                    {/* Hover Popover */}
-                    <div className="absolute left-full ml-3 top-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div className="bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-100 py-2 px-1 min-w-[160px]">
-                            <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                                Add to Canvas
-                            </div>
-                            <button
-                                onClick={() => setMode('add')}
-                                className={`w-full px-3 py-2 text-left text-[13px] rounded-lg flex items-center gap-3 transition-colors ${mode === 'add' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
-                            >
-                                <Square size={16} />
-                                <span>Frame</span>
-                                <span className="ml-auto text-[11px] text-gray-400">F</span>
-                            </button>
-                            <button
-                                onClick={() => setMode('text')}
-                                className={`w-full px-3 py-2 text-left text-[13px] rounded-lg flex items-center gap-3 transition-colors ${mode === 'text' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
-                            >
-                                <Type size={16} />
-                                <span>Text</span>
-                                <span className="ml-auto text-[11px] text-gray-400">T</span>
-                            </button>
-                            <button
-                                onClick={() => setMode('draw')}
-                                className={`w-full px-3 py-2 text-left text-[13px] rounded-lg flex items-center gap-3 transition-colors ${mode === 'draw' ? 'bg-indigo-50 text-indigo-600' : 'text-gray-700 hover:bg-gray-100'
-                                    }`}
-                            >
-                                <Pencil size={16} />
-                                <span>Draw</span>
-                                <span className="ml-auto text-[11px] text-gray-400">P</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 <Divider />
 
@@ -271,6 +238,14 @@ export const ControlHud: React.FC<ControlHudProps> = ({
                 />
 
                 <Divider />
+
+                {/* Control Center Trigger */}
+                <ToolButton
+                    icon={Settings}
+                    onClick={() => useBrandStore.getState().setIsCommandCenterOpen(true)}
+                    label="Command Center"
+                    showDot={pendingInterventions.length > 0}
+                />
 
                 {/* Lock Control */}
                 <ToolButton

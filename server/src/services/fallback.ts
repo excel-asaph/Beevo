@@ -34,6 +34,10 @@ export type StreamThoughtCallback = (
 // EXECUTION ENGINE
 // ==========================================
 
+/**
+ * Engine responsible for executing the multi-phase brand research and generation process.
+ * Orchestrates calls to Gemini/NanoBanana to extract DNA, research competitors, and generate visual identity assets.
+ */
 export class ExecutionEngine {
     private genAI: GoogleGenAI;
     private researchAgent: ResearchAgent;
@@ -48,7 +52,7 @@ export class ExecutionEngine {
         // Ensure artifacts directory exists
         // Use workspace-specific path
         this.artifactsDir = path.join(process.cwd(), 'brain', 'workspaces', workspaceId, 'research_artifacts');
-        
+
         if (!fs.existsSync(this.artifactsDir)) {
             fs.mkdirSync(this.artifactsDir, { recursive: true });
         }
@@ -57,6 +61,12 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 1: EXTRACT BRAND DNA
     // ==========================================
+    /**
+     * Phase 1: Extracts Brand DNA from the conversation history.
+     * 
+     * @param {string} conversationHistory - The chat history to analyze.
+     * @returns {Promise<BrandDNA>} The extracted Brand DNA object.
+     */
     async extractBrandDNA(conversationHistory: string): Promise<BrandDNA> {
         console.log(`🔹 [${this.workspaceId}] Phase 1: Extracting Brand DNA...`);
 
@@ -105,20 +115,13 @@ export class ExecutionEngine {
         const dna: BrandDNA = {
             name: toSelectable(extracted.name || 'Untitled Brand'),
             mission: toSelectable(extracted.mission || 'To define'),
-
             voice: toSelectable(extracted.voice || 'Professional'),
             values: toSelectableArray(extracted.values),
             tagline: toSelectable(extracted.tagline || 'Building the future'),
             industry: toSelectable(extracted.industry || 'General Business'),
             targetAudience: toSelectableArray(extracted.targetAudience || ['General public']),
             mood: toSelectableArray(extracted.mood || ['Modern']),
-            paletteCount: extracted.paletteCount || 3,
             rationale: extracted.rationale || 'Extracted from conversation analysis.',
-
-            // Legacy/Optional initializations
-            designGoals: '',
-            logoType: '',
-            imagery: ''
         };
 
         return dna;
@@ -127,6 +130,12 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 2: RESEARCH COMPETITORS
     // ==========================================
+    /**
+     * Phase 2: Researches competitors based on the extracted Brand DNA.
+     * 
+     * @param {BrandDNA} dna - The brand DNA.
+     * @returns {Promise<CompetitorResearch>} The competitor research results.
+     */
     async researchCompetitors(dna: BrandDNA): Promise<CompetitorResearch> {
         const industry = dna.industry?.value || 'General';
         const context = `${dna.name.value} - ${dna.mission.value}`;
@@ -150,6 +159,15 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 3: GENERATE COLORS
     // ==========================================
+    /**
+     * Phase 3: Generates color palettes for the brand.
+     * 
+     * @param {BrandDNA} dna - The brand DNA.
+     * @param {CompetitorResearch} [competitors] - Competitor research for differentiation.
+     * @param {number} [count=3] - Number of palettes to generate.
+     * @param {string} [mood] - Optional mood override.
+     * @returns {Promise<ColorPalettes>} The generated color palettes.
+     */
     async generateColorPalettes(
         dna: BrandDNA,
         competitors?: CompetitorResearch,
@@ -202,6 +220,14 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 4: GENERATE TYPOGRAPHY
     // ==========================================
+    /**
+     * Phase 4: Generates typography pairings for the brand.
+     * 
+     * @param {BrandDNA} dna - The brand DNA.
+     * @param {number} [count=3] - Number of pairings to generate.
+     * @param {string} [style] - Optional style override.
+     * @returns {Promise<TypographyPairings>} The generated typography pairings.
+     */
     async generateTypography(
         dna: BrandDNA,
         count: number = 3,
@@ -252,6 +278,15 @@ export class ExecutionEngine {
     // ==========================================
     // PHASE 5: FINALIZATION
     // ==========================================
+    /**
+     * Phase 5: Finalizes the research phase, compiling all data into a cohesive report.
+     * 
+     * @param {BrandDNA} dna - The extracted Brand DNA.
+     * @param {CompetitorResearch} competitors - The competitor research.
+     * @param {ColorPalettes} palettes - The generated color palettes.
+     * @param {TypographyPairings} fonts - The generated typography pairings.
+     * @returns {Promise<ResearchPhaseObject>} The final research object.
+     */
     async finalizeResearch(
         dna: BrandDNA,
         competitors: CompetitorResearch,
@@ -306,6 +341,13 @@ export class ExecutionEngine {
     // MAIN ENTRY POINT
     // ==========================================
 
+    /**
+     * Runs the full 5-phase research cycle sequentially.
+     * 
+     * @param {string} conversationHistory - The initial conversation history.
+     * @param {StreamThoughtCallback} [onStreamThought] - Callback for streaming thought updates.
+     * @returns {Promise<ResearchPhaseObject>} The complete research result.
+     */
     async runFullResearchCycle(
         conversationHistory: string,
         onStreamThought?: StreamThoughtCallback

@@ -3,14 +3,30 @@ import { useTracking } from '../../hooks/useTracking';
 import { useBrand } from '../../context/BrandContext';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
+/**
+ * Props for the NavigationBar component.
+ */
 interface NavigationBarProps {
+    /** Configuration for the navigation bar, including links and styles. */
     config: {
         links: Array<{ label: string; action_id: string }>;
         styles?: any;
     };
+    /** The brand ID associated with the navigation tracking. */
     brandId: string;
 }
 
+/**
+ * Renders the main navigation bar for the landing page.
+ * 
+ * Features:
+ * - Dynamic link rendering based on configuration.
+ * - Scroll-aware styling (glassmorphism effect when scrolled).
+ * - Intelligent logo switching (Primary vs Inverted) based on background.
+ * - Event dispatching for form triggers (Intent, Offer, Contact).
+ * 
+ * @param {NavigationBarProps} props - The component props.
+ */
 export const NavigationBar: React.FC<NavigationBarProps> = ({ config, brandId }) => {
     const { dna } = useBrand();
     const { resolveAssetUrl } = useWorkspace();

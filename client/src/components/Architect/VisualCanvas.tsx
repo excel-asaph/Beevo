@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Type as TypeIcon, Palette, Code, MousePointerClick, Sparkles, BookOpen, ChevronDown, ChevronUp, Search, Zap, LayoutTemplate, Shapes, Image as ImageIcon } from 'lucide-react';
 import type { FontSuggestion, ColorPalette, LogoStructureOption, ImagerySuggestion } from '@shared/types';
 
+/**
+ * Represents a generated or retrieved logo concept.
+ */
 interface LogoConcept {
     id: string;
     url: string;
@@ -12,6 +15,9 @@ interface LogoConcept {
     alt_text: string;
 }
 
+/**
+ * Tracks the status of the logo research agent.
+ */
 interface ResearchProgress {
     isResearching: boolean;
     phase: 'starting' | 'browsing' | 'analyzing' | 'complete';
@@ -26,22 +32,49 @@ interface LogoResearchInsights {
     recommendation: string;
 }
 
+/**
+ * Props for the VisualCanvas component.
+ */
 interface VisualCanvasProps {
+    /** The active display mode for the canvas. */
     mode: 'none' | 'fonts' | 'colors' | 'logos' | 'logo_structure' | 'imagery';
+    /** List of font suggestions to display. */
     fontSuggestions: FontSuggestion[];
+    /** List of color palette suggestions to display. */
     colorSuggestions: ColorPalette[];
+    /** List of logo concepts to display. */
     logoSuggestions?: LogoConcept[];
+    /** List of logo structure options. */
     logoStructureOptions?: LogoStructureOption[];
+    /** List of imagery suggestions. */
     imagerySuggestions?: ImagerySuggestion[];
+    /** Insights from logo research. */
     logoResearchInsights?: LogoResearchInsights;
+    /** Text to use for previewing fonts. */
     previewText: string;
+    /** Callback when a font is selected. */
     onFontSelect: (fontName: string) => void;
+    /** Callback when a color palette is selected. */
     onColorSelect: (paletteName: string) => void;
+    /** Callback when a logo or structure is selected. */
     onLogoSelect?: (logoId: string, style: string) => void;
+    /** Whether the system is currently processing/generating. */
     isProcessing?: boolean;
+    /** Current status of background research. */
     researchProgress?: ResearchProgress;
 }
 
+/**
+ * The main visual workspace for the Architect.
+ * 
+ * Responsibilities:
+ * - Renders different modes: Fonts, Colors, Logos, Structure, Imagery.
+ * - Handles selection interactions for each mode.
+ * - Displays research progress and insights.
+ * - Visualizes loading/processing states.
+ * 
+ * @param {VisualCanvasProps} props - The component props.
+ */
 export const VisualCanvas: React.FC<VisualCanvasProps> = ({
     mode,
     fontSuggestions,

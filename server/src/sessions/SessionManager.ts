@@ -7,11 +7,15 @@ import { BrandStateManager } from '../state/BrandStateManager';
 import { WorkspaceManager } from '../services/StateManager';
 import {
     ClientMessage,
-    ServerMessage,
-    SessionStartedMessage,
-    SessionEndedMessage
+    ServerMessage
 } from '../../../shared/messages';
-import { ArchitectSession, FontSuggestion, ColorPalette } from '../../../shared/types';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { FontSuggestion, ColorPalette } from '../../../shared/types';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface Session {
     id: string;
@@ -32,6 +36,10 @@ interface Session {
     };
 }
 
+/**
+ * Manages WebSocket sessions and Gemini Live connections.
+ * Handles session creation, lifecycle, message routing, and state synchronization.
+ */
 export class SessionManager {
     private sessions: Map<string, Session> = new Map();
     private workspaceListeners: Set<string> = new Set();
@@ -47,16 +55,27 @@ export class SessionManager {
                 // Sync session memory
                 session.stateManager.updateBatch(newState.brandDNA);
 
-                // Send FULL state update
-                console.log(`📦 [SessionManager] Broadcasting FULL state (v${newState.stateVersion}) to session ${id}`);
+                // Fetch current thoughts (Unified Log)
+                const thoughts = WorkspaceManager.getStateManager(workspaceId).getThoughts();
+
+                // Send FULL state update with thoughts injected
+                console.log(`📦 [SessionManager] Broadcasting FULL state (v${newState.stateVersion}) with ${thoughts.length} thoughts to session ${id}`);
                 this.sendToClient(id, {
                     type: 'FULL_STATE_UPDATE',
-                    state: newState
+                    state: { ...newState, thoughts } as any
                 });
             }
         }
     }
 
+    /**
+     * Creates a new session for a WebSocket connection.
+     * Initializes the BrandStateManager, sets up workspace listeners, and attempts hydration.
+     * 
+     * @param {WebSocket} ws - The WebSocket connection.
+     * @param {string} [workspaceId='default'] - The workspace identifier.
+     * @returns {string} The unique session ID.
+     */
     createSession(ws: WebSocket, workspaceId: string = 'default'): string {
         const sessionId = uuidv4();
 
@@ -76,8 +95,17 @@ export class SessionManager {
 
         this.sessions.set(sessionId, session);
 
-        // Ensure we are listening to this workspace
-        if (!this.workspaceListeners.has(workspaceId)) {
+        // Fix for Ghost Workspaces: Check if workspace folder exists BEFORE initializing persistence
+        // If it doesn't exist, we skip persistence logic (listeners, hydration) and let BrainConnection handle the error.
+        const workspaceDir = path.resolve(__dirname, `../../brain/workspaces/${workspaceId}`);
+        const workspaceExists = workspaceId === 'default' || fs.existsSync(workspaceDir);
+
+        if (!workspaceExists) {
+            console.warn(`🚧 [SessionManager] Workspace folder missing: ${workspaceId} -> Skipping persistence setup.`);
+        }
+
+        // Ensure we are listening to this workspace (ONLY IF EXISTS)
+        if (workspaceExists && !this.workspaceListeners.has(workspaceId)) {
             const manager = WorkspaceManager.getStateManager(workspaceId);
             manager.on('stateUpdated', (newState: any) => {
                 this.broadcastToWorkspace(workspaceId, newState);
@@ -95,39 +123,47 @@ export class SessionManager {
         // ==========================================
         // INITIAL STATE HYDRATION (Fix for State Loss)
         // ==========================================
-        const manager = WorkspaceManager.getStateManager(workspaceId);
-        const existingState = manager.loadLatest();
-        if (existingState && existingState.brandDNA) {
-            console.log(`💧 Hydrating session ${sessionId} with existing state (v${existingState.stateVersion || '?'})`);
+        if (workspaceExists) {
+            const manager = WorkspaceManager.getStateManager(workspaceId);
+            const existingState = manager.loadLatest();
+            if (existingState && existingState.brandDNA) {
+                console.log(`💧 Hydrating session ${sessionId} with existing state (v${existingState.stateVersion || '?'})`);
 
-            // 1. Populate Session State Manager
-            // (Using updateBatch to ensure all fields are correctly structured)
-            session.stateManager.updateBatch(existingState.brandDNA as any);
+                // 1. Populate Session State Manager
+                // (Using updateBatch to ensure all fields are correctly structured)
+                session.stateManager.updateBatch(existingState.brandDNA as any);
 
-            // 2. Send DNA Updates to Client
+                // 2. Send DNA Updates to Client
 
+                // 3. Send Colors/Fonts/etc if they exist
+                // 3. Send FULL State (Hydration with Thoughts)
+                const thoughts = WorkspaceManager.getStateManager(workspaceId).getThoughts();
+                console.log(`💧 Broadcasting FULL hydrated state (v${existingState.stateVersion || '?'}) with ${thoughts.length} thoughts to session ${sessionId}`);
 
-            // 3. Send Colors/Fonts/etc if they exist
-            // 3. Send FULL State (Hydration)
-            console.log(`💧 Broadcasting FULL hydrated state (v${existingState.stateVersion || '?'})`);
-            this.sendToClient(sessionId, {
-                type: 'FULL_STATE_UPDATE',
-                state: existingState
-            });
+                this.sendToClient(sessionId, {
+                    type: 'FULL_STATE_UPDATE',
+                    state: { ...existingState, thoughts } as any
+                });
 
-            // Hydrate internal session memory
-            if (existingState.colorPalettes?.palettes) session.currentPalettes = existingState.colorPalettes.palettes;
-            if (existingState.typographyPairings?.fonts) session.currentFonts = existingState.typographyPairings.fonts;
+                // Hydrate internal session memory
+                if (existingState.colorPalettes?.palettes) session.currentPalettes = existingState.colorPalettes.palettes;
+                if (existingState.typographyPairings?.fonts) session.currentFonts = existingState.typographyPairings.fonts;
 
-            if (existingState.logoInspirations?.inspirations) {
-                // Send logo inspirations if we had a message type for it (we might need to check messages.ts)
-                // For now, we rely on DNA update which might include them if structure matches
+                if (existingState.logoInspirations?.inspirations) {
+                    // Send logo inspirations if we had a message type for it (we might need to check messages.ts)
+                    // For now, we rely on DNA update which might include them if structure matches
+                }
             }
         }
 
         return sessionId;
     }
 
+    /**
+     * Destroys a session, disconnecting Gemini (if active) and cleaning up resources.
+     * 
+     * @param {string} sessionId - The ID of the session to destroy.
+     */
     destroySession(sessionId: string): void {
         const session = this.sessions.get(sessionId);
         if (session) {
@@ -143,6 +179,28 @@ export class SessionManager {
         return this.sessions.size;
     }
 
+    /**
+     * Terminate all sessions and listeners for a specific workspace
+     */
+    public disconnectWorkspace(workspaceId: string): void {
+        console.log(`🔌 [SessionManager] Disconnecting all sessions for workspace: ${workspaceId}`);
+
+        for (const [id, session] of this.sessions.entries()) {
+            if (session.workspaceId === workspaceId) {
+                this.destroySession(id);
+            }
+        }
+
+        this.workspaceListeners.delete(workspaceId);
+    }
+
+    /**
+     * Handles incoming messages from the client.
+     * Routes messages to specific handlers based on type (e.g., START_SESSION, TEXT_INPUT).
+     * 
+     * @param {string} sessionId - The session ID.
+     * @param {ClientMessage} message - The message object.
+     */
     async handleMessage(sessionId: string, message: ClientMessage): Promise<void> {
         const session = this.sessions.get(sessionId);
         if (!session) {
@@ -461,6 +519,15 @@ ${canvasInfo}
         }
     }
 
+    /**
+     * Ingests a file into the "Brand Vault" (Knowledge Base) for the session.
+     * Uses a large-context model to extract text and update session stats.
+     * 
+     * @param {Session} session - The session object.
+     * @param {string} base64 - The file content in base64.
+     * @param {string} mimeType - The file MIME type.
+     * @param {string} fileName - The name of the file.
+     */
     private async ingestVaultFile(session: Session, base64: string, mimeType: string, fileName: string): Promise<void> {
         console.log(`🏦 Ingesting file "${fileName}" into Brand Vault...`);
         const apiKey = process.env.GEMINI_API_KEY;
@@ -519,6 +586,14 @@ ${canvasInfo}
         }
     }
 
+    /**
+     * Analyzes an uploaded file to extract Brand Identity (Name, Mission, Voice) and Visual Style.
+     * Updates the session state and notifies the client via Gemini.
+     * 
+     * @param {Session} session - The session object.
+     * @param {string} base64 - The file content in base64.
+     * @param {string} mimeType - The file MIME type.
+     */
     private async analyzeFileAndExtractIdentity(session: Session, base64: string, mimeType: string): Promise<void> {
         console.log('🔍 Starting background file analysis for extraction...');
         const apiKey = process.env.GEMINI_API_KEY;

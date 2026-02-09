@@ -1,0 +1,4034 @@
+[
+  {
+    "id": "thought-1770652853459-i3kfzvydv",
+    "stepIndex": 0,
+    "nodeId": "identity",
+    "title": "Analyzing Brand Vision",
+    "content": "Extracting brand essence from conversation...",
+    "timestamp": "2026-02-09T16:00:53.459Z"
+  },
+  {
+    "id": "thought-1770652859140-sif711bp4",
+    "stepIndex": 0,
+    "nodeId": "identity",
+    "title": "Brand Identity Defined",
+    "content": "Identified \"HECTOR\" in Electric Vehicles (E-bikes)",
+    "timestamp": "2026-02-09T16:00:59.140Z"
+  },
+  {
+    "id": "thought-1770652859560-pb5s9ipdn",
+    "stepIndex": 0,
+    "nodeId": "identity",
+    "title": "Core Values",
+    "content": "Values: Sustainability, Affordability, Accessibility",
+    "timestamp": "2026-02-09T16:00:59.560Z"
+  },
+  {
+    "id": "thought-1770652860006-b9bfwa5xx",
+    "stepIndex": 0,
+    "nodeId": "identity",
+    "title": "Strategic Insight",
+    "content": "HECTOR positions itself as a disruptive force by democratizing sustainable transportation, bridging the gap between high-end EV technology and everyday affordability for the European mass market.",
+    "timestamp": "2026-02-09T16:01:00.006Z"
+  },
+  {
+    "id": "thought-1770652860425-vxishmn2a",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Market Research",
+    "content": "Searching for Electric Vehicles (E-bikes) competitors...",
+    "timestamp": "2026-02-09T16:01:00.425Z"
+  },
+  {
+    "id": "thought-1770652889703-asws2xkv8",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Found Competitor",
+    "content": "Cowboy (cowboy.com)",
+    "timestamp": "2026-02-09T16:01:29.703Z"
+  },
+  {
+    "id": "thought-1770652890111-8oxf4oy74",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Found Competitor",
+    "content": "VanMoof (vanmoof.com)",
+    "timestamp": "2026-02-09T16:01:30.111Z"
+  },
+  {
+    "id": "thought-1770652890528-fl0phe9wp",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Found Competitor",
+    "content": "TENWAYS (tenways.com)",
+    "timestamp": "2026-02-09T16:01:30.528Z"
+  },
+  {
+    "id": "thought-1770652890947-t1j5t27kj",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Found Competitor",
+    "content": "Decathlon (decathlon.com)",
+    "timestamp": "2026-02-09T16:01:30.947Z"
+  },
+  {
+    "id": "thought-1770652891367-og9xxoac6",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Found Competitor",
+    "content": "Canyon Bicycles (canyon.com)",
+    "timestamp": "2026-02-09T16:01:31.367Z"
+  },
+  {
+    "id": "thought-1770652891779-zswdjla45",
+    "stepIndex": 1,
+    "nodeId": "competitors",
+    "title": "Differentiation Strategy",
+    "content": "Avoid the 'Cold Tech' aesthetic of black, grey, and blue. To stand out, a new brand should lean into 'Organic Humanism.' Use a palette of Sage Green (",
+    "timestamp": "2026-02-09T16:01:31.779Z"
+  },
+  {
+    "id": "thought-1770652892191-rbawu2w9c",
+    "stepIndex": 2,
+    "nodeId": "colors",
+    "title": "Color Strategy",
+    "content": "Designing palettes that differentiate from competitors...",
+    "timestamp": "2026-02-09T16:01:32.191Z"
+  },
+  {
+    "id": "thought-1770652903773-8bgl4wgn5",
+    "stepIndex": 2,
+    "nodeId": "colors",
+    "title": "Palette Created",
+    "content": "\"The Verdant Trail\": Centered on Sage Green, this palette evokes a sense of calm and environmental st",
+    "timestamp": "2026-02-09T16:01:43.773Z"
+  },
+  {
+    "id": "thought-1770652904188-tr4xqta99",
+    "stepIndex": 2,
+    "nodeId": "colors",
+    "title": "Palette Created",
+    "content": "\"Adobe Sunset\": Utilizing Terracotta as a primary hero color, this palette feels energetic and t",
+    "timestamp": "2026-02-09T16:01:44.188Z"
+  },
+  {
+    "id": "thought-1770652904610-af7vzu8b5",
+    "stepIndex": 2,
+    "nodeId": "colors",
+    "title": "Palette Created",
+    "content": "\"Organic Humanist\": A harmonious blend of both Sage and Terracotta. This palette maximizes the 'outd",
+    "timestamp": "2026-02-09T16:01:44.610Z"
+  },
+  {
+    "id": "thought-1770652905023-e44ur4fyt",
+    "stepIndex": 2,
+    "nodeId": "colors",
+    "title": "Color Psychology",
+    "content": "These palettes deliberately reject the 'aggressive' visual language of the EV industry (high-contrast blacks, neon accents, and corporate blues). By u",
+    "timestamp": "2026-02-09T16:01:45.023Z"
+  },
+  {
+    "id": "thought-1770652905437-d17dqn7oy",
+    "stepIndex": 3,
+    "nodeId": "typography",
+    "title": "Typography Analysis",
+    "content": "Selecting fonts for Electric Vehicles (E-bikes) brand voice...",
+    "timestamp": "2026-02-09T16:01:45.437Z"
+  },
+  {
+    "id": "thought-1770652912420-gdz08lybc",
+    "stepIndex": 3,
+    "nodeId": "typography",
+    "title": "Font Pairing",
+    "content": "Montserrat + Open Sans: Montserrat provides a geometric, urban aesthetic that feels modern and high-tech, perfect for an E-bike brand. Pairing it with Open Sans ensures high legibility and an approachable, democratic feel for body text, making the brand feel inclusive to all riders.",
+    "timestamp": "2026-02-09T16:01:52.420Z"
+  },
+  {
+    "id": "thought-1770652912843-js5aw78qe",
+    "stepIndex": 3,
+    "nodeId": "typography",
+    "title": "Font Pairing",
+    "content": "Inter + Roboto Mono: Inter is the gold standard for clean, efficient digital interfaces, reflecting the visionary tech aspect of electric vehicles. Roboto Mono is used for accents and technical specs to emphasize efficiency and engineering precision without losing the brand's modern edge.",
+    "timestamp": "2026-02-09T16:01:52.843Z"
+  },
+  {
+    "id": "thought-1770652913255-oc5ecyd5z",
+    "stepIndex": 3,
+    "nodeId": "typography",
+    "title": "Font Pairing",
+    "content": "Poppins + Lato: Poppins features friendly, circular geometric shapes that make the brand feel approachable and visionary. Lato provides a warm, humanist contrast for long-form content, maintaining the 'democratic' voice by being highly readable and stable across all devices.",
+    "timestamp": "2026-02-09T16:01:53.255Z"
+  },
+  {
+    "id": "thought-1770652913664-7ap5t48vy",
+    "stepIndex": 3,
+    "nodeId": "typography",
+    "title": "Typography Strategy",
+    "content": "The typography strategy for HECTOR focuses on 'Humanist-Geometric' hybrids. By using sans-serif families that balance technical precision (representing the E-bike hardware) with open, friendly letterforms, we convey a brand that is both cutting-edge and easy to interact with. This selection avoids aggressive industrial tones in favor of a clean, efficient aesthetic that suggests the future of urban mobility is accessible to everyone.",
+    "timestamp": "2026-02-09T16:01:53.664Z"
+  },
+  {
+    "id": "thought-1770652914087-fnl4769vl",
+    "stepIndex": 4,
+    "nodeId": "logo",
+    "title": "Logo Architecture",
+    "content": "Defining logo structure options for Electric Vehicles (E-bikes)...",
+    "timestamp": "2026-02-09T16:01:54.087Z"
+  },
+  {
+    "id": "thought-1770652923334-run643411",
+    "stepIndex": 4,
+    "nodeId": "logo",
+    "title": "Structure Option",
+    "content": "Combination Mark: This is the most effective choice for the EV sector. It combines a unique icon representing energy or movement with the brand name, ensuring high recognition whether the logo is on a website or a bike frame.",
+    "timestamp": "2026-02-09T16:02:03.334Z"
+  },
+  {
+    "id": "thought-1770652923751-lbf004wkt",
+    "stepIndex": 4,
+    "nodeId": "logo",
+    "title": "Structure Option",
+    "content": "Wordmark: Many modern e-bike brands favor a minimalist, tech-forward aesthetic. A wordmark allows for custom, aerodynamic typography that conveys a sense of speed, efficiency, and modern engineering.",
+    "timestamp": "2026-02-09T16:02:03.751Z"
+  },
+  {
+    "id": "thought-1770652924173-pdnxb4jvu",
+    "stepIndex": 4,
+    "nodeId": "logo",
+    "title": "Structure Option",
+    "content": "Monogram: Perfect for premium or high-performance e-bike brands. A monogram provides a compact, scalable mark that fits elegantly on small surface areas such as the head tube, battery pack, or digital display unit.",
+    "timestamp": "2026-02-09T16:02:04.173Z"
+  },
+  {
+    "id": "thought-1770652924584-0st7qt06t",
+    "stepIndex": 5,
+    "nodeId": "strategy",
+    "title": "Finalizing",
+    "content": "Compiling brand strategy for HECTOR...",
+    "timestamp": "2026-02-09T16:02:04.586Z"
+  },
+  {
+    "id": "thought-1770652934056-a4ybghacw",
+    "stepIndex": 5,
+    "nodeId": "strategy",
+    "title": "Research Complete",
+    "content": "Brand identity complete: HECTOR",
+    "timestamp": "2026-02-09T16:02:14.056Z"
+  },
+  {
+    "id": "tool-1770652966232-av6z6mfju",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: select_color_palettes",
+    "content": "Arguments: {\"instruction\":\"Select the 'Adobe Sunset' palette.\"}",
+    "timestamp": "2026-02-09T16:02:46.232Z"
+  },
+  {
+    "id": "tool-1770652989452-99rp47ckf",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: select_fonts",
+    "content": "Arguments: {\"instruction\":\"Select Montserrat as the brand typography.\"}",
+    "timestamp": "2026-02-09T16:03:09.452Z"
+  },
+  {
+    "id": "tool-1770653015751-y7xkfyt7f",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: select_logo_structures",
+    "content": "Arguments: {\"instruction\":\"Select the 'Monogram' logo structure.\"}",
+    "timestamp": "2026-02-09T16:03:35.751Z"
+  },
+  {
+    "id": "tool-1770653042086-gd4n2g7rk",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: create_logo_inspirations",
+    "content": "Arguments: {\"query\":\"monogram logo inspirations for HECTOR electric bikes modern clean democratic style\",\"count\":5}",
+    "timestamp": "2026-02-09T16:04:02.086Z"
+  },
+  {
+    "id": "tool-1770653098530-aohxxe59u",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: select_logo_inspirations",
+    "content": "Arguments: {\"instruction\":\"select logo_1 and logo_8\"}",
+    "timestamp": "2026-02-09T16:04:58.530Z"
+  },
+  {
+    "id": "tool-1770653101996-chmxaadw0",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: select_logo_inspirations",
+    "content": "Arguments: {\"instruction\":\"select logo_1 and logo_8\"}",
+    "timestamp": "2026-02-09T16:05:01.996Z"
+  },
+  {
+    "id": "tool-1770653120574-b5w4fvxsw",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: create_imagery_suggestions",
+    "content": "Arguments: {\"query\":\"modern, clean, and democratic lifestyle photography for HECTOR electric bikes in European urban settings, featuring warm tones and sustainable commuting vibes\",\"count\":4}",
+    "timestamp": "2026-02-09T16:05:20.574Z"
+  },
+  {
+    "id": "tool-1770653124991-utjy3vo6e",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: create_imagery_suggestions",
+    "content": "Arguments: {\"count\":5,\"query\":\"modern, clean, and democratic photography featuring HECTOR electric bikes in European urban environments, focusing on eco-conscious commuters and approachable everyday scenes\"}",
+    "timestamp": "2026-02-09T16:05:24.991Z"
+  },
+  {
+    "id": "tool-1770653167486-5i4do1sud",
+    "stepIndex": 5,
+    "nodeId": "canvas-interaction",
+    "title": "Executing Tool: select_imagery_suggestions",
+    "content": "Arguments: {\"instruction\":\"Select 'The Soft Urbanist' imagery concept.\"}",
+    "timestamp": "2026-02-09T16:06:07.486Z"
+  },
+  {
+    "id": "log-1770653203070-yghdqrq",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Starting Logo Generation",
+    "content": "Designing the brand anchor and stylistic variants...",
+    "timestamp": "2026-02-09T16:06:43.070Z"
+  },
+  {
+    "id": "log-1770653203079-hvlh3jo",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Processing Inspirations",
+    "content": "Processing 2 inspiration images...",
+    "timestamp": "2026-02-09T16:06:43.079Z"
+  },
+  {
+    "id": "log-1770653203175-dtwfz7e",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Saved Inspiration",
+    "content": "Saved inspiration_1.jpeg",
+    "timestamp": "2026-02-09T16:06:43.175Z"
+  },
+  {
+    "id": "log-1770653203225-hn6kjf0",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Saved Inspiration",
+    "content": "Saved inspiration_2.png",
+    "timestamp": "2026-02-09T16:06:43.225Z"
+  },
+  {
+    "id": "log-1770653203277-0sitb9q",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Generating Primary Logo",
+    "content": "Designing the main brand mark...",
+    "timestamp": "2026-02-09T16:06:43.277Z"
+  },
+  {
+    "id": "log-1770653212843-ij3fiaq",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Primary Logo Created",
+    "content": "Official brand mark synthesized successfully: logo_variant_primary.png",
+    "timestamp": "2026-02-09T16:06:52.843Z"
+  },
+  {
+    "id": "log-1770653212849-p38giw8",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Generating Variations",
+    "content": "Creating 7 brand variants (Dark Mode, Icon, Wordmark)...",
+    "timestamp": "2026-02-09T16:06:52.849Z"
+  },
+  {
+    "id": "log-1770653212892-x1he9tj",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting inverted variant...",
+    "timestamp": "2026-02-09T16:06:52.892Z"
+  },
+  {
+    "id": "log-1770653222294-g5lsdr6",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting icon variant...",
+    "timestamp": "2026-02-09T16:07:02.294Z"
+  },
+  {
+    "id": "log-1770653232606-q4h4qvr",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting icon_inverted variant...",
+    "timestamp": "2026-02-09T16:07:12.606Z"
+  },
+  {
+    "id": "log-1770653242355-64reo2l",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting wordmark variant...",
+    "timestamp": "2026-02-09T16:07:22.355Z"
+  },
+  {
+    "id": "log-1770653251895-bd1l6x6",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting wordmark_inverted variant...",
+    "timestamp": "2026-02-09T16:07:31.895Z"
+  },
+  {
+    "id": "log-1770653262540-nmxihnt",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting social variant...",
+    "timestamp": "2026-02-09T16:07:42.540Z"
+  },
+  {
+    "id": "log-1770653273692-1w59lpw",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Designing Variant",
+    "content": "Crafting social_inverted variant...",
+    "timestamp": "2026-02-09T16:07:53.692Z"
+  },
+  {
+    "id": "log-1770653283566-t85p1wk",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Variations Complete",
+    "content": "Generated 7 variations.",
+    "timestamp": "2026-02-09T16:08:03.566Z"
+  },
+  {
+    "id": "log-1770653283603-zpw6ob2",
+    "stepIndex": 5,
+    "nodeId": "Logo Generator",
+    "title": "Logo Kit Baked",
+    "content": "Final logo kit saved to: C:\\Users\\Excel\\Desktop\\Github Projects\\Beevo\\client\\public\\workspaces\\a107edc7_hector\\assets\\logo_kit_challenger.json",
+    "timestamp": "2026-02-09T16:08:03.603Z"
+  },
+  {
+    "id": "log-1770653283618-vbu3rz3",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Production Line",
+    "content": "Starting Transparency Production Line for Workspace: a107edc7_hector (V3 - Global Key)...",
+    "timestamp": "2026-02-09T16:08:03.618Z"
+  },
+  {
+    "id": "transparency-start-1770653283652",
+    "stepIndex": 5,
+    "nodeId": "transparency-baker",
+    "title": "Making Logos Transparent",
+    "content": "Started background removal process for generated logos.",
+    "timestamp": "2026-02-09T16:08:03.652Z"
+  },
+  {
+    "id": "log-1770653286456-ggw6ptf",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: primary (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_primary.png)",
+    "timestamp": "2026-02-09T16:08:06.456Z"
+  },
+  {
+    "id": "log-1770653286474-bhe62bz",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_primary.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_primary_transparent.png",
+    "timestamp": "2026-02-09T16:08:06.474Z"
+  },
+  {
+    "id": "log-1770653286993-ka1qo8r",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 999574 pixels.",
+    "timestamp": "2026-02-09T16:08:06.993Z"
+  },
+  {
+    "id": "log-1770653286999-n4cx5ud",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.primary -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_primary_transparent.png",
+    "timestamp": "2026-02-09T16:08:06.999Z"
+  },
+  {
+    "id": "log-1770653287036-awf1i4i",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: inverted (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_inverted.png)",
+    "timestamp": "2026-02-09T16:08:07.036Z"
+  },
+  {
+    "id": "log-1770653287075-f9kp8es",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_inverted.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:07.075Z"
+  },
+  {
+    "id": "log-1770653287493-zx9kz74",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 999005 pixels.",
+    "timestamp": "2026-02-09T16:08:07.493Z"
+  },
+  {
+    "id": "log-1770653287524-8p91toj",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.inverted -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:07.524Z"
+  },
+  {
+    "id": "log-1770653287624-ps1btvk",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: icon (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_icon.png)",
+    "timestamp": "2026-02-09T16:08:07.624Z"
+  },
+  {
+    "id": "log-1770653287772-35pmql4",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_icon.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_icon_transparent.png",
+    "timestamp": "2026-02-09T16:08:07.772Z"
+  },
+  {
+    "id": "log-1770653288425-2dmlawu",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 1001734 pixels.",
+    "timestamp": "2026-02-09T16:08:08.425Z"
+  },
+  {
+    "id": "log-1770653288441-g0hqrp3",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.icon -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_icon_transparent.png",
+    "timestamp": "2026-02-09T16:08:08.441Z"
+  },
+  {
+    "id": "log-1770653288508-1cp3v3w",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: icon_inverted (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_icon_inverted.png)",
+    "timestamp": "2026-02-09T16:08:08.508Z"
+  },
+  {
+    "id": "log-1770653288658-btveqsz",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_icon_inverted.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_icon_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:08.658Z"
+  },
+  {
+    "id": "log-1770653289267-lit1wsn",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 66893 pixels.",
+    "timestamp": "2026-02-09T16:08:09.267Z"
+  },
+  {
+    "id": "log-1770653289282-nykbike",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.icon_inverted -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_icon_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:09.282Z"
+  },
+  {
+    "id": "log-1770653289319-19syss7",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: wordmark (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_wordmark.png)",
+    "timestamp": "2026-02-09T16:08:09.319Z"
+  },
+  {
+    "id": "log-1770653289386-nls0qyh",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_wordmark.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_transparent.png",
+    "timestamp": "2026-02-09T16:08:09.386Z"
+  },
+  {
+    "id": "log-1770653289869-6saztyd",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 1031915 pixels.",
+    "timestamp": "2026-02-09T16:08:09.869Z"
+  },
+  {
+    "id": "log-1770653289878-sjdzfov",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.wordmark -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_transparent.png",
+    "timestamp": "2026-02-09T16:08:09.878Z"
+  },
+  {
+    "id": "log-1770653289953-4j0tv6h",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: wordmark_inverted (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_wordmark_inverted.png)",
+    "timestamp": "2026-02-09T16:08:09.953Z"
+  },
+  {
+    "id": "log-1770653290028-4ke6noi",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_wordmark_inverted.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:10.028Z"
+  },
+  {
+    "id": "log-1770653290415-1szxmaw",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 998931 pixels.",
+    "timestamp": "2026-02-09T16:08:10.415Z"
+  },
+  {
+    "id": "log-1770653290440-07bocb9",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.wordmark_inverted -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:10.440Z"
+  },
+  {
+    "id": "log-1770653290516-lumqrcn",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: social (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_social.png)",
+    "timestamp": "2026-02-09T16:08:10.516Z"
+  },
+  {
+    "id": "log-1770653290564-mqm61gi",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_social.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_social_transparent.png",
+    "timestamp": "2026-02-09T16:08:10.564Z"
+  },
+  {
+    "id": "log-1770653291130-bp5kanz",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 999501 pixels.",
+    "timestamp": "2026-02-09T16:08:11.130Z"
+  },
+  {
+    "id": "log-1770653291168-6jb34n5",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.social -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_social_transparent.png",
+    "timestamp": "2026-02-09T16:08:11.168Z"
+  },
+  {
+    "id": "log-1770653291217-6868xzo",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Logo",
+    "content": "Starting: social_inverted (Source: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_social_inverted.png)",
+    "timestamp": "2026-02-09T16:08:11.217Z"
+  },
+  {
+    "id": "log-1770653291255-j9esabd",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processing Image",
+    "content": "Processing: /workspaces/a107edc7_hector/assets/generated_logos/logo_variant_social_inverted.png -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_social_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:11.255Z"
+  },
+  {
+    "id": "log-1770653291820-0lzva0t",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Processed",
+    "content": "Removed 265392 pixels.",
+    "timestamp": "2026-02-09T16:08:11.820Z"
+  },
+  {
+    "id": "log-1770653291830-47jlmoy",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Updated Kit",
+    "content": "Updated kit.social_inverted -> /workspaces/a107edc7_hector/assets/transparent_logos/logo_variant_social_inverted_transparent.png",
+    "timestamp": "2026-02-09T16:08:11.830Z"
+  },
+  {
+    "id": "log-1770653293056-yt8yw96",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Brand DNA Update",
+    "content": "Setting Primary Brand Logo to Transparent Wordmark (as requested)",
+    "timestamp": "2026-02-09T16:08:13.056Z"
+  },
+  {
+    "id": "log-1770653293098-m0scxll",
+    "stepIndex": 5,
+    "nodeId": "Transparency Baker",
+    "title": "Transparency Complete",
+    "content": "Kit updated. Transparent logos saved to C:\\Users\\Excel\\Desktop\\Github Projects\\Beevo\\client\\public\\workspaces\\a107edc7_hector\\assets\\transparent_logos",
+    "timestamp": "2026-02-09T16:08:13.098Z"
+  },
+  {
+    "id": "transparency-end-1770653293159",
+    "stepIndex": 5,
+    "nodeId": "transparency-baker",
+    "title": "Transparency Process Complete",
+    "content": "Successfully removed backgrounds from all generated logos.",
+    "timestamp": "2026-02-09T16:08:13.159Z"
+  },
+  {
+    "id": "log-1770653356468-g6b1tw5",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Startup",
+    "content": "Starting for Workspace: a107edc7_hector",
+    "timestamp": "2026-02-09T16:09:16.468Z"
+  },
+  {
+    "id": "log-1770653356526-okoz8l6",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Initialization",
+    "content": "Initialization Mode Detected.",
+    "timestamp": "2026-02-09T16:09:16.526Z"
+  },
+  {
+    "id": "log-1770653358884-lmh9hck",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating Hero Section",
+    "content": "Analyzing brand DNA and starting asset generation...",
+    "timestamp": "2026-02-09T16:09:18.884Z"
+  },
+  {
+    "id": "log-1770653358885-6n9zx62",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Loading Research",
+    "content": "Reading complete_research_latest.json...",
+    "timestamp": "2026-02-09T16:09:18.885Z"
+  },
+  {
+    "id": "log-1770653358887-is5rlos",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Meta Injected",
+    "content": "Variant ID: hero_v1770653358887",
+    "timestamp": "2026-02-09T16:09:18.887Z"
+  },
+  {
+    "id": "log-1770653358887-7t9jgey",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Directing Video",
+    "content": "Synthesizing cinematic attributes for Veo AI...",
+    "timestamp": "2026-02-09T16:09:18.887Z"
+  },
+  {
+    "id": "log-1770653365087-qwb30hk",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating Video",
+    "content": "Requesting 4K cinematic video from Veo (this may take a minute)...",
+    "timestamp": "2026-02-09T16:09:25.087Z"
+  },
+  {
+    "id": "log-1770653365087-deq6zgn",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Connecting to Veo",
+    "content": "Initializing generation parameters...",
+    "timestamp": "2026-02-09T16:09:25.087Z"
+  },
+  {
+    "id": "log-1770653365087-mczyl7f",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Submitting",
+    "content": "Sending prompt to Veo model...",
+    "timestamp": "2026-02-09T16:09:25.087Z"
+  },
+  {
+    "id": "log-1770653366573-avq1ax2",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Operation Started",
+    "content": "ID: models/veo-3.1-generate-preview/operations/1vnbcse5mhpc",
+    "timestamp": "2026-02-09T16:09:26.573Z"
+  },
+  {
+    "id": "log-1770653366573-336lh4e",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:09:26.573Z"
+  },
+  {
+    "id": "log-1770653372745-0c7yqgu",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:09:32.745Z"
+  },
+  {
+    "id": "log-1770653378953-gwb42hw",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:09:38.953Z"
+  },
+  {
+    "id": "log-1770653384543-06ujb14",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:09:44.543Z"
+  },
+  {
+    "id": "log-1770653390700-752qu1x",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:09:50.700Z"
+  },
+  {
+    "id": "log-1770653397100-qpshl7b",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:09:57.100Z"
+  },
+  {
+    "id": "log-1770653403324-r0zlb1r",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:03.324Z"
+  },
+  {
+    "id": "log-1770653408989-sbhukez",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:08.989Z"
+  },
+  {
+    "id": "log-1770653414602-e9jtr7z",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:14.602Z"
+  },
+  {
+    "id": "log-1770653420806-c8cu2so",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:20.806Z"
+  },
+  {
+    "id": "log-1770653426398-eyuu4re",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:26.398Z"
+  },
+  {
+    "id": "log-1770653432670-2pztogr",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:32.670Z"
+  },
+  {
+    "id": "log-1770653438840-xlda35b",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:38.840Z"
+  },
+  {
+    "id": "log-1770653444431-8ld8d0y",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:44.431Z"
+  },
+  {
+    "id": "log-1770653450675-06duaoy",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:50.675Z"
+  },
+  {
+    "id": "log-1770653456868-pd22qy6",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:10:56.868Z"
+  },
+  {
+    "id": "log-1770653462443-aora07n",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating",
+    "content": "Waiting for video processing (5s)...",
+    "timestamp": "2026-02-09T16:11:02.443Z"
+  },
+  {
+    "id": "log-1770653468202-a26vdhe",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Download",
+    "content": "Video generation complete. Downloading asset...",
+    "timestamp": "2026-02-09T16:11:08.202Z"
+  },
+  {
+    "id": "log-1770653473102-1crvanx",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Video Captured",
+    "content": "Asset archived to history: /workspaces/a107edc7_hector/assets/history/hero_v1770653358887/hero_video_1770653468203.mp4",
+    "timestamp": "2026-02-09T16:11:13.102Z"
+  },
+  {
+    "id": "log-1770653473102-50d9j9q",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Drafting Copy",
+    "content": "Generating high-impact headlines and lead-gen forms...",
+    "timestamp": "2026-02-09T16:11:13.102Z"
+  },
+  {
+    "id": "log-1770653489974-9vw6wl9",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Layout Configured",
+    "content": "Standard centering template applied.",
+    "timestamp": "2026-02-09T16:11:29.974Z"
+  },
+  {
+    "id": "log-1770653489974-eemb30r",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Saving",
+    "content": "Writing staged hero block to file...",
+    "timestamp": "2026-02-09T16:11:29.974Z"
+  },
+  {
+    "id": "log-1770653489979-jdze704",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Hero Generation Complete",
+    "content": "Staged challenger saved successfully.",
+    "timestamp": "2026-02-09T16:11:29.979Z"
+  },
+  {
+    "id": "log-1770653491129-q6gv8lx",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Generating Social Proof",
+    "content": "Synthesizing data visualization and trust metrics...",
+    "timestamp": "2026-02-09T16:11:31.129Z"
+  },
+  {
+    "id": "log-1770653491130-7w4yhc5",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Loading Data",
+    "content": "Reading brand research and imagery suggestions...",
+    "timestamp": "2026-02-09T16:11:31.130Z"
+  },
+  {
+    "id": "log-1770653491133-zuvk7ij",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Visualizing Trust",
+    "content": "Requesting trust visualization via NanoBanana Service...",
+    "timestamp": "2026-02-09T16:11:31.133Z"
+  },
+  {
+    "id": "log-1770653524018-a1sijjt",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Saving",
+    "content": "Writing staged Proof block to file...",
+    "timestamp": "2026-02-09T16:12:04.018Z"
+  },
+  {
+    "id": "log-1770653524027-9fjfwst",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Proof Generation Complete",
+    "content": "Trust-building block staged successfully.",
+    "timestamp": "2026-02-09T16:12:04.027Z"
+  },
+  {
+    "id": "log-1770653527598-rvb51ku",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Social Proof",
+    "content": "Synthesizing authentic testimonials and trust signals...",
+    "timestamp": "2026-02-09T16:12:07.598Z"
+  },
+  {
+    "id": "log-1770653527602-keekdic",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Drafting Testimonials",
+    "content": "Synthesizing industry-relevant customer reviews via NanoBanana...",
+    "timestamp": "2026-02-09T16:12:07.602Z"
+  },
+  {
+    "id": "log-1770653545138-vlf8y4a",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Baking Headshots",
+    "content": "Generating 3 human-like avatars for social proof...",
+    "timestamp": "2026-02-09T16:12:25.138Z"
+  },
+  {
+    "id": "log-1770653545139-pqn99d1",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Julian Voss...",
+    "timestamp": "2026-02-09T16:12:25.139Z"
+  },
+  {
+    "id": "log-1770653545140-vjvladh",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:12:25.140Z"
+  },
+  {
+    "id": "log-1770653552550-pmvf5y7",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770653545138/testimonial_1770653552480_1770653552520.png",
+    "timestamp": "2026-02-09T16:12:32.550Z"
+  },
+  {
+    "id": "log-1770653552551-g2pur98",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Elara Dupont...",
+    "timestamp": "2026-02-09T16:12:32.551Z"
+  },
+  {
+    "id": "log-1770653552552-rtkxn3f",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:12:32.552Z"
+  },
+  {
+    "id": "log-1770653559888-gwbtdf9",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770653545138/testimonial_1770653559872_1770653559873.png",
+    "timestamp": "2026-02-09T16:12:39.888Z"
+  },
+  {
+    "id": "log-1770653559888-h351pyy",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Marco Rossi...",
+    "timestamp": "2026-02-09T16:12:39.888Z"
+  },
+  {
+    "id": "log-1770653559888-478dvta",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:12:39.888Z"
+  },
+  {
+    "id": "log-1770653567581-2ervxkt",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770653545138/testimonial_1770653567578_1770653567578.png",
+    "timestamp": "2026-02-09T16:12:47.581Z"
+  },
+  {
+    "id": "log-1770653567581-t2vn05j",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Saving",
+    "content": "Writing staged Social block to file...",
+    "timestamp": "2026-02-09T16:12:47.581Z"
+  },
+  {
+    "id": "log-1770653567595-liqrbia",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Social Proof Complete",
+    "content": "Authentic testimonial block staged successfully.",
+    "timestamp": "2026-02-09T16:12:47.595Z"
+  },
+  {
+    "id": "log-1770653568980-5g9rpbw",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Generating Case Study",
+    "content": "Analyzing customer pain points for Problem-Agitation-Solution framework...",
+    "timestamp": "2026-02-09T16:12:48.980Z"
+  },
+  {
+    "id": "log-1770653568982-i8qtl1h",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Reading Research",
+    "content": "Identifying core agitation triggers from brand DNA...",
+    "timestamp": "2026-02-09T16:12:48.982Z"
+  },
+  {
+    "id": "log-1770653568987-s0ojakl",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Drafting Story",
+    "content": "Synthesizing empathetic copy and visual metaphors via NanoBanana...",
+    "timestamp": "2026-02-09T16:12:48.987Z"
+  },
+  {
+    "id": "log-1770653580842-qipjbk6",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Saving",
+    "content": "Writing staged PAS block to file...",
+    "timestamp": "2026-02-09T16:13:00.842Z"
+  },
+  {
+    "id": "log-1770653580898-0b8nxbu",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "PAS Generation Complete",
+    "content": "Customer empathy block staged correctly.",
+    "timestamp": "2026-02-09T16:13:00.898Z"
+  },
+  {
+    "id": "log-1770653584815-w0z0koz",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Generating Technical Blueprint",
+    "content": "Analyzing brand mission for functional specifications and interactive node maps...",
+    "timestamp": "2026-02-09T16:13:04.815Z"
+  },
+  {
+    "id": "log-1770653584816-qqpxg3g",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Reading Research",
+    "content": "Extracting key features and functional mood from brand DNA...",
+    "timestamp": "2026-02-09T16:13:04.816Z"
+  },
+  {
+    "id": "log-1770653584819-51b1x4p",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Designing Nodes",
+    "content": "Requesting interactive feature blueprint and layout via NanoBanana...",
+    "timestamp": "2026-02-09T16:13:04.819Z"
+  },
+  {
+    "id": "log-1770653605677-9j0fd3g",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Saving Staged Spec Block...",
+    "content": "Writing generated spec to C:\\Users\\Excel\\Desktop\\Github Projects\\Beevo\\server\\brain\\workspaces\\a107edc7_hector\\staging\\spec_block_staging.json",
+    "timestamp": "2026-02-09T16:13:25.677Z"
+  },
+  {
+    "id": "log-1770653605735-0taxihj",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Spec Generation Complete",
+    "content": "Interactive blueprint staged successfully.",
+    "timestamp": "2026-02-09T16:13:25.735Z"
+  },
+  {
+    "id": "log-1770653610370-zyd8t8m",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Generating Offers",
+    "content": "Analyzing brand value proposition and crafting core offers...",
+    "timestamp": "2026-02-09T16:13:30.370Z"
+  },
+  {
+    "id": "log-1770653610373-r3jd2ia",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Reading Research",
+    "content": "Parsing brand DNA for industry-specific conversion triggers...",
+    "timestamp": "2026-02-09T16:13:30.373Z"
+  },
+  {
+    "id": "log-1770653610392-zkq0mdt",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Drafting Offer",
+    "content": "Requesting high-conversion pricing tiers and strategy from NanoBanana...",
+    "timestamp": "2026-02-09T16:13:30.392Z"
+  },
+  {
+    "id": "log-1770653630805-ad297i5",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Saving",
+    "content": "Writing staged offer block to file...",
+    "timestamp": "2026-02-09T16:13:50.805Z"
+  },
+  {
+    "id": "log-1770653630867-luvwnej",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Offer Generation Complete",
+    "content": "Final offer tiers and guarantees staged.",
+    "timestamp": "2026-02-09T16:13:50.867Z"
+  },
+  {
+    "id": "log-1770653631915-hktb4lw",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Initialization",
+    "content": "Initialization Complete.",
+    "timestamp": "2026-02-09T16:13:51.915Z"
+  },
+  {
+    "id": "log-1770653631938-zefh3o4",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Broadcast",
+    "content": "Broadcasting INIT STATE_UPDATE for hash: ebeaeff851bc",
+    "timestamp": "2026-02-09T16:13:51.938Z"
+  },
+  {
+    "id": "log-1770653632128-jg9oev6",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Config",
+    "content": "[WARN] Could not load watcher config, using defaults.",
+    "timestamp": "2026-02-09T16:13:52.128Z"
+  },
+  {
+    "id": "log-1770653632130-moq6zw5",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Startup Buffer",
+    "content": "Waiting 5 minutes before first Watcher Run...",
+    "timestamp": "2026-02-09T16:13:52.130Z"
+  },
+  {
+    "id": "log-1770653932153-v7h5lz6",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T16:18:52.154Z"
+  },
+  {
+    "id": "log-1770653934538-otg7ws4",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T16:18:54.538Z"
+  },
+  {
+    "id": "log-1770653934594-tu1u8bv",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Context Loaded",
+    "content": "Current video asset loaded for analysis.",
+    "timestamp": "2026-02-09T16:18:54.594Z"
+  },
+  {
+    "id": "log-1770653934596-2bswl6l",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 1)",
+    "timestamp": "2026-02-09T16:18:54.596Z"
+  },
+  {
+    "id": "log-1770653936004-llhs7ji",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T16:18:56.004Z"
+  },
+  {
+    "id": "log-1770653936028-ac0n7pt",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1816ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T16:18:56.028Z"
+  },
+  {
+    "id": "log-1770653936029-mqz4t47",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T16:18:56.029Z"
+  },
+  {
+    "id": "log-1770653937958-d9hcqye",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T16:18:57.958Z"
+  },
+  {
+    "id": "log-1770653937981-94hscub",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 5)",
+    "timestamp": "2026-02-09T16:18:57.981Z"
+  },
+  {
+    "id": "log-1770653948093-yk77thv",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T16:19:08.093Z"
+  },
+  {
+    "id": "log-1770653948129-46wl8ec",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 1)",
+    "timestamp": "2026-02-09T16:19:08.129Z"
+  },
+  {
+    "id": "log-1770653950274-rxl6nrv",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T16:19:10.274Z"
+  },
+  {
+    "id": "log-1770653950316-bkz5hdz",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 1)",
+    "timestamp": "2026-02-09T16:19:10.316Z"
+  },
+  {
+    "id": "log-1770653951338-8mu28xw",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T16:19:11.338Z"
+  },
+  {
+    "id": "log-1770653951433-sjr2lle",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (5). Waiting.",
+    "timestamp": "2026-02-09T16:19:11.433Z"
+  },
+  {
+    "id": "log-1770653962955-vq4fa3o",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Aborted",
+    "content": "User rejected optimization request.",
+    "timestamp": "2026-02-09T16:19:22.955Z"
+  },
+  {
+    "id": "log-1770653963017-35hfyta",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T16:19:23.017Z"
+  },
+  {
+    "id": "log-1770653963093-brzp2uz",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: ebeaeff851bc",
+    "timestamp": "2026-02-09T16:19:23.093Z"
+  },
+  {
+    "id": "log-1770653963135-1trkl7j",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T16:19:23.135Z"
+  },
+  {
+    "id": "log-1770654263237-sk3xxko",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T16:24:23.237Z"
+  },
+  {
+    "id": "log-1770654270894-wmasvfo",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T16:24:30.894Z"
+  },
+  {
+    "id": "log-1770654271047-ef7cv7r",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Context Loaded",
+    "content": "Current video asset loaded for analysis.",
+    "timestamp": "2026-02-09T16:24:31.047Z"
+  },
+  {
+    "id": "log-1770654271049-2phutro",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 1)",
+    "timestamp": "2026-02-09T16:24:31.049Z"
+  },
+  {
+    "id": "log-1770654275388-sh47f5a",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T16:24:35.388Z"
+  },
+  {
+    "id": "log-1770654275470-9sfocwv",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1604ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T16:24:35.470Z"
+  },
+  {
+    "id": "log-1770654275470-pa510v3",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T16:24:35.470Z"
+  },
+  {
+    "id": "log-1770654276794-wv4xh83",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T16:24:36.794Z"
+  },
+  {
+    "id": "log-1770654276879-wnxxygl",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 7)",
+    "timestamp": "2026-02-09T16:24:36.879Z"
+  },
+  {
+    "id": "log-1770654277753-oggzgbb",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T16:24:37.753Z"
+  },
+  {
+    "id": "log-1770654277829-437u366",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 2)",
+    "timestamp": "2026-02-09T16:24:37.829Z"
+  },
+  {
+    "id": "log-1770654281787-nri2fss",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T16:24:41.787Z"
+  },
+  {
+    "id": "log-1770654281904-1l4ppu3",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 2)",
+    "timestamp": "2026-02-09T16:24:41.904Z"
+  },
+  {
+    "id": "log-1770654284498-vkiqgzo",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T16:24:44.498Z"
+  },
+  {
+    "id": "log-1770654284586-1dqjq33",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (8). Waiting.",
+    "timestamp": "2026-02-09T16:24:44.586Z"
+  },
+  {
+    "id": "log-1770654292123-csrk1s0",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Aborted",
+    "content": "User rejected optimization request.",
+    "timestamp": "2026-02-09T16:24:52.123Z"
+  },
+  {
+    "id": "log-1770654292427-c2q25uk",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T16:24:52.427Z"
+  },
+  {
+    "id": "log-1770654292509-qksv0e6",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: ebeaeff851bc",
+    "timestamp": "2026-02-09T16:24:52.509Z"
+  },
+  {
+    "id": "log-1770654292599-kwbusry",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T16:24:52.599Z"
+  },
+  {
+    "id": "log-1770654386996-sd9i4us",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Startup",
+    "content": "Starting for Workspace: a107edc7_hector",
+    "timestamp": "2026-02-09T16:26:26.996Z"
+  },
+  {
+    "id": "log-1770654387046-tq6wul4",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Initialization",
+    "content": "Initialization Mode Detected.",
+    "timestamp": "2026-02-09T16:26:27.046Z"
+  },
+  {
+    "id": "log-1770654391646-4uepol4",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating Hero Section",
+    "content": "Analyzing brand DNA and starting asset generation...",
+    "timestamp": "2026-02-09T16:26:31.646Z"
+  },
+  {
+    "id": "log-1770654391649-nuk1rkq",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Loading Research",
+    "content": "Reading complete_research_latest.json...",
+    "timestamp": "2026-02-09T16:26:31.649Z"
+  },
+  {
+    "id": "log-1770654391655-e1oaqny",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Meta Injected",
+    "content": "Variant ID: hero_v1770654391655",
+    "timestamp": "2026-02-09T16:26:31.655Z"
+  },
+  {
+    "id": "log-1770654391655-eszb00o",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Directing Video",
+    "content": "Synthesizing cinematic attributes for Veo AI...",
+    "timestamp": "2026-02-09T16:26:31.655Z"
+  },
+  {
+    "id": "log-1770654399550-540v12j",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Generating Video",
+    "content": "Requesting 4K cinematic video from Veo (this may take a minute)...",
+    "timestamp": "2026-02-09T16:26:39.550Z"
+  },
+  {
+    "id": "log-1770654399550-mel86gc",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Connecting to Veo",
+    "content": "Initializing generation parameters...",
+    "timestamp": "2026-02-09T16:26:39.550Z"
+  },
+  {
+    "id": "log-1770654399550-i6xjkt0",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Submitting",
+    "content": "Sending prompt to Veo model...",
+    "timestamp": "2026-02-09T16:26:39.550Z"
+  },
+  {
+    "id": "log-1770654400014-u1ok31o",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Veo Failed",
+    "content": "Using fallback placeholder video.",
+    "timestamp": "2026-02-09T16:26:40.014Z"
+  },
+  {
+    "id": "log-1770654400648-vq7xcv7",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Drafting Copy",
+    "content": "Generating high-impact headlines and lead-gen forms...",
+    "timestamp": "2026-02-09T16:26:40.649Z"
+  },
+  {
+    "id": "log-1770654414632-qfxgkh3",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Layout Configured",
+    "content": "Standard centering template applied.",
+    "timestamp": "2026-02-09T16:26:54.632Z"
+  },
+  {
+    "id": "log-1770654414633-hf70tha",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Saving",
+    "content": "Writing staged hero block to file...",
+    "timestamp": "2026-02-09T16:26:54.633Z"
+  },
+  {
+    "id": "log-1770654414645-y8nvnrf",
+    "stepIndex": 5,
+    "nodeId": "Hero Generator",
+    "title": "Hero Generation Complete",
+    "content": "Staged challenger saved successfully.",
+    "timestamp": "2026-02-09T16:26:54.645Z"
+  },
+  {
+    "id": "log-1770654415942-7jxgjtk",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Generating Social Proof",
+    "content": "Synthesizing data visualization and trust metrics...",
+    "timestamp": "2026-02-09T16:26:55.942Z"
+  },
+  {
+    "id": "log-1770654415946-opiah76",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Loading Data",
+    "content": "Reading brand research and imagery suggestions...",
+    "timestamp": "2026-02-09T16:26:55.946Z"
+  },
+  {
+    "id": "log-1770654415992-dk71ekr",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Visualizing Trust",
+    "content": "Requesting trust visualization via NanoBanana Service...",
+    "timestamp": "2026-02-09T16:26:55.992Z"
+  },
+  {
+    "id": "log-1770654433282-fdw8ddo",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Saving",
+    "content": "Writing staged Proof block to file...",
+    "timestamp": "2026-02-09T16:27:13.282Z"
+  },
+  {
+    "id": "log-1770654433388-j5ya0ys",
+    "stepIndex": 5,
+    "nodeId": "Proof Generator",
+    "title": "Proof Generation Complete",
+    "content": "Trust-building block staged successfully.",
+    "timestamp": "2026-02-09T16:27:13.388Z"
+  },
+  {
+    "id": "log-1770654436945-1olzmzn",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Social Proof",
+    "content": "Synthesizing authentic testimonials and trust signals...",
+    "timestamp": "2026-02-09T16:27:16.945Z"
+  },
+  {
+    "id": "log-1770654436953-pucqtma",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Drafting Testimonials",
+    "content": "Synthesizing industry-relevant customer reviews via NanoBanana...",
+    "timestamp": "2026-02-09T16:27:16.953Z"
+  },
+  {
+    "id": "log-1770654458799-assjhx2",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Baking Headshots",
+    "content": "Generating 4 human-like avatars for social proof...",
+    "timestamp": "2026-02-09T16:27:38.799Z"
+  },
+  {
+    "id": "log-1770654458801-nd995u3",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Julianne Moreau...",
+    "timestamp": "2026-02-09T16:27:38.801Z"
+  },
+  {
+    "id": "log-1770654458854-pomotw7",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:27:38.854Z"
+  },
+  {
+    "id": "log-1770654466044-rq8sq8w",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654465987_1770654466001.png",
+    "timestamp": "2026-02-09T16:27:46.044Z"
+  },
+  {
+    "id": "log-1770654466044-ogcrev5",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Erik Sorenson...",
+    "timestamp": "2026-02-09T16:27:46.044Z"
+  },
+  {
+    "id": "log-1770654466044-whqcjj9",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:27:46.044Z"
+  },
+  {
+    "id": "log-1770654474537-ecex3c5",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654474518_1770654474519.png",
+    "timestamp": "2026-02-09T16:27:54.537Z"
+  },
+  {
+    "id": "log-1770654474538-ztbnjgv",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Matteo Rossi...",
+    "timestamp": "2026-02-09T16:27:54.538Z"
+  },
+  {
+    "id": "log-1770654474539-4swmvz1",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:27:54.539Z"
+  },
+  {
+    "id": "log-1770654481893-w8ei8lu",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654481880_1770654481889.png",
+    "timestamp": "2026-02-09T16:28:01.893Z"
+  },
+  {
+    "id": "log-1770654481893-7g61z9l",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Avatar",
+    "content": "Creating headshot for Elena Fischer...",
+    "timestamp": "2026-02-09T16:28:01.893Z"
+  },
+  {
+    "id": "log-1770654481893-xquff7e",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Generating Image",
+    "content": "Requesting Image via generateContent (Model: gemini-2.5-flash-image)...",
+    "timestamp": "2026-02-09T16:28:01.893Z"
+  },
+  {
+    "id": "log-1770654489050-4v5btao",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Image Archived",
+    "content": "Saved via MediaService: /workspaces/a107edc7_hector/assets/history/social_v1770654458800/testimonial_1770654489047_1770654489048.png",
+    "timestamp": "2026-02-09T16:28:09.050Z"
+  },
+  {
+    "id": "log-1770654489050-39tkski",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Saving",
+    "content": "Writing staged Social block to file...",
+    "timestamp": "2026-02-09T16:28:09.050Z"
+  },
+  {
+    "id": "log-1770654489056-l4awhfp",
+    "stepIndex": 5,
+    "nodeId": "Social Generator",
+    "title": "Social Proof Complete",
+    "content": "Authentic testimonial block staged successfully.",
+    "timestamp": "2026-02-09T16:28:09.056Z"
+  },
+  {
+    "id": "log-1770654490152-lqvipbj",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Generating Case Study",
+    "content": "Analyzing customer pain points for Problem-Agitation-Solution framework...",
+    "timestamp": "2026-02-09T16:28:10.152Z"
+  },
+  {
+    "id": "log-1770654490155-7lz088l",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Reading Research",
+    "content": "Identifying core agitation triggers from brand DNA...",
+    "timestamp": "2026-02-09T16:28:10.155Z"
+  },
+  {
+    "id": "log-1770654490162-couckmn",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Drafting Story",
+    "content": "Synthesizing empathetic copy and visual metaphors via NanoBanana...",
+    "timestamp": "2026-02-09T16:28:10.163Z"
+  },
+  {
+    "id": "log-1770654505259-sinnf9j",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "Saving",
+    "content": "Writing staged PAS block to file...",
+    "timestamp": "2026-02-09T16:28:25.259Z"
+  },
+  {
+    "id": "log-1770654505262-oyudowk",
+    "stepIndex": 5,
+    "nodeId": "PAS Generator",
+    "title": "PAS Generation Complete",
+    "content": "Customer empathy block staged correctly.",
+    "timestamp": "2026-02-09T16:28:25.262Z"
+  },
+  {
+    "id": "log-1770654506219-s79whfe",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Generating Technical Blueprint",
+    "content": "Analyzing brand mission for functional specifications and interactive node maps...",
+    "timestamp": "2026-02-09T16:28:26.219Z"
+  },
+  {
+    "id": "log-1770654506220-4uf4ipk",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Reading Research",
+    "content": "Extracting key features and functional mood from brand DNA...",
+    "timestamp": "2026-02-09T16:28:26.220Z"
+  },
+  {
+    "id": "log-1770654506223-o9hv2hp",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Designing Nodes",
+    "content": "Requesting interactive feature blueprint and layout via NanoBanana...",
+    "timestamp": "2026-02-09T16:28:26.223Z"
+  },
+  {
+    "id": "log-1770654526849-hjpbd8m",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Saving Staged Spec Block...",
+    "content": "Writing generated spec to C:\\Users\\Excel\\Desktop\\Github Projects\\Beevo\\server\\brain\\workspaces\\a107edc7_hector\\staging\\spec_block_staging.json",
+    "timestamp": "2026-02-09T16:28:46.850Z"
+  },
+  {
+    "id": "log-1770654526908-weof0br",
+    "stepIndex": 5,
+    "nodeId": "Spec Generator",
+    "title": "Spec Generation Complete",
+    "content": "Interactive blueprint staged successfully.",
+    "timestamp": "2026-02-09T16:28:46.908Z"
+  },
+  {
+    "id": "log-1770654530050-dlxz5j8",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Generating Offers",
+    "content": "Analyzing brand value proposition and crafting core offers...",
+    "timestamp": "2026-02-09T16:28:50.050Z"
+  },
+  {
+    "id": "log-1770654530055-y6yq2ez",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Reading Research",
+    "content": "Parsing brand DNA for industry-specific conversion triggers...",
+    "timestamp": "2026-02-09T16:28:50.055Z"
+  },
+  {
+    "id": "log-1770654530069-wranpfv",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Drafting Offer",
+    "content": "Requesting high-conversion pricing tiers and strategy from NanoBanana...",
+    "timestamp": "2026-02-09T16:28:50.069Z"
+  },
+  {
+    "id": "log-1770654553757-4475fiy",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Saving",
+    "content": "Writing staged offer block to file...",
+    "timestamp": "2026-02-09T16:29:13.757Z"
+  },
+  {
+    "id": "log-1770654553882-ctkvfv6",
+    "stepIndex": 5,
+    "nodeId": "Offer Generator",
+    "title": "Offer Generation Complete",
+    "content": "Final offer tiers and guarantees staged.",
+    "timestamp": "2026-02-09T16:29:13.882Z"
+  },
+  {
+    "id": "log-1770654554584-6b7fk17",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Initialization",
+    "content": "Initialization Complete.",
+    "timestamp": "2026-02-09T16:29:14.584Z"
+  },
+  {
+    "id": "log-1770654554605-p7rqrvb",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Broadcast",
+    "content": "Broadcasting INIT STATE_UPDATE for hash: d114812f5134",
+    "timestamp": "2026-02-09T16:29:14.605Z"
+  },
+  {
+    "id": "log-1770654554732-d6hvjbj",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Startup Buffer",
+    "content": "Waiting 5 minutes before first Watcher Run...",
+    "timestamp": "2026-02-09T16:29:14.732Z"
+  },
+  {
+    "id": "log-1770654854825-u26sifq",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T16:34:14.825Z"
+  },
+  {
+    "id": "log-1770654861494-7bepo19",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T16:34:21.494Z"
+  },
+  {
+    "id": "log-1770654861720-gax0xb5",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T16:34:21.720Z"
+  },
+  {
+    "id": "log-1770654866841-otujxq2",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T16:34:26.841Z"
+  },
+  {
+    "id": "log-1770654866926-r4n4ifs",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T16:34:26.926Z"
+  },
+  {
+    "id": "log-1770654866926-hclp7hy",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T16:34:26.926Z"
+  },
+  {
+    "id": "log-1770654870885-3lme200",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T16:34:30.885Z"
+  },
+  {
+    "id": "log-1770654871187-db9q2d4",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T16:34:31.187Z"
+  },
+  {
+    "id": "log-1770654878838-nupbu4q",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T16:34:38.838Z"
+  },
+  {
+    "id": "log-1770654878894-fwbkqf0",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T16:34:38.894Z"
+  },
+  {
+    "id": "log-1770654880271-y4y36la",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T16:34:40.271Z"
+  },
+  {
+    "id": "log-1770654880389-freeema",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T16:34:40.389Z"
+  },
+  {
+    "id": "log-1770654882067-goiemjr",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T16:34:42.067Z"
+  },
+  {
+    "id": "log-1770654882162-03x44oq",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T16:34:42.162Z"
+  },
+  {
+    "id": "log-1770654996630-bs90iqc",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T16:36:36.630Z"
+  },
+  {
+    "id": "log-1770654996631-lt5lfa0",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T16:36:36.631Z"
+  },
+  {
+    "id": "log-1770655008292-4unzi48",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T16:36:48.293Z"
+  },
+  {
+    "id": "log-1770655036380-d5vwkgt",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T16:37:16.380Z"
+  },
+  {
+    "id": "log-1770655176734-lrxmvml",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T16:39:36.735Z"
+  },
+  {
+    "id": "log-1770655176793-2mdua9y",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T16:39:36.793Z"
+  },
+  {
+    "id": "log-1770655176884-21n5lqy",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 510da64f47cf",
+    "timestamp": "2026-02-09T16:39:36.884Z"
+  },
+  {
+    "id": "log-1770655176905-dw484uv",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T16:39:36.905Z"
+  },
+  {
+    "id": "log-1770655476934-jfl26ll",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T16:44:36.934Z"
+  },
+  {
+    "id": "log-1770655478670-1gnhvh4",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T16:44:38.670Z"
+  },
+  {
+    "id": "log-1770655478683-5ck46x8",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T16:44:38.683Z"
+  },
+  {
+    "id": "log-1770655480271-xfivuzj",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T16:44:40.271Z"
+  },
+  {
+    "id": "log-1770655480282-g1bq37c",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T16:44:40.282Z"
+  },
+  {
+    "id": "log-1770655480282-c334xqn",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T16:44:40.282Z"
+  },
+  {
+    "id": "log-1770655482261-0hxlmj6",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T16:44:42.261Z"
+  },
+  {
+    "id": "log-1770655482268-zgi2l3h",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T16:44:42.268Z"
+  },
+  {
+    "id": "log-1770655484419-4zdol22",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T16:44:44.419Z"
+  },
+  {
+    "id": "log-1770655484434-g57jywq",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T16:44:44.434Z"
+  },
+  {
+    "id": "log-1770655487276-qn4zed5",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T16:44:47.276Z"
+  },
+  {
+    "id": "log-1770655487345-scxtmpq",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T16:44:47.346Z"
+  },
+  {
+    "id": "log-1770655492037-1yqp2g7",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T16:44:52.037Z"
+  },
+  {
+    "id": "log-1770655492089-1kcwa2s",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T16:44:52.089Z"
+  },
+  {
+    "id": "log-1770655626800-qt0zq7j",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T16:47:06.800Z"
+  },
+  {
+    "id": "log-1770655626800-qwo97c2",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T16:47:06.800Z"
+  },
+  {
+    "id": "log-1770655636739-87m44y9",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T16:47:16.739Z"
+  },
+  {
+    "id": "log-1770655656138-psppkd7",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T16:47:36.138Z"
+  },
+  {
+    "id": "log-1770655806850-m1vjufw",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T16:50:06.850Z"
+  },
+  {
+    "id": "log-1770655806947-f9hr42p",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T16:50:06.947Z"
+  },
+  {
+    "id": "log-1770655806980-eugvk5u",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 30f5f0e8ee05",
+    "timestamp": "2026-02-09T16:50:06.980Z"
+  },
+  {
+    "id": "log-1770655807053-c9fh44q",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T16:50:07.053Z"
+  },
+  {
+    "id": "log-1770656107082-0a73r41",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T16:55:07.082Z"
+  },
+  {
+    "id": "log-1770656108765-crjtzmm",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T16:55:08.765Z"
+  },
+  {
+    "id": "log-1770656108778-dc1clf8",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 5)",
+    "timestamp": "2026-02-09T16:55:08.778Z"
+  },
+  {
+    "id": "log-1770656112381-5pszt0v",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T16:55:12.381Z"
+  },
+  {
+    "id": "log-1770656112415-8zvnxlu",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T16:55:12.415Z"
+  },
+  {
+    "id": "log-1770656112416-0vtcpvj",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T16:55:12.416Z"
+  },
+  {
+    "id": "log-1770656112868-vy4m6z7",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T16:55:12.868Z"
+  },
+  {
+    "id": "log-1770656112884-3okb5ip",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T16:55:12.884Z"
+  },
+  {
+    "id": "log-1770656115935-b0x8k73",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T16:55:15.935Z"
+  },
+  {
+    "id": "log-1770656115971-fkbydix",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T16:55:15.971Z"
+  },
+  {
+    "id": "log-1770656116633-h7s63ar",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T16:55:16.633Z"
+  },
+  {
+    "id": "log-1770656116645-mccoaw5",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T16:55:16.645Z"
+  },
+  {
+    "id": "log-1770656118403-suoarat",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T16:55:18.403Z"
+  },
+  {
+    "id": "log-1770656118417-vdx62sm",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T16:55:18.417Z"
+  },
+  {
+    "id": "log-1770656256750-0e3guni",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T16:57:36.750Z"
+  },
+  {
+    "id": "log-1770656256751-zgqxnir",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T16:57:36.751Z"
+  },
+  {
+    "id": "log-1770656271216-qccc1ry",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T16:57:51.216Z"
+  },
+  {
+    "id": "log-1770656289779-nqbaxn7",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T16:58:09.779Z"
+  },
+  {
+    "id": "log-1770656437068-axbhss6",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T17:00:37.068Z"
+  },
+  {
+    "id": "log-1770656437115-1d9xwf9",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:00:37.115Z"
+  },
+  {
+    "id": "log-1770656437163-traqwzm",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 0c6379e32b76",
+    "timestamp": "2026-02-09T17:00:37.163Z"
+  },
+  {
+    "id": "log-1770656437212-5hv986q",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:00:37.212Z"
+  },
+  {
+    "id": "log-1770656737347-rwvfhoq",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T17:05:37.347Z"
+  },
+  {
+    "id": "log-1770656744774-w1wyuw2",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T17:05:44.774Z"
+  },
+  {
+    "id": "log-1770656744884-9yllzgv",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 6)",
+    "timestamp": "2026-02-09T17:05:44.884Z"
+  },
+  {
+    "id": "log-1770656754020-la7iuh1",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T17:05:54.020Z"
+  },
+  {
+    "id": "log-1770656754158-ulid5na",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T17:05:54.158Z"
+  },
+  {
+    "id": "log-1770656754159-25946a2",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T17:05:54.159Z"
+  },
+  {
+    "id": "log-1770656756025-pf3abhz",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T17:05:56.025Z"
+  },
+  {
+    "id": "log-1770656756215-olugmrt",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T17:05:56.215Z"
+  },
+  {
+    "id": "log-1770656759019-q8zaq4i",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T17:05:59.019Z"
+  },
+  {
+    "id": "log-1770656759107-o5cl5qf",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T17:05:59.107Z"
+  },
+  {
+    "id": "log-1770656759657-32e9fgp",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T17:05:59.657Z"
+  },
+  {
+    "id": "log-1770656759716-0oakmap",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T17:05:59.716Z"
+  },
+  {
+    "id": "log-1770656761664-am3tevs",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T17:06:01.664Z"
+  },
+  {
+    "id": "log-1770656761741-c61eitd",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T17:06:01.741Z"
+  },
+  {
+    "id": "log-1770656887312-0ocn5q1",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T17:08:07.312Z"
+  },
+  {
+    "id": "log-1770656887313-uvty5pu",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T17:08:07.313Z"
+  },
+  {
+    "id": "log-1770656902583-pjuw5q9",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T17:08:22.583Z"
+  },
+  {
+    "id": "log-1770656918575-pln98le",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T17:08:38.575Z"
+  },
+  {
+    "id": "log-1770657066940-plbo2g6",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T17:11:06.941Z"
+  },
+  {
+    "id": "log-1770657067025-xdzb6fw",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:11:07.025Z"
+  },
+  {
+    "id": "log-1770657067089-yetr7an",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 3f5db599d6ef",
+    "timestamp": "2026-02-09T17:11:07.089Z"
+  },
+  {
+    "id": "log-1770657067124-h7htesq",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:11:07.124Z"
+  },
+  {
+    "id": "log-1770657367156-xtif64q",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T17:16:07.156Z"
+  },
+  {
+    "id": "log-1770657368658-74eedce",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T17:16:08.658Z"
+  },
+  {
+    "id": "log-1770657368686-m9zjeaq",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 7)",
+    "timestamp": "2026-02-09T17:16:08.686Z"
+  },
+  {
+    "id": "log-1770657370465-k0n3d16",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T17:16:10.465Z"
+  },
+  {
+    "id": "log-1770657370479-lx5a3qy",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T17:16:10.479Z"
+  },
+  {
+    "id": "log-1770657370479-adhlt84",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T17:16:10.479Z"
+  },
+  {
+    "id": "log-1770657372487-8o81jv5",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T17:16:12.487Z"
+  },
+  {
+    "id": "log-1770657372499-ik3knn0",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T17:16:12.499Z"
+  },
+  {
+    "id": "log-1770657374834-cpgcg30",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T17:16:14.834Z"
+  },
+  {
+    "id": "log-1770657374848-17owsk7",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T17:16:14.848Z"
+  },
+  {
+    "id": "log-1770657376562-g40f6ei",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T17:16:16.562Z"
+  },
+  {
+    "id": "log-1770657376579-z9dviiy",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T17:16:16.579Z"
+  },
+  {
+    "id": "log-1770657378512-8xa2ps1",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T17:16:18.512Z"
+  },
+  {
+    "id": "log-1770657378526-8xfzcl4",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T17:16:18.526Z"
+  },
+  {
+    "id": "log-1770657451485-r0fzgoe",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Aborted",
+    "content": "User rejected optimization request.",
+    "timestamp": "2026-02-09T17:17:31.485Z"
+  },
+  {
+    "id": "log-1770657451933-crwgm4l",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:17:31.933Z"
+  },
+  {
+    "id": "log-1770657452078-joto4zn",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 3f5db599d6ef",
+    "timestamp": "2026-02-09T17:17:32.078Z"
+  },
+  {
+    "id": "log-1770657452780-qbjnc99",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:17:32.780Z"
+  },
+  {
+    "id": "log-1770657752798-d5s7trc",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T17:22:32.798Z"
+  },
+  {
+    "id": "log-1770657755236-d1n7dxp",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T17:22:35.236Z"
+  },
+  {
+    "id": "log-1770657755282-j2qg1fb",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 7)",
+    "timestamp": "2026-02-09T17:22:35.282Z"
+  },
+  {
+    "id": "log-1770657757478-ab09f18",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T17:22:37.478Z"
+  },
+  {
+    "id": "log-1770657757521-sq6gv2y",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T17:22:37.521Z"
+  },
+  {
+    "id": "log-1770657757521-e6iwmir",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T17:22:37.521Z"
+  },
+  {
+    "id": "log-1770657758959-0f31ky5",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T17:22:38.959Z"
+  },
+  {
+    "id": "log-1770657758982-j2t15e2",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T17:22:38.982Z"
+  },
+  {
+    "id": "log-1770657760612-dhbk8k7",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T17:22:40.612Z"
+  },
+  {
+    "id": "log-1770657760629-18o4you",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T17:22:40.629Z"
+  },
+  {
+    "id": "log-1770657762163-ctlidp7",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T17:22:42.163Z"
+  },
+  {
+    "id": "log-1770657762180-h8ugpn4",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T17:22:42.180Z"
+  },
+  {
+    "id": "log-1770657764295-0n1mcbh",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T17:22:44.295Z"
+  },
+  {
+    "id": "log-1770657764315-otqxgkg",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T17:22:44.315Z"
+  },
+  {
+    "id": "log-1770657907880-es7xwvn",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T17:25:07.881Z"
+  },
+  {
+    "id": "log-1770657907882-twf809w",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T17:25:07.883Z"
+  },
+  {
+    "id": "log-1770657919441-fbtsrm6",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T17:25:19.441Z"
+  },
+  {
+    "id": "log-1770657938411-8zkn6ij",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T17:25:38.411Z"
+  },
+  {
+    "id": "log-1770658087593-8c7sbf4",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T17:28:07.593Z"
+  },
+  {
+    "id": "log-1770658087745-dtoql57",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:28:07.745Z"
+  },
+  {
+    "id": "log-1770658087941-1n654rh",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: ce55fd94281e",
+    "timestamp": "2026-02-09T17:28:07.941Z"
+  },
+  {
+    "id": "log-1770658088003-2ss0elm",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:28:08.003Z"
+  },
+  {
+    "id": "log-1770658388027-h0pcvsz",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T17:33:08.027Z"
+  },
+  {
+    "id": "log-1770658389576-lew9ym3",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T17:33:09.576Z"
+  },
+  {
+    "id": "log-1770658389587-1fogn6g",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 8)",
+    "timestamp": "2026-02-09T17:33:09.587Z"
+  },
+  {
+    "id": "log-1770658391343-7nttjnp",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T17:33:11.343Z"
+  },
+  {
+    "id": "log-1770658391360-mub9t1t",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T17:33:11.360Z"
+  },
+  {
+    "id": "log-1770658391360-5szj8ae",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T17:33:11.360Z"
+  },
+  {
+    "id": "log-1770658393402-s48s6ma",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T17:33:13.402Z"
+  },
+  {
+    "id": "log-1770658393416-19zoul7",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T17:33:13.416Z"
+  },
+  {
+    "id": "log-1770658395636-dvtctje",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T17:33:15.636Z"
+  },
+  {
+    "id": "log-1770658395649-usz9txo",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T17:33:15.649Z"
+  },
+  {
+    "id": "log-1770658397493-acrt127",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T17:33:17.493Z"
+  },
+  {
+    "id": "log-1770658397506-lhzzrqd",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T17:33:17.506Z"
+  },
+  {
+    "id": "log-1770658399402-r7d8s7c",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T17:33:19.402Z"
+  },
+  {
+    "id": "log-1770658399421-nem8awx",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T17:33:19.421Z"
+  },
+  {
+    "id": "log-1770658537540-vktxf7w",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T17:35:37.540Z"
+  },
+  {
+    "id": "log-1770658537542-164fq29",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T17:35:37.542Z"
+  },
+  {
+    "id": "log-1770658549815-laoi9t1",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T17:35:49.815Z"
+  },
+  {
+    "id": "log-1770658568704-46kqpzq",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T17:36:08.704Z"
+  },
+  {
+    "id": "log-1770658718815-real5ey",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T17:38:38.815Z"
+  },
+  {
+    "id": "log-1770658718871-fop5n22",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:38:38.871Z"
+  },
+  {
+    "id": "log-1770658718933-uc6s8f0",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 6549d058245f",
+    "timestamp": "2026-02-09T17:38:38.933Z"
+  },
+  {
+    "id": "log-1770658718953-vfjwaxm",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:38:38.953Z"
+  },
+  {
+    "id": "log-1770659018995-6btzuxq",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T17:43:38.995Z"
+  },
+  {
+    "id": "log-1770659020831-1xhnuql",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T17:43:40.831Z"
+  },
+  {
+    "id": "log-1770659020845-byte7kc",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 9)",
+    "timestamp": "2026-02-09T17:43:40.845Z"
+  },
+  {
+    "id": "log-1770659022485-fwyrwf4",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T17:43:42.485Z"
+  },
+  {
+    "id": "log-1770659022511-97x6a47",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T17:43:42.511Z"
+  },
+  {
+    "id": "log-1770659022511-9hdnw7h",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T17:43:42.511Z"
+  },
+  {
+    "id": "log-1770659024573-mep7u0p",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T17:43:44.573Z"
+  },
+  {
+    "id": "log-1770659024595-79negr1",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T17:43:44.595Z"
+  },
+  {
+    "id": "log-1770659026744-sjlmlfd",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T17:43:46.744Z"
+  },
+  {
+    "id": "log-1770659026761-jyocjpv",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T17:43:46.761Z"
+  },
+  {
+    "id": "log-1770659028769-05pcq8i",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T17:43:48.769Z"
+  },
+  {
+    "id": "log-1770659028786-p1xdgs9",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T17:43:48.786Z"
+  },
+  {
+    "id": "log-1770659030454-b8o3gj3",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T17:43:50.454Z"
+  },
+  {
+    "id": "log-1770659030473-ulzyijx",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T17:43:50.473Z"
+  },
+  {
+    "id": "log-1770659168823-qnbg7mu",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T17:46:08.823Z"
+  },
+  {
+    "id": "log-1770659168825-mnz40b9",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T17:46:08.825Z"
+  },
+  {
+    "id": "log-1770659178474-ccrlapt",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T17:46:18.474Z"
+  },
+  {
+    "id": "log-1770659195700-px8go4s",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T17:46:35.700Z"
+  },
+  {
+    "id": "log-1770659318953-8g9iptl",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T17:48:38.953Z"
+  },
+  {
+    "id": "log-1770659319014-fbokqfb",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:48:39.014Z"
+  },
+  {
+    "id": "log-1770659319076-nclu4b5",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 38b0353a3ca2",
+    "timestamp": "2026-02-09T17:48:39.076Z"
+  },
+  {
+    "id": "log-1770659319094-ep2ow23",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:48:39.094Z"
+  },
+  {
+    "id": "log-1770659619133-yn3wktg",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T17:53:39.133Z"
+  },
+  {
+    "id": "log-1770659621743-a6klvxi",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T17:53:41.743Z"
+  },
+  {
+    "id": "log-1770659621767-ylft4fx",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 10)",
+    "timestamp": "2026-02-09T17:53:41.767Z"
+  },
+  {
+    "id": "log-1770659624090-4r391m8",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T17:53:44.090Z"
+  },
+  {
+    "id": "log-1770659624125-f4yok2g",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T17:53:44.125Z"
+  },
+  {
+    "id": "log-1770659624125-jvf8ws3",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T17:53:44.125Z"
+  },
+  {
+    "id": "log-1770659624899-97odvv3",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T17:53:44.899Z"
+  },
+  {
+    "id": "log-1770659624919-hq0nskk",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T17:53:44.919Z"
+  },
+  {
+    "id": "log-1770659626613-c491otv",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T17:53:46.613Z"
+  },
+  {
+    "id": "log-1770659626626-vhi7g9x",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T17:53:46.626Z"
+  },
+  {
+    "id": "log-1770659628525-bcu4ayl",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T17:53:48.525Z"
+  },
+  {
+    "id": "log-1770659628537-892r3tz",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T17:53:48.537Z"
+  },
+  {
+    "id": "log-1770659630668-keymmdo",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T17:53:50.668Z"
+  },
+  {
+    "id": "log-1770659630686-etedkbk",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T17:53:50.686Z"
+  },
+  {
+    "id": "log-1770659768343-wevtgu3",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T17:56:08.343Z"
+  },
+  {
+    "id": "log-1770659768344-b5b619c",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T17:56:08.344Z"
+  },
+  {
+    "id": "log-1770659780901-mk5gyb4",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T17:56:20.901Z"
+  },
+  {
+    "id": "log-1770659800775-xxjjzvv",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T17:56:40.775Z"
+  },
+  {
+    "id": "log-1770659948868-8diq0uu",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T17:59:08.868Z"
+  },
+  {
+    "id": "log-1770659948955-susu3z6",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T17:59:08.956Z"
+  },
+  {
+    "id": "log-1770659949034-5t9hata",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: fc3fb3bcd9cb",
+    "timestamp": "2026-02-09T17:59:09.034Z"
+  },
+  {
+    "id": "log-1770659949109-12d498b",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T17:59:09.109Z"
+  },
+  {
+    "id": "log-1770660249125-3mebndf",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T18:04:09.125Z"
+  },
+  {
+    "id": "log-1770660251225-fcy7l6d",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T18:04:11.225Z"
+  },
+  {
+    "id": "log-1770660251264-1z7pqq8",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 11)",
+    "timestamp": "2026-02-09T18:04:11.264Z"
+  },
+  {
+    "id": "log-1770660253009-yrlq0tz",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T18:04:13.009Z"
+  },
+  {
+    "id": "log-1770660253029-fwg8cac",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T18:04:13.029Z"
+  },
+  {
+    "id": "log-1770660253029-h8l3ixb",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T18:04:13.029Z"
+  },
+  {
+    "id": "log-1770660257137-gqec8wp",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T18:04:17.137Z"
+  },
+  {
+    "id": "log-1770660257234-awzuraf",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T18:04:17.235Z"
+  },
+  {
+    "id": "log-1770660259320-tube2r8",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T18:04:19.320Z"
+  },
+  {
+    "id": "log-1770660259339-koflo57",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T18:04:19.339Z"
+  },
+  {
+    "id": "log-1770660260155-ln42nmt",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T18:04:20.155Z"
+  },
+  {
+    "id": "log-1770660260193-wjqd8bm",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T18:04:20.193Z"
+  },
+  {
+    "id": "log-1770660261504-9s70o5x",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T18:04:21.504Z"
+  },
+  {
+    "id": "log-1770660261523-osszswt",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T18:04:21.523Z"
+  },
+  {
+    "id": "log-1770660399108-s2nu2mk",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T18:06:39.108Z"
+  },
+  {
+    "id": "log-1770660399109-ex4o3t7",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T18:06:39.109Z"
+  },
+  {
+    "id": "log-1770660417440-2q5lngj",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T18:06:57.440Z"
+  },
+  {
+    "id": "log-1770660439278-198rf1i",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T18:07:19.278Z"
+  },
+  {
+    "id": "log-1770660579368-10l4wi3",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T18:09:39.368Z"
+  },
+  {
+    "id": "log-1770660579418-4flchdy",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T18:09:39.418Z"
+  },
+  {
+    "id": "log-1770660579512-56emwi0",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: 4a1099b60ccd",
+    "timestamp": "2026-02-09T18:09:39.512Z"
+  },
+  {
+    "id": "log-1770660579527-q4aqd23",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T18:09:39.527Z"
+  },
+  {
+    "id": "log-1770660879556-srmx309",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T18:14:39.556Z"
+  },
+  {
+    "id": "log-1770660881856-1w0y5h0",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T18:14:41.856Z"
+  },
+  {
+    "id": "log-1770660881898-h00144g",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 12)",
+    "timestamp": "2026-02-09T18:14:41.898Z"
+  },
+  {
+    "id": "log-1770660883216-cjk8kb1",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T18:14:43.216Z"
+  },
+  {
+    "id": "log-1770660883228-gslxqda",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T18:14:43.228Z"
+  },
+  {
+    "id": "log-1770660883230-rfjm3vl",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T18:14:43.230Z"
+  },
+  {
+    "id": "log-1770660884936-z97w0il",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T18:14:44.936Z"
+  },
+  {
+    "id": "log-1770660884953-ubgt7d4",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T18:14:44.953Z"
+  },
+  {
+    "id": "log-1770660887026-x4iw2fj",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T18:14:47.026Z"
+  },
+  {
+    "id": "log-1770660887040-7lme2s4",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T18:14:47.040Z"
+  },
+  {
+    "id": "log-1770660889138-fui4vk5",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T18:14:49.138Z"
+  },
+  {
+    "id": "log-1770660889150-l2bjbt3",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T18:14:49.150Z"
+  },
+  {
+    "id": "log-1770660891125-jybe9v0",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T18:14:51.125Z"
+  },
+  {
+    "id": "log-1770660891145-4cgrfz6",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T18:14:51.145Z"
+  },
+  {
+    "id": "log-1770661029311-x06m9xv",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Reasoning",
+    "content": "Dwell Time Low. Initiating Strategic Mutation...",
+    "timestamp": "2026-02-09T18:17:09.311Z"
+  },
+  {
+    "id": "log-1770661029312-fgjn66u",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Snapshot",
+    "content": "Capturing block snapshot...",
+    "timestamp": "2026-02-09T18:17:09.312Z"
+  },
+  {
+    "id": "log-1770661040514-bwvan82",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Analysis",
+    "content": "Requesting refined visual from NanoBananaService...",
+    "timestamp": "2026-02-09T18:17:20.514Z"
+  },
+  {
+    "id": "log-1770661058067-fml3gfk",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Post-Optimization Approval...",
+    "timestamp": "2026-02-09T18:17:38.067Z"
+  },
+  {
+    "id": "log-1770661179084-9mn2ztt",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Staged",
+    "content": "Proof Section Mutated in staging.",
+    "timestamp": "2026-02-09T18:19:39.084Z"
+  },
+  {
+    "id": "log-1770661179182-r3y0b3e",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Coordinator",
+    "content": "Checking for staged changes...",
+    "timestamp": "2026-02-09T18:19:39.182Z"
+  },
+  {
+    "id": "log-1770661179241-kghwojw",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "State Update",
+    "content": "Broadcasting STATE_UPDATE for hash: a7b98dca6a5c",
+    "timestamp": "2026-02-09T18:19:39.241Z"
+  },
+  {
+    "id": "log-1770661179326-5ynu9vy",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Complete",
+    "content": "Fleet dormant. Next run in 5 minutes...",
+    "timestamp": "2026-02-09T18:19:39.326Z"
+  },
+  {
+    "id": "log-1770661479346-mz6wcjs",
+    "stepIndex": 5,
+    "nodeId": "Orchestrator",
+    "title": "Cycle Start",
+    "content": "Triggering Watcher Fleet [a107edc7_hector]...",
+    "timestamp": "2026-02-09T18:24:39.346Z"
+  },
+  {
+    "id": "log-1770661481067-mlkswdk",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Watcher Active",
+    "content": "Hero Watcher analysis started.",
+    "timestamp": "2026-02-09T18:24:41.067Z"
+  },
+  {
+    "id": "log-1770661481091-xxlmc0i",
+    "stepIndex": 5,
+    "nodeId": "Hero Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 13)",
+    "timestamp": "2026-02-09T18:24:41.091Z"
+  },
+  {
+    "id": "log-1770661482892-o7aosi3",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Watcher Active",
+    "content": "Proof Watcher waking up...",
+    "timestamp": "2026-02-09T18:24:42.892Z"
+  },
+  {
+    "id": "log-1770661482904-phpi36d",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "Metrics Analysis",
+    "content": "Avg Dwell Time = 1368ms (Target: 2997ms+)",
+    "timestamp": "2026-02-09T18:24:42.904Z"
+  },
+  {
+    "id": "log-1770661482904-zh3s5qz",
+    "stepIndex": 5,
+    "nodeId": "Proof Watcher",
+    "title": "HITL Gate",
+    "content": "Triggering Pre-Optimization Gate...",
+    "timestamp": "2026-02-09T18:24:42.904Z"
+  },
+  {
+    "id": "log-1770661485040-hoc5h1d",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Watcher Active",
+    "content": "Social Watcher analysis started...",
+    "timestamp": "2026-02-09T18:24:45.040Z"
+  },
+  {
+    "id": "log-1770661485061-r0rixud",
+    "stepIndex": 5,
+    "nodeId": "Social Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Dwell events: 12)",
+    "timestamp": "2026-02-09T18:24:45.061Z"
+  },
+  {
+    "id": "log-1770661493909-4v3exzl",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Watcher Active",
+    "content": "Offer Watcher analysis started...",
+    "timestamp": "2026-02-09T18:24:53.909Z"
+  },
+  {
+    "id": "log-1770661493959-0x5mwhx",
+    "stepIndex": 5,
+    "nodeId": "Offer Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 3)",
+    "timestamp": "2026-02-09T18:24:53.959Z"
+  },
+  {
+    "id": "log-1770661496553-jzlndmt",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Watcher Active",
+    "content": "PAS Watcher analysis started...",
+    "timestamp": "2026-02-09T18:24:56.554Z"
+  },
+  {
+    "id": "log-1770661496690-ybz15ko",
+    "stepIndex": 5,
+    "nodeId": "PAS Watcher",
+    "title": "Skipping",
+    "content": "Insufficient data (Views: 4)",
+    "timestamp": "2026-02-09T18:24:56.690Z"
+  },
+  {
+    "id": "log-1770661497842-c730bld",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Watcher Active",
+    "content": "Spec Watcher analysis started...",
+    "timestamp": "2026-02-09T18:24:57.842Z"
+  },
+  {
+    "id": "log-1770661497881-i4h25mv",
+    "stepIndex": 5,
+    "nodeId": "Spec Watcher",
+    "title": "Skipping",
+    "content": "Low Data (10). Waiting.",
+    "timestamp": "2026-02-09T18:24:57.881Z"
+  }
+]

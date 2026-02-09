@@ -3,13 +3,24 @@ import { NodeProps } from '@xyflow/react';
 import { motion } from 'framer-motion';
 import { Mic, MicOff, Volume2, Loader } from 'lucide-react';
 
+/**
+ * Possible states for the Voice Orb.
+ */
 export type VoiceOrbState = 'idle' | 'listening' | 'processing' | 'speaking' | 'muted';
 
+/**
+ * Data structure for the VoiceOrbNode.
+ */
 export interface VoiceOrbNodeData {
+    /** Current state of the orb. */
     state: VoiceOrbState;
+    /** Message/transcript to display. */
     message?: string;
+    /** Callback to start listening/interaction. */
     onActivate?: () => void;
+    /** Callback to stop listening/interaction. */
     onDeactivate?: () => void;
+    /** Callback to mute the orb. */
     onMute?: () => void;
 }
 
@@ -29,6 +40,16 @@ const stateLabels: Record<VoiceOrbState, string> = {
     muted: 'Muted',
 };
 
+/**
+ * A custom Node component for ReactFlow that wraps the Voice AI interaction.
+ * 
+ * Features:
+ * - Visualizes voice states (Listening, Processing, Speaking).
+ * - Interactive orb button.
+ * - Displays transcript/messages.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const VoiceOrbNode: React.FC<NodeProps> = ({ data }) => {
     const nodeData = data as unknown as VoiceOrbNodeData;
     const state = nodeData.state || 'idle';

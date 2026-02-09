@@ -3,7 +3,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
-import { DatabaseService } from './services/DatabaseService.js';
 import { StateCoordinator } from './utils/StateCoordinator.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,16 +30,81 @@ const GENERATORS = [
     'InitialOfferGenerator.ts'
 ];
 
+/**
+ * Runs a specific generator agent in a child process.
+ * 
+ * @param {string} name - The filename of the generator agent.
+ * @returns {Promise<void>}
+ */
 async function runGenerator(name: string) {
     return new Promise((resolve) => {
         console.log(`\n🚀 [${WORKSPACE_ID}] Starting ${name}...`);
-        // Use npx tsx to execute the typescript generators
+
         const agentPath = path.resolve(__dirname, `agents/${name}`);
-        // Pass workspace arg
-        const child = spawn('node', ['--import', 'tsx', agentPath, `--workspace=${WORKSPACE_ID}`], {
-            stdio: 'inherit',
+
+        // ROBUST WINDOWS SPAWN LOGIC
+        const safeCommand = process.platform === 'win32' ? 'cmd' : 'node';
+        const safeArgs = process.platform === 'win32'
+            ? ['/c', 'node', '--import', 'tsx', agentPath, `--workspace=${WORKSPACE_ID}`]
+            : ['--import', 'tsx', agentPath, `--workspace=${WORKSPACE_ID}`];
+
+        const child = spawn(safeCommand, safeArgs, {
+            stdio: ['ignore', 'pipe', 'pipe'], // Pipe output for interception
             windowsHide: true
         });
+
+        // Helper to broadcast logs
+        const broadcastLog = async (log: any) => {
+            try {
+                // Determine API Port (Default 3000, but Beevo server is on 3001)
+                // App runs on 3001 for server logs (express) as per shared/constants.js
+                await fetch('http://localhost:3001/api/broadcast/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-workspace-id': WORKSPACE_ID
+                    },
+                    body: JSON.stringify(log)
+                });
+            } catch (e) {
+                // console.warn('Broadcast failed (server likely starting/restarting):', e.message);
+            }
+        };
+
+        // Stream Handler
+        const handleStream = (stream: any, type: 'stdout' | 'stderr') => {
+            stream.on('data', (data: Buffer) => {
+                const text = data.toString();
+                const lines = text.split('\n');
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+
+                    if (line.includes('__JSON__:')) {
+                        // Extract JSON part
+                        const parts = line.split('__JSON__:');
+                        try {
+                            const jsonStr = parts[1];
+                            const logObj = JSON.parse(jsonStr);
+                            broadcastLog(logObj);
+                        } catch (e) {
+                            console.log(`[${name}] Malformed JSON Log:`, line);
+                        }
+                    } else {
+                        // Standard Log pass-through
+                        if (type === 'stderr') console.error(`[${name}] ${line}`);
+                        else console.log(`[${name}] ${line}`);
+
+                        // OPTIONAL: We could wrap *every* stdout line as a log for the UI?
+                        // For now, let's stick to explicit __JSON__ events to avoid noise.
+                    }
+                }
+            });
+        };
+
+        handleStream(child.stdout, 'stdout');
+        handleStream(child.stderr, 'stderr');
+
         child.on('close', resolve);
     });
 }

@@ -4,11 +4,20 @@ import { WS_CONFIG } from '../../../shared/constants.js';
 
 const API_BASE = `http://127.0.0.1:${WS_CONFIG.SERVER_PORT || 3000}/api/hitl`;
 
+/**
+ * Client for interacting with the internal Notification/HITL API.
+ * Used by agents or services to request user approval.
+ */
 export class NotificationClient {
     private static instance: NotificationClient;
 
     private constructor() { }
 
+    /**
+     * Retrieves the singleton instance of NotificationClient.
+     * 
+     * @returns {NotificationClient} The NotificationClient instance.
+     */
     public static getInstance(): NotificationClient {
         if (!NotificationClient.instance) {
             NotificationClient.instance = new NotificationClient();
@@ -19,6 +28,17 @@ export class NotificationClient {
     /**
      * Blocks execution until the request is Approved or Rejected.
      * Returns true if Approved, false if Rejected.
+     */
+    /**
+     * Sends an approval request to the system and waits for a response (Approved/Rejected).
+     * Blocks execution until resolved or returns immediately if auto-approved.
+     * 
+     * @param {string} section - The section requesting approval.
+     * @param {'PRE_GENERATION' | 'POST_GENERATION'} type - The type of intervention.
+     * @param {string} message - The explanation message.
+     * @param {any} [proposal] - Optional proposal data.
+     * @param {string} [workspaceId='default'] - The workspace identifier.
+     * @returns {Promise<{ approved: boolean; feedback?: string }>} The result of the request.
      */
     async requestApproval(
         section: string,

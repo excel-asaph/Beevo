@@ -1,0 +1,79 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_v1770654553757",
+    "meta": {
+        "strategy": "Democratizing EV ownership through tiered hardware specifications targeting different user needs while maintaining premium European quality standards and high-trust transparency.",
+        "offer_type": "one-time",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Inclusive, approachable, and visionary.",
+        "industry": "Electric Vehicles (E-bikes)"
+    },
+    "content": {
+        "headline": "The New Standard of Mobility.",
+        "subhead": "Precision-engineered in Europe. Built for the mass market. Choose your HECTOR model and secure your place in the sustainable revolution.",
+        "tiers": [
+            {
+                "id": "hector-one",
+                "name": "HECTOR ONE",
+                "price": "€19,900",
+                "description": "The essential city commuter. Efficient, compact, and uncompromisingly safe.",
+                "features": [
+                    "250km WLTP Range",
+                    "50kW DC Fast Charging",
+                    "8-Core Infotainment System",
+                    "HECTOR Assist Lite",
+                    "10-Year Battery Warranty"
+                ],
+                "cta_text": "Reserve Now",
+                "badge": "Urban Core",
+                "interval": "starting price",
+                "is_highlighted": false
+            },
+            {
+                "id": "hector-plus",
+                "name": "HECTOR PLUS",
+                "price": "€28,500",
+                "description": "The versatile family cruiser. Extended range and enhanced comfort for every journey.",
+                "features": [
+                    "450km WLTP Range",
+                    "100kW DC Fast Charging",
+                    "Panoramic Thermal Roof",
+                    "Level 2 Autonomous Suite",
+                    "Premium Sound by HECTOR"
+                ],
+                "cta_text": "Reserve Now",
+                "badge": "Most Popular",
+                "interval": "starting price",
+                "is_highlighted": true
+            },
+            {
+                "id": "hector-max",
+                "name": "HECTOR MAX",
+                "price": "€39,000",
+                "description": "The high-performance flagship. Unrivaled power and the full suite of HECTOR technology.",
+                "features": [
+                    "620km WLTP Range",
+                    "150kW Ultra-Fast Charging",
+                    "Dual-Motor AWD System",
+                    "Full Self-Driving Readiness",
+                    "Executive Interior Package"
+                ],
+                "cta_text": "Reserve Now",
+                "badge": "Performance",
+                "interval": "starting price",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "Includes a 10-year battery warranty and 24/7 roadside assistance across the EU."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#FFFBF2] text-[#5D5C61] py-24 px-6 font-sans\"><div class=\"max-w-7xl mx-auto\"><div class=\"text-center mb-20\"><h2 class=\"text-5xl font-bold tracking-tight text-[#8E443D] mb-6\">The New Standard of Mobility.</h2><p class=\"text-xl max-w-2xl mx-auto\">Precision-engineered in Europe. Built for the mass market. Choose your HECTOR model and secure your place in the sustainable revolution.</p></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch\"><div data-tier-id=\"hector-one\" class=\"bg-[#F2E9E1] border border-[#5D5C61]/10 p-10 flex flex-col\"><span class=\"text-xs uppercase tracking-widest font-bold text-[#E2725B] mb-4\">Urban Core</span><h3 class=\"text-3xl font-bold mb-2\">HECTOR ONE</h3><div class=\"mb-6\"><span class=\"text-4xl font-bold\">€19,900</span><span class=\"text-sm block text-[#5D5C61]/70 mt-1\">starting price</span></div><p class=\"mb-8 text-sm leading-relaxed\">The essential city commuter. Efficient, compact, and uncompromisingly safe.</p><ul class=\"space-y-4 mb-10 flex-grow text-sm\"> <li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>250km WLTP Range</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>50kW DC Fast Charging</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>8-Core Infotainment System</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>HECTOR Assist Lite</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>10-Year Battery Warranty</li></ul><button data-cta-id=\"reserve-hector-one\" onclick=\"window.track('offer_cta_click', { tierId: 'hector-one', actionId: 'reserve-hector-one' })\" class=\"w-full py-4 bg-[#5D5C61] text-white font-bold uppercase tracking-widest text-xs hover:bg-[#8E443D] transition-colors\">Reserve Now</button></div><div data-tier-id=\"hector-plus\" class=\"bg-white border-2 border-[#E2725B] p-10 flex flex-col relative scale-105 shadow-2xl\"><div class=\"absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E2725B] text-white px-4 py-1 text-[10px] uppercase font-black tracking-[0.2em]\">Most Popular</div><span class=\"text-xs uppercase tracking-widest font-bold text-[#E2725B] mb-4\">Versatile</span><h3 class=\"text-3xl font-bold mb-2\">HECTOR PLUS</h3><div class=\"mb-6\"><span class=\"text-4xl font-bold\">€28,500</span><span class=\"text-sm block text-[#5D5C61]/70 mt-1\">starting price</span></div><p class=\"mb-8 text-sm leading-relaxed\">The versatile family cruiser. Extended range and enhanced comfort for every journey.</p><ul class=\"space-y-4 mb-10 flex-grow text-sm\"> <li class=\"flex items-center font-bold\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>450km WLTP Range</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>100kW DC Fast Charging</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>Panoramic Thermal Roof</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>Level 2 Autonomous Suite</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>Premium Sound by HECTOR</li></ul><button data-cta-id=\"reserve-hector-plus\" onclick=\"window.track('offer_cta_click', { tierId: 'hector-plus', actionId: 'reserve-hector-plus' })\" class=\"w-full py-4 bg-[#E2725B] text-white font-bold uppercase tracking-widest text-xs hover:bg-[#8E443D] transition-colors\">Reserve Now</button></div><div data-tier-id=\"hector-max\" class=\"bg-[#F2E9E1] border border-[#5D5C61]/10 p-10 flex flex-col\"><span class=\"text-xs uppercase tracking-widest font-bold text-[#E2725B] mb-4\">Performance</span><h3 class=\"text-3xl font-bold mb-2\">HECTOR MAX</h3><div class=\"mb-6\"><span class=\"text-4xl font-bold\">€39,000</span><span class=\"text-sm block text-[#5D5C61]/70 mt-1\">starting price</span></div><p class=\"mb-8 text-sm leading-relaxed\">The high-performance flagship. Unrivaled power and the full suite of HECTOR technology.</p><ul class=\"space-y-4 mb-10 flex-grow text-sm\"> <li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>620km WLTP Range</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>150kW Ultra-Fast Charging</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>Dual-Motor AWD System</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>Full Self-Driving Readiness</li><li class=\"flex items-center\"><div class=\"w-1.5 h-1.5 bg-[#E2725B] mr-3\"></div>Executive Interior Package</li></ul><button data-cta-id=\"reserve-hector-max\" onclick=\"window.track('offer_cta_click', { tierId: 'hector-max', actionId: 'reserve-hector-max' })\" class=\"w-full py-4 bg-[#5D5C61] text-white font-bold uppercase tracking-widest text-xs hover:bg-[#8E443D] transition-colors\">Reserve Now</button></div></div><div class=\"mt-16 text-center text-xs uppercase tracking-[0.2em] font-bold text-[#8E443D]\">Includes a 10-year battery warranty and 24/7 roadside assistance across the EU.</div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#FFFBF2",
+        "color": "#5D5C61",
+        "fontFamily": "Montserrat",
+        "accentColor": "#E2725B"
+    }
+}

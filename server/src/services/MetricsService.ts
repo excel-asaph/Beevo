@@ -18,6 +18,10 @@ interface CampaignMetrics {
     last_updated: string;
 }
 
+/**
+ * Service for tracking and aggregating user engagement metrics.
+ * Handles event tracking, persistence to JSON and SQLite, and atomic writes.
+ */
 export class MetricsService {
     private static instances: Map<string, MetricsService> = new Map();
     private lock = false;
@@ -33,11 +37,24 @@ export class MetricsService {
         this.syntheticMetricsFile = path.join(baseMetricsPath, 'landing_page_metrics_synthetic.json');
     }
 
+    /**
+     * Retrieves the singleton instance of MetricsService for a workspace.
+     * 
+     * @param {string} [workspaceId='default'] - The workspace identifier.
+     * @returns {MetricsService} The MetricsService instance.
+     */
     public static getInstance(workspaceId: string = 'default'): MetricsService {
         if (!MetricsService.instances.has(workspaceId)) {
             MetricsService.instances.set(workspaceId, new MetricsService(workspaceId));
         }
         return MetricsService.instances.get(workspaceId)!;
+    }
+
+    /**
+     * Remove the metrics instance for a workspace
+     */
+    public static cleanup(workspaceId: string): void {
+        MetricsService.instances.delete(workspaceId);
     }
 
     private async acquireLock() {
@@ -70,6 +87,12 @@ export class MetricsService {
         }
     }
 
+    /**
+     * Tracks a user interaction event.
+     * Updates in-memory metrics, writes to JSON storage, and syncs with SQLite for organic events.
+     * 
+     * @param {any} event - The event object containing type, componentId, etc.
+     */
     async trackEvent(event: any) {
         // Simple Mutex to prevent race conditions (JSON Corruption)
         await this.acquireLock();

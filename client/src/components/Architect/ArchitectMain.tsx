@@ -9,11 +9,25 @@ import { ChatHistory } from './ChatHistory';
 import { Junction } from '@shared/types';
 import type { FontSuggestion, ColorPalette, BrandDNA, LogoStructureOption, ImagerySuggestion } from '@shared/types';
 
+/**
+ * Represents a single message in the chat history.
+ */
 interface ChatMessage {
+    /** The sender of the message ('user' or 'model'). */
     role: 'user' | 'model';
+    /** The content of the message. */
     text: string;
 }
 
+/**
+ * The main container for the Architect AI experience.
+ * 
+ * Coordinates:
+ * - Voice interaction (VoicePanel).
+ * - Visual generation and manipulation (VisualCanvas).
+ * - Chat history and thinking visualization (ChatHistory).
+ * - WebSocket communication for real-time updates.
+ */
 export const ArchitectMain: React.FC = () => {
     const { setDna, addThought } = useBrand();
 

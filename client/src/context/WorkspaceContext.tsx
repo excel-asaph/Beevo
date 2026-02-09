@@ -1,17 +1,35 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Interface definition for the Workspace Context.
+ */
 interface WorkspaceContextType {
+    /** The current active workspace ID (defaults to 'default'). */
     workspaceId: string;
+    /** The persistent user ID (stored in localStorage). */
     userId: string;
+    /** Switch the active workspace. */
     setWorkspaceId: (id: string) => void;
+    /** Manually set/override the user ID. */
     setUserId: (id: string) => void;
+    /** Resolves a relative asset path to a full URL based on the workspace. */
     resolveAssetUrl: (url: string | undefined) => string;
+    /** Generates a workspace ID string from a brand name and user ID. */
     getWorkspaceForBrand: (brandName: string, customUserId?: string) => string;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
+/**
+ * Context Provider for Workspace management.
+ * 
+ * Features:
+ * - Persists User ID in localStorage.
+ * - Persists Active Workspace in sessionStorage and URL search params.
+ * - Provides utilities for asset URL resolution (scoped to workspace).
+ * - Generates consistent workspace IDs based on user and brand name.
+ */
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     // Persistent User ID (Resident on browser)
     const [userId, setUserIdState] = useState<string>(() => {

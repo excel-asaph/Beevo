@@ -1,0 +1,44 @@
+{
+    "id": "pas_section_v1",
+    "variant_id": "pas_v1770631240358",
+    "meta": {
+        "strategy": "The PAS strategy focuses on the physiological cost of spinal misalignment, agitating the long-term musculoskeletal consequences of generic surfaces, and positioning Stitch as the clinical-grade restorative intervention.",
+        "tone": "Empathetic, expert, and restorative.",
+        "active_variant": "challenger",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "The Biomechanics of Spinal Equilibrium",
+        "steps": [
+            {
+                "id": "pas-1",
+                "phase": "PROBLEM",
+                "title": "Structural Incongruity",
+                "description": "Conventional mattresses utilize uniform resistance modules that fail to map the non-linear curvature of the human spine, resulting in sustained nocturnal tension and pelvic tilt."
+            },
+            {
+                "id": "pas-2",
+                "phase": "AGITATION",
+                "title": "Cumulative Compression",
+                "description": "Prolonged exposure to improper support leads to chronic disc compression and nerve impingement, accelerating musculoskeletal degradation and reducing systemic recovery rates."
+            },
+            {
+                "id": "pas-3",
+                "phase": "SOLUTION",
+                "title": "Anatomical Integration",
+                "description": "The Stitch Protocol employs variable-density calibration to neutralize axial pressure, facilitating immediate spinal decompression and optimizing physiological restoration cycles."
+            }
+        ],
+        "closing_statement": "Engineering the intersection of mechanical integrity and biological recovery."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"max-w-7xl mx-auto py-24 px-6 md:px-12\" style=\"background-color: #F2F0E9; font-family: 'Montserrat', sans-serif; color: #4A5D23;\"><div class=\"text-center max-w-3xl mx-auto mb-24\"><span class=\"text-xs font-bold tracking-[0.3em] uppercase opacity-60 mb-4 block\">Technical Analysis</span><h2 class=\"text-4xl md:text-5xl font-light tracking-tight leading-tight\">The Biomechanics of Spinal Equilibrium</h2></div><div class=\"grid grid-cols-1 md:grid-cols-3 gap-0 border border-[#BDBB99]\"><div class=\"p-10 flex flex-col justify-between min-h-[400px] border-b md:border-b-0 md:border-r border-[#BDBB99]\" style=\"background-color: #F2F0E9;\"><div><div class=\"w-8 h-8 rounded-full border border-[#4A5D23] flex items-center justify-center text-xs font-bold mb-8\">01</div><h3 class=\"text-xl font-semibold uppercase tracking-wider mb-6\">Structural Incongruity</h3><p class=\"text-sm leading-relaxed opacity-80\">Conventional mattresses utilize uniform resistance modules that fail to map the non-linear curvature of the human spine, resulting in sustained nocturnal tension and pelvic tilt.</p></div><div class=\"pt-8 mt-8 border-t border-[#BDBB99]/30\"><span class=\"text-[10px] uppercase tracking-widest font-bold opacity-50\">Status: Problem</span></div></div><div class=\"p-10 flex flex-col justify-between min-h-[400px] border-b md:border-b-0 md:border-r border-[#BDBB99]\" style=\"background-color: #E8E4D9;\"><div><div class=\"w-8 h-8 rounded-full border border-[#4A5D23] flex items-center justify-center text-xs font-bold mb-8\">02</div><h3 class=\"text-xl font-semibold uppercase tracking-wider mb-6\">Cumulative Compression</h3><p class=\"text-sm leading-relaxed opacity-80\">Prolonged exposure to improper support leads to chronic disc compression and nerve impingement, accelerating musculoskeletal degradation and reducing systemic recovery rates.</p></div><div class=\"pt-8 mt-8 border-t border-[#BDBB99]/30\"><span class=\"text-[10px] uppercase tracking-widest font-bold opacity-50\">Impact: Agitation</span></div></div><div class=\"p-10 flex flex-col justify-between min-h-[400px] text-[#F2F0E9]\" style=\"background-color: #4A5D23;\"><div><div class=\"w-8 h-8 rounded-full border border-[#F2F0E9] flex items-center justify-center text-xs font-bold mb-8\">03</div><h3 class=\"text-xl font-semibold uppercase tracking-wider mb-6\">Anatomical Integration</h3><p class=\"text-sm leading-relaxed opacity-90\">The Stitch Protocol employs variable-density calibration to neutralize axial pressure, facilitating immediate spinal decompression and optimizing physiological restoration cycles.</p></div><div class=\"pt-8 mt-8 border-t border-[#F2F0E9]/20\"><span class=\"text-[10px] uppercase tracking-widest font-bold opacity-70\">Result: Solution</span></div></div></div><div class=\"mt-16 text-center\"><p class=\"text-lg font-light tracking-wide max-w-2xl mx-auto border-l border-r border-[#BDBB99] px-8\">Engineering the intersection of mechanical integrity and biological recovery.</p></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#F2F0E9",
+        "color": "#4A5D23",
+        "fontFamily": "Montserrat"
+    },
+    "layout_strategy": "TRIPTYCH"
+}

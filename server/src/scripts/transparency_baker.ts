@@ -3,13 +3,24 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import puppeteer from 'puppeteer';
+import { AgentLogger } from '../utils/AgentLogger.js';
+import { WorkspaceManager } from '../services/StateManager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PUBLIC_DIR = path.resolve(__dirname, '../../../client/public');
 
-async function processImage(page: any, relativePath: string, workspaceId: string): Promise<string | null> {
+/**
+ * Processes a single image to remove its background using a canvas-based algorithm in Puppeteer.
+ * 
+ * @param {AgentLogger} logger - The logger instance.
+ * @param {any} page - The Puppeteer page instance.
+ * @param {string} relativePath - The relative path of the source image.
+ * @param {string} workspaceId - The workspace identifier.
+ * @returns {Promise<string | null>} The relative path of the processed image or null if failed.
+ */
+async function processImage(logger: AgentLogger, page: any, relativePath: string, workspaceId: string): Promise<string | null> {
     const workspaceAssetsDir = path.join(PUBLIC_DIR, `workspaces/${workspaceId}/assets`);
     const outputDir = path.join(workspaceAssetsDir, 'transparent_logos');
 
@@ -30,14 +41,14 @@ async function processImage(page: any, relativePath: string, workspaceId: string
     try {
         await fs.access(fullPath);
     } catch {
-        console.warn(`⚠️ Source file not found: ${fullPath}`);
+        logger.info("Source Missing", `Source file not found: ${fullPath}`);
         return null;
     }
 
     const fileBuffer = await fs.readFile(fullPath);
     const base64Image = `data:image/png;base64,${fileBuffer.toString('base64')}`;
 
-    console.log(`Processing: ${cleanPath} -> ${outputRelativePath}`);
+    logger.info("Processing Image", `Processing: ${cleanPath} -> ${outputRelativePath}`);
 
     // === BROWSER LOGIC (Global Color Keying) ===
     const browserCode = `
@@ -188,18 +199,40 @@ async function processImage(page: any, relativePath: string, workspaceId: string
             const base64Data = result.data.replace(/^data:image\/png;base64,/, "");
             await fs.writeFile(outputPath, base64Data, 'base64');
             // @ts-ignore
-            console.log(`   ✅ Success. Removed ${result.removed} pixels.`);
+            logger.success("Processed", `Removed ${result.removed} pixels.`);
             return outputRelativePath;
         }
     } catch (e) {
-        console.error(`   ❌ Error processing ${cleanPath}:`, e);
+        logger.error("Error", `Error processing ${cleanPath}: ${e}`);
     }
 
     return null;
 }
 
-export async function bakeTransparency(workspaceId: string = 'default') {
-    console.log(`🧼 Starting Transparency Production Line for Workspace: ${workspaceId} (V3 - Global Key)...`);
+/**
+ * Main function to bake transparency into generated logos.
+ * Iterates through all logo variants in the kit, removes backgrounds, and updates the kit JSON.
+ * 
+ * @param {string} [workspaceId='default'] - The workspace identifier.
+ * @param {(log: any) => void} [onProgress] - Optional progress callback.
+ * @returns {Promise<any>} The updated logo kit.
+ */
+export async function bakeTransparency(workspaceId: string = 'default', onProgress?: (log: any) => void) {
+    const logger = new AgentLogger('Transparency Baker', workspaceId, onProgress);
+
+    logger.start("Production Line", `Starting Transparency Production Line for Workspace: ${workspaceId} (V3 - Global Key)...`);
+
+    const stateManager = WorkspaceManager.getStateManager(workspaceId);
+
+    // PERSISTENCE: Start Log
+    await stateManager.appendThought({
+        id: `transparency-start-${Date.now()}`,
+        stepIndex: 5,
+        nodeId: 'transparency-baker',
+        title: 'Making Logos Transparent',
+        content: 'Started background removal process for generated logos.',
+        timestamp: new Date().toISOString()
+    });
 
     const kitPath = path.resolve(PUBLIC_DIR, `workspaces/${workspaceId}/assets/logo_kit_challenger.json`);
     const workspaceAssetsDir = path.join(PUBLIC_DIR, `workspaces/${workspaceId}/assets`);
@@ -213,7 +246,7 @@ export async function bakeTransparency(workspaceId: string = 'default') {
         const kitRaw = await fs.readFile(kitPath, 'utf-8');
         kit = JSON.parse(kitRaw);
     } catch (e) {
-        console.warn(`⚠️ Logo Kit JSON not found at ${kitPath}. Regenerating from source images...`);
+        logger.info("Kit Missing", `Logo Kit JSON not found at ${kitPath}. Regenerating from source images...`);
     }
 
     const browser = await puppeteer.launch({
@@ -230,15 +263,14 @@ export async function bakeTransparency(workspaceId: string = 'default') {
         // Enforce Source of Truth: Always look in generated_logos within the workspace
         const sourceRelativePath = `/workspaces/${workspaceId}/assets/generated_logos/logo_variant_${key}.png`;
 
-        console.log(`\n🔍 Logo Key: ${key}`);
-        console.log(`   Source: ${sourceRelativePath}`);
+        logger.info("Processing Logo", `Starting: ${key} (Source: ${sourceRelativePath})`);
 
-        const newPath = await processImage(page, sourceRelativePath, workspaceId);
+        const newPath = await processImage(logger, page, sourceRelativePath, workspaceId);
         if (newPath) {
             kit.kit[key] = `${newPath}?v=${timestamp}`;
-            console.log(`   📌 Updated kit.${key} -> ${newPath}`);
+            logger.success("Updated Kit", `Updated kit.${key} -> ${newPath}`);
         } else {
-            console.warn(`   ⚠️ Could not process source for ${key}`);
+            logger.info("Skipped", `Could not process source for ${key}`);
         }
     }
 
@@ -249,7 +281,7 @@ export async function bakeTransparency(workspaceId: string = 'default') {
         if (!kit.brandDNA) kit.brandDNA = {};
         if (!kit.brandDNA.logoUrl) kit.brandDNA.logoUrl = {};
 
-        console.log("👑 Setting Primary Brand Logo to Transparent Wordmark (as requested)");
+        logger.info("Brand DNA Update", "Setting Primary Brand Logo to Transparent Wordmark (as requested)");
         kit.brandDNA.logoUrl.value = kit.kit.wordmark;
     } else if (kit.kit.primary) {
         // Fallback
@@ -257,7 +289,18 @@ export async function bakeTransparency(workspaceId: string = 'default') {
     }
 
     await fs.writeFile(kitPath, JSON.stringify(kit, null, 4));
-    console.log(`✨ Kit updated. Transparent logos saved to ${transparentOutputDir}`);
+    logger.success("Transparency Complete", `Kit updated. Transparent logos saved to ${transparentOutputDir}`);
+
+    // PERSISTENCE: End Log
+    await stateManager.appendThought({
+        id: `transparency-end-${Date.now()}`,
+        stepIndex: 5,
+        nodeId: 'transparency-baker',
+        title: 'Transparency Process Complete',
+        content: 'Successfully removed backgrounds from all generated logos.',
+        timestamp: new Date().toISOString()
+    });
+
     return kit;
 }
 

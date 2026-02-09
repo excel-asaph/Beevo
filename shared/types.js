@@ -5,5 +5,6 @@ export var Junction;
     Junction["ARCHITECT"] = "ARCHITECT";
     Junction["FORGE"] = "FORGE";
     Junction["GUARDIAN"] = "GUARDIAN";
+    Junction["LOGO_STUDIO"] = "LOGO_STUDIO";
 })(Junction || (Junction = {}));
 //# sourceMappingURL=types.js.map

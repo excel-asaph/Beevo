@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1770654526849",
+    "meta": {
+        "strategy": "HECTOR Architecture: A clinical forensic analysis of the core technologies enabling the democratization of high-performance sustainable mobility across the European market.",
+        "tone": "Inclusive, approachable, and visionary.",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "HECTOR PLATFORM SPECIFICATION",
+        "subhead": "ENGINEERING THE DEMOCRATIZATION OF SUSTAINABLE TRANSPORTATION",
+        "nodes": [
+            {
+                "id": "node-1",
+                "label": "Modular Drive Unit",
+                "description": "Proprietary drivetrain architecture designed for rapid scaling and low-maintenance longevity.",
+                "icon": "TRANS-01"
+            },
+            {
+                "id": "node-2",
+                "label": "Energy Management Matrix",
+                "description": "Smart battery orchestration system achieving 98.4% energy delivery efficiency.",
+                "icon": "POW-02"
+            },
+            {
+                "id": "node-3",
+                "label": "Integrated Logic Core",
+                "description": "Centralized vehicle intelligence processing 1.2 trillion operations per second for safety.",
+                "icon": "CPU-03"
+            },
+            {
+                "id": "node-4",
+                "label": "Sustainable Lifecycle System",
+                "description": "Bi-directional charging capability supporting grid-stabilization and local storage.",
+                "icon": "ECO-04"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div id='hector-blueprint' class='relative w-full min-h-[600px] bg-[#F2E9E1] font-[\"Montserrat\"] p-4 md:p-12 overflow-hidden border-2 border-[#8E443D] text-[#5D5C61] flex flex-col items-center justify-center'><style>@import url(\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap\"); .blueprint-grid { background-image: linear-gradient(#8E443D15 1px, transparent 1px), linear-gradient(90deg, #8E443D15 1px, transparent 1px); background-size: 40px 40px; } .node-active { border-color: #E2725B !important; color: #E2725B !important; box-shadow: 0 0 15px rgba(226, 114, 91, 0.3); }</style><div class='absolute inset-0 blueprint-grid pointer-events-none'></div><div class='z-10 text-center mb-16'><h2 class='text-xs tracking-[0.4em] uppercase font-bold mb-2 opacity-60'>Technical Schematic</h2><div class='h-px w-24 bg-[#E2725B] mx-auto'></div></div><div class='relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-items-center'><div id='schematic-display' class='order-2 md:order-1 flex flex-col gap-6 w-full'><div id='detail-card' class='border-l-4 border-[#8E443D] p-6 bg-[#FFFBF2] shadow-sm transition-all duration-300 transform'><h3 id='detail-title' class='text-2xl font-bold uppercase tracking-tight text-[#8E443D]'>Select System Component</h3><p id='detail-desc' class='mt-2 text-sm leading-relaxed'>Interact with the HECTOR core nodes to inspect technical specifications and performance metrics.</p><div id='detail-stat' class='mt-4 text-xs font-bold text-[#E2725B] tracking-widest uppercase'>Status: Ready for Inspection</div></div></div><div class='order-1 md:order-2 relative h-[300px] w-[300px] flex items-center justify-center'><div class='absolute inset-0 border-[1px] border-[#8E443D] rounded-full opacity-20 animate-pulse'></div><div class='absolute inset-4 border-[1px] border-[#8E443D] rounded-full opacity-40'></div><div class='w-24 h-24 bg-[#8E443D] flex items-center justify-center text-[#FFFBF2] font-bold text-xl rounded shadow-2xl z-20'>HECTOR</div><div id='node-orbit' class='absolute inset-0 w-full h-full'><div onclick='updateSpec(\"node-1\")' class='node-btn absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#FFFBF2] border-2 border-[#8E443D] flex items-center justify-center cursor-pointer transition-all hover:scale-110 z-30' data-node='node-1'>01</div><div onclick='updateSpec(\"node-2\")' class='node-btn absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#FFFBF2] border-2 border-[#8E443D] flex items-center justify-center cursor-pointer transition-all hover:scale-110 z-30' data-node='node-2'>02</div><div onclick='updateSpec(\"node-3\")' class='node-btn absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-12 h-12 bg-[#FFFBF2] border-2 border-[#8E443D] flex items-center justify-center cursor-pointer transition-all hover:scale-110 z-30' data-node='node-3'>03</div><div onclick='updateSpec(\"node-4\")' class='node-btn absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-[#FFFBF2] border-2 border-[#8E443D] flex items-center justify-center cursor-pointer transition-all hover:scale-110 z-30' data-node='node-4'>04</div></div></div></div><div class='mt-20 z-10 w-full flex justify-between items-end border-t border-[#8E443D33] pt-4 text-[10px] uppercase tracking-widest opacity-70'><div>Serial: H-PLATFORM-2024</div><div>Auth: Technical Product Architect</div></div><script>const nodeData = {'node-1': {title: 'Modular Drive Unit', desc: 'Proprietary drivetrain architecture designed for rapid scaling and low-maintenance longevity.', stat: 'Efficiency: 96% Thermal Threshold'}, 'node-2': {title: 'Energy Management Matrix', desc: 'Smart battery orchestration system achieving 98.4% energy delivery efficiency across varied climates.', stat: 'Density: 320Wh/kg Integrated Logic'}, 'node-3': {title: 'Integrated Logic Core', desc: 'Centralized vehicle intelligence processing 1.2 trillion operations per second for active safety.', stat: 'Latency: <2ms System-Wide'}, 'node-4': {title: 'Sustainable Lifecycle System', desc: 'Bi-directional charging capability supporting grid-stabilization and optimized local storage.', stat: 'Recovery: 22% Kinetic Gain'}}; function updateSpec(id) { const card = document.getElementById('detail-card'); const title = document.getElementById('detail-title'); const desc = document.getElementById('detail-desc'); const stat = document.getElementById('detail-stat'); const buttons = document.querySelectorAll('.node-btn'); buttons.forEach(b => b.classList.remove('node-active')); document.querySelector(`[data-node='${id}']`).classList.add('node-active'); card.style.opacity = '0'; card.style.transform = 'translateX(-20px)'; setTimeout(() => { title.innerText = nodeData[id].title; desc.innerText = nodeData[id].desc; stat.innerText = 'Technical Yield: ' + nodeData[id].stat; card.style.opacity = '1'; card.style.transform = 'translateX(0)'; }, 200); } updateSpec('node-1'); </script></div>"
+    },
+    "styles": {
+        "backgroundColor": "#F2E9E1",
+        "color": "#5D5C61",
+        "fontFamily": "Montserrat"
+    }
+}

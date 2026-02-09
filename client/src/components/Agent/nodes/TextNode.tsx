@@ -6,12 +6,22 @@ import { motion } from 'framer-motion';
 // Selection color (Vibrant UI Blue matching reference)
 const SELECTION_COLOR = '#3b82f6';
 
+/**
+ * Typography variants for the text node.
+ */
 export type TextNodeVariant = 'headline' | 'title' | 'body' | 'caption';
 
+/**
+ * Data structure for the TextNode.
+ */
 export interface TextNodeData {
+    /** Main text content. */
     text: string;
+    /** Optional subtitle text. */
     subtitle?: string;
+    /** Typography style variant. Defaults to 'headline'. */
     variant?: TextNodeVariant;
+    /** Text alignment. Defaults to 'left'. */
     align?: 'left' | 'center' | 'right';
 }
 
@@ -39,6 +49,16 @@ const variantStyles: Record<TextNodeVariant, { fontSize: number; fontWeight: num
     },
 };
 
+/**
+ * A custom Node component for ReactFlow that renders styled text without a frame background.
+ * 
+ * Features:
+ * - Supports standard typography variants (Headline, Title, Body, Caption).
+ * - Configurable alignment.
+ * - Selection highlighting without obtrusive borders.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 const TextNodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
     const nodeData = data as unknown as TextNodeData;
     const { text, subtitle, variant = 'headline', align = 'left' } = nodeData;

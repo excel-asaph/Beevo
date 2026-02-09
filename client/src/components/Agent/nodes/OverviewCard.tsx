@@ -5,8 +5,12 @@ import { useBrandStore } from '../../../stores/useBrandStore';
 import { useShallow } from 'zustand/react/shallow';
 
 /**
- * OverviewCard - Displays Mission and Tagline in the Overview frame
- * Reads directly from the Zustand store
+ * A card component that displays the brand's Mission and Tagline in the Overview frame.
+ * 
+ * Features:
+ * - Reads data directly from the global BrandStore.
+ * - displays "Mission" and "Tagline" sections with specific styling.
+ * - Handles empty states with placeholder text.
  */
 export const OverviewCard: React.FC = () => {
     const { mission, tagline } = useBrandStore(

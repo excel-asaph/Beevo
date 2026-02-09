@@ -1,0 +1,170 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1770635155769",
+    "meta": {
+        "strategy": "The brand's focus on ergonomic precision and health innovation necessitates a voice that is both authoritative and soothing, bridging the gap between medical utility and home relaxation.",
+        "tone": "Empathetic, expert, and restorative.",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "prompt_signature": "Ultra-macro 8k footage of a surgical-grade white polymer lattice under mechanical stress test. The structure compresses under high-precision calipers and exhibits 100% elastic memory upon release. Lighting is sterile laboratory white with sharp shadows that define the geometric precision of the internal hexagonal cells.",
+        "attributes": {
+            "camera_movement": "Slow vertical dolly zoom on the lattice compression point.",
+            "color_grade": "High-contrast clinical monochrome with subtle olive-drab depth.",
+            "lighting": "Hard directional laboratory lighting to emphasize structural rigidity.",
+            "subject_focus": "The geometric deformation and recovery of the bioactive material."
+        },
+        "source_url": "/workspaces/a107edc7_stitch/assets/history/hero_v1770631254439/hero_video_1770631312234.mp4",
+        "source_id": "veo_asset_hero_v1770631254439"
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "Precision Biomechanical Decompression",
+            "styles": {
+                "color": "#F2F0E9"
+            }
+        },
+        "subhead": {
+            "text": "Engineered with a variable-density elastomer matrix that provides 360-degree pressure neutralization. Validated to reduce spinal torque and peak cutaneous pressure by up to 37% for optimized musculoskeletal recovery.",
+            "styles": {
+                "color": "#F2F0E9"
+            }
+        },
+        "cta": {
+            "text": "Analyze Technical Specifications",
+            "action_id": "open_offer_form",
+            "styles": {
+                "backgroundColor": "#F2F0E9",
+                "color": "#4A5D23"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "backdropFilter": "blur(12px) brightness(0.7)",
+            "alignItems": "center",
+            "padding": "80px",
+            "textAlign": "center"
+        },
+        "overlay_gradient": "linear-gradient(180deg, rgba(10,15,5,0.6) 0%, rgba(0,0,0,0.9) 100%)"
+    },
+    "navigation": {
+        "links": [
+            {
+                "label": "Offer",
+                "action_id": "open_offer_form"
+            },
+            {
+                "label": "Partnership",
+                "action_id": "open_intent_form"
+            },
+            {
+                "label": "Contact",
+                "action_id": "open_contact_form"
+            }
+        ],
+        "styles": {
+            "color": "#4A5D23",
+            "fontFamily": "Montserrat",
+            "fontSize": "0.75rem",
+            "fontWeight": "700",
+            "letterSpacing": "0.2em",
+            "textTransform": "uppercase"
+        }
+    },
+    "forms": {
+        "contact": {
+            "id": "contact_inquiry",
+            "title": "Get Personalized Advice",
+            "submit_text": "Send Message",
+            "fields": [
+                {
+                    "id": "full_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Jane Doe"
+                },
+                {
+                    "id": "email_address",
+                    "label": "Email Address",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "jane@example.com"
+                },
+                {
+                    "id": "inquiry_type",
+                    "label": "Inquiry Type",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Product Questions",
+                        "Shipping Support",
+                        "Warranty Claim",
+                        "Other"
+                    ]
+                },
+                {
+                    "id": "message",
+                    "label": "How can we assist your rest?",
+                    "type": "textarea",
+                    "required": true
+                }
+            ],
+            "subtitle": "Our sleep consultants are here to guide your ergonomic selection."
+        },
+        "intent": {
+            "id": "partnership_discovery",
+            "title": "Clinical Sleep Partnership",
+            "submit_text": "Request Strategic Overview",
+            "fields": [
+                {
+                    "id": "specialty_type",
+                    "label": "Practice Specialty",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Chiropractic Clinic",
+                        "Physical Therapy",
+                        "Sleep Medicine",
+                        "Wellness Retail"
+                    ]
+                },
+                {
+                    "id": "infrastructure_scale",
+                    "label": "Current Facility Infrastructure",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Number of locations or clinical beds"
+                },
+                {
+                    "id": "scaling_goals",
+                    "label": "Industry Scaling Goal",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "Describe your goals for integrating ergonomic solutions."
+                },
+                {
+                    "id": "professional_email",
+                    "label": "Professional Email",
+                    "type": "email",
+                    "required": true
+                },
+                {
+                    "id": "agreement",
+                    "label": "I agree to the partnership terms.",
+                    "type": "checkbox",
+                    "required": true
+                }
+            ],
+            "subtitle": "Collaborate with us to integrate health-focused sleep innovation into your clinical practice."
+        }
+    },
+    "styles": {
+        "backgroundColor": "#8A9A5B",
+        "color": "#FFFFFF",
+        "accentColor": "#F2F0E9",
+        "fontFamily": "Montserrat"
+    }
+}

@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Send, Loader2, Sparkles } from 'lucide-react';
 
+/**
+ * Props for the VoicePanel component.
+ */
 interface VoicePanelProps {
+    /** Whether the WebSocket connection is active. */
     isConnected: boolean;
+    /** Whether the Gemini model is connected. */
     isGeminiConnected: boolean;
+    /** Whether audio is currently being recorded. */
     isRecording: boolean;
+    /** Whether the microphone is muted. */
     isMuted: boolean;
+    /** Duration of the current call in seconds. */
     callDuration: number;
+    /** Callback to start the voice session. */
     onStartSession: () => void;
+    /** Callback to end the voice session. */
     onEndSession: () => void;
+    /** Callback to toggle mute state. */
     onToggleMute: () => void;
+    /** Callback for sending text input as an alternative to voice. */
     onTextInput: (text: string) => void;
 }
 
+/**
+ * A control panel for the voice interaction session.
+ * 
+ * Features:
+ * - Start/End call controls.
+ * - Mute toggle.
+ * - Connection status indicators.
+ * - Text input fallback.
+ * - Call duration timer.
+ * 
+ * @param {VoicePanelProps} props - The component props.
+ */
 export const VoicePanel: React.FC<VoicePanelProps> = ({
     isConnected,
     isGeminiConnected,
@@ -101,8 +125,8 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({
                         <button
                             onClick={onToggleMute}
                             className={`p-4 rounded-xl font-bold transition-all ${isMuted
-                                    ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                                    : 'bg-slate-700 hover:bg-slate-600 text-white'
+                                ? 'bg-amber-600 hover:bg-amber-500 text-white'
+                                : 'bg-slate-700 hover:bg-slate-600 text-white'
                                 }`}
                         >
                             {isMuted ? <MicOff size={20} /> : <Mic size={20} />}

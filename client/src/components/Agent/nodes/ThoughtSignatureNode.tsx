@@ -3,16 +3,33 @@ import { NodeProps } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
+/**
+ * Data structure for the ThoughtSignatureNode.
+ */
 export interface ThoughtSignatureData {
+    /** ID of the parent node this thought relates to. */
     parentNodeId: string;
+    /** Short title or topic of the thought. */
     title: string;
+    /** Detailed explanation of the AI's reasoning. */
     reasoning: string;
+    /** Confidence score (0-1) associated with this thought. */
     confidence?: number;
 }
 
+/**
+ * A custom Node component for ReactFlow that visualizes an AI "thought" or reasoning step.
+ * 
+ * Features:
+ * - Expandable/collapsible card interaction.
+ * - Visual confidence indicator.
+ * - Distinct styling to separate it from user content.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 const ThoughtSignatureNode: React.FC<NodeProps> = ({ data }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const nodeData = data as ThoughtSignatureData;
+    const nodeData = data as unknown as ThoughtSignatureData;
     const { title, reasoning, confidence } = nodeData;
 
     return (

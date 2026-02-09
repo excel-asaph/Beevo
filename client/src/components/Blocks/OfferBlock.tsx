@@ -2,7 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 import { OfferBlockConfig } from '../../../../shared/types';
 
+/**
+ * Props for the OfferBlock component.
+ */
 interface OfferBlockProps {
+    /** Configuration data for the Offer section. */
     config: OfferBlockConfig;
 }
 
@@ -12,6 +16,17 @@ declare global {
     }
 }
 
+/**
+ * Renders the Offer section of the landing page.
+ * 
+ * Features:
+ * - Dwell time tracking for engagement metrics.
+ * - Robust event delegation for CTA clicks.
+ * - Integration with global legacy tracking if needed.
+ * - Dynamic HTML content rendering for visual offers.
+ * 
+ * @param {OfferBlockProps} props - The component props.
+ */
 export const OfferBlock: React.FC<OfferBlockProps> = ({ config }) => {
     const { track } = useTracking(config.id);
     const containerRef = useRef<HTMLDivElement>(null);

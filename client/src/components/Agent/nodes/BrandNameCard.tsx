@@ -2,11 +2,26 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Crown } from 'lucide-react';
 
+/**
+ * Props for the BrandNameCard component.
+ */
 export interface BrandNameCardProps {
+    /** The generated brand name to display. */
     name: string;
+    /** Optional tagline or slogan associated with the brand name. */
     tagline?: string;
 }
 
+/**
+ * A stylized card component for displaying a generated brand name and tagline.
+ * 
+ * Features:
+ * - Gradient background.
+ * - Crown icon.
+ * - Animated entrance.
+ * 
+ * @param {BrandNameCardProps} props - The component props.
+ */
 export const BrandNameCard: React.FC<BrandNameCardProps> = ({ name, tagline }) => {
     return (
         <motion.div

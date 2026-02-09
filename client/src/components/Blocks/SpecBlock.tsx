@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTracking } from '../../hooks/useTracking';
 
+/**
+ * Represents a single specification item node.
+ */
 interface SpecNode {
     id: string;
     label: string;
@@ -8,6 +11,9 @@ interface SpecNode {
     icon: string;
 }
 
+/**
+ * Configuration for the SpecBlock component.
+ */
 interface SpecBlockConfig {
     id: string;
     meta: {
@@ -32,6 +38,16 @@ interface SpecBlockConfig {
     };
 }
 
+/**
+ * Renders the Technical Specifications or Features section.
+ * 
+ * Features:
+ * - View tracking for funnel analysis.
+ * - Dwell time tracking for engagement.
+ * - Event delegation for tracking interactions within the dynamic HTML content.
+ * 
+ * @param {{ config: SpecBlockConfig }} props - The component props.
+ */
 export const SpecBlock: React.FC<{ config: SpecBlockConfig }> = ({ config }) => {
     const { track } = useTracking(config.id);
     const sectionRef = useRef<HTMLElement>(null);

@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1770630803170",
+    "meta": {
+        "strategy": "The brand's focus on ergonomic precision and health innovation necessitates a voice that is both authoritative and soothing, bridging the gap between medical utility and home relaxation.",
+        "tone": "Empathetic, expert, and restorative.",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "Stitch Precision Architecture",
+        "subhead": "A high-fidelity technical framework for ergonomic synchronization and kinetic material response.",
+        "nodes": [
+            {
+                "id": "node-1",
+                "label": "Precision Alignment Core",
+                "description": "Utilizes sub-millimeter postural scanning to ensure 100% spinal neutrality during transition phases.",
+                "icon": "crosshair"
+            },
+            {
+                "id": "node-2",
+                "label": "Kinetic Response Mesh",
+                "description": "A proprietary weave that dynamically adjusts tensile strength based on real-time biometric pressure points.",
+                "icon": "layers"
+            },
+            {
+                "id": "node-3",
+                "label": "Biometric Feedback Loop",
+                "description": "Integrated sensors provide a 4.8x increase in health data accuracy for continuous ergonomic optimization.",
+                "icon": "activity"
+            },
+            {
+                "id": "node-4",
+                "label": "Adaptive Tension Matrix",
+                "description": "Smart-calibrated resistance zones that mitigate fatigue across 99.9% of user-specific movement profiles.",
+                "icon": "settings"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div class='w-full p-8 font-sans bg-[#F2F0E9] min-h-[600px] flex flex-col items-center justify-center' style='font-family: \"Montserrat\", sans-serif; background-image: radial-gradient(#BDBB99 0.5px, transparent 0.5px); background-size: 20px 20px;'> <div class='w-full max-w-6xl border border-[#BDBB99] bg-[#F2F0E9]/90 backdrop-blur-sm p-12 relative shadow-2xl'> <div class='absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#8A9A5B]'></div> <div class='absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#8A9A5B]'></div> <div class='absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#8A9A5B]'></div> <div class='absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#8A9A5B]'></div> <div class='grid grid-cols-1 lg:grid-cols-12 gap-12 items-center'> <div class='lg:col-span-4 flex flex-col gap-6' id='node-container'> <div id='btn-node-1' onclick='updateSpec(\"node-1\")' class='spec-trigger group cursor-pointer border-l-2 border-transparent hover:border-[#8A9A5B] pl-4 transition-all duration-300'> <h4 class='text-[#4A5D23] font-bold text-sm tracking-widest uppercase'>Precision Alignment Core</h4> <p class='text-xs text-[#8A9A5B] mt-1 opacity-0 group-hover:opacity-100 transition-opacity'>STITCH-AC-001</p> </div> <div id='btn-node-2' onclick='updateSpec(\"node-2\")' class='spec-trigger group cursor-pointer border-l-2 border-transparent hover:border-[#8A9A5B] pl-4 transition-all duration-300'> <h4 class='text-[#4A5D23] font-bold text-sm tracking-widest uppercase'>Kinetic Response Mesh</h4> <p class='text-xs text-[#8A9A5B] mt-1 opacity-0 group-hover:opacity-100 transition-opacity'>STITCH-RM-002</p> </div> <div id='btn-node-3' onclick='updateSpec(\"node-3\")' class='spec-trigger group cursor-pointer border-l-2 border-transparent hover:border-[#8A9A5B] pl-4 transition-all duration-300'> <h4 class='text-[#4A5D23] font-bold text-sm tracking-widest uppercase'>Biometric Feedback Loop</h4> <p class='text-xs text-[#8A9A5B] mt-1 opacity-0 group-hover:opacity-100 transition-opacity'>STITCH-FL-003</p> </div> <div id='btn-node-4' onclick='updateSpec(\"node-4\")' class='spec-trigger group cursor-pointer border-l-2 border-transparent hover:border-[#8A9A5B] pl-4 transition-all duration-300'> <h4 class='text-[#4A5D23] font-bold text-sm tracking-widest uppercase'>Adaptive Tension Matrix</h4> <p class='text-xs text-[#8A9A5B] mt-1 opacity-0 group-hover:opacity-100 transition-opacity'>STITCH-TM-004</p> </div> </div> <div class='lg:col-span-4 flex justify-center py-10 relative'> <div id='schematic-base' class='w-64 h-64 border-2 border-[#BDBB99] rounded-full flex items-center justify-center relative transition-transform duration-700'> <div class='absolute inset-2 border border-dashed border-[#8A9A5B] rounded-full animate-spin-slow'></div> <div class='w-32 h-32 bg-[#8A9A5B] opacity-20 blur-xl absolute' id='core-glow'></div> <svg viewBox='0 0 100 100' class='w-40 h-40 stroke-[#4A5D23] fill-none stroke-[0.5]'> <path d='M50,10 L50,90 M20,30 L80,30 M15,50 L85,50 M20,70 L80,70' id='schematic-lines' /> <circle cx='50' cy='50' r='45' /> </svg> </div> </div> <div class='lg:col-span-4 bg-[#E8E4D9] p-6 border border-[#BDBB99] min-h-[200px] flex flex-col justify-center shadow-inner'> <h3 id='spec-title' class='text-[#4A5D23] font-bold text-lg mb-2 uppercase tracking-tighter'>System Overview</h3> <div class='h-px w-full bg-[#BDBB99] mb-4'></div> <p id='spec-desc' class='text-[#4A5D23] text-sm leading-relaxed'>Select a technical node to view specific architectural requirements and performance metrics.</p> <div id='spec-stats' class='mt-6 grid grid-cols-2 gap-4 hidden'> <div> <p class='text-[10px] uppercase text-[#8A9A5B]'>Uptime</p> <p class='text-lg font-bold'>99.9%</p> </div> <div> <p class='text-[10px] uppercase text-[#8A9A5B]'>Accuracy</p> <p class='text-lg font-bold'>4.8x</p> </div> </div> </div> </div> </div> </div> <script> function updateSpec(nodeId) { const data = { 'node-1': { title: 'Precision Alignment Core', desc: 'Utilizes sub-millimeter postural scanning to ensure 100% spinal neutrality during transition phases.', color: '#8A9A5B' }, 'node-2': { title: 'Kinetic Response Mesh', desc: 'A proprietary weave that dynamically adjusts tensile strength based on real-time biometric pressure points.', color: '#BDBB99' }, 'node-3': { title: 'Biometric Feedback Loop', desc: 'Integrated sensors provide a 4.8x increase in health data accuracy for continuous ergonomic optimization.', color: '#4A5D23' }, 'node-4': { title: 'Adaptive Tension Matrix', desc: 'Smart-calibrated resistance zones that mitigate fatigue across 99.9% of user-specific movement profiles.', color: '#E8E4D9' } }; const node = data[nodeId]; document.getElementById('spec-title').innerText = node.title; document.getElementById('spec-desc').innerText = node.desc; document.getElementById('spec-stats').classList.remove('hidden'); document.getElementById('core-glow').style.backgroundColor = node.color; document.getElementById('schematic-base').style.transform = 'rotate(' + (Math.random() * 360) + 'deg)'; document.querySelectorAll('.spec-trigger').forEach(el => { el.style.borderLeftColor = 'transparent'; }); document.getElementById('btn-' + nodeId).style.borderLeftColor = '#8A9A5B'; } </script> <style> .animate-spin-slow { animation: spin 12s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } </style>"
+    },
+    "styles": {
+        "backgroundColor": "#F2F0E9",
+        "color": "#4A5D23",
+        "fontFamily": "Montserrat"
+    }
+}

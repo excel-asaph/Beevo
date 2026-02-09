@@ -5,6 +5,17 @@ import { Button } from './ui/Button';
 import { Junction } from '@shared/types';
 import { Image as ImageIcon, Video, Layers, Download, RefreshCw } from 'lucide-react';
 
+/**
+ * The Forge component handles the generation of visual assets (images and videos).
+ * 
+ * Features:
+ * - Integration with "Nano Banana Pro" for image generation.
+ * - Integration with Veo for cinematic video generation.
+ * - Prompt management and history tracking via thoughts.
+ * - Downloads generated assets to the local vault.
+ * 
+ * @returns {JSX.Element} The Forge interface.
+ */
 export const Forge: React.FC = () => {
     const { dna, addAsset, addThought } = useBrand();
     const [prompt, setPrompt] = useState('');

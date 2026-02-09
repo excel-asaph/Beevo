@@ -1,19 +1,40 @@
 import React, { useState } from 'react';
 import { NodeProps, Handle, Position } from '@xyflow/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Image as ImageIcon, Check, RefreshCw } from 'lucide-react';
+import { Check, RefreshCw } from 'lucide-react';
 import { useWorkspace } from '../../../context/WorkspaceContext';
 import { LogoInspiration } from '../../../../../shared/types';
+import { SkeletonBlock } from '../../ui/Skeleton';
 
+/**
+ * Data structure for the InspirationNode.
+ */
 export interface InspirationNodeData {
+    /** Label text for the node header. */
     label: string;
+    /** Current state of the inspiration grid. */
     status: 'empty' | 'options' | 'saved';
+    /** List of generated logo inspirations (when status is 'options'). */
     options?: LogoInspiration[];
+    /** List of saved logo inspirations (when status is 'saved'). */
     saved?: LogoInspiration[];
+    /** Callback triggered when a logo option is selected. */
     onSelect?: (logoId: string) => void;
+    /** Callback triggered when the "Regenerate" button is clicked. */
     onRegenerate?: () => void;
 }
 
+/**
+ * A custom Node component for ReactFlow that displays a grid of logo inspirations.
+ * 
+ * Features:
+ * - Empty state with skeleton loading.
+ * - Options state with selectable logo grid.
+ * - Saved state showing confirmed selections.
+ * - Regeneration capability.
+ * 
+ * @param {NodeProps} props - The node props provided by ReactFlow.
+ */
 export const InspirationNode: React.FC<NodeProps> = ({ data }) => {
     const { resolveAssetUrl } = useWorkspace();
     const nodeData = data as unknown as InspirationNodeData;
@@ -22,9 +43,12 @@ export const InspirationNode: React.FC<NodeProps> = ({ data }) => {
     const status = nodeData.status || 'empty';
 
     const renderEmpty = () => (
-        <div className="flex flex-col items-center justify-center py-8 text-slate-400">
-            <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-            <p className="text-sm">Logo inspiration will appear here</p>
+        <div className="grid grid-cols-4 gap-2">
+            {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="aspect-square">
+                    <SkeletonBlock className="w-full h-full bg-slate-50 border border-slate-100" />
+                </div>
+            ))}
         </div>
     );
 

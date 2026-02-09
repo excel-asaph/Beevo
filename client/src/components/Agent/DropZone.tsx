@@ -2,17 +2,32 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, FileText, Image, Video, File } from 'lucide-react';
 
+/**
+ * Props for the DropZone component.
+ */
 interface DropZoneProps {
+    /** Whether a file is currently being dragged over the zone. */
     isDragOver: boolean;
+    /** Callback for dragover event. */
     onDragOver: (e: React.DragEvent) => void;
+    /** Callback for dragleave event. */
     onDragLeave: () => void;
+    /** Callback for drop event. */
     onDrop: (e: React.DragEvent) => void;
+    /** Callback triggered when files are selected via the file dialog. */
     onFileSelect?: (files: File[]) => void;
+    /** List of accepted file (extensions without dot). Defaults to common media/doc types. */
     acceptedTypes?: string[];
+    /** Additional CSS classes. */
     className?: string;
 }
 
-// Map file extensions to icons - exported for potential use in file lists
+/**
+ * Helper function to get the appropriate icon for a file based on its extension.
+ * 
+ * @param {string} filename - The name of the file.
+ * @returns {React.ReactNode} The Lucide icon component.
+ */
 export const getFileIcon = (filename: string) => {
     const ext = filename.split('.').pop()?.toLowerCase();
     switch (ext) {
@@ -33,6 +48,14 @@ export const getFileIcon = (filename: string) => {
     }
 };
 
+/**
+ * A draggable file upload zone component.
+ * 
+ * Supports drag-and-drop interactions as well as clicking to open the native file dialog.
+ * Handles visual feedback for drag states.
+ * 
+ * @param {DropZoneProps} props - The component props.
+ */
 export const DropZone: React.FC<DropZoneProps> = ({
     isDragOver,
     onDragOver,

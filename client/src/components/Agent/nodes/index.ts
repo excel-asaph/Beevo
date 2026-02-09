@@ -1,6 +1,11 @@
+/**
+ * Export barrel for all custom ReactFlow nodes and related components used in the Agent interface.
+ */
 // Export all custom nodes
 export { StickyNode } from './StickyNode';
 export type { StickyNodeData, StickyColor } from './StickyNode';
+export * from './LandingPageFrame';
+export * from './FrameNode';
 
 export { PaletteNode } from './PaletteNode';
 export type { PaletteNodeData, ColorOption } from './PaletteNode';

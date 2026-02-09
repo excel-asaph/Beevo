@@ -2,25 +2,54 @@ import React, { useRef, useEffect } from 'react';
 import { User, Bot, Radio } from 'lucide-react';
 import { ThinkingBubble } from './ThinkingBubble';
 
+/**
+ * Represents a single message in the chat history.
+ */
 interface ChatMessage {
+    /** The sender of the message ('user' or 'model'). */
     role: 'user' | 'model';
+    /** The content of the message. */
     text: string;
 }
 
+/**
+ * Represents the internal state of the AI's "thinking" process.
+ */
 interface ThinkingState {
+    /** Whether the AI is currently processing. */
     isThinking: boolean;
+    /** Timestamp when thinking started. */
     startTime: number | null;
+    /** Duration of the thinking phase in ms. */
     duration: number | null;
+    /** List of intermediate thoughts or steps. */
     thoughts: string[];
+    /** The tool or action decided upon. */
     toolDecided: string | null;
+    /** The current phase of reasoning. */
     phase: 'classify' | 'analyze' | 'decide' | 'execute' | null;
 }
 
+/**
+ * Props for the ChatHistory component.
+ */
 interface ChatHistoryProps {
+    /** Array of chat messages to display. */
     messages: ChatMessage[];
+    /** Current state of the AI's thinking process. */
     thinkingState?: ThinkingState;
 }
 
+/**
+ * Displays the conversation history and real-time thinking process of the Architect.
+ * 
+ * Features:
+ * - Auto-scrolling message list.
+ * - Distinct styles for user vs. AI messages.
+ * - "ThinkingBubble" integration for visualizing internal reasoning.
+ * 
+ * @param {ChatHistoryProps} props - The component props.
+ */
 export const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, thinkingState }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
 

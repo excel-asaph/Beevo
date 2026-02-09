@@ -21,6 +21,10 @@ interface LogoSearchArgs {
     logoTypes?: string[];
 }
 
+/**
+ * Service for performing grounded searches using Google Search.
+ * Optimized for finding logo inspirations and verifying domains.
+ */
 export class SearchGroundingService {
     private client: GoogleGenAI;
     private modelName = MODELS.ARCHITECT_TEXT; // Optimized for speed and grounding
@@ -29,6 +33,12 @@ export class SearchGroundingService {
         this.client = new GoogleGenAI({ apiKey });
     }
 
+    /**
+     * Searches for logo inspirations from the web based on style and industry.
+     * 
+     * @param {LogoSearchArgs} args - Search arguments.
+     * @returns {Promise<LogoSearchResult[]>} A list of verified logo search results.
+     */
     async searchLogoInspirationFromWeb(args: LogoSearchArgs): Promise<LogoSearchResult[]> {
         const count = args.count || 6;
         console.log(`Starting Optimized Image Discovery for ${count} logos...`);
@@ -47,6 +57,12 @@ export class SearchGroundingService {
         return processedLogos.slice(0, count);
     }
 
+    /**
+     * Phase 1: Uses Google Search Grounding to find relevant brand pages.
+     * 
+     * @param {LogoSearchArgs} args - Search arguments.
+     * @returns {Promise<Array<{ url: string; title: string }>>} List of discovered pages.
+     */
     private async discoverLogoPages(args: LogoSearchArgs): Promise<Array<{ url: string; title: string }>> {
         const query = this.buildSearchQuery(args);
         console.log(`🔎 Search Query: "${query}"`);
@@ -89,6 +105,13 @@ export class SearchGroundingService {
         }
     }
 
+    /**
+     * Phase 2: Extracts verified logo images from the discovered pages.
+     * 
+     * @param {Array<{ url: string; title: string }>} pages - List of pages to process.
+     * @param {LogoSearchArgs} args - Original search arguments.
+     * @returns {Promise<LogoSearchResult[]>} List of successfully extracted logos.
+     */
     private async batchExtractLogoImages(
         pages: Array<{ url: string; title: string }>,
         args: LogoSearchArgs
@@ -208,6 +231,12 @@ export class SearchGroundingService {
         return `${args.styleKeywords} ${args.industry} branding examples ${args.mood || ''}`.trim();
     }
 
+    /**
+     * Performs a general grounded search for any query.
+     * 
+     * @param {string} query - The search query.
+     * @returns {Promise<string>} The search result summary.
+     */
     async search(query: string): Promise<string> {
         console.log(`🔎 General Search: "${query}"`);
         const tool: Tool = { googleSearch: {} };

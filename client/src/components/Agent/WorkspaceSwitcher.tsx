@@ -1,17 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Check, ChevronDown, Folder } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
+/**
+ * Structure representing a available workspace.
+ */
 interface Workspace {
+    /** Unique identifier. */
     id: string;
+    /** Display name. */
     name: string;
+    /** ISO timestamp of last activity. */
     lastActive: string;
 }
 
+/**
+ * A dropdown menu component for switching between active workspaces or creating a new one.
+ * 
+ * Features:
+ * - Displays current workspace name.
+ * - Lists available workspaces fetched from the API.
+ * - Provides an option to create a new workspace (redirects to landing).
+ */
 export const WorkspaceSwitcher: React.FC = () => {
     const { workspaceId, setWorkspaceId } = useWorkspace();
     const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -19,6 +34,22 @@ export const WorkspaceSwitcher: React.FC = () => {
         if (isOpen) {
             fetchWorkspaces();
         }
+    }, [isOpen]);
+
+    // Click outside handler
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, [isOpen]);
 
     const fetchWorkspaces = async () => {
@@ -35,17 +66,9 @@ export const WorkspaceSwitcher: React.FC = () => {
     };
 
     const handleCreateNew = () => {
-        const name = window.prompt('Enter brand name:');
-        if (!name) return;
-
-        const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-        if (!id) return;
-
-        setWorkspaceId(id);
         setIsOpen(false);
-
-        // Refresh page to ensure clean state
-        window.location.href = `/?workspace=${id}&skip_discovery=true`;
+        // Redirect to root (Workspace Selection Landing)
+        window.location.href = '/';
     };
 
     const handleSwitch = (id: string) => {
@@ -55,7 +78,7 @@ export const WorkspaceSwitcher: React.FC = () => {
     };
 
     return (
-        <div className="relative">
+        <div className="relative" ref={containerRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all text-gray-700 shadow-sm"
@@ -70,10 +93,7 @@ export const WorkspaceSwitcher: React.FC = () => {
             <AnimatePresence>
                 {isOpen && (
                     <>
-                        <div
-                            className="fixed inset-0 z-[110]"
-                            onClick={() => setIsOpen(false)}
-                        />
+
                         <motion.div
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}

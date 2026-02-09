@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { AgentLogger } from '../utils/AgentLogger.js';
 import { NanoBananaService } from '../services/NanoBananaService.js';
 import { MediaService } from '../services/MediaService.js';
 import { SocialBlockConfig } from '../../../shared/types.js';
@@ -15,6 +16,16 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
+/**
+ * Initial Social Generator Agent.
+ * 
+ * Responsibilities:
+ * - Generates Social Proof sections specifically focused on user testimonials.
+ * - Synthesizes authentic-sounding reviews based on Brand Voice.
+ * - Generates human-like avatar images for testimonials using Forge Image models.
+ * - Archives generated assets via MediaService.
+ * - Stages the Social block.
+ */
 export class InitialSocialGenerator {
     private client: GoogleGenAI;
     private nanoBanana: NanoBananaService;
@@ -23,8 +34,9 @@ export class InitialSocialGenerator {
     private researchPath: string;
     private outputPath: string;
     private assetsDir: string;
+    private logger: AgentLogger;
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set");
@@ -38,10 +50,19 @@ export class InitialSocialGenerator {
         this.researchPath = path.join(baseBrainPath, 'research_artifacts/complete_research_latest.json');
         this.outputPath = path.join(baseBrainPath, 'staging/social_block_staging.json');
         this.assetsDir = path.join(baseClientPath, 'assets');
+        this.logger = new AgentLogger('Social Generator', workspaceId, onLog);
     }
 
+    /**
+     * Main execution method.
+     * 1. Loads research data.
+     * 2. Calls NanoBanana to generate testimonial content.
+     * 3. Iterates through testimonials to generate avatar images.
+     * 4. Assembles the Social component.
+     * 5. Stages the result.
+     */
     async generate() {
-        console.log(`🚀 [${this.workspaceId}] Initial Social Generator: Starting...`);
+        this.logger.start("Generating Social Proof", "Synthesizing authentic testimonials and trust signals...");
 
         // 1. Read Research
         const rawData = await fs.readFile(this.researchPath, 'utf-8');
@@ -64,11 +85,11 @@ export class InitialSocialGenerator {
         };
 
         // 3. Request Social from NanoBanana
-        console.log("[Step 1] Requesting Social Visualization from NanoBananaService...");
+        this.logger.info("Drafting Testimonials", "Synthesizing industry-relevant customer reviews via NanoBanana...");
         const generatedData = await this.nanoBanana.generateSocialVisual(context);
 
         // 4. Generate Images for Testimonials
-        console.log("[Step 2] Generating Human-like Headshots for Testimonials...");
+        this.logger.info("Baking Headshots", `Generating ${generatedData.testimonials.length} human-like avatars for social proof...`);
         const testimonials = generatedData.testimonials;
 
         const variantId = `social_v${Date.now()}`;
@@ -78,7 +99,7 @@ export class InitialSocialGenerator {
             const imageName = `testimonial_${i + 1}_challenger.png`;
             const imagePath = path.join(this.assetsDir, imageName);
 
-            console.log(`...Baking Headshot for ${t.name} (${t.title})`);
+            this.logger.info("Generating Avatar", `Creating headshot for ${t.name}...`);
             // generateImage now returns the relative path from MediaService
             const archivedPath = await this.generateImage(t.image_prompt, imagePath, variantId);
             t.image_url = archivedPath;
@@ -111,15 +132,24 @@ export class InitialSocialGenerator {
         };
 
         // 6. Save
-        console.log("Saving Staged Social Block...");
+        this.logger.info("Saving", "Writing staged Social block to file...");
         await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
         await fs.writeFile(this.outputPath, JSON.stringify(challenger, null, 4));
-        console.log("✅ Done.");
+        this.logger.success("Social Proof Complete", "Authentic testimonial block staged successfully.");
     }
 
+    /**
+     * Generates an avatar image for a testimonial.
+     * Uses the Forge Image model and archives the result.
+     * 
+     * @param {string} prompt - The image generation prompt.
+     * @param {string} outputPath - The local path (legacy argument, mostly unused now).
+     * @param {string} variantId - The variant ID for archiving.
+     * @returns {Promise<string>} The relative path to the archived asset.
+     */
     private async generateImage(prompt: string, outputPath: string, variantId: string) {
         try {
-            console.log(`🎨 Requesting Image via generateContent (Model: ${MODELS.FORGE_IMAGE})...`);
+            this.logger.info("Generating Image", `Requesting Image via generateContent (Model: ${MODELS.FORGE_IMAGE})...`);
 
             const response = await this.client.models.generateContent({
                 model: MODELS.FORGE_IMAGE,
@@ -156,15 +186,15 @@ export class InitialSocialGenerator {
                     variantId
                 );
 
-                console.log(`✅ Image Archived via MediaService: ${relativePath}`);
+                this.logger.success("Image Archived", `Saved via MediaService: ${relativePath}`);
                 return relativePath;
             } else {
                 throw new Error("No inlineData found in response parts");
             }
 
         } catch (error) {
-            console.error(`❌ Image generation failed for prompt: ${prompt}`, error);
-            console.warn("Using placeholder for testimonial headshot.");
+            this.logger.error("Avatar Failed", `Headshot generation failed for ${prompt.substring(0, 20)}... Error: ${error}`);
+            this.logger.info("Fallback", "Using placeholder for testimonial headshot.");
             return "/assets/placeholders/social_placeholder.png";
         }
     }
@@ -175,6 +205,14 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     // Default workspace for manual CLI run
     const workspaceId = process.argv.find(a => a.startsWith('--workspace='))?.split('=')[1] || 'default';
     const generator = new InitialSocialGenerator(workspaceId);
-    generator.generate().catch(console.error);
+    generator.generate()
+        .then(() => {
+            // console.log("✅ Social Generation Process Finished.");
+            process.exit(0);
+        })
+        .catch(err => {
+            // console.error("❌ Social Generation Failed:", err);
+            process.exit(1);
+        });
 }
 

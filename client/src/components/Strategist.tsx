@@ -5,6 +5,16 @@ import { Button } from './ui/Button';
 import { Junction, SWOT } from '@shared/types';
 import { Search, TrendingUp, AlertTriangle, Shield, Target } from 'lucide-react';
 
+/**
+ * The Strategist component facilitates high-level brand strategy and market analysis.
+ * 
+ * Features:
+ * - Runs SWOT analysis using Antigravity agents.
+ * - Identifies "Strategic Gaps" in the market.
+ * - Auto-infers initial Brand DNA (Mission, Name) from analysis results.
+ * 
+ * @returns {JSX.Element} The Strategist interface.
+ */
 export const Strategist: React.FC = () => {
   const { addThought, setDna, dna } = useBrand();
   const [brandName, setBrandName] = useState(dna?.name || '');

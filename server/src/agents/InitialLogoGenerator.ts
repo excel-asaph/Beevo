@@ -4,6 +4,8 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import { MODELS } from '../../../shared/constants';
 import dotenv from 'dotenv';
+import { AgentLogger } from '../utils/AgentLogger.js';
+import { WorkspaceManager } from '../services/StateManager';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,10 +13,16 @@ const __dirname = path.dirname(__filename);
 // Load env vars
 dotenv.config({ path: path.resolve(__dirname, '../../../.env.local') });
 
-// Paths
-// Paths - Resolved relative to this file (server/src/agents)
-// CONSTANTS REMOVED in favor of dynamic paths in constructor
-
+/**
+ * Initial Logo Generator Agent
+ * 
+ * Responsibilities:
+ * - Generates a complete Logo Kit based on Brand Research.
+ * - Creates a Primary Logo Anchor.
+ * - Derives variations: Dark Mode, Icon, Wordmark, and Social Profile.
+ * - Processes and utilizes inspiration images.
+ * - Persists the generated kit to the assets directory.
+ */
 export class InitialLogoGenerator {
     private client: GoogleGenAI;
     private modelName = MODELS.FORGE_IMAGE;
@@ -25,9 +33,11 @@ export class InitialLogoGenerator {
     private outputPath: string;
     private inspirationDir: string;
     private generatedDir: string;
+    private logger: AgentLogger;
 
-    constructor(workspaceId: string) {
+    constructor(workspaceId: string, onLog?: (log: any) => void) {
         this.workspaceId = workspaceId;
+        this.logger = new AgentLogger('Logo Generator', workspaceId, onLog);
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error("GEMINI_API_KEY not set in .env.local");
         this.client = new GoogleGenAI({ apiKey });
@@ -42,8 +52,31 @@ export class InitialLogoGenerator {
         this.generatedDir = path.join(baseClientPath, 'assets/generated_logos');
     }
 
+    /**
+     * Main execution method.
+     * 1. Loads research and processes inspiration images.
+     * 2. Generates the Primary Logo.
+     * 3. Iteratively generates variations (Icon, Wordmark, etc.) based on the Primary.
+     * 4. Saves the final Logo Kit.
+     * 
+     * @param {string} [additionalContext] - Optional user override instructions.
+     */
     async generate(additionalContext?: string) {
-        console.log(`🚀 [${this.workspaceId}] Starting Logo Generator...`);
+        // Log Start
+        const startId = `gen-${Date.now()}`;
+        // const stateManager = WorkspaceManager.getStateManager(this.workspaceId);
+
+        // PERSISTENCE: Log start of logo generation
+        // await stateManager.appendThought({
+        //     id: startId,
+        //     stepIndex: 5, // Use 5 for "System/Manual" actions
+        //     nodeId: 'logo-generator',
+        //     title: 'Generating Logos',
+        //     content: `Started logo generation process.${additionalContext ? ` Context: ${additionalContext}` : ''}`,
+        //     timestamp: new Date().toISOString()
+        // });
+
+        this.logger.start("Starting Logo Generation", "Designing the brand anchor and stylistic variants...");
 
         // Ensure directories exist
         await fs.mkdir(path.dirname(this.outputPath), { recursive: true });
@@ -53,18 +86,17 @@ export class InitialLogoGenerator {
         const rawData = await fs.readFile(this.researchPath, 'utf-8');
         const research = JSON.parse(rawData);
 
-
         // Safety check for critical path
         if (!research.brandDNA?.name?.value) {
-            console.error("❌ CRITICAL: Missing Brand Name in research data", JSON.stringify(research.brandDNA, null, 2));
+            this.logger.error("Missing Data", "CRITICAL: Missing Brand Name in research data");
             throw new Error("Missing Brand Name in research data");
         }
 
         // 1. Process Inspirations
-        const selectedInspirations = research.logoInspirations.inspirations.filter((i: any) => i.isSelected);
+        const selectedInspirations = research.logoInspirations?.inspirations?.filter((i: any) => i.isSelected) || [];
         const inspirationParts: any[] = [];
 
-        console.log(`📂 Processing ${selectedInspirations.length} inspiration images...`);
+        this.logger.info("Processing Inspirations", `Processing ${selectedInspirations.length} inspiration images...`);
         for (const [index, insp] of selectedInspirations.entries()) {
             if (insp.url.startsWith('data:image')) {
                 const matches = insp.url.match(/^data:image\/([a-zA-Z]*);base64,([^\"]*)$/);
@@ -77,7 +109,7 @@ export class InitialLogoGenerator {
                     const filePath = path.join(this.inspirationDir, filename);
 
                     await fs.writeFile(filePath, buffer);
-                    console.log(`   - Saved ${filename}`);
+                    this.logger.info("Saved Inspiration", `Saved ${filename}`);
 
                     inspirationParts.push({
                         inlineData: {
@@ -90,9 +122,9 @@ export class InitialLogoGenerator {
         }
 
         // 2. Extract Context (FILTERING all selected)
-        const selectedPalettes = research.colorPalettes.palettes.filter((p: any) => p.isSelected);
-        const selectedFonts = research.typographyPairings.fonts.filter((f: any) => f.isSelected);
-        const selectedStructures = research.logoStructures.options.filter((o: any) => o.isSelected);
+        const selectedPalettes = research.colorPalettes?.palettes?.filter((p: any) => p.isSelected) || [];
+        const selectedFonts = research.typographyPairings?.fonts?.filter((f: any) => f.isSelected) || [];
+        const selectedStructures = research.logoStructures?.options?.filter((o: any) => o.isSelected) || [];
 
         // Helper to format list
         const formatList = (items: any[], label: string, formatter: (i: any) => string) =>
@@ -113,11 +145,11 @@ export class InitialLogoGenerator {
         `;
 
         // 3. Setup Generated Directory
-        // (already done in generate init)
         const generatedPaths: Record<string, string> = {};
 
         // 4. Generate PRIMARY First (The Anchor)
-        console.log(`🎨 Step 1: Generating PRIMARY Logo...`);
+        this.logger.info("Generating Primary Logo", "Designing the main brand mark...");
+
         let primaryBase64 = "";
 
         try {
@@ -155,12 +187,13 @@ export class InitialLogoGenerator {
                 const filename = `logo_variant_primary.png`;
                 await fs.writeFile(path.join(this.generatedDir, filename), buffer);
                 generatedPaths['primary'] = `/workspaces/${this.workspaceId}/assets/generated_logos/${filename}`;
-                console.log(`   ✅ Primary Generated & Saved to ${filename}`);
+                this.logger.success("Primary Logo Created", `Official brand mark synthesized successfully: ${filename}`);
+
             } else {
                 throw new Error("No image returned for Primary Logo");
             }
         } catch (e) {
-            console.error("❌ Critical: Primary Generation Failed", e);
+            this.logger.error("Primary Generation Failed", e instanceof Error ? e.message : String(e));
             return; // Cannot proceed without primary
         }
 
@@ -175,10 +208,13 @@ export class InitialLogoGenerator {
             { key: 'social_inverted', prompt: "Create a Dark Mode Social Profile Picture. Center the white logo on a dark background." }
         ];
 
-        console.log(`🎨 Step 2: Generating ${variationMap.length} Variations...`);
+        this.logger.info(`Generating Variations`, `Creating ${variationMap.length} brand variants (Dark Mode, Icon, Wordmark)...`);
 
         for (const variant of variationMap) {
-            console.log(`   - Generating ${variant.key}...`);
+
+            // Send info update (streaming thought)
+            this.logger.info("Designing Variant", `Crafting ${variant.key} variant...`);
+
             try {
                 const response = await this.client.models.generateContent({
                     model: this.modelName,
@@ -205,14 +241,16 @@ export class InitialLogoGenerator {
                     await fs.writeFile(path.join(this.generatedDir, filename), buffer);
                     generatedPaths[variant.key] = `/workspaces/${this.workspaceId}/assets/generated_logos/${filename}`;
                 } else {
-                    console.warn(`     ⚠️ No image returned for ${variant.key}`);
+                    this.logger.info("Variation Skipped", `No image returned for ${variant.key}`);
                     generatedPaths[variant.key] = generatedPaths['primary'] || ''; // Fallback
                 }
             } catch (e) {
-                console.error(`     ❌ Error generating ${variant.key}:`, e);
+                this.logger.error("Variation Failed", `Error generating ${variant.key}: ${e}`);
                 generatedPaths[variant.key] = generatedPaths['primary'] || '';
             }
         }
+
+        this.logger.success("Variations Complete", `Generated ${variationMap.length} variations.`);
 
         const representativePalette = selectedPalettes[0] || { name: 'Unknown', colors: [] };
 
@@ -239,7 +277,17 @@ export class InitialLogoGenerator {
         };
 
         await fs.writeFile(this.outputPath, JSON.stringify(finalOutput, null, 4));
-        console.log(`✅ Logo Kit Baked to: ${this.outputPath}`);
+        this.logger.success("Logo Kit Baked", `Final logo kit saved to: ${this.outputPath}`);
+
+        // PERSISTENCE: Log completion
+        // await stateManager.appendThought({
+        //     id: `gen-complete-${Date.now()}`,
+        //     stepIndex: 5,
+        //     nodeId: 'logo-generator',
+        //     title: 'Logo Generation Complete',
+        //     content: `Successfully generated primary logo and ${variationMap.length} variations.`,
+        //     timestamp: new Date().toISOString()
+        // });
     }
 
     private getPlaceholder(text: string): string {
@@ -249,7 +297,10 @@ export class InitialLogoGenerator {
 
 // Auto-run
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    // Default workspace for manual CLI run
-    const generator = new InitialLogoGenerator('default');
+    // Get workspace from args or default
+    const arg = process.argv.find(a => a.startsWith('--workspace='));
+    const workspaceId = arg ? arg.split('=')[1] : 'default';
+
+    const generator = new InitialLogoGenerator(workspaceId);
     generator.generate().catch(console.error);
 }

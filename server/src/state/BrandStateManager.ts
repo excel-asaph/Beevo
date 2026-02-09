@@ -1,6 +1,9 @@
 import { BrandDNA, ProgressItem } from '../../../shared/types';
-import { ServerMessage, DNAUpdateMessage } from '../../../shared/messages';
 
+/**
+ * Manages the in-memory state of the Brand DNA during a session.
+ * Tracks changes, maintains history for undo/redo (potential), and handles persistence formatting.
+ */
 export class BrandStateManager {
     private sessionId: string;
     private dna: BrandDNA;
@@ -48,6 +51,12 @@ export class BrandStateManager {
         return [...this.progress];
     }
 
+    /**
+     * Updates a single field in the Brand DNA.
+     * 
+     * @param {string} field - The key of the field to update.
+     * @param {any} value - The new value.
+     */
     update(field: string, value: any): void {
         const valueStr = value === undefined ? 'undefined' : JSON.stringify(value);
         console.log(`📝 State update - ${field}:`, (valueStr || 'null').substring(0, 100));
@@ -120,6 +129,11 @@ export class BrandStateManager {
         this.saveSnapshot();
     }
 
+    /**
+     * Batch updates multiple fields in the Brand DNA.
+     * 
+     * @param {Record<string, any>} updates - A key-value object of updates.
+     */
     updateBatch(updates: Record<string, any>): void {
         console.log('📝 Batch state update:', Object.keys(updates));
         Object.entries(updates).forEach(([field, value]) => {

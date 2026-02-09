@@ -3,10 +3,25 @@ import { useTracking } from '../../hooks/useTracking';
 import { HeroBlockConfig } from '../../../../shared/types';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
+/**
+ * Props for the HeroBlock component.
+ */
 interface HeroBlockProps {
+    /** Configuration data for the Hero section. */
     config: HeroBlockConfig;
 }
 
+/**
+ * Renders the Hero section of the generated landing page.
+ * 
+ * Features:
+ * - Video background support.
+ * - Intersection Observer for view tracking.
+ * - Retention tracking (3s dwell).
+ * - CTA click tracking and form triggering.
+ * 
+ * @param {HeroBlockProps} props - The component props.
+ */
 export const HeroBlock: React.FC<HeroBlockProps> = ({ config }) => {
     const { track, isReady } = useTracking(config.id);
     const { resolveAssetUrl } = useWorkspace();

@@ -8,10 +8,12 @@ import { Guardian } from './components/Guardian';
 import { AgentCanvas } from './components/Agent';
 import { DynamicLandingPage } from './components/DynamicLandingPage';
 import { HITLControlCenter } from './components/HITLControlCenter';
+import { SimpleErrorBoundary } from './components/SimpleErrorBoundary';
 import { Junction } from '@shared/types';
+import { WorkspaceLanding } from './components/Agent/WorkspaceLanding';
 import { Brain, Search, Code, Layers, ShieldCheck, Activity, Sparkles, MonitorPlay } from 'lucide-react';
 
-type ViewMode = 'dashboard' | 'agent' | 'landing_page' | 'hitl';
+type ViewMode = 'dashboard' | 'agent' | 'landing_page' | 'hitl' | 'workspace_selection';
 
 const SidebarItem: React.FC<{
     active: boolean;
@@ -37,30 +39,75 @@ const SidebarItem: React.FC<{
     </button>
 );
 
+/**
+ * Main Layout Component.
+ * 
+ * Handles top-level navigation and mode switching between:
+ * - Dashboard (Classic View) -> Deprecated/Refactored
+ * - Agent (Agent Canvas)
+ * - Landing Page (Live Preview)
+ * - HITL (Human-in-the-Loop Control Center)
+ * - Workspace Selection
+ */
 const MainLayout: React.FC = () => {
     const { currentJunction, setJunction } = useBrand();
 
     // Check URL for mode (for headless testing/snapshots)
-    // Default changed to 'agent' as per user request to skip discovery
-    const initialMode = (new URLSearchParams(window.location.search).get('mode') as ViewMode) || 'agent';
-    const [viewMode, setViewMode] = useState<ViewMode>(initialMode);
+    // If NO mode query param, check for workspace param.
+    // If NO workspace param, default to 'workspace_selection' (Root Landing)
+    // If YES workspace param, default to 'agent'
+    const searchParams = new URLSearchParams(window.location.search);
+    const modeParam = searchParams.get('mode') as ViewMode;
+    const workspaceParam = searchParams.get('workspace');
 
-    // If in Agent mode, render the full-screen Agent Canvas
+    let defaultMode: ViewMode = 'workspace_selection';
+    if (window.location.pathname === '/hitl') {
+        defaultMode = 'hitl';
+    } else if (modeParam) {
+        defaultMode = modeParam;
+    } else if (workspaceParam) {
+        defaultMode = 'agent';
+    }
+
+    const [viewMode, setViewMode] = useState<ViewMode>(defaultMode);
+
+    // Inception Guard: If we are in an iframe (window.self !== window.top) 
+    // AND we are in 'agent' mode, we have a problem (The "Inception" Bug).
+    // Force switch to 'landing_page' or show error.
     if (viewMode === 'agent') {
-        return <AgentCanvas onBack={() => setViewMode('dashboard')} />;
+        if (window.self !== window.top) {
+            console.warn("⚠️ Detected Agent Mode inside Iframe! Forcing Landing Page Mode.");
+            // We can return null temporarily while state updates, or render the LP directly
+            // But to be safe, we'll force the viewMode switch immediately:
+            // Note: in a real render, state updates might cause a loop if not careful, 
+            // but here we just render the LP component directly to break the loop.
+            return (
+                <div className="relative w-full h-full bg-white">
+                    <SimpleErrorBoundary componentName="Landing Page (Recovered)">
+                        <DynamicLandingPage />
+                    </SimpleErrorBoundary>
+                </div>
+            );
+        }
+        return <AgentCanvas onBack={() => setViewMode('workspace_selection')} />;
+    }
+
+    // If in Workspace Selection mode, render the Workspace Landing
+    if (viewMode === 'workspace_selection') {
+        return (
+            <div className="relative w-full h-full bg-white">
+                <WorkspaceLanding />
+            </div>
+        );
     }
 
     // If in Landing Page mode, render the Dynamic Landing Page
     if (viewMode === 'landing_page') {
         return (
             <div className="relative w-full h-full">
-                <button
-                    onClick={() => setViewMode('dashboard')}
-                    className="absolute top-4 right-4 z-[99999] px-4 py-2 bg-black/50 text-white hover:bg-black rounded-lg backdrop-blur-sm transition-colors border border-white/10"
-                >
-                    Exit Preview
-                </button>
-                <DynamicLandingPage />
+                <SimpleErrorBoundary componentName="Landing Page">
+                    <DynamicLandingPage />
+                </SimpleErrorBoundary>
             </div>
         );
     }
@@ -100,8 +147,13 @@ const MainLayout: React.FC = () => {
                     {/* Agent Canvas - Featured at top */}
                     <div className="pb-3 mb-3 border-b border-slate-800 space-y-2">
                         <SidebarItem
-                            active={false}
-                            onClick={() => setViewMode('agent')}
+                            active={viewMode === 'agent' || viewMode === 'workspace_selection'}
+                            onClick={() => {
+                                // clicking sidebar "Agent Canvas" should go to selection if no active workspace, 
+                                // or return to current canvas? 
+                                // For now, let's make it go to selection to be safe
+                                setViewMode('workspace_selection');
+                            }}
                             icon={<Sparkles size={20} />}
                             label="Agent Canvas"
                             accent
@@ -180,6 +232,13 @@ const MainLayout: React.FC = () => {
     );
 }
 
+/**
+ * Root Application Component.
+ * 
+ * Sets up global Context Providers:
+ * - WorkspaceProvider
+ * - BrandProvider
+ */
 const App: React.FC = () => {
     return (
         <WorkspaceProvider>

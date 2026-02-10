@@ -1,0 +1,76 @@
+{
+    "id": "offer_section_v1",
+    "variant_id": "offer_v1770682125614",
+    "meta": {
+        "strategy": "The Evergreen Protocol focuses on the compounding effects of bio-harmonization and executive workflow optimization, ensuring that professional growth is sustainable, not seasonal. We utilize a high-performance system designed to synchronize daily output with long-term physiological longevity.",
+        "offer_type": "subscription",
+        "layout_strategy": "TRIPTYCH",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "industry": "Fitness and Health Technology"
+    },
+    "content": {
+        "headline": "Invest in Your Most Durable Asset: You.",
+        "subhead": "Synchronize professional output with physiological longevity through our specialized performance tiers.",
+        "tiers": [
+            {
+                "id": "tier-base",
+                "name": "The Base",
+                "price": "$99",
+                "description": "Essential performance optimization for the modern professional.",
+                "features": [
+                    "Biometric Dashboard Access",
+                    "Quarterly Health Audit",
+                    "Efficiency Workflow Templates",
+                    "Community Access"
+                ],
+                "cta_text": "Start Foundation",
+                "interval": "per month",
+                "is_highlighted": false
+            },
+            {
+                "id": "tier-accelerator",
+                "name": "The Accelerator",
+                "price": "$199",
+                "description": "Advanced integration of health data and executive productivity coaching.",
+                "features": [
+                    "Everything in Base",
+                    "Monthly Performance Strategy",
+                    "Wearable Data Integration",
+                    "Priority Support",
+                    "Custom Nutritional Protocol"
+                ],
+                "cta_text": "Accelerate Growth",
+                "badge": "Most Efficient",
+                "interval": "per month",
+                "is_highlighted": true
+            },
+            {
+                "id": "tier-immortal",
+                "name": "The Immortal",
+                "price": "$499",
+                "description": "Bespoke high-touch management for top-tier executives.",
+                "features": [
+                    "Everything in Accelerator",
+                    "Weekly 1-on-1 Bio-Optimization",
+                    "Private Concierge Access",
+                    "White-Glove Tech Setup",
+                    "Exclusive Annual Retreat"
+                ],
+                "cta_text": "Enter Elite Tier",
+                "interval": "per month",
+                "is_highlighted": false
+            }
+        ],
+        "guarantee_text": "100% Satisfaction Guarantee. Cancel or pause your protocol at any time."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#2C1E33] py-20 px-6 font-sans text-[#E8D7D0]\"><div class=\"max-w-7xl mx-auto text-center mb-16\"><h2 class=\"text-4xl md:text-6xl font-bold mb-6 tracking-tight\">Invest in Your Most Durable Asset: You.</h2><p class=\"text-xl opacity-90\">Synchronize professional output with physiological longevity through our specialized performance tiers.</p></div><div class=\"max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8\"> <div data-tier-id=\"tier-base\" class=\"bg-[#3E2A47] border border-[#D9C5B2]/20 p-8 rounded-xl flex flex-col h-full transform transition-all hover:scale-[1.02]\"><div class=\"mb-6\"><h3 class=\"text-2xl font-bold mb-2\">The Base</h3><p class=\"text-sm opacity-80 mb-6\">Essential performance optimization for the modern professional.</p><div class=\"text-4xl font-bold mb-1\">$99<span class=\"text-sm font-normal opacity-70\">/mo</span></div></div><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Biometric Dashboard Access</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Quarterly Health Audit</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Efficiency Workflow Templates</li></ul><button data-cta-id=\"cta-base\" onclick=\"window.track('offer_cta_click', { tierId: 'tier-base', actionId: 'cta-base' })\" class=\"w-full py-4 bg-transparent border-2 border-[#D9C5B2] text-[#D9C5B2] font-bold rounded-lg hover:bg-[#D9C5B2] hover:text-[#2C1E33] transition-colors\">Start Foundation</button></div> <div data-tier-id=\"tier-accelerator\" class=\"bg-[#3E2A47] border-2 border-[#7D8C7C] p-8 rounded-xl flex flex-col h-full transform scale-105 shadow-2xl relative\"><span class=\"absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#7D8C7C] text-[#2C1E33] px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest\">Most Efficient</span><div class=\"mb-6\"><h3 class=\"text-2xl font-bold mb-2\">The Accelerator</h3><p class=\"text-sm opacity-80 mb-6\">Advanced integration of health data and executive productivity coaching.</p><div class=\"text-4xl font-bold mb-1\">$199<span class=\"text-sm font-normal opacity-70\">/mo</span></div></div><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Everything in Base</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Monthly Performance Strategy</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Wearable Data Integration</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Custom Nutritional Protocol</li></ul><button data-cta-id=\"cta-accelerator\" onclick=\"window.track('offer_cta_click', { tierId: 'tier-accelerator', actionId: 'cta-accelerator' })\" class=\"w-full py-4 bg-[#7D8C7C] text-[#2C1E33] font-bold rounded-lg hover:brightness-110 transition-all shadow-lg shadow-[#7D8C7C]/20\">Accelerate Growth</button></div> <div data-tier-id=\"tier-immortal\" class=\"bg-[#3E2A47] border border-[#D9C5B2]/20 p-8 rounded-xl flex flex-col h-full transform transition-all hover:scale-[1.02]\"><div class=\"mb-6\"><h3 class=\"text-2xl font-bold mb-2\">The Immortal</h3><p class=\"text-sm opacity-80 mb-6\">Bespoke high-touch management for top-tier executives.</p><div class=\"text-4xl font-bold mb-1\">$499<span class=\"text-sm font-normal opacity-70\">/mo</span></div></div><ul class=\"space-y-4 mb-10 flex-grow\"><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Everything in Accelerator</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Weekly 1-on-1 Bio-Optimization</li><li class=\"flex items-center gap-3\"><svg class=\"w-5 h-5 text-[#7D8C7C]\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path d=\"M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z\"/></svg>Private Concierge Access</li></ul><button data-cta-id=\"cta-immortal\" onclick=\"window.track('offer_cta_click', { tierId: 'tier-immortal', actionId: 'cta-immortal' })\" class=\"w-full py-4 bg-transparent border-2 border-[#D9C5B2] text-[#D9C5B2] font-bold rounded-lg hover:bg-[#D9C5B2] hover:text-[#2C1E33] transition-colors\">Enter Elite Tier</button></div></div><p class=\"text-center mt-12 text-sm opacity-60\">100% Satisfaction Guarantee. Cancel or pause your protocol at any time.</p></section>"
+    },
+    "styles": {
+        "backgroundColor": "#2C1E33",
+        "color": "#E8D7D0",
+        "fontFamily": "Montserrat",
+        "accentColor": "#7D8C7C"
+    }
+}

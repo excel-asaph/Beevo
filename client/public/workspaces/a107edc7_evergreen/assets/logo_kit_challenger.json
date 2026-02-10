@@ -1,0 +1,84 @@
+{
+    "metadata": {
+        "generated_at": "2026-02-10T00:03:11.877Z",
+        "brand_name": "Evergreen",
+        "palette_used": "Twilight Restoration"
+    },
+    "kit": {
+        "primary": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_primary_transparent.png?v=1770681797118",
+        "inverted": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_inverted_transparent.png?v=1770681797118",
+        "icon": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_icon_transparent.png?v=1770681797118",
+        "icon_inverted": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_icon_inverted_transparent.png?v=1770681797118",
+        "wordmark": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770681797118",
+        "wordmark_inverted": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_wordmark_inverted_transparent.png?v=1770681797118",
+        "social": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_social_transparent.png?v=1770681797118",
+        "social_inverted": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_social_inverted_transparent.png?v=1770681797118"
+    },
+    "palette": {
+        "name": "Twilight Restoration",
+        "colors": [
+            "#3E2A47",
+            "#D9C5B2",
+            "#7D8C7C",
+            "#E8D7D0",
+            "#2C1E33"
+        ],
+        "vibe": "Deep Plum serves as the foundation here, conveying a sense of premium wisdom and recovery. It moves the brand away from 'sweat and grit' toward 'rest and longevity.' The sandy neutrals keep the interface accessible and soft to the eye.",
+        "id": "2",
+        "isSelected": true
+    },
+    "brandDNA": {
+        "name": {
+            "value": "Evergreen",
+            "isSelected": true
+        },
+        "mission": {
+            "value": "To empower busy professionals with innovative, high-efficiency home workout solutions that integrate seamlessly into a demanding lifestyle.",
+            "isSelected": true
+        },
+        "voice": {
+            "value": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+            "isSelected": true
+        },
+        "values": {
+            "items": [
+                "Efficiency",
+                "Adaptability",
+                "Innovation",
+                "Sustainability"
+            ],
+            "isSelected": true
+        },
+        "tagline": {
+            "value": "Evergreen: Fitness that fits your schedule.",
+            "isSelected": true
+        },
+        "industry": {
+            "value": "Fitness and Health Technology",
+            "isSelected": true
+        },
+        "targetAudience": {
+            "items": [
+                "Corporate executives",
+                "Remote-working professionals",
+                "Career-driven parents",
+                "High-performance entrepreneurs"
+            ],
+            "isSelected": true
+        },
+        "mood": {
+            "items": [
+                "energetic",
+                "accessible",
+                "innovative",
+                "modern",
+                "streamlined"
+            ],
+            "isSelected": true
+        },
+        "rationale": "The Evergreen identity is built on the concept of 'long-lasting health' and efficiency, using innovative tools to ensure that professional success and physical fitness are not mutually exclusive.",
+        "logoUrl": {
+            "value": "/workspaces/a107edc7_evergreen/assets/transparent_logos/logo_variant_wordmark_transparent.png?v=1770681797118"
+        }
+    }
+}

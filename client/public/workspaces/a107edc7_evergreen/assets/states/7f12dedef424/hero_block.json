@@ -1,0 +1,179 @@
+{
+    "id": "hero_section_v1",
+    "variant_id": "hero_v1770681861540",
+    "meta": {
+        "strategy": "The Evergreen identity is built on the concept of 'long-lasting health' and efficiency, using innovative tools to ensure that professional success and physical fitness are not mutually exclusive.",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "active_variant": "challenger"
+    },
+    "visual_asset": {
+        "type": "video",
+        "source_url": "/workspaces/a107edc7_evergreen/assets/history/hero_v1770681861540/hero_video_1770681929498.mp4",
+        "source_id": "generated_veo_asset",
+        "prompt_signature": "Cinematic 4k shot of a streamlined, high-tech home gym where an executive athlete performs a focused, high-speed sprint on a modern treadmill. The environment is minimalist and professional, capturing the fluid transition between a high-stakes workday and peak physical conditioning. The motion is crisp, energetic, and conveys a sense of extreme efficiency and modern vitality.",
+        "attributes": {
+            "lighting": "High-key, architectural lighting with cold-white LED accents and soft-box diffusion for a crisp, professional look.",
+            "camera_movement": "A dynamic 360-degree tracking orbit that emphasizes the subject's momentum and the streamlined design of the space.",
+            "subject_focus": "A focused professional athlete-executive embodying the fusion of career success and physical longevity.",
+            "color_grade": "#7D8C7C"
+        }
+    },
+    "overlay_content": {
+        "headline": {
+            "text": "Efficiency for Peak Performance",
+            "styles": {
+                "color": "#E8D7D0",
+                "fontFamily": "Montserrat",
+                "fontSize": "4rem",
+                "fontWeight": "700",
+                "textShadow": "0 4px 10px rgba(44, 30, 51, 0.5)"
+            }
+        },
+        "subhead": {
+            "text": "Achieve sustainable health with high-efficiency home workout solutions designed for the demanding schedules of modern professionals.",
+            "styles": {
+                "color": "#D9C5B2",
+                "fontFamily": "Montserrat",
+                "fontSize": "1.25rem",
+                "marginTop": "1.5rem"
+            }
+        },
+        "cta": {
+            "text": "Start Training Now",
+            "action_id": "open_intent_form",
+            "styles": {
+                "backgroundColor": "#7D8C7C",
+                "color": "#2C1E33",
+                "fontFamily": "Montserrat",
+                "padding": "14px 28px",
+                "borderRadius": "4px",
+                "fontWeight": "600"
+            }
+        }
+    },
+    "layout_config": {
+        "container_styles": {
+            "justifyContent": "center",
+            "alignItems": "center",
+            "textAlign": "center",
+            "padding": "40px"
+        },
+        "overlay_gradient": "linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7))"
+    },
+    "navigation": {
+        "links": [
+            {
+                "label": "Offer",
+                "action_id": "open_offer_form"
+            },
+            {
+                "label": "Partnership",
+                "action_id": "open_intent_form"
+            },
+            {
+                "label": "Contact",
+                "action_id": "open_contact_form"
+            }
+        ],
+        "styles": {
+            "color": "#E8D7D0",
+            "fontFamily": "Montserrat",
+            "fontSize": "0.75rem",
+            "fontWeight": "700",
+            "letterSpacing": "0.2em",
+            "textTransform": "uppercase"
+        }
+    },
+    "forms": {
+        "contact": {
+            "id": "contact_form_evergreen",
+            "title": "Connect With Evergreen",
+            "submit_text": "Send Message",
+            "fields": [
+                {
+                    "id": "contact_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true,
+                    "placeholder": "Enter your name"
+                },
+                {
+                    "id": "contact_email",
+                    "label": "Email Address",
+                    "type": "email",
+                    "required": true,
+                    "placeholder": "name@company.com"
+                },
+                {
+                    "id": "contact_message",
+                    "label": "Inquiry",
+                    "type": "textarea",
+                    "required": true,
+                    "placeholder": "How can we help your fitness journey?"
+                }
+            ],
+            "subtitle": "Questions about our high-efficiency systems? We're here to help."
+        },
+        "intent": {
+            "id": "intent_form_evergreen",
+            "title": "Build Your Foundation",
+            "submit_text": "Apply for Access",
+            "fields": [
+                {
+                    "id": "intent_name",
+                    "label": "Full Name",
+                    "type": "text",
+                    "required": true
+                },
+                {
+                    "id": "intent_email",
+                    "label": "Business Email",
+                    "type": "email",
+                    "required": true
+                },
+                {
+                    "id": "fitness_scaling_goal",
+                    "label": "Primary Performance Goal",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "Strength Optimization",
+                        "Cognitive Clarity",
+                        "Metabolic Efficiency",
+                        "Stress Resilience"
+                    ]
+                },
+                {
+                    "id": "current_infrastructure",
+                    "label": "Current Home Environment",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "No Existing Equipment",
+                        "Minimalist Setup",
+                        "Dedicated Home Studio",
+                        "Professional Integration Required"
+                    ]
+                },
+                {
+                    "id": "time_allocation",
+                    "label": "Weekly Training Commitment",
+                    "type": "select",
+                    "required": true,
+                    "options": [
+                        "15 mins Daily",
+                        "30 mins Daily",
+                        "Variable Schedule"
+                    ]
+                }
+            ],
+            "subtitle": "Provide your details to receive a customized evergreen fitness strategy tailored to your professional lifestyle."
+        }
+    },
+    "styles": {
+        "backgroundColor": "#3E2A47",
+        "color": "#FFFFFF",
+        "accentColor": "#D9C5B2",
+        "fontFamily": "Montserrat"
+    }
+}

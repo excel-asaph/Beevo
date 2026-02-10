@@ -1,0 +1,49 @@
+{
+    "id": "spec_section_v1",
+    "variant_id": "spec_v1770682085403",
+    "meta": {
+        "strategy": "The Evergreen identity is built on the concept of 'long-lasting health' and efficiency, using innovative tools to ensure that professional success and physical fitness are not mutually exclusive.",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "active_variant": "challenger",
+        "layout_strategy": "BLUEPRINT"
+    },
+    "content": {
+        "headline": "System Schematic: The Longevity Architecture",
+        "subhead": "Engineered for sustained executive performance and physiological resilience through forensic biometric modeling.",
+        "nodes": [
+            {
+                "id": "node-01",
+                "label": "Biometric Pulse Synchronization",
+                "description": "Real-time physiological telemetry monitoring with 8.4ms latency for immediate metabolic feedback.",
+                "icon": "pulse"
+            },
+            {
+                "id": "node-02",
+                "label": "Cognitive Flow Architecture",
+                "description": "Advanced neural workload balancing delivering a measurable 32% increase in deep-work productivity.",
+                "icon": "brain"
+            },
+            {
+                "id": "node-03",
+                "label": "Sleep Restoration Protocol",
+                "description": "Precision circadian alignment engine achieving a 98% optimal recovery rate across high-stress cycles.",
+                "icon": "moon"
+            },
+            {
+                "id": "node-04",
+                "label": "Metabolic Velocity Scaler",
+                "description": "Dynamic nutrient density optimization providing a 4.2x energy return on investment per intake cycle.",
+                "icon": "bolt"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<div id='evergreen-blueprint' class='relative w-full min-h-[600px] p-8 font-[\"Montserrat\"] flex items-center justify-center overflow-hidden' style='background-color: #2C1E33; color: #E8D7D0;'><div class='absolute inset-0 opacity-10' style='background-image: radial-gradient(#7D8C7C 1px, transparent 1px); background-size: 30px 30px;'></div><div class='relative z-10 w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8 items-center'><div class='space-y-6'><div id='spec-card-1' onmouseover='highlightPath(1)' class='p-4 border-l-2 border-[#7D8C7C] bg-[#3E2A47]/30 cursor-pointer transition-all hover:bg-[#3E2A47]'><h3 class='text-xs uppercase tracking-widest text-[#7D8C7C] mb-1'>Module: Pulse</h3><p class='font-bold text-lg'>Biometric Synchronization</p><p class='text-sm opacity-70 mt-2'>8.4ms Latency Monitoring</p></div><div id='spec-card-2' onmouseover='highlightPath(2)' class='p-4 border-l-2 border-[#7D8C7C] bg-[#3E2A47]/30 cursor-pointer transition-all hover:bg-[#3E2A47]'><h3 class='text-xs uppercase tracking-widest text-[#7D8C7C] mb-1'>Module: Focus</h3><p class='font-bold text-lg'>Cognitive Flow Architecture</p><p class='text-sm opacity-70 mt-2'>32% Productivity Lift</p></div></div><div class='flex flex-col items-center justify-center space-y-4'><div class='relative w-64 h-64 rounded-full border border-[#7D8C7C]/30 flex items-center justify-center animate-spin-slow'><div class='absolute inset-2 rounded-full border border-[#D9C5B2]/20'></div><div class='absolute inset-8 rounded-full border-2 border-dashed border-[#7D8C7C]/40'></div><div class='w-32 h-32 rounded-full bg-[#3E2A47] flex items-center justify-center border-4 border-[#7D8C7C] shadow-[0_0_30px_#7D8C7C55]'><span class='text-xs tracking-tighter text-center px-4'>CORE ENGINE<br/>99.9% UPTIME</span></div></div><div id='readout' class='text-center mt-6 h-12'><span class='text-[#D9C5B2] text-xs uppercase tracking-[0.2em] transition-all' id='status-text'>SYSTEMS NOMINAL</span></div></div><div class='space-y-6'><div id='spec-card-3' onmouseover='highlightPath(3)' class='p-4 border-r-2 border-[#7D8C7C] bg-[#3E2A47]/30 text-right cursor-pointer transition-all hover:bg-[#3E2A47]'><h3 class='text-xs uppercase tracking-widest text-[#7D8C7C] mb-1'>Module: Recovery</h3><p class='font-bold text-lg'>Sleep Restoration Protocol</p><p class='text-sm opacity-70 mt-2'>98% Recovery Rate</p></div><div id='spec-card-4' onmouseover='highlightPath(4)' class='p-4 border-r-2 border-[#7D8C7C] bg-[#3E2A47]/30 text-right cursor-pointer transition-all hover:bg-[#3E2A47]'><h3 class='text-xs uppercase tracking-widest text-[#7D8C7C] mb-1'>Module: Energy</h3><p class='font-bold text-lg'>Metabolic Velocity Scaler</p><p class='text-sm opacity-70 mt-2'>4.2x Energy ROI</p></div></div></div><style>@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .animate-spin-slow { animation: spin-slow 20s linear infinite; }</style><script>function highlightPath(id){ const status = document.getElementById('status-text'); const messages = ['', 'BIOMETRIC STREAM ACTIVE', 'NEURAL MAPPING ENGAGED', 'RECOVERY CYCLES OPTIMIZED', 'METABOLIC FLOW ACCELERATED']; status.style.color = '#7D8C7C'; status.innerText = messages[id]; setTimeout(() => { status.style.color = '#D9C5B2'; }, 1500); }</script></div>"
+    },
+    "styles": {
+        "backgroundColor": "#2C1E33",
+        "color": "#E8D7D0",
+        "fontFamily": "Montserrat"
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "id": "proof_section_v1",
+    "variant_id": "proof_v1770682533803",
+    "meta": {
+        "strategy": "Nano Banana analytical mapping for high-efficiency lifestyle integration.",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "Seamless Life Integration",
+        "layout_strategy": "FORENSIC_GRID"
+    },
+    "content": {
+        "headline": "The Calculus of Physical Performance",
+        "subhead": "A technical audit of hardware performance designed for the precision-focused global executive.",
+        "graphic_caption": "Forensic Performance Analysis: Evergreen High-Efficiency Integration Module",
+        "evidence_items": [
+            {
+                "id": "stat-01",
+                "label": "Setup Latency",
+                "value": "12s",
+                "description": "Mechanical transition from inactive to operational state.",
+                "icon": "Timer",
+                "unit": "seconds",
+                "visual_type": "Metric"
+            },
+            {
+                "id": "stat-02",
+                "label": "Structural Integrity",
+                "value": "100%",
+                "description": "Treated carbon-steel frame tested against continuous peak resistance.",
+                "icon": "Shield",
+                "unit": "rating",
+                "visual_type": "Gauge"
+            },
+            {
+                "id": "stat-03",
+                "label": "Metabolic Curve",
+                "value": "2.4x",
+                "description": "Efficiency multiplier validated against standard gym modalities.",
+                "icon": "Activity",
+                "unit": "multiplier",
+                "visual_type": "Trend"
+            },
+            {
+                "id": "stat-04",
+                "label": "Acoustic Profile",
+                "value": "18dB",
+                "description": "Optimized for zero-friction operation within professional home offices.",
+                "icon": "VolumeX",
+                "unit": "decibels",
+                "visual_type": "Metric"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "primary_color": "#3E2A47",
+        "accent_color": "#7D8C7C",
+        "show_labels": true,
+        "animation_duration": 1.5,
+        "visual_code": "<div class=\"w-full bg-[#E8D7D0] p-8 lg:p-16 font-['Montserrat'] text-[#2C1E33] max-w-7xl mx-auto\"><div class=\"text-center mb-16 space-y-4\"><div class=\"inline-block px-4 py-1 border-x border-[#3E2A47] text-[10px] tracking-[0.4em] font-bold text-[#3E2A47] uppercase\">Validation Protocol 0.8.4</div><h2 class=\"text-4xl lg:text-6xl font-black tracking-tight text-[#3E2A47] uppercase\">Forensic Specifications</h2><div class=\"h-px w-24 bg-[#7D8C7C] mx-auto mt-6\"></div></div><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#3E2A47]/20\"><div class=\"p-8 border-[#3E2A47]/20 border-b lg:border-b-0 lg:border-r hover:bg-[#D9C5B2]/20 transition-colors group\"><div class=\"flex justify-between items-start mb-12\"><div class=\"text-[10px] font-bold tracking-widest text-[#3E2A47]/40 uppercase\">Metric: Velocity</div><div class=\"w-4 h-4 border border-[#3E2A47] rounded-full flex items-center justify-center\"><div class=\"w-1 h-1 bg-red-500 animate-pulse\"></div></div></div><div class=\"text-6xl font-black text-[#3E2A47] mb-2\">12<span class=\"text-xl\">s</span></div><div class=\"text-xs font-bold uppercase tracking-tighter text-[#7D8C7C] mb-4\">Setup Latency</div><p class=\"text-[11px] leading-relaxed text-[#3E2A47]/70 border-t border-[#3E2A47]/10 pt-4\">Mechanical transition from inactive to operational state achieved in sub-optimal timeframes.</p></div><div class=\"p-8 border-[#3E2A47]/20 border-b lg:border-b-0 lg:border-r hover:bg-[#D9C5B2]/20 transition-colors\"><div class=\"flex justify-between items-start mb-12\"><div class=\"text-[10px] font-bold tracking-widest text-[#3E2A47]/40 uppercase\">Metric: Load</div><div class=\"text-[8px] font-mono text-[#7D8C7C]\">[STABLE]</div></div><div class=\"text-6xl font-black text-[#3E2A47] mb-2\">100<span class=\"text-xl\">%</span></div><div class=\"text-xs font-bold uppercase tracking-tighter text-[#7D8C7C] mb-4\">Structural Integrity</div><div class=\"flex gap-1 mb-4\"><div class=\"h-1 flex-1 bg-[#3E2A47]\"></div><div class=\"h-1 flex-1 bg-[#3E2A47]\"></div><div class=\"h-1 flex-1 bg-[#3E2A47]\"></div><div class=\"h-1 flex-1 bg-[#3E2A47]\"></div></div><p class=\"text-[11px] leading-relaxed text-[#3E2A47]/70\">Treated carbon-steel frame tested against 15,000 continuous hours of peak resistance oscillation.</p></div><div class=\"p-8 border-[#3E2A47]/20 border-b md:border-b-0 lg:border-r hover:bg-[#D9C5B2]/20 transition-colors\"><div class=\"flex justify-between items-start mb-12\"><div class=\"text-[10px] font-bold tracking-widest text-[#3E2A47]/40 uppercase\">Metric: Output</div><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#7D8C7C\" stroke-width=\"2\"><path d=\"M22 12h-4l-3 9L9 3l-3 9H2\"/></svg></div><div class=\"text-6xl font-black text-[#3E2A47] mb-2\">2.4<span class=\"text-xl\">x</span></div><div class=\"text-xs font-bold uppercase tracking-tighter text-[#7D8C7C] mb-4\">Metabolic Curve</div><p class=\"text-[11px] leading-relaxed text-[#3E2A47]/70 border-t border-[#3E2A47]/10 pt-4\">Efficiency multiplier validated against standard gym-floor modalities for VO2 Max optimization.</p></div><div class=\"p-8 hover:bg-[#D9C5B2]/20 transition-colors\"><div class=\"flex justify-between items-start mb-12\"><div class=\"text-[10px] font-bold tracking-widest text-[#3E2A47]/40 uppercase\">Metric: Noise</div><div class=\"text-[10px] text-[#3E2A47] font-mono\">-18dB</div></div><div class=\"text-6xl font-black text-[#3E2A47] mb-2\">18<span class=\"text-xl\">db</span></div><div class=\"text-xs font-bold uppercase tracking-tighter text-[#7D8C7C] mb-4\">Acoustic Profile</div><div class=\"space-y-1 mb-4\"><div class=\"h-0.5 w-full bg-[#3E2A47]/10\"></div><div class=\"h-0.5 w-[60%] bg-[#3E2A47]/20\"></div><div class=\"h-0.5 w-[30%] bg-[#3E2A47]/30\"></div></div><p class=\"text-[11px] leading-relaxed text-[#3E2A47]/70\">Optimized for zero-friction operation within professional home office and high-density environments.</p></div></div><div class=\"mt-8 flex justify-center opacity-30\"><div class=\"text-[9px] font-mono uppercase tracking-[0.5em]\">Engineering Data // Non-Proprietary // Evergreen v2.0</div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#E8D7D0",
+        "color": "#2C1E33",
+        "fontFamily": "Montserrat"
+    },
+    "layout_strategy": "FORENSIC_GRID"
+}

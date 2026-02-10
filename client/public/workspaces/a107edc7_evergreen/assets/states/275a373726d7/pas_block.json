@@ -1,0 +1,43 @@
+{
+    "id": "pas_section_v1",
+    "variant_id": "pas_v1770682049138",
+    "meta": {
+        "strategy": "Leverage the 'long-lasting health' rationale by positioning Evergreen as the critical bridge between career peak and physical vitality, transforming fitness from a chore into a high-ROI business asset.",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "active_variant": "challenger",
+        "layout_strategy": "TRIPTYCH"
+    },
+    "content": {
+        "headline": "Stop Sacrificing Your Vitality for Your Vision",
+        "steps": [
+            {
+                "id": "step-1",
+                "phase": "PROBLEM",
+                "title": "The Executive Decline",
+                "description": "Long hours and high-stakes meetings create a sedentary trap where physical health is traded for professional output, leading to metabolic stagnation."
+            },
+            {
+                "id": "step-2",
+                "phase": "AGITATION",
+                "title": "The Compound Cost",
+                "description": "Neglect breeds brain fog, diminished stamina, and burnout. Your career longevity is directly tied to the physiological resilience you are currently ignoring."
+            },
+            {
+                "id": "step-3",
+                "phase": "SOLUTION",
+                "title": "The Evergreen Edge",
+                "description": "High-efficiency, integrated home workout systems that deliver maximum physiological ROI in minimum time, ensuring you stay as sharp as your strategy."
+            }
+        ],
+        "closing_statement": "Achieve peak performance without the trade-offs. Secure your professional longevity."
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#2C1E33] text-[#E8D7D0] py-24 px-8\" style=\"font-family: 'Montserrat', sans-serif;\"><div class=\"max-w-7xl mx-auto\"><div class=\"grid grid-cols-12 gap-0 border-b border-[#7D8C7C]/30 mb-16 pb-8\"><div class=\"col-span-12 lg:col-span-8\"><h2 class=\"text-6xl font-black uppercase tracking-tighter leading-none mb-4\">Vitality is <span class=\"text-[#7D8C7C]\">Equity.</span></h2><p class=\"text-xl uppercase tracking-widest font-light text-[#D9C5B2]\">Professional success and health are not mutually exclusive.</p></div><div class=\"col-span-12 lg:col-span-4 flex items-end justify-start lg:justify-end mt-6 lg:mt-0\"><span class=\"text-xs font-bold uppercase tracking-[0.3em] border-l-4 border-[#7D8C7C] pl-4 py-2 text-[#7D8C7C]\">Strategic Physical Integration</span></div></div><div class=\"grid grid-cols-12 gap-8\"><div class=\"col-span-12 md:col-span-4 flex flex-col justify-between p-8 bg-[#3E2A47] hover:bg-[#7D8C7C] hover:text-[#2C1E33] transition-colors duration-500 group\"><div class=\"mb-12\"><span class=\"text-sm font-black uppercase tracking-widest opacity-50\">01 / Problem</span><h3 class=\"text-3xl font-bold uppercase mt-4 mb-6 leading-tight\">The Executive Decline</h3><p class=\"text-lg leading-relaxed font-medium\">Long hours and high-stakes meetings create a sedentary trap where physical health is traded for professional output.</p></div><div class=\"h-1 w-full bg-[#E8D7D0] group-hover:bg-[#2C1E33]\"></div></div><div class=\"col-span-12 md:col-span-4 flex flex-col justify-between p-8 bg-[#3E2A47] hover:bg-[#7D8C7C] hover:text-[#2C1E33] transition-colors duration-500 group\"><div class=\"mb-12\"><span class=\"text-sm font-black uppercase tracking-widest opacity-50\">02 / Agitation</span><h3 class=\"text-3xl font-bold uppercase mt-4 mb-6 leading-tight\">The Compound Cost</h3><p class=\"text-lg leading-relaxed font-medium\">Neglect breeds brain fog and burnout. Your career longevity is tied to the resilience you are currently ignoring.</p></div><div class=\"h-1 w-full bg-[#E8D7D0] group-hover:bg-[#2C1E33]\"></div></div><div class=\"col-span-12 md:col-span-4 flex flex-col justify-between p-8 bg-[#D9C5B2] text-[#2C1E33]\"><div class=\"mb-12\"><span class=\"text-sm font-black uppercase tracking-widest opacity-60\">03 / Solution</span><h3 class=\"text-3xl font-bold uppercase mt-4 mb-6 leading-tight\">The Evergreen Edge</h3><p class=\"text-lg leading-relaxed font-bold\">High-efficiency, integrated systems that deliver maximum physiological ROI in minimum time.</p></div><div class=\"h-1 w-full bg-[#2C1E33]\"></div></div></div><div class=\"grid grid-cols-12 mt-20\"><div class=\"col-span-12 flex flex-col md:flex-row justify-between items-center gap-8 border-y border-[#7D8C7C]/30 py-10\"><p class=\"text-2xl font-bold uppercase tracking-tight\">Achieve peak performance without the trade-offs.</p><button class=\"bg-[#7D8C7C] text-[#2C1E33] font-black uppercase text-sm tracking-[0.2em] px-10 py-5 hover:bg-[#D9C5B2] transition-all\">Optimize Integration Now</button></div></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#2C1E33",
+        "color": "#E8D7D0",
+        "fontFamily": "Montserrat"
+    }
+}

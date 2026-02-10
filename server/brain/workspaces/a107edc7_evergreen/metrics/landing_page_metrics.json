@@ -1,0 +1,90 @@
+{
+    "page_root": {
+        "variant_id": "page_root",
+        "views": 8,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:23:01.829Z"
+    },
+    "hero_section_v1": {
+        "variant_id": "hero_section_v1",
+        "views": 8,
+        "clicks": 0,
+        "retention_count": 3,
+        "retention_sum_ms": 9000,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:23:02.478Z"
+    },
+    "proof_section_v1": {
+        "variant_id": "proof_section_v1",
+        "views": 8,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 14,
+        "dwell_sum_ms": 27834,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:23:04.115Z"
+    },
+    "pas_section_v1": {
+        "variant_id": "pas_section_v1",
+        "views": 6,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 16,
+        "dwell_sum_ms": 35713,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:18:05.779Z"
+    },
+    "spec_section_v1": {
+        "variant_id": "spec_section_v1",
+        "views": 5,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 16,
+        "dwell_sum_ms": 385507,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:17:57.953Z"
+    },
+    "social_section_v1": {
+        "variant_id": "social_section_v1",
+        "views": 5,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 10,
+        "dwell_sum_ms": 14452,
+        "velocity_sum": 11874.661789347785,
+        "last_updated": "2026-02-10T00:17:57.735Z"
+    },
+    "offer_section_v1": {
+        "variant_id": "offer_section_v1",
+        "views": 4,
+        "clicks": 2,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 4,
+        "dwell_sum_ms": 20447,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:17:56.035Z"
+    },
+    "hero_section_v1_nav": {
+        "variant_id": "hero_section_v1_nav",
+        "views": 0,
+        "clicks": 0,
+        "retention_count": 0,
+        "retention_sum_ms": 0,
+        "dwell_count": 0,
+        "dwell_sum_ms": 0,
+        "velocity_sum": 0,
+        "last_updated": "2026-02-10T00:11:52.587Z"
+    }
+}

@@ -1,0 +1,61 @@
+{
+    "id": "social_section_v1",
+    "variant_id": "social_v1770681995953",
+    "meta": {
+        "strategy": "Social Proof based on Brand Voice",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "active_variant": "challenger",
+        "layout_strategy": "GRID"
+    },
+    "content": {
+        "headline": "Endorsed by Industry Leaders",
+        "subhead": "Real results from professionals who refuse to compromise between career excellence and physical longevity.",
+        "testimonials": [
+            {
+                "id": "testimonial_001",
+                "name": "Sarah Jenkins",
+                "title": "Chief Operations Officer",
+                "company": "Zenith Logistics",
+                "quote": "Evergreen has finally bridged the gap between my relentless schedule and my health goals; the efficiency of the workouts is absolutely unmatched.",
+                "image_prompt": "High-end professional headshot, woman in her 40s, sharp navy blazer, modern office background with soft bokeh, confident expression, soft natural lighting, photorealistic.",
+                "image_url": "/workspaces/a107edc7_evergreen/assets/history/social_v1770681995953/testimonial_1770682003972_1770682004023.png"
+            },
+            {
+                "id": "testimonial_002",
+                "name": "Marcus Thorne",
+                "title": "Senior Partner",
+                "company": "Thorne and Associates",
+                "quote": "I used to sacrifice sleep for fitness, but Evergreen's solutions fit perfectly into my morning routine without a single compromise to my productivity.",
+                "image_prompt": "Professional business portrait, man in his 50s, charcoal grey suit, library setting with leather-bound books, warm lighting, sophisticated and approachable, 8k resolution.",
+                "image_url": "/workspaces/a107edc7_evergreen/assets/history/social_v1770681995953/testimonial_1770682011883_1770682011886.png"
+            },
+            {
+                "id": "testimonial_003",
+                "name": "Elena Rodriguez",
+                "title": "VP of Product",
+                "company": "TechFlow Systems",
+                "quote": "The focus on longevity makes Evergreen the first fitness brand that actually understands an executive's needs for sustainable, long-term vitality.",
+                "image_prompt": "Modern executive portrait, woman in her late 30s, smart cream-colored professional attire, bright minimalist office, crisp lighting, professional camera lens, clean look.",
+                "image_url": "/workspaces/a107edc7_evergreen/assets/history/social_v1770681995953/testimonial_1770682019244_1770682019254.png"
+            },
+            {
+                "id": "testimonial_004",
+                "name": "David Chen",
+                "title": "Managing Director",
+                "company": "Global Equity Partners",
+                "quote": "It is rare to find a health solution that values my time as much as I do while delivering measurable, high-impact physical results every day.",
+                "image_prompt": "Corporate portrait, man in his 40s, white dress shirt with no tie, glass-walled office background, natural daylight, looking directly into camera, sharp focus, high-end commercial photography.",
+                "image_url": "/workspaces/a107edc7_evergreen/assets/history/social_v1770681995953/testimonial_1770682025921_1770682025922.png"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "generative",
+        "visual_code": "<section class=\"bg-[#2C1E33] py-24 px-8 font-['Montserrat']\"><div class=\"max-w-7xl mx-auto\"><div class=\"text-center mb-20\"><h2 class=\"text-4xl md:text-5xl font-bold text-[#E8D7D0] mb-6\">Endorsed by Industry Leaders</h2><p class=\"text-xl text-[#D9C5B2] max-w-3xl mx-auto\">Real results from professionals who refuse to compromise between career excellence and physical longevity.</p></div><div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8\"><div class=\"bg-[#3E2A47] p-10 rounded-2xl border border-[#7D8C7C]/30 flex flex-col items-center text-center\"><img src=\"testimonial_001_url\" class=\"w-24 h-24 rounded-full mb-8 border-4 border-[#7D8C7C] object-cover\" alt=\"Sarah Jenkins\"/><p class=\"text-[#E8D7D0] text-lg italic mb-10 leading-relaxed\">\"Evergreen has finally bridged the gap between my relentless schedule and my health goals; the efficiency of the workouts is absolutely unmatched.\"</p><div><h4 class=\"font-bold text-[#D9C5B2] text-xl\">Sarah Jenkins</h4><p class=\"text-[#7D8C7C] uppercase tracking-widest text-xs mt-2\">COO, Zenith Logistics</p></div></div><div class=\"bg-[#3E2A47] p-10 rounded-2xl border border-[#7D8C7C]/30 flex flex-col items-center text-center\"><img src=\"testimonial_002_url\" class=\"w-24 h-24 rounded-full mb-8 border-4 border-[#7D8C7C] object-cover\" alt=\"Marcus Thorne\"/><p class=\"text-[#E8D7D0] text-lg italic mb-10 leading-relaxed\">\"I used to sacrifice sleep for fitness, but Evergreen's solutions fit perfectly into my morning routine without a single compromise to my productivity.\"</p><div><h4 class=\"font-bold text-[#D9C5B2] text-xl\">Marcus Thorne</h4><p class=\"text-[#7D8C7C] uppercase tracking-widest text-xs mt-2\">Senior Partner, Thorne and Associates</p></div></div><div class=\"bg-[#3E2A47] p-10 rounded-2xl border border-[#7D8C7C]/30 flex flex-col items-center text-center\"><img src=\"testimonial_003_url\" class=\"w-24 h-24 rounded-full mb-8 border-4 border-[#7D8C7C] object-cover\" alt=\"Elena Rodriguez\"/><p class=\"text-[#E8D7D0] text-lg italic mb-10 leading-relaxed\">\"The focus on longevity makes Evergreen the first fitness brand that actually understands an executive's needs for sustainable, long-term vitality.\"</p><div><h4 class=\"font-bold text-[#D9C5B2] text-xl\">Elena Rodriguez</h4><p class=\"text-[#7D8C7C] uppercase tracking-widest text-xs mt-2\">VP of Product, TechFlow Systems</p></div></div><div class=\"bg-[#3E2A47] p-10 rounded-2xl border border-[#7D8C7C]/30 flex flex-col items-center text-center\"><img src=\"testimonial_004_url\" class=\"w-24 h-24 rounded-full mb-8 border-4 border-[#7D8C7C] object-cover\" alt=\"David Chen\"/><p class=\"text-[#E8D7D0] text-lg italic mb-10 leading-relaxed\">\"It is rare to find a health solution that values my time as much as I do while delivering measurable, high-impact physical results every day.\"</p><div><h4 class=\"font-bold text-[#D9C5B2] text-xl\">David Chen</h4><p class=\"text-[#7D8C7C] uppercase tracking-widest text-xs mt-2\">Managing Director, Global Equity Partners</p></div></div></div></div></section>"
+    },
+    "styles": {
+        "backgroundColor": "#2C1E33",
+        "color": "#E8D7D0",
+        "fontFamily": "Montserrat"
+    }
+}

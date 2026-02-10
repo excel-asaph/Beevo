@@ -1,0 +1,67 @@
+{
+    "id": "proof_section_v1",
+    "variant_id": "proof_v1770681948837",
+    "meta": {
+        "strategy": "Nano Banana analytical mapping for high-efficiency lifestyle integration.",
+        "tone": "Motivating, professional, and direct, focusing on maximizing results within minimal timeframes.",
+        "active_variant": "challenger",
+        "selected_imagery_concept": "Seamless Life Integration",
+        "layout_strategy": "SPLIT"
+    },
+    "content": {
+        "headline": "The Architecture of Enduring Vitality",
+        "subhead": "Precision-engineered fitness solutions designed to harmonize with the pace of global executive life.",
+        "graphic_caption": "Forensic Performance Analysis: Evergreen High-Efficiency Integration Module",
+        "evidence_items": [
+            {
+                "id": "stat-01",
+                "label": "Daily Setup Velocity",
+                "value": "12s",
+                "description": "Rapid deployment mechanism for immediate transition from professional focus to physical exertion.",
+                "icon": "Timer",
+                "unit": "seconds",
+                "visual_type": "Metric"
+            },
+            {
+                "id": "stat-02",
+                "label": "Structural Integrity",
+                "value": "100%",
+                "description": "Industrial-grade carbon-treated steel designed for perpetual resistance consistency.",
+                "icon": "Shield",
+                "unit": "rating",
+                "visual_type": "Gauge"
+            },
+            {
+                "id": "stat-03",
+                "label": "Metabolic Efficiency",
+                "value": "2.4x",
+                "description": "Optimized high-intensity interval curves compared to traditional steady-state modalities.",
+                "icon": "Activity",
+                "unit": "multiplier",
+                "visual_type": "Trend"
+            },
+            {
+                "id": "stat-04",
+                "label": "Acoustic Dampening",
+                "value": "18dB",
+                "description": "Whisper-quiet operation ensuring zero disruption to household or home-office environments.",
+                "icon": "VolumeX",
+                "unit": "decibels",
+                "visual_type": "Metric"
+            }
+        ]
+    },
+    "graphic_config": {
+        "type": "Executive Performance Dashboard",
+        "primary_color": "#3E2A47",
+        "accent_color": "#7D8C7C",
+        "show_labels": true,
+        "animation_duration": 1.5,
+        "visual_code": "<div class=\"w-full bg-[#E8D7D0] p-8 lg:p-12 font-['Montserrat'] text-[#2C1E33]\"><div class=\"grid grid-cols-1 lg:grid-cols-12 gap-12 items-center\"><div class=\"lg:col-span-5 space-y-6\"><div class=\"inline-block px-3 py-1 border border-[#3E2A47] text-[10px] uppercase tracking-[0.2em] font-bold text-[#3E2A47] mb-4\">System Architecture v2.0</div><h2 class=\"text-4xl lg:text-5xl font-extrabold tracking-tighter leading-none text-[#3E2A47]\">PERFORMANCE BY DESIGN</h2><p class=\"text-lg leading-relaxed text-[#3E2A47]/80 max-w-md\">Evergreen leverages forensic engineering to eliminate the friction between career success and physical longevity.</p><div class=\"flex gap-4 pt-4\"><div class=\"w-12 h-1 bg-[#7D8C7C]\"></div><div class=\"w-12 h-1 bg-[#D9C5B2]\"></div><div class=\"w-12 h-1 bg-[#3E2A47]\"></div></div></div><div class=\"lg:col-span-7 grid grid-cols-2 gap-4\"><div class=\"bg-[#D9C5B2]/30 p-6 border-l-4 border-[#3E2A47] transition-all hover:bg-[#D9C5B2]/50 group\"><div class=\"text-[10px] uppercase tracking-widest text-[#3E2A47]/60 mb-1\">Setup Velocity</div><div class=\"text-4xl font-black text-[#3E2A47] flex items-baseline gap-1\">12<span class=\"text-sm font-normal\">sec</span></div><div class=\"mt-4 h-[2px] w-full bg-[#3E2A47]/10\"><div class=\"h-full bg-[#3E2A47] w-[90%] animate-pulse\"></div></div><p class=\"text-[11px] mt-3 leading-tight text-[#3E2A47]/70 italic\">Instant Deployment Protocol</p></div><div class=\"bg-[#3E2A47] p-6 transition-all hover:scale-[1.02]\"><div class=\"text-[10px] uppercase tracking-widest text-[#E8D7D0]/60 mb-1\">Structural Rating</div><div class=\"text-4xl font-black text-[#E8D7D0]\">100%</div><div class=\"mt-4 grid grid-cols-5 gap-1\"><div class=\"h-2 bg-[#7D8C7C]\"></div><div class=\"h-2 bg-[#7D8C7C]\"></div><div class=\"h-2 bg-[#7D8C7C]\"></div><div class=\"h-2 bg-[#7D8C7C]\"></div><div class=\"h-2 bg-[#7D8C7C]\"></div></div><p class=\"text-[11px] mt-3 leading-tight text-[#E8D7D0]/70\">Carbon-Treated Frame</p></div><div class=\"bg-white/40 p-6 border-t-4 border-[#7D8C7C]\"><div class=\"text-[10px] uppercase tracking-widest text-[#3E2A47]/60 mb-1\">Metabolic Multiplier</div><div class=\"text-4xl font-black text-[#7D8C7C]\">2.4x</div><p class=\"text-[11px] mt-4 leading-tight text-[#3E2A47]/70\">Optimized Efficiency Curve vs Baseline</p></div><div class=\"bg-[#D9C5B2]/30 p-6 border-r-4 border-[#3E2A47]/20 flex flex-col justify-between\"><div class=\"flex justify-between items-start\"><div class=\"text-[10px] uppercase tracking-widest text-[#3E2A47]/60\">Acoustic Signature</div><div class=\"w-2 h-2 rounded-full bg-red-500 animate-ping\"></div></div><div class=\"text-4xl font-black text-[#3E2A47]\">18<span class=\"text-sm uppercase ml-1\">db</span></div><p class=\"text-[11px] mt-2 text-[#3E2A47]/70\">Sub-Ambient Noise Floor</p></div></div></div><div class=\"mt-12 pt-8 border-t border-[#3E2A47]/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] tracking-[0.3em] font-bold text-[#3E2A47]/50\"><div>EVERGREEN INTEGRATION MODULE</div><div>VERIFIED SPECIFICATIONS : 2024.V1</div><div>NON-PROPRIETARY PERFORMANCE DATA</div></div></div>"
+    },
+    "styles": {
+        "backgroundColor": "#E8D7D0",
+        "color": "#2C1E33",
+        "fontFamily": "Montserrat"
+    }
+}
